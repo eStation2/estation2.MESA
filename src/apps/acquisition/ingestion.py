@@ -3564,8 +3564,14 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
     sub_dir = sds_meta_in.get_item('eStation2_subdir')
     product_type = functions.get_product_type_from_subdir(sub_dir)
 
-    output_file = es_constants.es2globals['processing_dir']+\
-                      functions.convert_name_from_eumetcast(my_input_file, product_type, with_dir=True, new_mapset=target_mapsetid)
+
+    if re.match(es_constants.es2globals['prefix_eumetcast_files'] + '.*.tif', os.path.basename(input_file)):
+        output_file = es_constants.es2globals['processing_dir']+ \
+                          functions.convert_name_from_eumetcast(my_input_file, product_type, with_dir=True, new_mapset=target_mapsetid)
+    else:
+        output_file = es_constants.es2globals['processing_dir'] + \
+                      functions.convert_name_from_archive(my_input_file, product_type, with_dir=True,
+                                                            new_mapset=target_mapsetid)
 
     # make sure output dir exists
     output_dir = os.path.split(output_file)[0]

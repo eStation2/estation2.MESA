@@ -1438,9 +1438,10 @@ def get_all_from_path_full(full_path):
 #   Description: returns information form the fullpath
 #
 def get_all_from_filename(filename):
-
+    # Ensure there is no dir path
+    fileonly = os.path.basename(filename)
     # Get info from directory
-    tokens = [token for token in filename.split('_') if token]
+    tokens = [token for token in fileonly.split('_') if token]
     str_date = tokens[0]
     product_code = tokens[1]
     sub_product_code = tokens[2]
@@ -1494,6 +1495,32 @@ def get_product_type_from_subdir(subdir):
         if name == product_subdir:
             product_type = type
     return product_type
+
+
+######################################################################################
+#   convert_name_from_eumetcast
+#   Purpose: Convert filename from the EUMETCast transmission format to the internal eStation
+#   Author: Marco Clerici, JRC, European Commission
+#   Date: 2014/06/22
+#   Inputs: filename_eumetcast (might contain a dirpath, which is cut)
+#           product_type: Ingest or Derived
+#           with_dir -> if set, it adds sub_dir
+#   Output: filename           (only filename, no dir)
+#   Description: returns information form the fullpath
+#
+def convert_name_from_archive(filename, product_type, with_dir=False, new_mapset=False):
+
+    extension = '.tif'
+    [dir, name] = os.path.split(filename)
+    [str_date, product_code, sub_product_code, mapset, version] = get_all_from_filename(name)
+    if new_mapset:
+        mapset = new_mapset
+    filename = set_path_filename(str_date, product_code, sub_product_code, mapset, version, extension)
+    if with_dir:
+        subdir=set_path_sub_directory(product_code, sub_product_code, product_type, version, mapset)
+        filename = subdir+filename
+    return filename
+
 
 
 ######################################################################################
