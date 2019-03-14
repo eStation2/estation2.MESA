@@ -279,8 +279,8 @@ def my_proc_chirps_dekad(pipe_run=0, pipe_print=3, start_date=None, end_date=Non
             'touch_only':touch_files_only}
 
     request_queue = Queue()
-    # proc_lists=processing_std_precip_stats_only(request_queue, **args)
-    proc_lists = processing_std_precip_prods_only(request_queue, **args)
+    proc_lists=processing_std_precip_stats_only(request_queue, **args)
+    # proc_lists = processing_std_precip_prods_only(request_queue, **args)
 
 
 def my_proc_arc2rain_dekad(pipe_run=0, pipe_print=3, start_date=None, end_date=None, upsert_db=False, touch_files_only=False):
@@ -733,8 +733,8 @@ def my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=Fa
 #my_proc_tamsat_rfe(pipe_run=4, pipe_print=0, start_date='19830101', end_date='20171231', touch_files_only=False)
 # proc_list=my_proc_fewsnet_rfe(pipe_run=0, pipe_print=8, start_date=None, end_date=None, touch_files_only=False)                       # OK
 
-my_proc_chirps_dekad(pipe_run=0, pipe_print=9, start_date='19810101', end_date='20171231', upsert_db=False, touch_files_only=False)
-# my_proc_arc2rain_dekad(pipe_run=4, pipe_print=0, start_date='19810101', end_date='20171231', upsert_db=True, touch_files_only=False)
+# my_proc_chirps_dekad(pipe_run=0, pipe_print=9, start_date='19810101', end_date='20171231', upsert_db=False, touch_files_only=False)
+my_proc_arc2rain_dekad(pipe_run=0, pipe_print=6, start_date='19810101', end_date='20171231', upsert_db=False, touch_files_only=False)
 # my_proc_chirps_lp(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False, type='')
 #my_proc_std_lsasaf_et(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
 #my_proc_std_lsasaf_lst(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
