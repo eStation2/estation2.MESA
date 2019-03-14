@@ -19,7 +19,7 @@ from lib.python import functions
 from lib.python.image_proc import raster_image_math
 from lib.python import es_logging as log
 from config import es_constants
-
+from database import querydb
 # Import third-party modules
 from ruffus import *
 
@@ -540,7 +540,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 #   Run the pipeline
 
 
-def processing_std_precip(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
+def processing_std_precip(res_queue, pipeline_run_level=0,pipeline_printout_level=0, upsert_db = False,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
                           starting_dates=None, update_stats=False, nrt_products=True, write2file=None, logfile=None, touch_only=False):
 
@@ -555,6 +555,22 @@ def processing_std_precip(res_queue, pipeline_run_level=0,pipeline_printout_leve
         fwrite_id=open(write2file,'w')
     else:
         fwrite_id=None
+
+    if upsert_db:
+        tasks = pipeline_get_task_names()
+        spec_logger.info("Updating DB for the pipeline %s" % tasks[0])
+        # Get input product info
+        input_product_info=querydb.get_product_out_info(allrecs=False,
+                                                        productcode=prod,
+                                                        subproductcode=starting_sprod,
+                                                        version=version)
+
+        for my_sprod in proc_lists.list_subprods:
+            # my_sprod.print_out()
+            status = querydb.update_processing_chain_products(prod, version, my_sprod, input_product_info)
+
+        spec_logger.info("Updating DB Done - Exit")
+        return res_queue
 
     if pipeline_run_level > 0:
         spec_logger.info("Run the pipeline %s" % 'processing_std_precip')
@@ -572,12 +588,12 @@ def processing_std_precip(res_queue, pipeline_run_level=0,pipeline_printout_leve
     if write2file is not None:
         fwrite_id.close()
 
-    #res_queue.put(proc_lists)
-    return True
+    res_queue.put(proc_lists)
+    return res_queue
 
 def processing_std_precip_stats_only(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None,write2file=None, logfile=None, touch_only=False):
+                          starting_dates=None,write2file=None, logfile=None, touch_only=False,upsert_db = False):
 
     result = processing_std_precip(res_queue, pipeline_run_level=pipeline_run_level,
                           pipeline_printout_level=pipeline_printout_level,
@@ -591,6 +607,7 @@ def processing_std_precip_stats_only(res_queue, pipeline_run_level=0,pipeline_pr
                           update_stats=True,
                           write2file=write2file,
                           logfile=logfile,
+                          upsert_db=upsert_db,
                           touch_only=touch_only)
 
     return result
@@ -598,7 +615,7 @@ def processing_std_precip_stats_only(res_queue, pipeline_run_level=0,pipeline_pr
 
 def processing_std_precip_prods_only(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None,write2file=None, logfile=None, touch_only=False):
+                          starting_dates=None,write2file=None, logfile=None, touch_only=False,upsert_db = False):
 
     result = processing_std_precip(res_queue, pipeline_run_level=pipeline_run_level,
                           pipeline_printout_level=pipeline_printout_level,
@@ -612,6 +629,7 @@ def processing_std_precip_prods_only(res_queue, pipeline_run_level=0,pipeline_pr
                           update_stats=False,
                           write2file=write2file,
                           logfile=logfile,
+                          upsert_db=upsert_db,
                           touch_only=touch_only)
 
     return result
@@ -619,7 +637,7 @@ def processing_std_precip_prods_only(res_queue, pipeline_run_level=0,pipeline_pr
 
 def processing_std_precip_all(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None,write2file=None, logfile=None, touch_only=False):
+                          starting_dates=None,write2file=None, logfile=None, touch_only=False,upsert_db = False):
 
     result = processing_std_precip(res_queue, pipeline_run_level=pipeline_run_level,
                           pipeline_printout_level=pipeline_printout_level,
@@ -633,6 +651,7 @@ def processing_std_precip_all(res_queue, pipeline_run_level=0,pipeline_printout_
                           update_stats=True,
                           write2file=write2file,
                           logfile=logfile,
+                          upsert_db=upsert_db,
                           touch_only=touch_only)
 
     return result
