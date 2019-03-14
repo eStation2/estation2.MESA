@@ -464,7 +464,11 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                                 # Estimate 'average' Latitude
                                 y_avg = (y_min + y_max)/2.0
                                 pixelAvgArea = area_km_equator * math.cos(y_avg / 180 * math.pi)
-                                meanResult = float(mxrange.count()) * pixelAvgArea
+                                # Consider the percent (%) as a weight - see ES2-271
+                                # This is important for the avg (between 0 to 100%)
+                                # meanResult = float(mxrange.count()) * pixelAvgArea
+                                meanResult = float(mxrange.sum()/100.0) * pixelAvgArea
+
                             else:
                                 # 'count'
                                 meanResult = float(mxrange.count())
