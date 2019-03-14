@@ -119,3 +119,8 @@
         ES2-215 — Wrong feature on Libya coastline in Gaul layer.
         ES2-261 — The install of the 2.1.2 package removes the previous layers -> correct the ISO 1.3.0.
         ES2-104 — Layer for northern Africa.
+
+
+3. PRODUCTS
+---------------
+

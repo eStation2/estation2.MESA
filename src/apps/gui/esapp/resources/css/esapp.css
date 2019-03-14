@@ -476,8 +476,19 @@ p {
     background-image:url(../img/icons/play.png);
     background-repeat: no-repeat;
 }
+
+.playred {
+    background-image:url(../img/icons/play_red.png);
+    background-repeat: no-repeat;
+}
+
 .pause {
     background-image:url(../img/icons/pause.png);
+    background-repeat: no-repeat;
+}
+
+.finished {
+    background-image:url(../img/icons/check-circle.png);
     background-repeat: no-repeat;
 }
 

@@ -34,8 +34,9 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
     collapsible: false,
     resizable: false,
     autoScroll: true,
+    layout: 'fit',
     height: 300,
-    width: 700,
+    width: 760,
 
     border:false,
     frame: false,
@@ -82,11 +83,31 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
 
         me.mon(me, {
             loadstore: function() {
+                me.focus();
+
                 if (me.forceStoreLoad || !me.getViewModel().getStore('requests').isLoaded() || me.dirtyStore) {
                     // me.getViewModel().getStore('requests').proxy.extraParams = {userid: esapp.getUser().userid};
+                    // var myMask = new Ext.LoadMask({
+                    //     target : me
+                    // });
+                    // myMask.show();
                     me.getViewModel().getStore('requests').load({
-                        callback: function (records, options, success) {
-                            // console.info(records);
+                        callback: function (records, options, success, message) {
+                            if (!success){
+                                Ext.Msg.show({
+                                    title: esapp.Utils.getTranslation('internet_proxy_error_title'),
+                                    message: esapp.Utils.getTranslation('internet_proxy_error_msg'),
+                                    buttons: Ext.Msg.OK,
+                                    icon: Ext.Msg.WARNING,
+                                    fn: function(btn) {
+                                        if (btn === 'ok') {
+                                            // todo: go to system tab?
+                                        }
+                                    }
+                                });
+                            }
+                            // me.updateLayout();
+                            // myMask.hide();
                         }
                     });
                     me.forceStoreLoad = false;
@@ -99,9 +120,12 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
         me.listeners = {
             afterrender: function(){
                 me.alignTarget = me.owner;
+                me.focus();
             },
             show: function(){
+                me.dirtyStore = true;
                 me.fireEvent('loadstore');
+                // me.focus();
             },
             focusleave: function(){
                 me.hide();
@@ -134,11 +158,21 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
         //     }]
         // });
 
+        me.defaults =  {
+            cellWrap:true,
+            menuDisabled: true,
+            sortable: false,
+            variableRowHeight : true,
+            draggable:false,
+            groupable:false,
+            hideable: false
+        };
+
         me.columns = [{
             xtype: 'actioncolumn',
             header: esapp.Utils.getTranslation('status'),   // 'Status',
             menuDisabled: true,
-            sortable: true,
+            sortable: false,
             variableRowHeight : true,
             draggable:false,
             groupable:false,
@@ -151,27 +185,43 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
                 width:'45',
                 disabled: false,
                 getClass: function(v, meta, rec) {
-                    if (rec.get('status')=='running'){
+                    if (rec.get('status').toLowerCase()=='running'){
                         // return 'fa fa-pause-circle-o fa-2x green';
                         return 'pause'
                     }
-                    else if (rec.get('status')=='paused'){
+                    else if (rec.get('status').toLowerCase()=='paused'){
                         // return 'fa fa-play-circle-o fa-2x orange';
                         return 'play'
                     }
+                    else if (rec.get('status').toLowerCase()=='finished'){
+                        // return 'fa fa-play-circle-o fa-2x orange';
+                        return 'finished'
+                    }
                     else {
                         // return 'fa fa-exclamation-circle fa-2x red';
-                        return 'exclamation'
+                        // There is an error in the request job, give the user the possibility to restart the job
+                        return 'playred'     // 'exclamation'
                     }
                 },
                 getTip: function(v, meta, rec) {
-                    return esapp.Utils.getTranslation('request_status') + ': ' + rec.get('status');   // 'Request status'
+                    if (rec.get('status').toLowerCase()=='running'){
+                        return esapp.Utils.getTranslation('request') + ' ' + rec.get('status').toLowerCase() + ', ' + esapp.Utils.getTranslation('request_click_to_pause');   // 'Request'  'click to Pause request!'
+                    }
+                    else if (rec.get('status').toLowerCase()=='paused'){
+                        return esapp.Utils.getTranslation('request') + ' ' + rec.get('status').toLowerCase() + ', ' + esapp.Utils.getTranslation('request_click_to_run');   // 'Request'  'click to Run request!'
+                    }
+                    else if (rec.get('status').toLowerCase()=='finished'){
+                        return esapp.Utils.getTranslation('request') + ' ' + rec.get('status').toLowerCase();   // 'Request'
+                    }
+                    else {
+                       return esapp.Utils.getTranslation('request_status') + ': ' + rec.get('status');   // 'Request status'
+                    }
                 },
                 handler: 'runPauseRequest'
             }]
         },{
-            text: esapp.Utils.getTranslation('level'),  // 'Request ID',
-            width: 65,
+            text: esapp.Utils.getTranslation('level'),  // 'Level',
+            width: 75,
             dataIndex: 'level',
             cellWrap:true,
             menuDisabled: true,
@@ -181,9 +231,28 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
             groupable:false,
             hideable: false
         },{
-            text: esapp.Utils.getTranslation('productcode'),  // 'Request ID',
-            width: 110,
-            dataIndex: 'productcode',
+            xtype:'templatecolumn',
+            header: esapp.Utils.getTranslation('product'),    // 'Product',
+            tpl: new Ext.XTemplate(
+                '<b>{prod_descriptive_name}</b>' +
+                '<tpl if="version != \'undefined\'">',
+                    '<b class="smalltext"> - {version}</b>',
+                '</tpl>',
+                '</br><span class="smalltext">' +
+                '<b>{productcode}</b>' +
+                '<tpl if="version != \'undefined\'">',
+                    '<b> - {version}</b>',
+                '</tpl>',
+                ' - <b>{mapsetcode}</b>' +
+                '<tpl if="subproductcode != \'\'">',
+                    ' - <b>{subproductcode}</b>',
+                '</tpl>',
+                '</span></br>' +
+                '<span class="smalltext">' +
+                '<b style="color:darkgrey">' + esapp.Utils.getTranslation("requestid") + ': {requestid}</b>' +
+                '</span></br>'
+            ),
+            width: 365,
             cellWrap:true,
             menuDisabled: true,
             sortable: true,
@@ -192,59 +261,59 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
             groupable:false,
             hideable: false
         },{
-            text: esapp.Utils.getTranslation('version'),  // 'Request ID',
-            width: 80,
-            dataIndex: 'version',
+            text: esapp.Utils.getTranslation('totalfiles'),  // 'Total files',
+            width: 85,
+            dataIndex: 'totfiles',
             cellWrap:true,
             menuDisabled: true,
-            sortable: true,
+            sortable: false,
             variableRowHeight : true,
             draggable:false,
             groupable:false,
             hideable: false
         },{
-            text: esapp.Utils.getTranslation('subproductcode'),  // 'Request ID',
-            width: 135,
-            dataIndex: 'subproductcode',
+            text: esapp.Utils.getTranslation('ok'),  // 'Ok',
+            width: 45,
+            dataIndex: 'totok',
             cellWrap:true,
             menuDisabled: true,
-            sortable: true,
+            sortable: false,
             variableRowHeight : true,
             draggable:false,
             groupable:false,
             hideable: false
         },{
-            text: esapp.Utils.getTranslation('mapsetcode'),  // 'Request ID',
-            width: 145,
-            dataIndex: 'mapsetcode',
+            text: esapp.Utils.getTranslation('error'),  // 'Error',
+            width: 55,
+            dataIndex: 'totko',
             cellWrap:true,
             menuDisabled: true,
-            sortable: true,
+            sortable: false,
             variableRowHeight : true,
             draggable:false,
             groupable:false,
             hideable: false
         },{
             xtype: 'actioncolumn',
-            header: esapp.Utils.getTranslation('delete'),   // 'Delete',
+            // header: esapp.Utils.getTranslation('delete'),   // 'Delete',
+            width: 45,
+            align: 'center',
+            stopSelection: false,
+            cellWrap:true,
             menuDisabled: true,
-            sortable: true,
+            sortable: false,
             variableRowHeight : true,
             draggable:false,
             groupable:false,
             hideable: false,
-            width: 65,
-            align: 'center',
-            stopSelection: false,
-
             items: [{
                 width:'45',
                 disabled: false,
                 getClass: function(v, meta, rec) {
                     return 'delete';
-                    //if (rec.get('deletable')){
+                    // if (rec.get('status').toLowerCase()!='running' && rec.get('status').toLowerCase()!='paused'){
                     //    return 'delete';
-                    //}
+                    // }
                 },
                 getTip: function(v, meta, rec) {
                     return esapp.Utils.getTranslation('delete_request') + ': ' + rec.get('requestid');   // 'Delete request'

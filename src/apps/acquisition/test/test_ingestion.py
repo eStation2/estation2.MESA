@@ -849,9 +849,9 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_jrc_wbd(self):
 
-        date_fileslist = glob.glob('/data/ingest/JRC-WBD_20180801_*')
+        date_fileslist = glob.glob('/data/ingest/JRC-WBD_20190101*')
         #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
-        in_date = '20180801'
+        in_date = '20190101'
         productcode = 'wd-gee'
         productversion = '1.0'
         subproductcode = 'occurr'
@@ -1299,6 +1299,52 @@ class TestIngestion(unittest.TestCase):
             # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
             #                                                                       source_id=datasource_descrID):
             ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
+    def test_ingest_g_cls_ndvi_300m_global(self):
+
+
+        # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
+        # Products released from VITO in March 2017
+        date_fileslist = glob.glob('/data/ingest/c_gls_NDVI300_201901010000_GLOBE_PROBAV_V1.0.1.nc')
+
+        for one_file in date_fileslist:
+
+            one_filename = os.path.basename(one_file)
+            in_date = '20190101'
+            productcode = 'vgt-ndvi'
+            productversion = 'proba300-v1.0'
+            subproductcode = 'ndv'
+            mapsetcode = 'SPOTV-Africa-300m'
+            datasource_descrID='PDF:GLS:PROBA-V1.0:NDVI300'
+
+
+            product = {"productcode": productcode,
+                       "version": productversion}
+            args = {"productcode": productcode,
+                    "subproductcode": subproductcode,
+                    "datasource_descr_id": datasource_descrID,
+                    "version": productversion}
+
+            product_in_info = querydb.get_product_in_info(**args)
+
+            re_process = product_in_info.re_process
+            re_extract = product_in_info.re_extract
+            sprod = {'subproduct': subproductcode,
+                                 'mapsetcode': mapsetcode,
+                                 're_extract': re_extract,
+                                 're_process': re_process }
+
+            subproducts=[]
+            subproducts.append(sprod)
+            datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                            source_id=datasource_descrID)
+            # ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger,
+            #                     echo_query=1)
+            # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+            #                                                                       source_id=datasource_descrID):
+            ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
+
 
     def test_ingest_g_cls_fapar_2_0_1(self):
 

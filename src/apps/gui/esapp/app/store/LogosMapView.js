@@ -32,7 +32,10 @@ Ext.define('esapp.store.LogosMapView', {
         { src:'resources/img/logo/ECOAGRIS.jpg', width:'20%', height:'50px' },
         { src:'resources/img/logo/TAFIRI_logo.png', width:'20%', height:'50px' },
         { src:'resources/img/logo/CSIR.jpg', width:'20%', height:'50px' },
-        { src:'resources/img/logo/NARSS.png', width:'20%', height:'50px' }
+        { src:'resources/img/logo/NARSS.png', width:'20%', height:'50px' },
+        { src:'resources/img/logo/Logo-OSS_Fr&EN_Vect.png', width:'20%', height:'50px' },
+        { src:'resources/img/logo/Logo-OSS_Vect_En.png', width:'20%', height:'50px' },
+        { src:'resources/img/logo/Logo-OSS_Vect_Fr.png', width:'20%', height:'50px' }
 
         // { src:'resources/img/logo/IOTC-logo_110.PNG', width:'20%', height:'50px' },
         // { src:'resources/img/logo/DSFA-logo_90.png', width:'20%', height:'33px' },

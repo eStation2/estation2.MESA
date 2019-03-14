@@ -78,13 +78,15 @@ Ext.define('esapp.Application', {
 
         Ext.Ajax.timeout = 300000; // 300 seconds
         Ext.override(Ext.data.proxy.Server, { timeout: Ext.Ajax.timeout });
+        Ext.override(Ext.data.proxy.Rest, { timeout: Ext.Ajax.timeout });
+        Ext.override(Ext.data.proxy.Ajax, { timeout: Ext.Ajax.timeout });
         Ext.override(Ext.data.Connection, { timeout: Ext.Ajax.timeout });
 
         esapp.globals = [];
 
-        esapp.globals['typeinstallation'] = 'full';
-        esapp.globals['role'] = 'pc2';
-        esapp.globals['mode'] = 'nominal';
+        // esapp.globals['typeinstallation'] = 'full';
+        // esapp.globals['role'] = 'pc2';
+        // esapp.globals['mode'] = 'nominal';
         Ext.Ajax.request({
             method: 'POST',
             url: 'typeinstallation',
@@ -235,7 +237,10 @@ Ext.define('esapp.Application', {
         });
         taskMain.delay(50);
 
-        if (esapp.globals['typeinstallation'] == 'windows' || esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online'){
+        if (esapp.globals['typeinstallation'].toLowerCase() == 'windows' ||
+            esapp.globals['typeinstallation'].toLowerCase() == 'online' ||
+            esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online')
+        {
             var datasetsstore  = Ext.data.StoreManager.lookup('DataSetsStore');
 
             if (datasetsstore.isStore) {

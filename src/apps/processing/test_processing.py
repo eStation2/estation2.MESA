@@ -47,8 +47,8 @@ def test_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False):
 
     #res_queue = Queue()
     res_queue = None
-    proc_lists = processing_std_ndvi_prods_only(res_queue,**args)
-    #proc_lists = processing_std_ndvi_stats_only(res_queue,**args)
+    #proc_lists = processing_std_ndvi_prods_only(res_queue,**args)
+    proc_lists = processing_std_ndvi_stats_only(res_queue,**args)
     #proc_lists = processing_std_ndvi_all(res_queue,**args)
 #   ---------------------------------------------------------------------
 # vgt-ndvi merge (for sv2-pv2.2)
@@ -699,7 +699,7 @@ def test_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=
 #test_proc_olci_wrr_chla_gradient(pipe_run=3, pipe_print=0, touch_files_only=False)
 
 #test_proc_chirps_dekad(pipe_run=4, pipe_print=0, start_date='19810101', end_date='20171231', touch_files_only=False)
-#test_proc_std_ndvi(pipe_run=4, pipe_print=0, touch_files_only=False)
+test_proc_std_ndvi(pipe_run=4, pipe_print=0, touch_files_only=False)
 #test_proc_vgt_dmp(pipe_run=4, pipe_print=0, start_date='19990101', end_date='20171231', touch_files_only=False)
 #my_starting_dates_stats = proc_functions.get_list_dates_for_dataset('modis-firms', '10dcount', 'v6.0', start_date='20020701', end_date='20180621')
 # for date in my_starting_dates_stats:
@@ -713,14 +713,14 @@ def test_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=
 #test_proc_modis_firms(pipe_run=4, pipe_print=0, start_date='20020701', end_date='20180630',touch_files_only=False)
 #test_proc_ba(pipe_run=4, pipe_print=0, start_date='20140701', end_date='20180630',touch_files_only=False)
 #test_proc_std_median_filter()
-import numpy
-# args = {"input_file": '/data/processing/exchange/Sentinel-3/gradient/20180202_olci-wrr_median-filter_SPOTV-Africa-1km_V02.0.tif', "output_file": '/data/processing/exchange/Sentinel-3/gradient/20180202_olci-wrr_extrapolated5_SPOTV-Africa-1km_V02.0.tif', "nodata": 1000,"output_format": 'GTIFF',
+# import numpy
+# # args = {"input_file": '/data/processing/exchange/Sentinel-3/gradient/20180202_olci-wrr_median-filter_SPOTV-Africa-1km_V02.0.tif', "output_file": '/data/processing/exchange/Sentinel-3/gradient/20180202_olci-wrr_extrapolated5_SPOTV-Africa-1km_V02.0.tif', "nodata": 1000,"output_format": 'GTIFF',
+# #         "options": "compress = lzw"}
+# args = {"input_file": '/data/processing/exchange/Sentinel-3/gradient/CHL_orig_10-12-2018.tif', "output_file": '/data/processing/exchange/Sentinel-3/gradient/CHL_ord_1IT_10_sd_2_10-12-2018.tif', "nodata": numpy.nan,"output_format": 'GTIFF',
 #         "options": "compress = lzw"}
-args = {"input_file": '/data/processing/exchange/Sentinel-3/gradient/CHL_orig_10-12-2018.tif', "output_file": '/data/processing/exchange/Sentinel-3/gradient/CHL_ord_1IT_10_sd_2_10-12-2018.tif', "nodata": numpy.nan,"output_format": 'GTIFF',
-        "options": "compress = lzw"}
-# args = {"input_file": '/data/processing/exchange/Sentinel-3/gradient/20180202_olci-wrr_extrapolated5_SPOTV-Africa-1km_V02.0.tif', "output_file": '/data/processing/exchange/Sentinel-3/gradient/20180202_olci-wrr_gradient5_SPOTV-Africa-1km_V02.0.tif', "nodata": 1000,"output_format": 'GTIFF',
-#         "options": "compress = lzw"}
-
-
-raster_image_math.extrapolate_edge(**args)
+# # args = {"input_file": '/data/processing/exchange/Sentinel-3/gradient/20180202_olci-wrr_extrapolated5_SPOTV-Africa-1km_V02.0.tif', "output_file": '/data/processing/exchange/Sentinel-3/gradient/20180202_olci-wrr_gradient5_SPOTV-Africa-1km_V02.0.tif', "nodata": 1000,"output_format": 'GTIFF',
+# #         "options": "compress = lzw"}
+#
+#
+# raster_image_math.extrapolate_edge(**args)
 #raster_image_math.compute_median_filter(**args)

@@ -22,7 +22,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
     ],
 
     store: 'DataSetsStore',
-    session: false,
+    // session: false,
 
     viewConfig: {
         stripeRows: false,
@@ -32,13 +32,15 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
         resizable: false,
         disableSelection: true,
         trackOver: false,
-        preserveScrollOnRefresh: true,
-        focusable: false
+        preserveScrollOnRefresh: false,
+        preserveScrollOnReload: false,
+        focusable: false,
+        focusOnToFront: false
     },
     // selType: 'cellmodel',
     // selModel: {listeners:{}},
-
-    bufferedRenderer: false,
+    // selModel: null,
+    // bufferedRenderer: true,
 
     collapsible: false,
     enableColumnMove: false,
@@ -51,7 +53,8 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
     focusable: false,
     margin: '0 0 10 0',    // (top, right, bottom, left).
 
-    layout: 'fit',
+    // layout: 'fit',
+    // autoHeight: true,
 
     features: [{
         id: 'prodcat',
@@ -143,8 +146,8 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                 // groupFeature.fireEvent('expand', group, true);
             },
             afterrender: function(view){
+                // Ext.util.Observable.capture(view, function(e){console.log('datamanagementgrid ' + view.id + ': ' + e);});
                 var scroller = me.view.getScrollable();
-
                 scroller.on('scroll', function(){
                     var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
                     Ext.each(completenessTooltips, function(item) {
@@ -152,21 +155,11 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                        item.hide();
                     });
                 }, scroller, {single: false});
+
+                // view.suspendEvents(false);
+                // view.clearManagedListeners();
             }
         }
-        //me.listeners = {
-        //    viewready: function(gridpanel,func){
-        //        //Ext.toast({ html: 'viewready', title: 'viewready', width: 200, align: 't' });
-        //
-        //        var task = new Ext.util.DelayedTask(function() {
-        //            var view = gridpanel.getView();
-        //            view.getFeature('prodcat').expandAll();
-        //            view.refresh();
-        //        });
-        //
-        //        task.delay(1000);
-        //    }
-        //};
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
             items: [{
@@ -235,7 +228,8 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
             sortable: false,
             groupable:true,
             draggable:false,
-            hideable: true
+            hideable: true,
+            variableRowHeight: false
         };
 
         me.columns = [
@@ -247,7 +241,8 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                 sortable: false,
                 groupable:true,
                 draggable:false,
-                hideable: true
+                hideable: true,
+                variableRowHeight: false
             },
             columns: [{
                 xtype:'templatecolumn',
@@ -312,6 +307,8 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                 //dataIndex: 'productmapsets',
                 minWidth: 1025,
                 bodyPadding:0,
+                variableRowHeight: false,
+                scrollable: false,
 
                 header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 215px; left: 0px; tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
@@ -350,10 +347,10 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                 ,onWidgetAttach: function(col,widget, record) {
 
                     if (!widget.widgetattached) {
-                        Ext.suspendLayouts();
+                        // Ext.suspendLayouts();
                         widget.getStore().setData(record.getData().productmapsets);
                         widget.widgetattached = true;
-                        Ext.resumeLayouts(true);
+                        // Ext.resumeLayouts(true);
                     }
                     // else {
                     //     me.ownerGrid.updateLayout();

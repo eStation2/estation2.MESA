@@ -39,7 +39,7 @@ from multiprocessing import (Process, Queue)
 
 from lib.python import functions
 from lib.python import es_logging as log
-
+from lib.python import reloadmodules
 
 logger = log.my_logger(__name__)
 
@@ -1010,12 +1010,18 @@ class runPauseRequest:
     def GET(self):
         getparams = web.input()
         if hasattr(getparams, "requestid") and getparams['requestid'] != '':
+            requestid = getparams['requestid']
             if getparams['task'] == 'pause':
-                response_json = webpy_esapp_helpers.pauseRequestJob(getparams)
+                response_json = webpy_esapp_helpers.pauseRequestJob(requestid)
             else:
-                response_json = webpy_esapp_helpers.restartRequestJob(getparams)
+                response_json = webpy_esapp_helpers.restartRequestJob(requestid)
         else:
-            response_json = '{"success":false, "error":"No request info passed!"}'
+            response = {"success":False, "error":"No request info passed!"}
+            response_json = json.dumps(response,
+                                       ensure_ascii=False,
+                                       sort_keys=True,
+                                       indent=4,
+                                       separators=(', ', ': '))
 
         return response_json
 
@@ -1041,7 +1047,8 @@ class deleteRequestJob:
     def GET(self):
         getparams = web.input()
         if hasattr(getparams, "requestid") and getparams['requestid'] != '':
-            response_json = webpy_esapp_helpers.deleteRequestJob(getparams)
+            requestid = getparams['requestid']
+            response_json = webpy_esapp_helpers.deleteRequestJob(requestid)
         else:
             response_json = '{"success":false, "error":"No request info passed!"}'
 
@@ -1959,7 +1966,6 @@ class SetDataAutoSync:
             functions.setSystemSetting('data_sync', getparams['dataautosync'])
 
             # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-            from lib.python import reloadmodules
             reloadmodules.reloadallmodules()
             # Reloading the settings does not work well so set manually
 
@@ -1981,7 +1987,6 @@ class SetDBAutoSync:
             functions.setSystemSetting('db_sync', getparams['dbautosync'])
 
             # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-            from lib.python import reloadmodules
             reloadmodules.reloadallmodules()
             # Reloading the settings does not work well so set manually
 
@@ -2442,7 +2447,6 @@ class setIngestArchives:
             # Todo: call system service to change the mode
 
             # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-            from lib.python import reloadmodules
             reloadmodules.reloadallmodules()
             # Reloading the settings does not work well so set manually
 
@@ -2466,7 +2470,6 @@ class ChangeRole:
             # Todo: call system service to change the mode
 
             # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-            from lib.python import reloadmodules
             reloadmodules.reloadallmodules()
             # Reloading the settings does not work well so set manually
 
@@ -2600,7 +2603,6 @@ class ChangeMode:
                     message = 'Data and Settings Synchronized to the other PC. You must now put the other PC in Nominal mode!'
 
                 # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-                from lib.python import reloadmodules
                 reloadmodules.reloadallmodules()
                 # Reloading the settings does not work well so set manually
 
@@ -2708,37 +2710,7 @@ class ChangeThema:
     def GET(self):
         getparams = web.input()
         if hasattr(getparams, "thema"):
-
-            functions.setSystemSetting('thema', getparams['thema'])
-
-            # Set thema in database by activating the thema products, ingestion and processes.
-            themaset = querydb.set_thema(getparams['thema'])
-
-            message = 'Thema changed also on other pc!'
-            setThemaOtherPC = False
-            systemsettings = functions.getSystemSettings()
-            if systemsettings['type_installation'].lower() == 'full':
-                if systemsettings['role'].lower() == 'pc2':
-                    otherPC = 'mesa-pc3'
-                elif systemsettings['role'].lower() == 'pc3':
-                    otherPC = 'mesa-pc2'
-                else:
-                    otherPC = 'mesa-pc1'
-
-                PC23_connection = functions.check_connection(otherPC)
-                if PC23_connection:
-                    setThemaOtherPC = functions.setThemaOtherPC(otherPC, getparams['thema'])
-                    if not setThemaOtherPC:
-                        message = '<B>Thema NOT set on other pc</B>, ' + otherPC + ' because of an error on the other pc. Please set the Thema manually on the other pc!'
-                else:
-                    message = '<B>Thema NOT set on other pc</B>, ' + otherPC + ' because there is no connection. Please set the Thema manually on the other pc!'
-
-            # print 'setThemaOtherPC: ' + str(setThemaOtherPC)
-            if themaset:
-                # print "thema changed"
-                changethema_json = '{"success":"true", "message":"Thema changed on this PC!</BR>' + message + '"}'
-            else:
-                changethema_json = '{"success":false, "error":"Changing thema in database error!"}'
+            changethema_json = webpy_esapp_helpers.ChangeThema(getparams['thema'])
         else:
             changethema_json = '{"success":false, "error":"No thema given!"}'
 
@@ -2779,7 +2751,6 @@ class ChangeLogLevel:
             functions.setUserSetting('log_general_level', getparams['loglevel'])
 
             # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-            from lib.python import reloadmodules
             reloadmodules.reloadallmodules()
 
             # ToDo: Query thema products and activate them.
@@ -3257,27 +3228,11 @@ class ResetUserSettings:
         self.lang = "eng"
 
     def GET(self):
-        import ConfigParser
-        usersettingsinifile = es_constants.es2globals['settings_dir']+'/user_settings.ini'
-        # usersettingsinifile = '/eStation2/settings/user_settings.ini'
-
-        config_usersettings = ConfigParser.ConfigParser()
-        config_usersettings.read(['user_settings.ini', usersettingsinifile])
-
-        for option in config_usersettings.options('USER_SETTINGS'):
-            config_usersettings.set('USER_SETTINGS', option, '')
-
-        # Writing our configuration file to 'example.cfg' - COMMENTS ARE NOT PRESERVED!
-        with open(usersettingsinifile, 'wb') as configfile:
-            config_usersettings.write(configfile)
-            configfile.close()
+        updatestatus = webpy_esapp_helpers.ResetUserSettings()
 
         # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
-        from lib.python import reloadmodules
-        reloadmodules.reloadallmodules()
-
-        # from config import es_constants as constantsreloaded
-        updatestatus = '{"success":"true", "message":"System settings reset to factory settings!"}'
+        import imp
+        imp.reload(webpy_esapp_helpers)
 
         return updatestatus
 
@@ -3289,6 +3244,10 @@ class UpdateUserSettings:
     def PUT(self):
         params = json.loads(web.data())
         updatestatus = webpy_esapp_helpers.UpdateUserSettings(params)
+
+        # ToDo: After changing the settings restart apache or reload all dependend modules to apply the new settings
+        import imp
+        imp.reload(webpy_esapp_helpers)
 
         return updatestatus
 
@@ -3798,13 +3757,9 @@ class UpdateProduct:
         #                'product_type': getparams['products']['product_type'],
         #                'defined_by': getparams['products']['defined_by'],
         #                'activated': getparams['products']['activated']}
-
-        result = querydb.activate_deactivate_product(productcode=getparams['products']['productcode'], version=getparams['products']['version'], activate=getparams['products']['activated'], force=True)
         # if self.crud_db.update('product', productinfo):
-        if result:
-            updatestatus = '{"success":"true", "message":"Product updated!"}'
-        else:
-            updatestatus = '{"success":false, "message":"An error occured while updating the product!"}'
+
+        updatestatus = webpy_esapp_helpers.UpdateProduct(productcode=getparams['products']['productcode'], version=getparams['products']['version'], activate=getparams['products']['activated'])
 
         return updatestatus
 
@@ -3943,8 +3898,8 @@ class ProductAcquisition:
     def GET(self, params):
         # return web.ctx
         getparams = web.input()
-        # products = querydb.get_products_acquisition(activated=getparams.activated)
-        products = querydb.get_products(activated=getparams.activated)
+        products = querydb.get_products_acquisition(activated=getparams.activated)
+        # products = querydb.get_products(activated=getparams.activated)
         products_json = functions.tojson(products)
         products_json = '{"success":"true", "total":'+str(products.__len__())+',"products":['+products_json+']}'
         return products_json

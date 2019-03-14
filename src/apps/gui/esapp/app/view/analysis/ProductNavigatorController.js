@@ -271,6 +271,7 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
     },
 
     productsGridRowClick: function(gridview, record){
+        var me = this.getView();
 
         this.lookupReference('addtomapbtn_'+this.getView().mapviewid.replace(/-/g,'_')).disable();
         this.lookupReference('mapset-dataset-grid').hide();
@@ -287,7 +288,7 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
 
         productinfopanel.expand(true);
         this.getStore('productmapsets').setData(record.get('productmapsets'));
-
+        me.productsensor = record.get('prod_descriptive_name');
     },
 
     mapsetItemClick: function(dataview, record ){
@@ -324,7 +325,6 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         var colorschemesgrid = me.lookupReference('colorschemesGrid');
         var mapsetdatasetgrid = this.lookupReference('mapset-dataset-grid');
 
-        // console.info(record);
         me.selectedproduct = {
             productcode:record.get('productcode'),
             productversion:record.get('version'),
@@ -332,7 +332,8 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
             subproductcode:record.get('subproductcode'),
             productname:record.get('descriptive_name'),
             date_format:record.get('date_format'),
-            frequency_id:record.get('frequency_id')
+            frequency_id:record.get('frequency_id'),
+            productsensor: me.productsensor
         };
 
         colorschemesgrid.columns[1].setText('<div class="grid-header-style">' + esapp.Utils.getTranslation('colorschemes') +

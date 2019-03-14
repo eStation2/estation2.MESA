@@ -33,7 +33,11 @@ Ext.define('esapp.model.SystemSetting', {
         {name: 'active_version'},
         {name: 'thema'},
         {name: 'loglevel'},
-        {name: 'log_general_level'}
+        {name: 'log_general_level'},
+        {name: 'proxy_host'},
+        {name: 'proxy_port'},
+        {name: 'proxy_user'},
+        {name: 'proxy_userpwd'}
     ]
 
     ,autoLoad: true

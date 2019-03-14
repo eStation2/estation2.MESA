@@ -33,7 +33,7 @@ def createSyncJob(args):
                            # shell=True,    # pass args as string
                            stdout=PIPE,
                            stderr=STDOUT)  # .pid
-    job.poll()
+    jobstatus = job.poll()
     answer = job.stdout.readline()
     print answer
     return answer
@@ -74,13 +74,15 @@ if __name__ == "__main__":
                 'estation_sync_file': '/srv/www/eStation2/apps/tools/eStationSync.jar'}
     print argslist
 
-    results_queue = Queue()
-    # p = Process(target=createSyncJob, args=(results_queue,), kwargs=argslist)
-    p = Process(target=createSyncJob, args=(results_queue,))
-    # p.daemon = True
-    p.start()
-    # proc_lists=results_queue.get()
-    p.join()
+    createSyncJob(argslist)
+
+    # results_queue = Queue()
+    # # p = Process(target=createSyncJob, args=(results_queue,), kwargs=argslist)
+    # p = Process(target=createSyncJob, args=(results_queue,))
+    # # p.daemon = True
+    # p.start()
+    # # proc_lists=results_queue.get()
+    # p.join()
 
     # jobstatus = createSyncJob(argslist)
     # createSyncJob(sys.argv[1:])

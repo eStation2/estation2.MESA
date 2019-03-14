@@ -185,7 +185,11 @@ src_file='/var/www/eStation2/config/install/user_settings.ini'
 trg_file='/eStation2/settings/user_settings.ini'
 
 if [ -f  ${trg_file} ]; then
-    echo "`date +'%Y-%m-%d %H:%M '` User Setting file already exist $trg_file" 
+    echo "`date +'%Y-%m-%d %H:%M '` User Setting file already exist $trg_file"
+    echo "proxy_host =" >> $trg_file
+    echo "proxy_port =" >> $trg_file
+    echo "proxy_user =" >> $trg_file
+    echo "proxy_userpwd =" >> $trg_file
 else
     cp $src_file $trg_file
     if [ $? -eq 0 ]; then 

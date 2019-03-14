@@ -21,7 +21,7 @@ Ext.define('esapp.store.DataSetsStore', {
 
     ,proxy: {
         type: 'rest',
-        // url: '',
+        timeout: 3000000,
         appendId: false,
         api: {
             read: 'datasets',

@@ -6,22 +6,42 @@ Ext.define('esapp.view.datamanagement.requestsAdminController', {
     ,runPauseRequest: function(grid, rowIndex, row){
         var record = grid.getStore().getAt(rowIndex);
         var params = {};
-        var status = record.get('status');
+        var msg = '';
+        var origstatus = record.get('status').toLowerCase();
 
-        if (record.get('status')=='running'){
+        if (origstatus=='running'){
             params = {
                 'requestid': record.get('requestid'),
                 'task': 'pause'
             };
-            status = 'paused';
+
+            msg = esapp.Utils.getTranslation('pausing_request') + ' ' + record.get('requestid');
         }
-        else if (record.get('status')=='paused'){
+        else if (origstatus=='paused'){
             params = {
                 'requestid': record.get('requestid'),
                 'task': 'run'
             };
-            status = 'running';
+            msg = esapp.Utils.getTranslation('restarting_request') + ' ' + record.get('requestid');
         }
+        else if (origstatus=='error'){  // Give the user the possibility to restart a job that is in error!
+            params = {
+                'requestid': record.get('requestid'),
+                'task': 'run'
+            };
+            msg = esapp.Utils.getTranslation('restarting_request') + ' ' + record.get('requestid');
+        }
+
+        var myMask = new Ext.LoadMask({
+            msg    : msg,
+            target : grid,
+            border : false,
+            frame : false,
+            shadow : false,
+            shim : true
+        });
+
+        myMask.show();
 
         Ext.Ajax.request({
             method: 'GET',
@@ -30,9 +50,69 @@ Ext.define('esapp.view.datamanagement.requestsAdminController', {
             loadMask: esapp.Utils.getTranslation('loading'),    // 'Loading...',
             callback:function(callinfo,responseOK,response ){
                 var request = Ext.JSON.decode(response.responseText.trim());
-                request = request.request;
-                // ToDO: error handling when success is false
-                record.set('status', status);
+                // request = request.request;
+                myMask.hide();
+                if (request.success) {
+                    record.set('status', request.status);
+                }
+                else {
+                    if (origstatus == 'running'){
+                        // Error pausing the request job.
+                        if (request.status.toLowerCase() == 'error'){
+                            Ext.Msg.show({
+                                title: esapp.Utils.getTranslation('internet_proxy_error_title'),
+                                message: esapp.Utils.getTranslation('internet_proxy_error_msg'),
+                                buttons: Ext.Msg.OK,
+                                icon: Ext.Msg.WARNING,
+                                fn: function(btn) {
+                                    if (btn === 'ok') {
+                                        // todo: go to system tab?
+                                    }
+                                }
+                            });
+                        }
+                        else {
+                            Ext.Msg.show({
+                                title: esapp.Utils.getTranslation('error_pausing_request'),
+                                message: request.message,
+                                buttons: Ext.Msg.OK,
+                                icon: Ext.Msg.WARNING,
+                                fn: function(btn) {
+                                    if (btn === 'ok') {
+                                    }
+                                }
+                            });
+                        }
+                    }
+                    else {
+                        // Error restarting the request job.
+                        if (request.status.toLowerCase() == 'error'){
+                            Ext.Msg.show({
+                                title: esapp.Utils.getTranslation('internet_proxy_error_title'),
+                                message: esapp.Utils.getTranslation('internet_proxy_error_msg'),
+                                buttons: Ext.Msg.OK,
+                                icon: Ext.Msg.WARNING,
+                                fn: function(btn) {
+                                    if (btn === 'ok') {
+                                        // todo: go to system tab?
+                                    }
+                                }
+                            });
+                        }
+                        else {
+                            Ext.Msg.show({
+                                title: esapp.Utils.getTranslation('error_restarting_request'),
+                                message: request.message,
+                                buttons: Ext.Msg.OK,
+                                icon: Ext.Msg.WARNING,
+                                fn: function(btn) {
+                                    if (btn === 'ok') {
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
             },
             success: function ( result, request ) {},
             failure: function ( result, request) {}
@@ -40,10 +120,23 @@ Ext.define('esapp.view.datamanagement.requestsAdminController', {
     }
 
     ,deleteRequest: function(grid, rowIndex, row){
+        var me = this.getView();
         var record = grid.getStore().getAt(rowIndex);
         var params = {
                 'requestid': record.get('requestid')
             };
+        var msg = esapp.Utils.getTranslation('deleting_request') + ' ' + record.get('requestid');
+
+        var myMask = new Ext.LoadMask({
+            msg    : msg,
+            target : grid,
+            border : false,
+            frame : false,
+            shadow : false,
+            shim : true
+        });
+
+        myMask.show();
 
         Ext.Ajax.request({
             method: 'GET',
@@ -52,9 +145,26 @@ Ext.define('esapp.view.datamanagement.requestsAdminController', {
             loadMask: esapp.Utils.getTranslation('loading'),    // 'Loading...',
             callback:function(callinfo,responseOK,response ){
                 var request = Ext.JSON.decode(response.responseText.trim());
-                request = request.request;
-                // ToDO: error handling when success is false
-                grid.getStore().remove(record);
+                // request = request.request;
+                // console.info(me);
+                myMask.hide();
+                if (request.success) {
+                   me.dirtyStore = true;
+                   me.fireEvent('loadstore');
+                   // grid.getStore().remove(record);
+                }
+                else {
+                    Ext.Msg.show({
+                        title: esapp.Utils.getTranslation('error_deleting_request'),
+                        message: request.message,
+                        buttons: Ext.Msg.OK,
+                        icon: Ext.Msg.WARNING,
+                        fn: function(btn) {
+                            if (btn === 'ok') {
+                            }
+                        }
+                    });
+                }
             },
             success: function ( result, request ) {},
             failure: function ( result, request) {}

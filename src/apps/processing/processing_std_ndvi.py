@@ -519,7 +519,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
                                                descriptive_name='10d lineax2 Standard deviation',
                                                description='Standard deviation NDVI linearx2 for dekad',
                                                frequency_id='e1dekad',
-                                               date_format='YYYYMMDD',
+                                               date_format='MMDD',
                                                masked=False,
                                                timeseries_role='ndvi_linearx2',
                                                active_default=True)
@@ -527,8 +527,10 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     prod_ident_10dstd = functions.set_path_filename_no_date(prod, output_sprod, mapset, version, ext)
     subdir_10dstd = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
-    formatter_in = "(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})" + in_prod_ident_linearx2
-    formatter_out = "{subpath[0][5]}" + os.path.sep + subdir_10dstd + "{YYYY[0]}{MMDD[0]}" + prod_ident_10dstd
+    #formatter_in = "(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})" + in_prod_ident_linearx2
+    formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident_linearx2
+    formatter_out = ["{subpath[0][5]}"+os.path.sep+subdir_10dstd+"{MMDD[0]}"+prod_ident_10dstd]
+    #formatter_out = "{subpath[0][5]}" + os.path.sep + subdir_10dstd + "{YYYY[0]}{MMDD[0]}" + prod_ident_10dstd
 
     ancillary_sprod = "10davg-linearx2"
     ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, version, ext)
@@ -537,10 +539,13 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_filtered_stats, activate_10dstd_linearx2)
     @follows(vgt_ndvi_10davg_linearx2)
-    @transform(starting_files_linearx2, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    #@transform(starting_files_linearx2, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    @collate(starting_files_linearx2, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
     def vgt_ndvi_10dstddev(input_file, output_file):
 
-        [current_file, avg_file] = input_file
+        #[current_file, avg_file] = input_file
+        current_file = [i[0] for i in input_file]
+        avg_file = [i[1] for i in input_file][0]
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
@@ -1279,10 +1284,10 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     ancillary_sprod = "10dstd-linearx2"
     ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, version, ext)
     ancillary_subdir = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived', version, mapset)
-    ancillary_input = "{subpath[0][5]}" + os.path.sep + ancillary_subdir + "{YYYY[0]}{MMDD[0]}" + ancillary_sprod_ident
+    ancillary_input = "{subpath[0][5]}" + os.path.sep + ancillary_subdir +"{MMDD[0]}"+ ancillary_sprod_ident
 
     @active_if(group_filtered_anomalies, activate_10dsndvi_linearx2)
-    @follows(vgt_ndvi_10ddiff_linearx2, vgt_ndvi_10dstddev)
+    #@follows(vgt_ndvi_10ddiff_linearx2, vgt_ndvi_10dstddev)
     @transform(starting_files_10ddiff, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
     def vgt_ndvi_10dsndvi(input_file, output_file):
 
@@ -1316,7 +1321,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_monthly_prods, activate_monndvi)
     @collate(starting_files_linearx2_all, formatter(formatter_in), formatter_out)
-    @follows(vgt_ndvi_ratio_linearx2)
+    # @follows(vgt_ndvi_ratio_linearx2)
     def vgt_ndvi_monndvi(input_file, output_file):
 
         output_file = functions.list_to_element(output_file)
@@ -1468,7 +1473,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
                                              descriptive_name='Monthly Standard deviation NDVI',
                                              description='Monthly Standard deviation NDVI',
                                              frequency_id='e1month',
-                                             date_format='YYYYMMDD',
+                                             date_format='MMDD',
                                              masked=False,
                                              timeseries_role='',
                                              active_default=True)
@@ -1476,8 +1481,10 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     prod_ident_1mondev = functions.set_path_filename_no_date(prod, output_sprod,mapset, version, ext)
     subdir_1mondev = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, mapset)
 
-    formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident_monndvi
-    formatter_out="{subpath[0][5]}"+os.path.sep+subdir_1mondev+"{YYYY[0]}{MMDD[0]}"+prod_ident_1mondev
+    # formatter_in="(?P<YYYY>[0-9]{4})(?P<MMDD>[0-9]{4})"+in_prod_ident_monndvi
+    # formatter_out="{subpath[0][5]}"+os.path.sep+subdir_1mondev+"{YYYY[0]}{MMDD[0]}"+prod_ident_1mondev
+    formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})"+in_prod_ident_monndvi
+    formatter_out = "{subpath[0][5]}"+os.path.sep+subdir_1mondev+"{MMDD[0]}"+prod_ident_1mondev
 
     ancillary_sprod = "1monavg"
     ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, version, ext)
@@ -1486,10 +1493,13 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @active_if(group_monthly_stats, activate_1monstd)
     @follows(vgt_ndvi_1monavg)
-    @transform(starting_files_monndvi, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    #@transform(starting_files_monndvi, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    @collate(starting_files_monndvi, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
     def vgt_ndvi_1monstddev(input_file, output_file):
 
-        [current_file, avg_file] = input_file
+        #[current_file, avg_file] = input_file
+        current_file = [i[0] for i in input_file]
+        avg_file = [i[1] for i in input_file][0]
 
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
@@ -1774,10 +1784,10 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     ancillary_sprod = "1monstd"
     ancillary_sprod_ident = functions.set_path_filename_no_date(prod, ancillary_sprod, mapset, version, ext)
     ancillary_subdir      = functions.set_path_sub_directory(prod, ancillary_sprod, 'Derived',version, mapset)
-    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+"{YYYY[0]}{MMDD[0]}"+ancillary_sprod_ident
+    ancillary_input="{subpath[0][5]}"+os.path.sep+ancillary_subdir+ "{MMDD[0]}" +ancillary_sprod_ident
 
     @active_if(group_monthly_anomalies, activate_1monsndvi)
-    @follows(vgt_ndvi_1mondiff, vgt_ndvi_1monstddev)
+    #@follows(vgt_ndvi_1mondiff, vgt_ndvi_1monstddev)
     @transform(starting_files_mondiff, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
     def vgt_ndvi_1monsndvi(input_file, output_file):
 

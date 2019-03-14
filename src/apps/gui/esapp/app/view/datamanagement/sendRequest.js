@@ -9,10 +9,10 @@ Ext.define("esapp.view.datamanagement.sendRequest",{
 
     requires: [
         'esapp.view.datamanagement.sendRequestController',
-        'esapp.view.datamanagement.sendRequestModel',
+        'esapp.view.datamanagement.sendRequestModel'
 
-        'Ext.layout.container.Center',
-        'Ext.XTemplate'
+        // 'Ext.layout.container.Center',
+        // 'Ext.XTemplate'
     ],
 
     title: esapp.Utils.getTranslation('getrequestfile'),     // 'Send request',
@@ -21,13 +21,13 @@ Ext.define("esapp.view.datamanagement.sendRequest",{
         titleAlign: 'center'
     },
 
-    constrainHeader: true,
-    //constrain: true,
+    // constrainHeader: true,
+    // constrain: true,
     modal: true,
     closable: true,
     closeAction: 'destroy', // 'hide',
     resizable: true,
-    autoScroll:false,
+    autoScroll: true,
     maximizable: false,
     width:500,
     height: 350,
@@ -36,7 +36,7 @@ Ext.define("esapp.view.datamanagement.sendRequest",{
 
     border:true,
     frame:true,
-    layout: 'fit',
+    // layout: 'fit',
 
     params: {
        level: null,
@@ -44,7 +44,7 @@ Ext.define("esapp.view.datamanagement.sendRequest",{
     },
 
     listeners: {
-        beforerender: 'getRequest'
+        afterrender: 'getRequest'
     },
 
     initComponent: function () {
@@ -56,28 +56,29 @@ Ext.define("esapp.view.datamanagement.sendRequest",{
             text: esapp.Utils.getTranslation('cancel'),    // 'Cancel',
             scale: 'medium',
             handler: 'onCancelClick'
-        // },{
-        //     text: esapp.Utils.getTranslation('saverequestfile'),    //'Save Request file',
-        //     iconCls: 'fa fa-floppy-o fa-2x',
-        //     style: { color: 'lightblue' },
-        //     scale: 'medium',
-        //     disabled: false,
-        //     handler: 'onSaveClick'
         },{
+            text: esapp.Utils.getTranslation('saverequestfile'),    //'Save Request file',
+            iconCls: 'fa fa-floppy-o fa-2x',
+            style: { color: 'lightblue' },
+            scale: 'medium',
+            disabled: false,
+            handler: 'onSaveClick'
+        },{
+            reference: 'getmissingfiles-btn',
             text: esapp.Utils.getTranslation('getmissingfiles'),
             iconCls: 'fa fa-cloud-download fa-2x',
             style: { color: 'lightblue' },
             scale: 'medium',
-            disabled: false,
+            disabled: true,
             handler: 'createRequestJob'
         }];
 
         me.items = [{
-            xtype:'container',
-            id: 'requestcontent',
+            xtype:'box',
+            reference: 'requestcontent',
             layout: 'fit',
-            autoScroll:true,
-            html:''
+            autoScroll: true,
+            html:'<BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR>'
         }];
 
         me.callParent();

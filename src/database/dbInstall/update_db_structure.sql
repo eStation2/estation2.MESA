@@ -1097,7 +1097,10 @@ ALTER FUNCTION products.activate_deactivate_product_ingestion_pads_processing(ch
 
 
 
-CREATE OR REPLACE FUNCTION products.activate_deactivate_product(productcode character varying, version character varying, activate boolean DEFAULT false)
+CREATE OR REPLACE FUNCTION products.activate_deactivate_product(
+    productcode character varying,
+    version character varying,
+    activate boolean DEFAULT false)
   RETURNS boolean AS
 $BODY$
 DECLARE
@@ -1112,24 +1115,42 @@ BEGIN
         AND p.productcode = _productcode
         AND p.version = _version;
 
+
         UPDATE products.ingestion i
         SET activated = _activate,
             enabled = _activate
         WHERE i.productcode = _productcode
-        AND i.version = _version;
+        AND i.version = _version
+        AND i.mapsetcode IN (
+          SELECT tp.mapsetcode FROM products.thema_product tp
+          WHERE tp.thema_id IN (SELECT t.thema_id FROM products.thema t WHERE t.activated IS TRUE)
+          AND tp.productcode = _productcode
+          AND tp.version = _version);
+
 
         UPDATE products.process_product pp
         SET activated = _activate
         WHERE pp.productcode = _productcode
-        AND pp.version = _version;
+        AND pp.version = _version
+        AND pp.mapsetcode IN (
+          SELECT tp.mapsetcode FROM products.thema_product tp
+          WHERE tp.thema_id IN (SELECT t.thema_id FROM products.thema t WHERE t.activated IS TRUE)
+          AND tp.productcode = _productcode
+          AND tp.version = _version);
+
 
         UPDATE products.processing p
         SET activated = _activate,
             enabled = _activate
         WHERE (p.process_id) in (SELECT process_id
-			         FROM products.process_product pp
-			         WHERE pp.productcode = _productcode
-				   AND pp.version = _version);
+                                 FROM products.process_product pp
+                                 WHERE pp.productcode = _productcode
+                                   AND pp.version = _version
+                                   AND pp.mapsetcode IN (
+                                      SELECT tp.mapsetcode FROM products.thema_product tp
+                                      WHERE tp.thema_id IN (SELECT t.thema_id FROM products.thema t WHERE t.activated IS TRUE)
+                                      AND tp.productcode = _productcode
+                                      AND tp.version = _version));
 
         UPDATE products.product_acquisition_data_source pads
         SET activated = _activate
@@ -2425,6 +2446,10 @@ ALTER FUNCTION analysis.update_insert_graph_yaxes(character varying, character v
 
 -- DROP FUNCTION products.export_jrc_data(boolean);
 
+-- Function: products.export_jrc_data(boolean)
+
+-- DROP FUNCTION products.export_jrc_data(boolean);
+
 CREATE OR REPLACE FUNCTION products.export_jrc_data(full_copy boolean DEFAULT false)
   RETURNS SETOF text AS
 $BODY$
@@ -2779,7 +2804,7 @@ BEGIN
 		|| ', date_format := ' || COALESCE('''' || date_format || '''', '''undefined''')
 		|| ', start_date:=   ' || COALESCE(TRIM(to_char(start_date, '999999999999')), 'NULL')
 		|| ', end_date:= ' || COALESCE(TRIM(to_char(end_date, '999999999999')), 'NULL')
-		|| ', full_copy := ' || FALSE
+		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
 	FROM products.process_product pp
 	WHERE process_id IN (SELECT process_id FROM products.processing WHERE defined_by = 'JRC')
@@ -3059,6 +3084,7 @@ $BODY$
   ROWS 1000;
 ALTER FUNCTION products.export_jrc_data(boolean)
   OWNER TO estation;
+
 
 
 

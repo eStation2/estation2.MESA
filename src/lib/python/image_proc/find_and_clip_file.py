@@ -283,10 +283,17 @@ def is_larger(candidate_file, trg_mapset):
     requested_ymin = requested_ymax+requested_deltay*trg_mapset["pixel_size_y"]
 
     # Compare the two BBoxes
+    is_larger = False
+    if round(available_xmin, 8) <= round(requested_xmin, 8) \
+            and round(available_xmax, 8) >= round(requested_xmax, 8) \
+            and round(available_ymin, 8) <= round(requested_ymin, 8) \
+            and round(available_ymax, 8) >= round(requested_ymax, 8):
+        is_larger = True
 
-    is_larger = True
-    if available_xmin > requested_xmin or available_xmax < requested_xmax or available_ymin > requested_ymin or available_ymax < requested_ymax:
-        is_larger = False
+    # print(is_larger)
+    # is_larger = True
+    # if available_xmin >= requested_xmin or available_xmax <= requested_xmax or available_ymin >= requested_ymin or available_ymax <= requested_ymax:
+    #     is_larger = False
 
     return is_larger
 

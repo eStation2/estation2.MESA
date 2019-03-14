@@ -830,8 +830,17 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
             callback:function(records, options, success){
                 if (records.length>0){
                     var nodefault = true;
+                    var counter = 0;
+
                     for (var i = 0; i < records.length; i++) {
                         if (records[i].get('default_legend') == 'true' || records[i].get('default_legend')) {
+                            // If there are more then one legend defined as default, set default to false
+                            // to all default legends except the 1st encountered.
+                            counter += 1;
+                            if (counter >= 2){
+                                records[i].set('default_legend', false);
+                                records[i].set('defaulticon', 'x-grid3-radio-col');
+                            }
                             nodefault = false;
                             me.up().up().legend_id = records[i].get('legend_id');
                         }

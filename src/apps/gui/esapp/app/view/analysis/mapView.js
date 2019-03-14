@@ -65,6 +65,7 @@ Ext.define("esapp.view.analysis.mapView",{
         // logoData: null,
         productcode: '',
         productname: '',
+        productsensor: '',
         productdate: '',
         link_product_layer: true,
         showlegend: true,
@@ -1046,51 +1047,52 @@ Ext.define("esapp.view.analysis.mapView",{
                 //me.setTitle('<div id="mapview_title_templatename_' + me.id + '" class="map-templatename">' + me.templatename + '</div>');
 
                 if (esapp.Utils.objectExists(me.productcode) && me.productcode != ''){
+                    mapLegendObj.legendPosition = me.legendObjPosition;
+                    mapLegendObj.legendLayout = me.legendlayout;
+                    mapLegendObj.showlegend = me.showlegend;
+
+                    Ext.data.StoreManager.lookup('DataSetsStore').each(function(rec){
+                        if (rec.get('productcode')== me.productcode && rec.get('version')== me.productversion ){
+                            me.productsensor = rec.get('prod_descriptive_name');
+                            rec.get('productmapsets').forEach(function(mapset){
+                                if (mapset.mapsetcode==me.mapsetcode){
+                                    mapset.mapsetdatasets.forEach(function(mapsetdataset){
+                                        if (mapsetdataset.subproductcode==me.subproductcode){
+                                            me.productname = mapsetdataset.descriptive_name;
+                                            me.date_format = mapsetdataset.date_format;
+                                            me.frequency_id = mapsetdataset.frequency_id;
+                                        }
+                                    },this);
+                                }
+                            },this);
+                        }
+                    },this);
+
+                    Ext.data.StoreManager.lookup('ColorSchemesStore').each(function(rec){
+                        if (rec.get('legend_id')==me.legendid){
+                            //me.colorschemeHTML = rec.get('colorschemeHTML');
+                            me.legendHTML = rec.get('legendHTML');
+                            me.legendHTMLVertical = rec.get('legendHTMLVertical');
+                        }
+                    },this);
+
                     var taskAddProductLayer = new Ext.util.DelayedTask(function() {
-
-                        mapLegendObj.legendPosition = me.legendObjPosition;
-                        mapLegendObj.legendLayout = me.legendlayout;
-                        mapLegendObj.showlegend = me.showlegend;
-
-                        Ext.data.StoreManager.lookup('DataSetsStore').each(function(rec){
-                            if (rec.get('productcode')== me.productcode && rec.get('version')== me.productversion ){
-                                rec.get('productmapsets').forEach(function(mapset){
-                                    if (mapset.mapsetcode==me.mapsetcode){
-                                        mapset.mapsetdatasets.forEach(function(mapsetdataset){
-                                            if (mapsetdataset.subproductcode==me.subproductcode){
-                                                me.productname = mapsetdataset.descriptive_name;
-                                                me.date_format = mapsetdataset.date_format;
-                                                me.frequency_id = mapsetdataset.frequency_id;
-                                            }
-                                        },this);
-                                    }
-                                },this);
-                            }
-                        },this);
-
-                        Ext.data.StoreManager.lookup('ColorSchemesStore').each(function(rec){
-                            if (rec.get('legend_id')==me.legendid){
-                                //me.colorschemeHTML = rec.get('colorschemeHTML');
-                                me.legendHTML = rec.get('legendHTML');
-                                me.legendHTMLVertical = rec.get('legendHTMLVertical');
-                            }
-                        },this);
-
-                        me.getController().addProductLayer(me.productcode,
-                                                           me.productversion,
-                                                           me.mapsetcode,
-                                                           me.subproductcode,
-                                                           me.productdate,
-                                                           me.legendid,
-                                                           me.legendHTML,
-                                                           me.legendHTMLVertical,
-                                                           me.productname,
-                                                           me.date_format,
-                                                           me.frequency_id
+                        me.getController().addProductLayer(
+                            me.productcode,
+                            me.productversion,
+                            me.mapsetcode,
+                            me.subproductcode,
+                            me.productdate,
+                            me.legendid,
+                            me.legendHTML,
+                            me.legendHTMLVertical,
+                            me.productname,
+                            me.date_format,
+                            me.frequency_id,
+                            me.productsensor
                         );
-
                     });
-                    taskAddProductLayer.delay(500);
+                    taskAddProductLayer.delay(1000);
                 }
 
                 if (me.vectorLayers != null && me.vectorLayers.trim() != '') {

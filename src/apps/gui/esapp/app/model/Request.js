@@ -5,6 +5,7 @@ Ext.define('esapp.model.Request', {
     fields: [
         {name: 'requestid', mapping: 'requestid'},
         {name: 'level', mapping: 'level'},
+        {name: 'prod_descriptive_name', mapping: 'prod_descriptive_name'},
         {name: 'productcode', mapping: 'productcode'},
         {name: 'version', mapping: 'version'},
         {name: 'subproductcode', mapping: 'subproductcode'},

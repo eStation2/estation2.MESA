@@ -229,7 +229,7 @@ Ext.define('esapp.view.main.Main', {
                             // Ext.getCmp('headerlogos').collapse();
                         }
                     }
-                    else if (esapp.globals['typeinstallation'] != 'windows'){
+                    else if (esapp.globals['typeinstallation'].toLowerCase() != 'windows' && esapp.globals['typeinstallation'].toLowerCase() != 'online'){
                         var headerlogos = Ext.ComponentQuery.query('container[id=headerlogos]')[0];
                         headerlogos.setHidden(true);
                     }
@@ -343,7 +343,7 @@ Ext.define('esapp.view.main.Main', {
                 }
             }
         }
-        else if (esapp.globals['typeinstallation'] == 'windows'){
+        else if (esapp.globals['typeinstallation'].toLowerCase() == 'windows' || esapp.globals['typeinstallation'].toLowerCase() == 'online'){
             me.loginview = 'loginview';
 
             me.northheader = {
@@ -452,7 +452,17 @@ Ext.define('esapp.view.main.Main', {
             }
         });
 
-        if (esapp.globals['typeinstallation'] == 'windows'){
+        if (esapp.globals['typeinstallation'].toLowerCase() == 'online'){
+            me.maintabpanel.add(me.analysis);
+            // me.maintabpanel.add(me.system);
+            me.maintabpanel.add(me.help);
+        }
+        else if (esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online'){
+            me.maintabpanel.add(me.analysis);
+            // me.maintabpanel.add(me.system);
+            me.maintabpanel.add(me.help);
+        }
+        else if (esapp.globals['typeinstallation'] != 'jrc_online'){
             // Pierluigi
             me.maintabpanel.add(me.dashboard);
             me.maintabpanel.add(me.acquisition);
@@ -463,21 +473,12 @@ Ext.define('esapp.view.main.Main', {
             me.maintabpanel.add(me.system);
             me.maintabpanel.add(me.help);
             // me.maintabpanel.setActiveTab('analysistab');
+            // me.maintabpanel.setActiveTab('dashboardtab');
         }
-        else if (esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online'){
+        else {
             me.maintabpanel.add(me.analysis);
             // me.maintabpanel.add(me.system);
             me.maintabpanel.add(me.help);
-        }
-        else {
-            me.maintabpanel.add(me.dashboard);
-            me.maintabpanel.add(me.acquisition);
-            me.maintabpanel.add(me.processing);
-            me.maintabpanel.add(me.datamanagement);
-            me.maintabpanel.add(me.analysis);
-            me.maintabpanel.add(me.system);
-            me.maintabpanel.add(me.help);
-            // me.maintabpanel.setActiveTab('dashboardtab');
         }
 
         me.items = [
@@ -489,6 +490,9 @@ Ext.define('esapp.view.main.Main', {
 
         if (esapp.globals['typeinstallation'] == 'windows'){
             me.maintabpanel.setActiveTab('dashboardtab');
+        }
+        else if (esapp.globals['typeinstallation'].toLowerCase() == 'online') {
+            me.maintabpanel.setActiveTab('analysistab');
         }
         else if (esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online'){
             me.maintabpanel.setActiveTab('analysistab');

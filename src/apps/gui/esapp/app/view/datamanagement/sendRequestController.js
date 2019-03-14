@@ -2,7 +2,7 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.datamanagement-sendrequest',
 
-    getRequest: function(win) {
+    getRequest: function() {
         var me = this.getView();
 
         //var params = Ext.JSON.encode(win.params);
@@ -34,11 +34,27 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
             };
         }
 
+        var myMask = Ext.create('Ext.LoadMask', {
+            msg    : esapp.Utils.getTranslation('loading'),
+            target : me.lookupReference('requestcontent'),
+            alwaysOnTop: true,
+            maxHeight: 200,
+            border : false,
+            frame : false
+            // constrain: true,
+            // autoRender: true,
+            // autoShow: true
+            // shadow : false
+        });
+
+        // me.alignTo(Ext.getCmp('datamanagementmain'), 'c');
+        myMask.show();
+
         Ext.Ajax.request({
             method: 'GET',
             url:'datamanagement/getrequest',
             params: params,
-            loadMask: esapp.Utils.getTranslation('loading'),    // 'Loading...',
+            // loadMask: esapp.Utils.getTranslation('loading'),    // 'Loading...',
             callback:function(callinfo,responseOK,response ){
 
             },
@@ -60,9 +76,14 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
                 }
                 requestHTML += '</tbody></table>';
 
-                Ext.getCmp('requestcontent').setHtml(requestHTML);
+                me.lookupReference('requestcontent').setHtml(requestHTML);
+
+                me.lookupReference('getmissingfiles-btn').enable();
+                myMask.hide();
             },
-            failure: function ( result, request) {}
+            failure: function ( result, request) {
+                myMask.hide();
+            }
         });
     } // eo getFile
 
@@ -100,27 +121,50 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
             };
         }
 
+        var myMask = new Ext.LoadMask({
+            msg    : esapp.Utils.getTranslation('creating_requestjob'),
+            target : me,    // me.lookupReference('requestcontent'),
+            alwaysOnTop: true,
+            maxHeight: 200,
+            border : false,
+            frame : false
+            // constrain: true
+            // shadow : false
+        });
+
+        myMask.show();
+        me.lookupReference('getmissingfiles-btn').disable();
+
         Ext.Ajax.request({
             method: 'GET',
             url:'datamanagement/createrequestjob',
             params: params,
-            loadMask: esapp.Utils.getTranslation('loading'),    // 'Loading...',
+            // loadMask: esapp.Utils.getTranslation('loading'),    // 'Loading...',
             callback:function(callinfo,responseOK,response ){
-                // var request = Ext.JSON.decode(response.responseText.trim());
-                // request = request.request;
-
-            },
-            success: function ( result, request ) {
-                // Add request job info to requests admin tool or
-                // show and refresh requests admin tool
-                var requestsbtn = Ext.getCmp('datamanagement-requests-btn');
-                requestsbtn.requestsAdminPanel.setDirtyStore(true);
-                requestsbtn.requestsAdminPanel.show();
-
-                thiscontroller.onCancelClick();
-            },
-            failure: function ( result, request) {
-
+                var request = Ext.JSON.decode(response.responseText.trim());
+                if (request.success){
+                    // Job created and running. Show and refresh requests admin tool
+                    var requestsbtn = Ext.getCmp('datamanagement-requests-btn');
+                    requestsbtn.requestsAdminPanel.setDirtyStore(true);
+                    requestsbtn.requestsAdminPanel.show();
+                    myMask.hide();
+                    thiscontroller.onCancelClick();
+                }
+                else{
+                    myMask.hide();
+                    me.lookupReference('getmissingfiles-btn').enable();
+                    Ext.Msg.show({
+                        title: esapp.Utils.getTranslation('internet_proxy_error_title'),
+                        message: esapp.Utils.getTranslation('internet_proxy_error_msg'),
+                        buttons: Ext.Msg.OK,
+                        icon: Ext.Msg.WARNING,
+                        fn: function(btn) {
+                            if (btn === 'ok') {
+                                // todo: go to system tab?
+                            }
+                        }
+                    });
+                }
             }
         });
 
@@ -187,7 +231,8 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
         //});
     }
     ,onCancelClick: function () {
-        Ext.destroy(this.getView());
+        this.getView().close();
+        // Ext.destroy(this.getView());
     }
 });
 

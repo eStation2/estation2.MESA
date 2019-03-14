@@ -3,7 +3,8 @@ Ext.define('esapp.view.acquisition.product.selectProductController', {
     alias: 'controller.acquisition-product-selectproduct',
 
     loadInactiveProductsGrid: function(grid){
-        grid.getStore().load();
+        var me = this.getView();
+        me.down('grid').getStore().load();
     },
 
     editProduct: function(grid, rowIndex, colIndex){

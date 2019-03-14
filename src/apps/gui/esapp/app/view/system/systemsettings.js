@@ -78,7 +78,11 @@ Ext.define("esapp.view.system.systemsettings",{
         me.form_fieldlabel_thema                       = esapp.Utils.getTranslation('thema');   // 'Thema';
         me.form_fieldlabel_loglevel                    = esapp.Utils.getTranslation('loglevel');   // 'Log level';
         me.fieldset_title_ipaddresses                  = '<b>'+esapp.Utils.getTranslation('ipaddresses')+'</b>';  // '<b>IP addresses</b>';
-
+        me.fieldset_title_proxy_settings               = '<b>'+esapp.Utils.getTranslation('proxy_settings')+'</b>';   // 'Internet proxy settings';
+        me.form_fieldlabel_proxy_host                  = esapp.Utils.getTranslation('proxy_host');   // 'Proxy host';
+        me.form_fieldlabel_proxy_port                  = esapp.Utils.getTranslation('proxy_port');   // 'Proxy port';
+        me.form_fieldlabel_proxy_user                  = esapp.Utils.getTranslation('proxy_user');   // 'Proxy user';
+        me.form_fieldlabel_proxy_userpwd               = esapp.Utils.getTranslation('proxy_userpwd');   // 'Proxy user password';
 
         var hiddenForWindowsVersion = false;
         if (esapp.globals['typeinstallation'] === 'windows'){
@@ -336,6 +340,8 @@ Ext.define("esapp.view.system.systemsettings",{
                                 success: function(record, operation) {
                                     me.loadRecord(systemsettingsrecord);
                                     me.updateRecord();
+                                    Ext.getCmp('datamanagementmain').setDirtyStore(true);
+                                    Ext.getCmp('acquisitionmain').setDirtyStore(true);
                                 }
                             });
                         },
@@ -494,7 +500,9 @@ Ext.define("esapp.view.system.systemsettings",{
                             //scale: 'medium',
                             scope:me,
                             handler: function(){
-                                Ext.Msg.alert('Active version change disabled', 'The active version change has been disabled<BR>because of tecnical issues.');
+                                Ext.Msg.alert('Active version change disabled',
+                                    'The active version change has been disabled<BR>' +
+                                    'In the Administration Manual it is explained how to change the version manually.');
 
                                 // var PCVersionAdminWin = new esapp.view.system.PCVersionAdmin({
                                 //     params: {
@@ -569,6 +577,52 @@ Ext.define("esapp.view.system.systemsettings",{
                 //        labelWidth: 100,
                 //        layout: 'hbox'
                 //    }
+                }]
+            },{
+                xtype: 'fieldset',
+                title: me.fieldset_title_proxy_settings,
+                collapsible:false,
+                defaults: {
+                    width: 350,
+                    labelWidth: 120
+                },
+                items:[{
+                   id: 'proxyhost',
+                   name: 'proxyhost',
+                   bind: '{system_setting.proxy_host}',
+                   xtype: 'textfield',
+                   fieldLabel: me.form_fieldlabel_proxy_host,
+                   style:'font-weight: bold;',
+                   allowBlank: true,
+                   disabled: false
+                },{
+                   id: 'proxyport',
+                   name: 'proxyport',
+                   bind: '{system_setting.proxy_port}',
+                   xtype: 'numberfield',
+                   fieldLabel: me.form_fieldlabel_proxy_port,
+                   style:'font-weight: bold;',
+                   width: 250,
+                   allowBlank: true,
+                   disabled: false
+                },{
+                   id: 'proxyuser',
+                   name: 'proxyuser',
+                   bind: '{system_setting.proxy_user}',
+                   xtype: 'textfield',
+                   fieldLabel: me.form_fieldlabel_proxy_user,
+                   style:'font-weight: bold;',
+                   allowBlank: true,
+                   disabled: false
+                },{
+                   id: 'proxyuserpwd',
+                   name: 'proxyuserpwd',
+                   bind: '{system_setting.proxy_userpwd}',
+                   xtype: 'textfield',
+                   fieldLabel: me.form_fieldlabel_proxy_userpwd,
+                   style:'font-weight: bold;',
+                   allowBlank: true,
+                   disabled: false
                 }]
             }]
         },{
