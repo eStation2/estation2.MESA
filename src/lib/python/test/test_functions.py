@@ -54,3 +54,4 @@ class TestFunctions(TestCase):
     def test_get_status_All_Services(self):
         services_status = functions.getStatusAllServices()
         print services_status
+
