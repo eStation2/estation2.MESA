@@ -2718,6 +2718,14 @@ def write_graph_xml_wd_gee(output_dir, input_file, band_name, output_file):
         outFile.write('</graph>\n')
 
 
+def day_length(day, latitude):
+
+    axis=23.439*N.pi
+    dl=axis
+    return dl
+
+
+
 ######################################################################################
 #                            PROCESSING CHAINS
 ######################################################################################
@@ -2728,21 +2736,35 @@ class ProcLists:
         self.list_subprods = []
         self.list_subprod_groups = []
 
-    def proc_add_subprod(self, sprod, group,
-                         final=False,
+    def proc_add_subprod(self,
+                         sprod,
+                         group,
                          descriptive_name='',
                          description = '',
                          frequency_id = '',
                          date_format = '',
+                         scale_factor = None,
+                         scale_offset = None,
+                         nodata = None,
+                         unit = None,
+                         data_type_id=None,
                          masked = '',
                          timeseries_role = '10d',
+                         final=False,
                          active_default=True):
 
-        self.list_subprods.append(ProcSubprod(sprod, group, final,
+        self.list_subprods.append(ProcSubprod(sprod,
+                                              group,
+                                              final,
                                               descriptive_name=descriptive_name,
                                               description = description,
                                               frequency_id = frequency_id,
                                               date_format = date_format,
+                                              scale_factor=scale_factor,
+                                              scale_offset=scale_offset,
+                                              nodata=nodata,
+                                              unit=unit,
+                                              data_type_id=data_type_id,
                                               masked = masked,
                                               timeseries_role = timeseries_role,
                                               active_default=True))
@@ -2752,14 +2774,35 @@ class ProcLists:
         self.list_subprod_groups.append(ProcSubprodGroup(sprod_group, active_default=True))
         return sprod_group
 
-
+    # take the list of sprods and upsert into db -> Done already in querydb.py
+    # def proc_upsert_subproducts_db(self, product, input_sprod, version, mapset):
+    #
+    #     # Get the product_info from the input subproduct
+    #
+    #     # Assign all outputs from the proc_list
+    #
+    #     # Assign from input_product (if undefined)
+    #
+    #     # Assign 'hard-coded' arguments
+    #
+    #     # Assign from the 'environment' (namely 'defined_by'
+    #
+    #     return False
+    #
 class ProcSubprod:
-    def __init__(self, sprod, group,
+    def __init__(self,
+                 sprod,
+                 group,
                  final=False,
                  descriptive_name='',
                  description = '',
                  frequency_id = '',
                  date_format = '',
+                 scale_factor=None,
+                 scale_offset=None,
+                 nodata=None,
+                 unit=None,
+                 data_type_id=None,
                  masked = '',
                  timeseries_role = '',
                  active_default=True,
@@ -2771,12 +2814,35 @@ class ProcSubprod:
         self.description = description
         self.frequency_id = frequency_id
         self.date_format = date_format
+        self.scale_factor = scale_factor
+        self.scale_offset = scale_offset
+        self.nodata = nodata
+        self.unit = unit
+        self.data_type_id = data_type_id
         self.masked = masked
         self.timeseries_role = timeseries_role
         self.final = final
         self.active_default=active_default
-        self.active_user = True
+        self.active_user = False                            # In the product table, it applies only to Native prods
         self.active_depend = active_depend
+
+    def print_out(self):
+        print('Subproduct  : {}'.format(self.sprod))
+        print('Group       : {}'.format(self.group))
+        print('Descr. Name : {}'.format(self.descriptive_name))
+        print('Description : {}'.format(self.description))
+        print('Frequency   : {}'.format(self.frequency_id))
+        print('Date Format : {}'.format(self.date_format))
+        print('Scale Factor: {}'.format(self.scale_factor))
+        print('No Data     : {}'.format(self.nodata))
+        print('Unit        : {}'.format(self.unit))
+        print('Data Type   : {}'.format(self.data_type_id))
+        print('Masked      : {}'.format(self.masked))
+        print('TS role     : {}'.format(self.timeseries_role))
+        print('Final       : {}'.format(self.final))
+        # print('active_default: {}'.format(self.active_default))
+        print('Active_user : {}'.format(self.active_user))
+        # print('active_depend: {}'.format(self.active_depend))
 
 
 class ProcSubprodGroup:
