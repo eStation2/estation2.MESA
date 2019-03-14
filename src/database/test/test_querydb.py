@@ -11,7 +11,6 @@ logger = log.my_logger(__name__)
 from database import querydb
 from lib.python import functions
 
-
 class TestQuerydb(TestCase):
 
     def test_update_yaxe(self):
@@ -47,14 +46,15 @@ class TestQuerydb(TestCase):
         print result
         self.assertEqual(1, 1)
 
-    def Test_get_chart_drawproperties(self):
-        charttype = 'default'
-        chart_drawproperties = querydb.get_chart_drawproperties()
-        print chart_drawproperties
+    # Commented: not working on 14.3.19 (MC)
+    # def test_get_chart_drawproperties(self):
+    #     charttype = 'default'
+    #     chart_drawproperties = querydb.__get_chart_drawproperties()
+    #     print chart_drawproperties
+    #
+    #     self.assertEqual(True, chart_drawproperties)
 
-        self.assertEqual(True, chart_drawproperties)
-
-    def Test_get_spirits(self):
+    def test_get_spirits(self):
 
         spirits = querydb.get_spirits()
         if spirits.__len__() > 0:
@@ -64,14 +64,14 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_set_thema(self):
+    def test_set_thema(self):
         themaid = 'AGRYHMET'
         themaset = querydb.set_thema(themaid)
         print themaset
 
         self.assertEqual(True, themaset)
 
-    def Test_get_i18n(self):
+    def test_get_i18n(self):
 
         i18n = querydb.get_i18n(lang='fra')
         len = i18n.__len__()
@@ -81,7 +81,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_languages(self):
+    def test_get_languages(self):
 
         languages = querydb.get_languages()
         logger.info("Languages active are: %s", languages)
@@ -90,7 +90,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_timeseries_yaxes(self):
+    def test_get_timeseries_yaxes(self):
         products = [{"productcode":"fewsnet-rfe", "version":"2.0", "subproductcode":"10d", "mapsetcode":"FEWSNET-Africa-8km"},
                     {"productcode":"fewsnet-rfe", "version":"2.0", "subproductcode":"10davg", "mapsetcode":"FEWSNET-Africa-8km"},
                     {"productcode":"fewsnet-rfe", "version":"2.0", "subproductcode":"10dmax", "mapsetcode":"FEWSNET-Africa-8km"},
@@ -105,7 +105,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_product_timeseries_drawproperties(self):
+    def test_get_product_timeseries_drawproperties(self):
 
         product = {"productcode":"fewsnet-rfe", "version":"2.0", "subproductcode":"10d"}
         timeseries_drawproperties = querydb.get_product_timeseries_drawproperties(product)
@@ -115,7 +115,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_update_product_info(self):
+    def test_update_product_info(self):
         productinfo = {'productcode': 'chirp',
                        'version': 'undefined',
                        'orig_productcode': 'chirpchanged',
@@ -125,21 +125,21 @@ class TestQuerydb(TestCase):
 
         print update_product
 
-    def Test_get_eumetcastsources(self):
+    def test_get_eumetcastsources(self):
         eumetcastsources = querydb.get_eumetcastsources()
 
         if eumetcastsources.__len__() > 0:
             for row in eumetcastsources:
                 row_dict = functions.row2dict(row)
 
-    def Test_get_internetsources(self):
+    def test_get_internetsources(self):
         internetsources = querydb.get_internetsources()
 
         if internetsources.__len__() > 0:
             for row in internetsources:
                 row_dict = functions.row2dict(row)
 
-    def Test_get_timeseries_subproducts(self):
+    def test_get_timeseries_subproducts(self):
         timeseries_subproducts = querydb.get_timeseries_subproducts(productcode='fewsnet-rfe',
                                                                     subproductcode='10d',
                                                                     version='2.0')
@@ -149,7 +149,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_timeseries_products(self):
+    def test_get_timeseries_products(self):
         timeseries_products = querydb.get_timeseries_products()
         logger.info("Time series products are: %s", timeseries_products)
         for timeseries_product in timeseries_products:
@@ -157,7 +157,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_active_internet_sources(self):
+    def test_get_active_internet_sources(self):
         internet_sources = querydb.get_active_internet_sources()
         logger.info("Internet sources are: %s", internet_sources)
         for internet_source in internet_sources:
@@ -165,7 +165,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_eumetcast_sources(self):
+    def test_get_eumetcast_sources(self):
 
         eumetcast_sources = querydb.get_eumetcast_sources()
         logger.info("Eumetcast sources are: %s", eumetcast_sources)
@@ -174,7 +174,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_datasource_descr(self):
+    def test_get_datasource_descr(self):
 
         # datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
         #                                                 source_id='EO:EUM:DAT:SPOT:S10NDVI')
@@ -196,7 +196,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_product_sources(self):
+    def test_get_product_sources(self):
 
         product_sources = querydb.get_product_sources(productcode='fewsnet-rfe',
                                                       subproductcode='fewsnet-rfe_native',
@@ -207,7 +207,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_product_sources2(self):
+    def test_get_product_sources2(self):
 
         product_sources = querydb.get_product_sources(productcode='vgt-ndvi',
                                                       subproductcode='vgt-ndvi_native',
@@ -218,7 +218,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_ingestion_subproduct(self):
+    def test_get_ingestion_subproduct(self):
 
         ingestion_subproduct = querydb.get_ingestion_subproduct(productcode='vgt_ndvi',
                                                                 version='undefined')
@@ -228,7 +228,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_ingestion_product(self):
+    def test_get_ingestion_product(self):
 
         ingestion_product = querydb.get_ingestion_product(allrecs=True)
         logger.info("Active ingestions of product are: %s", ingestion_product)
@@ -237,7 +237,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_mapset(self):
+    def test_get_mapset(self):
 
         mapset = querydb.get_mapset(mapsetcode='SPOTV-Africa-1km')
         logger.info("Mapset: %s", mapset.pixel_shift_lat)
@@ -245,28 +245,28 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_internet(self):
+    def test_get_internet(self):
 
         internet = querydb.get_internet(internet_id='USGS:EARLWRN:FEWSNET')
         logger.info("Internet source info: %s", internet)
 
         self.assertEqual(1, 1)
 
-    def Test_get_eumetcast(self):
+    def test_get_eumetcast(self):
 
         eumetcast = querydb.get_eumetcast(source_id='EO:EUM:DAT:SPOT1:S10NDVI')
         logger.info("Eumetcast source info: %s", eumetcast)
 
         self.assertEqual(1, 1)
 
-    def Test_get_product_native(self):
+    def test_get_product_native(self):
 
         product = querydb.get_product_native(productcode='fewsnet_rfe')
         logger.info("Native product info: %s", product)
 
         self.assertEqual(1, 1)
 
-    def Test_get_product_in_info(self):
+    def test_get_product_in_info(self):
 
         product_in = querydb.get_product_in_info(productcode='fewsnet-rfe',
                                                  subproductcode='10d',
@@ -280,7 +280,7 @@ class TestQuerydb(TestCase):
             result = 0
         self.assertEqual(1, result)
 
-    def Test_get_product_in_info1(self):
+    def test_get_product_in_info1(self):
 
         product_in = querydb.get_product_in_info(productcode='vgt-ndvi',
                                                  subproductcode='ndv',
@@ -293,7 +293,7 @@ class TestQuerydb(TestCase):
             result = 0
         self.assertEqual(1, result)
 
-    def Test_get_product_in_info2(self):
+    def test_get_product_in_info2(self):
 
         product_in = querydb.get_product_in_info(productcode='modis-firms',
                                                  subproductcode='1day',
@@ -303,7 +303,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_product_in_info3(self):
+    def test_get_product_in_info3(self):
 
         product_in = querydb.get_product_in_info(productcode='modis-chla',
                                                  subproductcode='chla-day',
@@ -313,7 +313,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_product_in_info4(self):
+    def test_get_product_in_info4(self):
 
         product_in = querydb.get_product_in_info(productcode='lsasaf-et',
                                                  subproductcode='et',
@@ -324,7 +324,7 @@ class TestQuerydb(TestCase):
         self.assertEqual(1, 1)
 
 
-    def Test_get_product_out_info(self):
+    def test_get_product_out_info(self):
 
         product_out = querydb.get_product_out_info(productcode='fewsnet-rfe',
                                                    subproductcode='10d',
@@ -336,7 +336,7 @@ class TestQuerydb(TestCase):
         self.assertEqual(1, 1)
         self.assertEqual(1, 1)
 
-    def Test_get_products_acquisition(self):
+    def test_get_products_acquisition(self):
 
         product = querydb.get_products_acquisition(activated=True)
         logger.info("Active products: %s", product)
@@ -348,7 +348,7 @@ class TestQuerydb(TestCase):
         for row in product:
             print row
 
-    def Test_get_products(self):
+    def test_get_products(self):
 
         product = querydb.get_products(activated=True)
         logger.info("Active products: %s", product)
@@ -367,7 +367,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_subproduct(self):
+    def test_get_subproduct(self):
 
         subproduct = querydb.get_subproduct(productcode='vgt-ndvi',
                                             subproductcode='ndv',
@@ -376,7 +376,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_dataacquisitions(self):
+    def test_get_dataacquisitions(self):
 
         dataacquisitions = querydb.get_dataacquisitions()
         logger.info("All Data Acquisitions: %s", dataacquisitions)
@@ -385,7 +385,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_ingestions(self):
+    def test_get_ingestions(self):
 
         ingestions = querydb.get_ingestions()
         logger.info("All Ingestions: %s", ingestions)
@@ -394,7 +394,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_legend_totals(self):
+    def test_get_legend_totals(self):
 
         legend_info = querydb.get_legend_totals(legendid=6)
         logger.info("Legend info: %s", legend_info)
@@ -407,7 +407,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_legend_info(self):
+    def test_get_legend_info(self):
 
         legend_info = querydb.get_legend_info(legendid=6)
         logger.info("Legend info: %s", legend_info)
@@ -417,7 +417,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_legend_steps(self):
+    def test_get_legend_steps(self):
 
         legend_steps = querydb.get_legend_steps(legendid=6)
         logger.info("Legend info: %s", legend_steps)
@@ -427,7 +427,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_product_legends(self):
+    def test_get_product_legends(self):
 
         product_legends = querydb.get_product_legends(productcode='vgt-ndvi', subproductcode='ndv', version='spot-v1')
         logger.info("Product Legends: %s", product_legends)
@@ -436,7 +436,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_processing_chains(self):
+    def test_get_processing_chains(self):
 
         processing_chains = querydb.get_processing_chains()
         logger.info("Processing chains: %s", processing_chains)
@@ -446,7 +446,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_processingchains_input_products(self):
+    def test_get_processingchains_input_products(self):
         import json
         processingchain_products = querydb.get_processingchains_input_products()
         if processingchain_products.__len__() > 0:
@@ -492,7 +492,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_processingchain_output_products(self):
+    def test_get_processingchain_output_products(self):
         process_id = 1
         processingchain_output_products = querydb.get_processingchain_output_products(process_id)
         logger.info("Processing chains: %s", processingchain_output_products)
@@ -504,7 +504,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_active_processing_chains(self):
+    def test_get_active_processing_chains(self):
 
         processing_chains = querydb.get_active_processing_chains()
         logger.info("Active processing chains: %s", processing_chains)
@@ -515,7 +515,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_processing_chain_inputs(self):
+    def test_get_processing_chain_inputs(self):
 
         process_id = 4
         input_products = querydb.get_processing_chain_products(process_id,type='input')
@@ -529,7 +529,7 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_processing_chain_outputs(self):
+    def test_get_processing_chain_outputs(self):
 
         process_id = 4
         output_products = querydb.get_processing_chain_products(process_id, type='output')
@@ -542,28 +542,43 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
-    def Test_get_frequency(self):
+    def test_get_frequency(self):
 
         frequency_id = 'e1dekad'
         output_products = querydb.get_frequency(frequency_id)
         logger.info("Frequency  id:%s", frequency_id)
         self.assertEqual(1, 1)
 
-    # def Test_update_processing_chain_products(self):
-    #
-    #     process_id = 4
-    #     productcode='vgt-ndvi'
-    #     version='sv2-pv2.1'
-    #     subproductcode='10dmax'
-    #     mapsetcode='SPOTV-Africa-1km'
-    #     activated=True
-    #     final=False
-    #     output_products = querydb.update_processing_chain_products(process_id,
-    #                                                                productcode,
-    #                                                                version,
-    #                                                                subproductcode,
-    #                                                                mapsetcode,
-    #                                                                activated,
-    #                                                                final)
+    def test_update_processing_chain_products(self):
 
-        # self.assertEqual(1, 1)
+        # Input product definition
+        productcode='chirps-dekad'
+        version='2.0'
+        input_sprodcode='10d'
+
+        # Create 'manually' a proc_list (normally done by pipeline)
+        proc_lists = functions.ProcLists()
+
+        output_sprod_group = proc_lists.proc_add_subprod_group("10dstats")
+        output_sprod = proc_lists.proc_add_subprod("10davg-New", "10dstats", final=False,
+                                                   descriptive_name='10d Average',
+                                                   description='Average rainfall for dekad',
+                                                   frequency_id='e1dekad',
+                                                   date_format='MMDD',
+                                                   masked=False,
+                                                   timeseries_role='10d',
+                                                   active_default=True)
+
+        for my_sprod in proc_lists.list_subprods:
+            my_sprod.print_out()
+
+        my_sprod = proc_lists.list_subprods[0]
+        # Get input product info
+        input_product_info=querydb.get_product_out_info(allrecs=False,
+                                                        productcode=productcode,
+                                                        subproductcode=input_sprodcode,
+                                                        version=version)
+
+        output_products = querydb.update_processing_chain_products(productcode, version, my_sprod, input_product_info)
+
+        self.assertEqual(1, 1)
