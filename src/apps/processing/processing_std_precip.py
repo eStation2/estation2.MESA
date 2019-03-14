@@ -542,7 +542,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
 def processing_std_precip(res_queue, pipeline_run_level=0,pipeline_printout_level=0, upsert_db = False,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
-                          starting_dates=None, update_stats=False, nrt_products=True, write2file=None, logfile=None, touch_only=False):
+                          starting_dates=None, update_stats=False, nrt_products=True, write2file=None, logfile=None,
+                          touch_only=False):
 
     spec_logger = log.my_logger(logfile)
     spec_logger.info("Entering routine %s" % 'processing_std_precip')
@@ -570,7 +571,7 @@ def processing_std_precip(res_queue, pipeline_run_level=0,pipeline_printout_leve
             status = querydb.update_processing_chain_products(prod, version, my_sprod, input_product_info)
 
         spec_logger.info("Updating DB Done - Exit")
-        return res_queue
+        return proc_lists
 
     if pipeline_run_level > 0:
         spec_logger.info("Run the pipeline %s" % 'processing_std_precip')
@@ -588,8 +589,9 @@ def processing_std_precip(res_queue, pipeline_run_level=0,pipeline_printout_leve
     if write2file is not None:
         fwrite_id.close()
 
-    res_queue.put(proc_lists)
-    return res_queue
+    # Using the Queue here gives an error of 'broken pipe' in Queue.py
+    # res_queue.put(proc_lists)
+    return proc_lists
 
 def processing_std_precip_stats_only(res_queue, pipeline_run_level=0,pipeline_printout_level=0,
                           pipeline_printout_graph_level=0, prod='', starting_sprod='', mapset='', version='',
