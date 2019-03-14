@@ -221,7 +221,7 @@ class TestTS(unittest.TestCase):
     def test_values_wd_gee(self):
 
         productcode="wd-gee"
-        subproductcode="occurr"
+        subproductcode="avg"
         version="1.0"
         mapsetcode="WD-GEE-ECOWAS-AVG"
         from_date=date(2018,01,01)
@@ -233,7 +233,8 @@ class TestTS(unittest.TestCase):
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt, from_date, to_date, aggregate)
         print(list_values)
 
-        self.assertEquals(len(list_values), 12)
+        self.assertEquals(len(list_values), 1)
+
 
 
     def test_values_chirps_10d_green(self):
