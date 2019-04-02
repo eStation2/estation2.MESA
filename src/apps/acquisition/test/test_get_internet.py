@@ -176,10 +176,12 @@ def get_one_source(internet_source, target_dir=None):
                                                            #target_file=internet_source['files_filter_expression'],
                                                            target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
 
-                            # elif internet_type == 'sentinel_sat':
-                            #     result = get_file_from_sentinelsat_url(str(filename), target_dir=es_constants.ingest_dir)
+                            elif internet_type == 'sentinel_sat':
+                                result = get_file_from_sentinelsat_url(str(filename), target_dir=es_constants.ingest_dir)
                             else:
-                                result = get_file_from_url(str(internet_source['url'])+os.path.sep+filename, target_file=os.path.basename(filename), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
+                                result = get_file_from_url(str(internet_source['url']) + os.path.sep + filename,
+                                                           target_dir=es_constants.ingest_dir,
+                                                           target_file=os.path.basename(filename), userpwd=str(usr_pwd), https_params=str(internet_source['https_params']))
                             if not result:
                                 logger_spec.info("File %s copied.", filename)
                                 processed_list.append(filename)
@@ -603,7 +605,7 @@ class TestGetInternet(unittest.TestCase):
         target_dir = '/data/ingest/temp/'
         files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         files_list = [remote_url+'2015_01/JRC_EXPORT_20160225110837299-0000000000-0000065536']
-        get_file_from_url(files_list[0], target_dir, target_file=None,userpwd='')
+        get_file_from_url(files_list[0], target_dir, target_file=None, userpwd='', https_params='')
         print files_list
    #   ---------------------------------------------------------------------------
     #   Test remote http SPIRITS
@@ -905,7 +907,7 @@ class TestGetInternet(unittest.TestCase):
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
 
-    def TestRemoteFtp_MODIS_FIRMS_6(self):
+    def Test_RemoteFtp_MODIS_FIRMS_6(self):
 
         internet_id='MODAPS:EOSDIS:FIRMS:NASA'
 
@@ -930,6 +932,31 @@ class TestGetInternet(unittest.TestCase):
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
 
+    def test_RemoteHttps_MODIS_FIRMS_6(self):
+
+        internet_id='MODAPS:EOSDIS:FIRMS:NASA:HTTP'
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'https_params': internet_source.https_params,
+                         'start_date':  '20190315',
+                         'end_date':None,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type}
+
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
 
     def TestRemoteHttps_DMP_2(self):
 
@@ -939,7 +966,7 @@ class TestGetInternet(unittest.TestCase):
         if False:
             filename='c_gls_DMP-RT6_201801100000_GLOBE_PROBAV_V2.0.1.nc'
             remote_url = 'https://land.copernicus.vgt.vito.be/PDF/datapool/Vegetation/Dry_Matter_Productivity/DMP_1km_V2/2018/1/10/DMP-RT6_201801100000_GLOBE_PROBAV_V2.0/'+filename
-            status = get_file_from_url(remote_url,  '/tmp/', target_file=filename, userpwd='estation:estation2018')
+            status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd='estation:estation2018')
             return
 
         internet_sources = querydb.get_active_internet_sources()
@@ -1080,3 +1107,7 @@ class TestGetInternet(unittest.TestCase):
 
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
+
+
+if __name__ == '__main__':
+        unittest.main()

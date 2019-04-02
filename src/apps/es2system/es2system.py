@@ -961,8 +961,8 @@ def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None, ma
                         source = data_dir+subdir
                         target = trg_dir + subdir
 
-                        # command = 'lftp -e "mirror -RLe {} {};exit" -u {}:{} {}"" >> {}'.format(source,target,user,psw,url,logfile)
-                        command = 'lftp -e "mirror -RLe {} {};exit" -u {}:{} {}"" >> /dev/null'.format(source,target,user,psw,url)
+                        command = 'lftp -e "mirror -RLe {} {};exit" -u {}:{} {}"" >> {}'.format(source,target,user,psw,url,logfile)
+                        # command = 'lftp -e "mirror -RLe {} {};exit" -u {}:{} {}"" >> /dev/null'.format(source,target,user,psw,url)
                         logger.debug("Executing %s" % command)
                         spec_logger.info('Working on mapset/subproduct {}/{} \n'.format(mapset, subproductcode))
 

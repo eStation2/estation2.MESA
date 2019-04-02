@@ -110,3 +110,8 @@ class TestFunctionsDate(TestCase):
         import lib.python.functions as f
         self.assertEqual(f.get_number_days_month('20180201'), 28)
 
+    def test_day_lenght(self):
+        day = 31
+        latitude = 40.0
+        dl = f.day_length(day,latitude)
+        print 'Day lenght is: {0}'.format(dl)

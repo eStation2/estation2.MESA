@@ -3,7 +3,7 @@
 #   Changes are with respect to 2.1.1
 #   Unless specification, they refer to Apps.rpm package.
 #   The references ES2-NNN reports the number of the corresponding ticket opened in YouTrack (https://estation2.myjetbrains.com/youtrack/)
-#   Date: October 2018
+#   Date: December 2018
 
 1. BUG FIXING
 -------------
