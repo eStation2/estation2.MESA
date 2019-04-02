@@ -10,6 +10,8 @@ SET client_min_messages = warning;
   For version 2.1.2
  *********************************************************/
 
+ALTER TABLE products.internet_source ADD COLUMN https_params character varying;
+
 ALTER TABLE products.spirits ADD COLUMN out_data_type character varying;
 ALTER TABLE products.spirits ADD COLUMN out_scale_factor double precision;
 ALTER TABLE products.spirits ADD COLUMN out_offset double precision;
@@ -1508,8 +1510,153 @@ ALTER FUNCTION products.update_insert_sub_datasource_description(character varyi
   OWNER TO estation;
 
 
+-- products.update_insert_internet_source for VERSION 2.1.2
+CREATE OR REPLACE FUNCTION products.update_insert_internet_source(
+    internet_id character varying,
+    defined_by character varying,
+    descriptive_name character varying,
+    description character varying,
+    modified_by character varying,
+    update_datetime timestamp without time zone,
+    url character varying,
+    user_name character varying,
+    password character varying,
+    type character varying,
+    include_files_expression character varying,
+    files_filter_expression character varying,
+    status boolean,
+    pull_frequency integer,
+    datasource_descr_id character varying,
+    frequency_id character varying,
+    start_date bigint,
+    end_date bigint,
+    https_params character varying,
+    full_copy boolean DEFAULT false)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+		_internet_id 	  		ALIAS FOR  $1;
+		_defined_by  			ALIAS FOR  $2;
+		_descriptive_name 		ALIAS FOR  $3;
+		_description   			ALIAS FOR  $4;
+		_modified_by 	  		ALIAS FOR  $5;
+		_update_datetime 	  	ALIAS FOR  $6;
+		_url  				ALIAS FOR  $7;
+		_user_name 			ALIAS FOR  $8;
+		_password  			ALIAS FOR  $9;
+		_type 	  			ALIAS FOR  $10;
+		_include_files_expression 	ALIAS FOR  $11;
+		_files_filter_expression  	ALIAS FOR  $12;
+		_status 	  		ALIAS FOR  $13;
+		_pull_frequency   		ALIAS FOR  $14;
+		_datasource_descr_id   		ALIAS FOR  $15;
+		_frequency_id   		ALIAS FOR  $16;
+		_start_date   			ALIAS FOR  $17;
+		_end_date   			ALIAS FOR  $18;
+		_https_params   		ALIAS FOR  $19;
+		_full_copy   			ALIAS FOR  $20;
+	BEGIN
+		PERFORM * FROM products.internet_source i WHERE i.internet_id = TRIM(_internet_id) AND i.defined_by = 'JRC';
+
+		IF FOUND THEN
+			IF _full_copy THEN
+				UPDATE products.internet_source i
+				SET defined_by = TRIM(_defined_by),
+					descriptive_name = TRIM(_descriptive_name),
+					description = TRIM(_description),
+					modified_by = TRIM(_modified_by),
+					update_datetime = _update_datetime,
+					url = TRIM(_url),
+					user_name = TRIM(_user_name),
+					password = TRIM(_password),
+					type = TRIM(_type),
+					include_files_expression = TRIM(_include_files_expression),
+					files_filter_expression = TRIM(_files_filter_expression),
+					status = _status,
+					pull_frequency = _pull_frequency,
+					datasource_descr_id = TRIM(_datasource_descr_id),
+					frequency_id = TRIM(_frequency_id),
+					start_date = _start_date,
+					end_date = _end_date,
+					https_params = _https_params
+				WHERE i.internet_id = TRIM(_internet_id);
+			ELSE
+				UPDATE products.internet_source i
+				SET defined_by = TRIM(_defined_by),
+					-- descriptive_name = TRIM(_descriptive_name),
+					-- description = TRIM(_description),
+					modified_by = TRIM(_modified_by),
+					update_datetime = _update_datetime,
+					-- url = TRIM(_url),
+					-- user_name = TRIM(_user_name),
+					-- password = TRIM(_password),
+					type = TRIM(_type),
+					-- include_files_expression = TRIM(_include_files_expression),
+					-- files_filter_expression = TRIM(_files_filter_expression),
+					status = _status,
+					-- pull_frequency = _pull_frequency,
+					datasource_descr_id = TRIM(_datasource_descr_id),
+					frequency_id = TRIM(_frequency_id)
+					-- , start_date = _start_date
+					-- , end_date = _end_date
+					-- , https_params = _https_params
+				WHERE i.internet_id = TRIM(_internet_id);
+			END IF;
+		ELSE
+			INSERT INTO products.internet_source (
+				internet_id,
+				defined_by,
+				descriptive_name,
+				description,
+				modified_by,
+				update_datetime,
+				url,
+				user_name,
+				password,
+				type,
+				include_files_expression,
+				files_filter_expression,
+				status,
+				pull_frequency,
+				datasource_descr_id,
+				frequency_id,
+				start_date,
+				end_date,
+				https_params
+			)
+			VALUES (
+				TRIM(_internet_id),
+				TRIM(_defined_by),
+				TRIM(_descriptive_name),
+				TRIM(_description),
+				TRIM(_modified_by),
+				_update_datetime,
+				TRIM(_url),
+				TRIM(_user_name),
+				TRIM(_password),
+				TRIM(_type),
+				TRIM(_include_files_expression),
+				TRIM(_files_filter_expression),
+				_status,
+				_pull_frequency,
+				TRIM(_datasource_descr_id),
+				TRIM(_frequency_id),
+				_start_date,
+				_end_date,
+				TRIM(_https_params)
+			);
+		END IF;
+		RETURN TRUE;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION products.update_insert_internet_source(character varying, character varying, character varying, character varying, character varying, timestamp without time zone, character varying, character varying, character varying, character varying, character varying, character varying, boolean, integer, character varying, character varying, bigint, bigint, character varying, boolean)
+  OWNER TO estation;
 
 
+
+-- products.update_insert_internet_source for VERSION 2.1.1
 CREATE OR REPLACE FUNCTION products.update_insert_internet_source(internet_id character varying, defined_by character varying, descriptive_name character varying, description character varying, modified_by character varying, update_datetime timestamp without time zone, url character varying, user_name character varying, password character varying, type character varying, include_files_expression character varying, files_filter_expression character varying, status boolean, pull_frequency integer, datasource_descr_id character varying, frequency_id character varying, start_date bigint, end_date bigint, full_copy boolean DEFAULT false)
   RETURNS boolean AS
 $BODY$
@@ -2443,11 +2590,6 @@ ALTER FUNCTION analysis.update_insert_graph_yaxes(character varying, character v
 ***********************************/
 
 -- Function: products.export_jrc_data(boolean)
-
--- DROP FUNCTION products.export_jrc_data(boolean);
-
--- Function: products.export_jrc_data(boolean)
-
 -- DROP FUNCTION products.export_jrc_data(boolean);
 
 CREATE OR REPLACE FUNCTION products.export_jrc_data(full_copy boolean DEFAULT false)
@@ -2613,6 +2755,7 @@ BEGIN
 		|| ', frequency_id := ' || COALESCE('''' || frequency_id || '''', '''undefined''')
 		|| ', start_date:=   ' || COALESCE(TRIM(to_char(start_date, '999999999999')), 'NULL')
 		|| ', end_date:= ' || COALESCE(TRIM(to_char(end_date, '999999999999')), 'NULL')
+		|| ', https_params := ' || COALESCE('''' || https_params || '''', 'NULL')
 		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
 	FROM products.internet_source
@@ -3088,9 +3231,7 @@ ALTER FUNCTION products.export_jrc_data(boolean)
 
 
 
-
 -- Function: products.export_all_data(boolean)
-
 -- DROP FUNCTION products.export_all_data(boolean);
 
 CREATE OR REPLACE FUNCTION products.export_all_data(full_copy boolean DEFAULT true)
@@ -3252,6 +3393,7 @@ BEGIN
 		|| ', frequency_id := ' || COALESCE('''' || frequency_id || '''', '''undefined''')
 		|| ', start_date:=   ' || COALESCE(TRIM(to_char(start_date, '999999999999')), 'NULL')
 		|| ', end_date:= ' || COALESCE(TRIM(to_char(end_date, '999999999999')), 'NULL')
+		|| ', https_params := ' || COALESCE('''' || https_params || '''', 'NULL')
 		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
 	FROM products.internet_source;
@@ -3722,9 +3864,7 @@ ALTER FUNCTION products.export_all_data(boolean)
 
 
 
-
 -- Function: products.export_product_data(character varying, boolean)
-
 -- DROP FUNCTION products.export_product_data(character varying, boolean);
 
 CREATE OR REPLACE FUNCTION products.export_product_data(

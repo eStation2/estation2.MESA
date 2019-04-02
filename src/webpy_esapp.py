@@ -1509,6 +1509,7 @@ class GetInternetSources:
                                   'frequency_id': row_dict['frequency_id'],
                                   'start_date': startdate,
                                   'end_date': enddate,
+                                  'https_params': row_dict['https_params'],
                                   'datasource_descr_id': row_dict['datasource_descr_id'],
                                   'format_type': row_dict['format_type'],
                                   'file_extension': row_dict['file_extension'],
@@ -1614,6 +1615,7 @@ class UpdateInternetSource:
                                   'frequency_id': getparams['internetsources']['frequency_id'],
                                   'start_date': startdate,
                                   'end_date': enddate,
+                                  'https_params': https_params,
                                   'datasource_descr_id': getparams['internetsources']['internet_id']}
 
             datasourcedescrinfo = {'datasource_descr_id': getparams['internetsources']['internet_id'],

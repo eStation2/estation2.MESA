@@ -375,7 +375,7 @@ def build_list_matching_files_tmpl(base_url, template, from_date, to_date, frequ
     #     logger.debug("Error in frequency.get_internet_dates: %s" %inst.args[0])
     #     raise
 
-    return list_filenames
+    # return list_filenames
 
 
 ######################################################################################
@@ -542,7 +542,7 @@ def get_file_from_motu_command(motu_command,  target_dir,userpwd=''):
 #           target_dir: target directory (by default a tmp dir is created)
 #   Output: full pathname is returned (or positive number for error)
 #
-def get_file_from_url(remote_url_file,  target_dir, target_file=None,userpwd=''):
+def get_file_from_url(remote_url_file,  target_dir, target_file=None, userpwd='', https_params=''):
 
     # Create a tmp directory for download
     tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.es2globals['base_tmp_dir'])
@@ -558,11 +558,14 @@ def get_file_from_url(remote_url_file,  target_dir, target_file=None,userpwd='')
     try:
         outputfile=open(target_fullpath, 'wb')
         logger.debug('Output File: '+target_fullpath)
-        remote_url_file = remote_url_file.replace('\\','') #Pierluigi
+        remote_url_file = remote_url_file.replace('\\', '')  # Pierluigi
         c.setopt(c.URL,remote_url_file)
         c.setopt(c.WRITEFUNCTION,outputfile.write)
         if remote_url_file.startswith('https'):
-            c.setopt(c.CAINFO, certifi.where()) #Pierluigi
+            c.setopt(c.CAINFO, certifi.where())     # Pierluigi
+            if https_params.strip() != '':
+                # headers = 'Authorization: Bearer ACB5F378-5483-11E9-849E-54E83FFDBADB'
+                c.setopt(pycurl.HTTPHEADER, [https_params])
         if userpwd is not ':':
             c.setopt(c.USERPWD,userpwd)
         c.perform()
@@ -824,7 +827,11 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                 #     result = get_file_from_sentinelsat_url(str(filename),
                                                 #                                            target_dir=es_constants.ingest_dir)
                                                 else:
-                                                    result = get_file_from_url(str(internet_source.url)+os.path.sep+filename, target_file=os.path.basename(filename), target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
+                                                    result = get_file_from_url(str(internet_source.url)+os.path.sep+filename,
+                                                                               target_file=os.path.basename(filename),
+                                                                               target_dir=es_constants.ingest_dir,
+                                                                               userpwd=str(usr_pwd),
+                                                                               https_params=internet_source.https_params)
                                                 if not result:
                                                     logger_spec.info("File %s copied.", filename)
                                                     processed_list.append(filename)

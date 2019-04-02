@@ -33,8 +33,8 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
     maximizable: false,
 
     //width: 975,
-    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-35 : 790,  // 725,
-    maxHeight: 800,
+    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-35 : 780,  // 725,
+    maxHeight: 780,
 
     frame: true,
     border: true,
@@ -85,17 +85,18 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                     xtype: 'fieldset',
                     title: '<b>'+esapp.Utils.getTranslation('internetdatasourceinfo')+'</b>',    // '<b>Internet data source info</b>',
                     collapsible: false,
-                    width: 425,
+                    width: 500,
                     margin: '10 5 10 10',
                     padding: '10 10 10 10',
                     defaults: {
-                        width: 400,
+                        width: 475,
                         labelWidth: 120,
                         labelAlign: 'left'
                     },
                     items: [{
                         xtype: 'displayfield',
                         fieldLabel: esapp.Utils.getTranslation('id'),    // 'ID',
+                        labelWidth: 60,
                         reference: 'internet_id',
                         msgTarget: 'side',
                         bind: '{theInternetSource.internet_id}',
@@ -109,6 +110,7 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                     }, {
                         xtype: 'textfield',
                         fieldLabel: esapp.Utils.getTranslation('name'),    // 'Name',
+                        labelWidth: 60,
                         reference: 'descriptive_name',
                         msgTarget: 'side',
                         bind: '{theInternetSource.descriptive_name}'
@@ -133,22 +135,35 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                         labelAlign: 'top',
                         msgTarget: 'side',
                         bind: '{theInternetSource.url}',
+                        height: 30,
                         grow: true
                     }, {
                         xtype: 'textfield',
                         fieldLabel: esapp.Utils.getTranslation('user_name'),    // 'User name',
+                        labelWidth: 80,
                         reference: 'user_name',
                         msgTarget: 'side',
                         bind: '{theInternetSource.user_name}'
                     }, {
                         xtype: 'textfield',
                         fieldLabel: esapp.Utils.getTranslation('password'),    // 'Password',
+                        labelWidth: 80,
                         reference: 'password',
                         msgTarget: 'side',
                         bind: '{theInternetSource.password}'
                     }, {
+                        xtype: 'textareafield',
+                        fieldLabel: esapp.Utils.getTranslation('https_params'),    // 'https parameters',
+                        reference: 'https_params',
+                        labelAlign: 'top',
+                        msgTarget: 'side',
+                        bind: '{theInternetSource.https_params}',
+                        height: 30,
+                        grow: true
+                    }, {
                         xtype: 'textfield',
                         fieldLabel: esapp.Utils.getTranslation('type'),    // 'Type',
+                        labelWidth: 60,
                         reference: 'type',
                         msgTarget: 'side',
                         bind: '{theInternetSource.type}'
@@ -159,6 +174,7 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                         reference: 'include_files_expression',
                         msgTarget: 'side',
                         bind: '{theInternetSource.include_files_expression}',
+                        height: 30,
                         grow: true
                     }, {
                         xtype: 'textareafield',
@@ -167,6 +183,7 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                         reference: 'files_filter_expression',
                         msgTarget: 'side',
                         bind: '{theInternetSource.files_filter_expression}',
+                        height: 30,
                         grow: true
                     //}, {
                     //    xtype: 'textfield',
@@ -183,6 +200,7 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                         minValue: 0,
                         allowDecimals: true,
                         hideTrigger: false,
+                        width: 230,
                         bind: '{theInternetSource.pull_frequency}'
                     }, {
                         xtype: 'combobox',
@@ -192,6 +210,7 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                         store: {
                             type: 'frequencies'
                         },
+                        width: 230,
                         bind: '{theInternetSource.frequency_id}',
                         valueField: 'frequency_id',
                         displayField: 'frequency_id',
@@ -211,6 +230,7 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                         // minValue: -99999999,
                         allowDecimals: true,
                         hideTrigger: false,
+                        width: 230,
                         bind: '{theInternetSource.start_date}'
                     }, {
                         xtype: 'numberfield',
@@ -224,18 +244,19 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                         // minValue: -99999999,
                         allowDecimals: true,
                         hideTrigger: false,
+                        width: 230,
                         bind: '{theInternetSource.end_date}'
                     }]
                 },{
                     xtype: 'fieldset',
                     title: '<b>'+esapp.Utils.getTranslation('datasourcedescription')+'</b>',    // '<b>Data source description</b>',
                     collapsible: false,
-                    width: 525,
+                    width: 350,
                     margin: '10 10 10 5',
                     padding: '10 10 10 10',
                     defaults: {
-                        width: 500,
-                        labelWidth: 200
+                        width: 325,
+                        labelWidth: 130
                     },
                     items: [{
                         xtype: 'textfield',
@@ -282,11 +303,14 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                         hideTrigger: false,
                         bind: '{theInternetSource.date_position}'
                     }, {
-                        xtype: 'textfield',
+                        xtype: 'textareafield',
                         fieldLabel: esapp.Utils.getTranslation('product_identifier'),    // 'Product identifier',
+                        labelAlign: 'top',
                         reference: 'product_identifier',
                         msgTarget: 'side',
-                        bind: '{theInternetSource.product_identifier}'
+                        bind: '{theInternetSource.product_identifier}',
+                        height: 30,
+                        grow: true
                     }, {
                         xtype: 'numberfield',
                         fieldLabel: esapp.Utils.getTranslation('prod_id_position'),    // 'Prod id position',
