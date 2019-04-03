@@ -1574,7 +1574,7 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         pass
 
     #Manually save tar file in the /data/ingest and send it to mesa-proc for the processing
-    command = 'tar -cvzf /data/ingest/MESA_JRC_wd-gee_occurr_20190101_WD-GEE-ECOWAS-AVG_1.0.tgz -C ' + os.path.dirname(output_file_mapset) + ' ' + os.path.basename(output_file_mapset)
+    command = 'tar -cvzf /data/ingest/MESA_JRC_wd-gee_occurr_20190201_WD-GEE-ECOWAS-AVG_1.0.tgz -C ' + os.path.dirname(output_file_mapset) + ' ' + os.path.basename(output_file_mapset)
     my_logger.debug('Command for tar the file is: ' + command)
     os.system(command)
     # Assign output file
@@ -2797,7 +2797,9 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 #           ECMWF: zipped file containing an .img and .hdr
 #           CPC_BINARY: binary file in big-endian
 #           BINARY: .bil product (e.g. GEOWRSI)
-#
+#           NETCDF_S3_WRR: S3A OLCI WRR data treatment using SNAP-GPT to do band subset, reproject.
+#           NETCDF_S3_WST: S3A SLSTR WST data treatment using SNAP-GPT to do band subset, reproject.
+#           JRC_WBD_GEE: merges the various tiles of the .tif files retrieved from GEE application and remove the bigtif tag(works only in developement machine)
 #       native_mapset_code: id code of the native mapset (from datasource_descr)
 #       subproducts: list of subproducts to be extracted from the file. Contains dictionaries such as:
 #           see ingestion() for full description
