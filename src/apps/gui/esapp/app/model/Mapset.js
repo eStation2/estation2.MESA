@@ -2,9 +2,6 @@ Ext.define('esapp.model.MapSet', {
     extend : 'esapp.model.Base',
 
     fields: [
-        {name: 'productid', reference:'DataSet', type: 'string'},
-        {name: 'productcode'},
-        {name: 'version'},
         {name: 'mapsetcode'},
         {name: 'defined_by'},
         {name: 'descriptive_name'},
@@ -23,25 +20,20 @@ Ext.define('esapp.model.MapSet', {
 
     autoLoad: true
 
-    //,proxy: {
-    //    type : 'ajax',
-    //    url : 'getmapsets',
-    //    reader: {
-    //         type: 'json'
-    //        ,successProperty: 'success'
-    //        ,rootProperty: 'mapsets'
-    //        ,messageProperty: 'message'
-    //    },
-    //    listeners: {
-    //        exception: function(proxy, response, operation){
-    //            // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-    //            Ext.Msg.show({
-    //                title: 'MAPSET MODEL- REMOTE EXCEPTION',
-    //                msg: operation.getError(),
-    //                icon: Ext.Msg.ERROR,
-    //                buttons: Ext.Msg.OK
-    //            });
-    //        }
-    //    }
-    //}
+    ,proxy: {
+        type: 'ajax',
+        url: 'getmapsetsall',
+        reader: {
+            type: 'json'
+            , successProperty: 'success'
+            , rootProperty: 'mapsets'
+            , messageProperty: 'message'
+        },
+        listeners: {
+            exception: function (proxy, response, operation) {
+                // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
+                console.info('MAPSET MODEL- REMOTE EXCEPTION');
+            }
+        }
+    }
 });
