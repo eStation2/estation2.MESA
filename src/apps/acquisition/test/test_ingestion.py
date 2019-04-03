@@ -849,9 +849,9 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_jrc_wbd(self):
 
-        date_fileslist = glob.glob('/data/ingest/JRC-WBD_20190101*')
+        date_fileslist = glob.glob('/data/ingest/JRC-WBD_20190201*')
         #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
-        in_date = '20190101'
+        in_date = '20190201'
         productcode = 'wd-gee'
         productversion = '1.0'
         subproductcode = 'occurr'
