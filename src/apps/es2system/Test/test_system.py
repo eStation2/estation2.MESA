@@ -161,16 +161,7 @@ class TestSystem(unittest.TestCase):
         status = es2system.get_status_PC1()
         print status
 
-    def test_push_ftp_aruba(self):
 
-        url='sftp://94.177.222.148'
-        user='jrc-user'
-        psw='M@rc0-Jur1'
-        trg_dir='/home/jrc-user/data/processing/'
-
-        # Should get here the role of my machine ...
-        # Masked=FALSE means the masked products are pushed.
-        status = es2system.push_data_ftp(url=url, user=user, psw=psw, trg_dir=trg_dir, masked=False)
 
     def test_push_ftp_jrc(self):
 
