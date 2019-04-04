@@ -162,7 +162,6 @@ class TestSystem(unittest.TestCase):
         print status
 
 
-
     def test_push_ftp_jrc(self):
 
         # Execute w.o. arguments: they are read from server_ftp.py
