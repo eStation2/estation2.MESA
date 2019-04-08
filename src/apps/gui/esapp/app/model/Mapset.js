@@ -16,24 +16,24 @@ Ext.define('esapp.model.MapSet', {
         {name: 'pixel_size_x'},
         {name: 'pixel_size_y'},
         {name: 'footprint_image'}
-    ],
+    ]
 
-    autoLoad: true
-
-    ,proxy: {
-        type: 'ajax',
-        url: 'getmapsetsall',
-        reader: {
-            type: 'json'
-            , successProperty: 'success'
-            , rootProperty: 'mapsets'
-            , messageProperty: 'message'
-        },
-        listeners: {
-            exception: function (proxy, response, operation) {
-                // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                console.info('MAPSET MODEL- REMOTE EXCEPTION');
-            }
-        }
-    }
+    // ,autoLoad: true
+    //
+    // ,proxy: {
+    //     type: 'ajax',
+    //     url: 'getmapsetsall',
+    //     reader: {
+    //         type: 'json'
+    //         , successProperty: 'success'
+    //         , rootProperty: 'mapsets'
+    //         , messageProperty: 'message'
+    //     },
+    //     listeners: {
+    //         exception: function (proxy, response, operation) {
+    //             // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
+    //             console.info('MAPSET MODEL- REMOTE EXCEPTION');
+    //         }
+    //     }
+    // }
 });

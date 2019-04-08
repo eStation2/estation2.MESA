@@ -17,7 +17,6 @@ import tempfile
 import glob
 import tarfile
 import shlex
-
 # import eStation2 modules
 from lib.python import functions
 from lib.python import es_logging as log
@@ -26,15 +25,16 @@ from apps.tools import ingest_historical_archives as iha
 from apps.es2system import convert_2_spirits as conv
 from database import querydb
 from apps.productmanagement.products import *
+from lib.python.daemon import DaemonDryRunnable
 
 logger = log.my_logger(__name__)
 data_dir = es_constants.es2globals['processing_dir']
 
-from lib.python.daemon import DaemonDryRunnable
 
 def get_status_local_machine():
-#   Get info on the status of the local machine
-#
+    #   Get info on the status of the local machine
+    #
+
     logger.debug("Entering routine %s" % 'get_status_local_machine')
 
     # Get the local systems settings
@@ -70,10 +70,11 @@ def get_status_local_machine():
                             'disk_status': 'true'}
     return status_local_machine
 
-def save_status_local_machine():
 
-#   Save a text file containing the status of the local machine
-#
+def save_status_local_machine():
+    #   Save a text file containing the status of the local machine
+    #
+
     logger.debug("Entering routine %s " % 'save_status_local_machine')
 
     # Define .txt filename
@@ -90,10 +91,11 @@ def save_status_local_machine():
 
     return 0
 
+
 def system_data_sync(source, target):
-#   Synchronize data directory from one machine to another (push)
-#   It is based on rsync daemon, the correct module should be set in /etc/rsyncd.conf file
-#   The rsync daemon should running (permission set in /etc/default/rsync)
+    #   Synchronize data directory from one machine to another (push)
+    #   It is based on rsync daemon, the correct module should be set in /etc/rsyncd.conf file
+    #   The rsync daemon should running (permission set in /etc/default/rsync)
 
     logfile=es_constants.es2globals['log_dir']+'rsync.log'
     message=time.strftime("%Y-%m-%d %H:%M")+' INFO: Running the data sync now ... \n'
@@ -110,10 +112,10 @@ def system_data_sync(source, target):
     else:
         return status
 
-def system_bucardo_service(action):
 
-#   Synchronize database contents from one instance to another (push)
-#   It checks the status of bucardo and updates it according to the required action
+def system_bucardo_service(action):
+    #   Synchronize database contents from one instance to another (push)
+    #   It checks the status of bucardo and updates it according to the required action
 
     logger.debug("Entering routine %s" % 'system_bucardo_service')
 
@@ -160,10 +162,10 @@ def system_bucardo_service(action):
         else:
             logger.warning('Error in stopping Bucardo.')
 
-def system_db_sync_full(pc_role):
 
-#   Manage the transition from Recovery to Nominal, by forcing a full sync of both DB schemas
-#   pc_role:    role of my PC (either PC2 or PC3)
+def system_db_sync_full(pc_role):
+    #   Manage the transition from Recovery to Nominal, by forcing a full sync of both DB schemas
+    #   pc_role:    role of my PC (either PC2 or PC3)
 
 
     logger.debug("Entering routine %s" % 'system_db_sync_full')
@@ -195,8 +197,9 @@ def system_db_sync_full(pc_role):
 
     return status
 
+
 def system_db_dump(list_dump):
-#   Dump the database schemas (for backup)
+    #   Dump the database schemas (for backup)
 
     logger.debug("Entering routine %s" % 'system_db_dump')
     now = datetime.datetime.now()
@@ -227,6 +230,7 @@ def system_db_dump(list_dump):
 
         return status
 
+
 def keep_one_for_month(yymm_date, date_list, remove_list, mode='1perM'):
 
     month_list = []
@@ -251,6 +255,7 @@ def keep_one_for_month(yymm_date, date_list, remove_list, mode='1perM'):
                 remove_list.append(mm)
 
     return remove_list
+
 
 def system_manage_dumps():
 #   Manage the dump files (house-keeping)
@@ -308,8 +313,9 @@ def system_manage_dumps():
     # Exit
     return status
 
+
 def system_bucardo_config():
-#   Check if bucardo has been already configured, and if there are conditions to do so
+    #   Check if bucardo has been already configured, and if there are conditions to do so
 
     res_bucardo_config = 0
 
@@ -352,9 +358,10 @@ def system_bucardo_config():
     # Exit
     return res_bucardo_config
 
+
 def system_create_report(target_file=None):
-#   Create a .zip file with the relevant information to be sent as for diagnostic
-#
+    #   Create a .zip file with the relevant information to be sent as for diagnostic
+    #
 
     # Dump the database schemas (for backup)
     logger.debug("Entering routine %s" % 'system_create_report')
@@ -406,9 +413,10 @@ def system_create_report(target_file=None):
 
     return output_filename
 
+
 def system_install_report(target_file=None):
-#   Create a .zip file with the relevant information on the system installation
-#
+    #   Create a .zip file with the relevant information on the system installation
+    #
 
     # Dump the database schemas (for backup)
     logger.debug("Entering routine %s" % 'system_install_report')
@@ -466,16 +474,17 @@ def system_install_report(target_file=None):
 
     return output_filename
 
+
 def check_delay_time(operation, delay_minutes=None, time=None, write=False):
-#
-# For a given operation, check if the delay has passed, or if it is time to execute it
-#
-# Input arguments: operation= is one of the foreseen operations ('sync_data', 'sync_db')
-#                  delay= is the delay - in minutes - between two executions
-#                  time= is the time (hh:mm) of the day for the execution
-#
-#                  write: if set, does write the ,info file
-#
+    #
+    # For a given operation, check if the delay has passed, or if it is time to execute it
+    #
+    # Input arguments: operation= is one of the foreseen operations ('sync_data', 'sync_db')
+    #                  delay= is the delay - in minutes - between two executions
+    #                  time= is the time (hh:mm) of the day for the execution
+    #
+    #                  write: if set, does write the ,info file
+    #
     logger.debug("Entering routine %s" % 'check_delay_time')
 
     to_be_executed = False
@@ -515,15 +524,16 @@ def check_delay_time(operation, delay_minutes=None, time=None, write=False):
 
     return to_be_executed
 
+
 def system_manage_lock(lock_id, action):
-#
-# Manage the lock file for an action
-#
-# lock_id is whatever string (but 'All_locks' which is reserved)
-#
-# action can be: check  -> check if it exist
-#                   create -> write the file
-#                   delete -> remove the file
+    #
+    # Manage the lock file for an action
+    #
+    # lock_id is whatever string (but 'All_locks' which is reserved)
+    #
+    # action can be: check  -> check if it exist
+    #                   create -> write the file
+    #                   delete -> remove the file
 
     logger.debug("Entering routine %s" % 'system_manage_lock')
     # Get variables
@@ -554,11 +564,12 @@ def system_manage_lock(lock_id, action):
                 os.utime(lock_file, None)
     return status
 
+
 def clean_temp_dir():
-#
-# Look into /eStation2/tmp directory and delete directories older than 3 days
-#
-#
+    #
+    # Look into /eStation2/tmp directory and delete directories older than 3 days
+    #
+    #
     logger.debug("Entering routine %s" % 'clean_temp_dir')
 
     now = time.time()
@@ -573,12 +584,13 @@ def clean_temp_dir():
             logger.warning('A directory was deleted by system: %s' % f)
     return 0
 
+
 def loop_system(dry_run=False):
-#    Driver of the system service
-#    Reads configuration from the system setting file (system_settings.ini)
-#    Perform the needed operations, according to the machine role/mode
-#    Arguments: dry_run -> if > 0, only report what has to be done (no actions)
-#                       -> if = 0, do operations (default)
+    #    Driver of the system service
+    #    Reads configuration from the system setting file (system_settings.ini)
+    #    Perform the needed operations, according to the machine role/mode
+    #    Arguments: dry_run -> if > 0, only report what has to be done (no actions)
+    #                       -> if = 0, do operations (default)
 
     logger.info("Entering routine %s" % 'loop_system')
 
@@ -803,6 +815,7 @@ def loop_system(dry_run=False):
         # Sleep some time
         time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))
 
+
 def cmd(acmd):
     try:
         logger.info(acmd)
@@ -812,11 +825,12 @@ def cmd(acmd):
         logger.error(pe)
     return None
 
+
 def get_status_PC1():
-#   Get info on the status of the services on PC1:
-#   DVB
-#   Tellicast
-#   FTS
+    #   Get info on the status of the services on PC1:
+    #   DVB
+    #   Tellicast
+    #   FTS
 
     status_PC1 = {'dvb_status': -1,
                   'tellicast_status': -1,
@@ -857,17 +871,17 @@ def get_status_PC1():
 
     return status_PC1
 
-def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None, masked=True):
 
-#   Synchronized data towards an ftp server (only for JRC)
-#   It replaces, since the new srv-ies-ftp.jrc.it ftp is set, the bash script: mirror_to_ftp.sh
-#   Configuration:  it looks at all 'non-masked' products and pushes them
-#                   For the mapsets, find what is in the filesystem, and pushes only the 'largest'
-#   It uses a command like:
-#       lftp -e "mirror -RLe /data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/10dmax-linearx2/
-#                            /narma/eStation_2.0/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/10dmax-linearx2/;exit"
-#                            -u narma:JRCVRw2960 sftp://srv-ies-ftp.jrc.it"" >> /eStation2/log/push_data_ftp.log
-#
+def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None, masked=True):
+    #   Synchronized data towards an ftp server (only for JRC)
+    #   It replaces, since the new srv-ies-ftp.jrc.it ftp is set, the bash script: mirror_to_ftp.sh
+    #   Configuration:  it looks at all 'non-masked' products and pushes them
+    #                   For the mapsets, find what is in the filesystem, and pushes only the 'largest'
+    #   It uses a command like:
+    #       lftp -e "mirror -RLe /data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/10dmax-linearx2/
+    #                            /narma/eStation_2.0/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/10dmax-linearx2/;exit"
+    #                            -u narma:JRCVRw2960 sftp://srv-ies-ftp.jrc.it"" >> /eStation2/log/push_data_ftp.log
+    #
 
     spec_logger = log.my_logger('apps.es2system.push_data_ftp')
 
@@ -980,6 +994,7 @@ def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None, ma
 class SystemDaemon(DaemonDryRunnable):
     def run(self):
         loop_system(dry_run=self.dry_run)
+
 
 class IngestArchiveDaemon(DaemonDryRunnable):
     def run(self):

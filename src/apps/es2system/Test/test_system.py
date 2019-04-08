@@ -161,7 +161,6 @@ class TestSystem(unittest.TestCase):
         status = es2system.get_status_PC1()
         print status
 
-
     def test_push_ftp_jrc(self):
 
         # Execute w.o. arguments: they are read from server_ftp.py

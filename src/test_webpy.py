@@ -27,6 +27,15 @@ logger = log.my_logger(__name__)
 
 class TestWebpy(unittest.TestCase):
 
+    def test_IngestArchive(self):
+        params = {
+            'task': 'run',
+            'service': 'ingestarchive'
+        }
+        result = webpy_esapp_helpers.IngestArchive(params)
+
+        self.assertEqual(1, 1)
+
     def test_UpdateProduct(self):
         productcode = 'vgt-lai'
         version = 'V2.0'

@@ -2,13 +2,11 @@ Ext.define('esapp.view.acquisition.editInternetSourceModel', {
     extend: 'Ext.app.ViewModel',
     alias: 'viewmodel.acquisition-editinternetsource',
     stores: {
-        // Define a store of EumetcastSource records that links to the Session.
         internetsources: {
             source: 'InternetSourceStore'
-            //,session: true
-            //model: 'InternetSource',
-            //autoLoad: true,
-            //autoSync: false
+        },
+        mapsets: {
+            source: 'MapsetsStore'
         }
     }
 

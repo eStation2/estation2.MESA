@@ -9,6 +9,9 @@ Ext.define('esapp.view.acquisition.editEumetcastSourceModel', {
             //model: 'EumetcastSource'
             //autoLoad: false,
             //autoSync: false
+        },
+        mapsets: {
+            source: 'MapsetsStore'
         }
         //theEumetcastSource: {
         //    source: '{eumetcastsources}',

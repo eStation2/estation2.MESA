@@ -5,10 +5,9 @@ Ext.define('esapp.view.system.systemsettingsController', {
     execServiceTask: function(menuitem, ev) {
         var me = this,
             running = false,
-            chechstatus,
             runner = new Ext.util.TaskRunner();
 
-        chechstatus = runner.newTask({     //  newTask
+        var checkstatus = runner.newTask({     //  newTask
             run: function () {
                 Ext.Ajax.request({
                     method: 'POST',
@@ -34,7 +33,7 @@ Ext.define('esapp.view.system.systemsettingsController', {
                                 me.getView().down('button[name=ingestarchivebtn]').down('menuitem[name=run_ingestarchive]').setDisabled(false);
                                 me.getView().down('button[name=ingestarchivebtn]').down('menuitem[name=stop_ingestarchive]').setDisabled(true);
                                 me.getView().down('button[name=ingestarchivebtn]').down('menuitem[name=restart_ingestarchive]').setDisabled(true);
-                                chechstatus.stop();     // Stop checking the status when Ingest Archive finished running.
+                                checkstatus.stop();     // Stop checking the status when Ingest Archive finished running.
                             }
                             //if (result.running == 'true') {
                             //    Ext.toast({
@@ -55,11 +54,11 @@ Ext.define('esapp.view.system.systemsettingsController', {
                     failure: function (response, opts) {
                         console.info(response.status);
                         me.getView().down('button[name=ingestarchivebtn]').setIconCls('');
-                        chechstatus.stop();
+                        checkstatus.stop();
                     }
                 });
             },
-            interval: 10000 // Check status every 10 seconds.
+            interval:5000 // Check status every 5 seconds.
         });
 
         // AJAX call to run/start a specified task of the service "ingestarchive" (specified through the menuitem task).
@@ -75,7 +74,7 @@ Ext.define('esapp.view.system.systemsettingsController', {
                 var result = Ext.JSON.decode(response.responseText);
                 if (result.running == 'true') {
                     running = true;
-                    chechstatus.start();
+                    checkstatus.start();
                     me.getView().down('button[name=ingestarchivebtn]').setIconCls('fa fa-spin fa-spinner');
                     //me.getView().down('button[name=ingestarchivebtn]').setStyle('color','white');
                     me.getView().down('button[name=ingestarchivebtn]').down('menuitem[name=run_ingestarchive]').setDisabled(true);

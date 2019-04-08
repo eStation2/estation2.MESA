@@ -802,70 +802,8 @@ Ext.define("esapp.view.system.systemsettings",{
                         },
                         listeners: {
                             beforerender: 'execServiceTask'
-                        },
-                        handler: 'execServiceTask'
-                        //handler: function(btn){
-                        //    var task;
-                        //    //console.info(btn);
-                        //    //if (btn.iconCls == '') {
-                        //        var runner = new Ext.util.TaskRunner();
-                        //        task = runner.newTask({     //  newTask
-                        //            run: function () {
-                        //                Ext.Ajax.request({
-                        //                    method: 'POST',
-                        //                    params: {
-                        //                        service: btn.service,
-                        //                        task: btn.task
-                        //                    },
-                        //                    url: 'systemsettings/ingestarchive',
-                        //                    success: function (response, opts) {
-                        //                        var result = Ext.JSON.decode(response.responseText);
-                        //                        if (result.success) {
-                        //                            console.info(result);
-                        //                            if (result.running == 'true') {
-                        //                                btn.setIconCls('fa fa-spin fa-spinner');
-                        //                                //me.getView().down('button[name=ingestarchivebtn]').setStyle('color','white');
-                        //                                btn.down('menuitem[name=run_ingestarchive]').setDisabled(true);
-                        //                                btn.down('menuitem[name=stop_ingestarchive]').setDisabled(false);
-                        //                                btn.down('menuitem[name=restart_ingestarchive]').setDisabled(false);
-                        //                            } else {
-                        //                                btn.setIconCls('');
-                        //                                //me.getView().down('button[name=ingestarchivebtn]').setIconCls('fa fa-spinner');
-                        //                                //me.getView().down('button[name=ingestarchivebtn]').setStyle('color','gray');
-                        //                                btn.down('menuitem[name=run_ingestarchive]').setDisabled(false);
-                        //                                btn.down('menuitem[name=stop_ingestarchive]').setDisabled(true);
-                        //                                btn.down('menuitem[name=restart_ingestarchive]').setDisabled(true);
-                        //                                task.stop();
-                        //                            }
-                        //                            //if (result.running == 'true') {
-                        //                            //    Ext.toast({
-                        //                            //        html: 'Ingest archive running...',
-                        //                            //        title: 'Ingest archive',
-                        //                            //        width: 250,
-                        //                            //        align: 't'
-                        //                            //    });
-                        //                            //    btn.setIconCls('fa fa-spin fa-spinner');
-                        //                            //}
-                        //                            //else {
-                        //                            //    btn.setIconCls('');
-                        //                            //    task.stop();
-                        //                            //    //Ext.util.TaskRunner.destroy(task);
-                        //                            //}
-                        //                        }
-                        //                    },
-                        //                    failure: function (response, opts) {
-                        //                        console.info(response.status);
-                        //                        btn.setIconCls('');
-                        //                        task.stop();
-                        //                    }
-                        //                });
-                        //            },
-                        //            interval: 5000
-                        //        });
-                        //
-                        //        task.start();
-                        //    //}
-                        //}
+                        }
+                        ,handler: 'execServiceTask'
                     }]
                 },{
                    id: 'eumetcast_files_dir',
