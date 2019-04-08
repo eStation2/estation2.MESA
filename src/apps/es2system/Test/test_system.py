@@ -162,6 +162,17 @@ class TestSystem(unittest.TestCase):
         print status
 
 
+    def test_push_ftp_aruba(self):
+
+        try:
+            import apps.es2system.Test.aruba_credentials as ac
+        except:
+            return 1
+
+        # Should get here the role of my machine ...
+        # Masked=FALSE means the masked products are pushed.
+        status = es2system.push_data_ftp(url=ac.url, user=ac.user, psw=ac.psw, trg_dir=ac.trg_dir, masked=False)
+
     def test_push_ftp_jrc(self):
 
         # Execute w.o. arguments: they are read from server_ftp.py
