@@ -19,6 +19,7 @@ Ext.define('esapp.model.InternetSource', {
         {name: 'frequency_id'},
         {name: 'start_date'},   // , type: 'number', useNull : true, defaultValue: null
         {name: 'end_date'},
+        {name: 'https_params'},
         {name: 'datasource_descr_id'},
         {name: 'format_type'},
         {name: 'file_extension'},

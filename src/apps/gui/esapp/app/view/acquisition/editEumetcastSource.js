@@ -25,16 +25,16 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
     modal: true,
     closable: true,
     closeAction: 'destroy', // 'hide',
-    resizable: true,
+    resizable: false,
     autoScroll:true,
     maximizable: false,
 
     //width: 1100,
-    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-35 : 715,  // 600,
-    //maxHeight: 700,
+    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-35 : 700,  // 600,
+    maxHeight: 700,
 
     frame: true,
-    border: true,
+    border: false,
     bodyStyle: 'padding:5px 0px 0',
 
     viewConfig:{forceFit:true},
@@ -68,6 +68,54 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
             handler: 'onCancelClick'
         }];
 
+        var formattypes = new Ext.data.Store({
+            model   : 'esapp.model.FormatType',
+            data: [
+                { format_type:'delimited', format_type_descr:'Delimited'},
+                { format_type:'fixed', format_type_descr:'Fixed'}
+            ]
+        });
+        var areatypes = new Ext.data.Store({
+            model   : 'esapp.model.AreaType',
+            data: [
+                { area_type:'global', area_type_descr:'Global'},
+                { area_type:'region', area_type_descr:'Region'},
+                { area_type:'segment', area_type_descr:'Segment'},
+                { area_type:'tile', area_type_descr:'Tile'}
+            ]
+        });
+
+        var preproctypes = new Ext.data.Store({
+            model   : 'esapp.model.PreprocType',
+            data: [
+                { preproc_type:'MSG_MPE', preproc_type_descr:'MSG MPE'},
+                { preproc_type:'MPE_UMARF', preproc_type_descr:'MPE UMARF'},
+                { preproc_type:'MODIS_HDF4_TILE', preproc_type_descr:'MODIS HDF4 TILE'},
+                { preproc_type:'LSASAF_HDF5', preproc_type_descr:'LSASAF HDF5'},
+                { preproc_type:'PML_NETCDF', preproc_type_descr:'PML NETCDF'},
+                { preproc_type:'UNZIP', preproc_type_descr:'UNZIP'},
+                { preproc_type:'BZIP2', preproc_type_descr:'BZIP2'},
+                { preproc_type:'GEOREF_NETCDF', preproc_type_descr:'GEOREF NETCDF'},
+                { preproc_type:'BZ2_HDF4', preproc_type_descr:'BZ2 HDF4'},
+                { preproc_type:'HDF5_ZIP', preproc_type_descr:'HDF5 ZIP'},
+                { preproc_type:'HDF5_GLS', preproc_type_descr:'HDF5 GLS'},
+                { preproc_type:'HDF5_GLS_NC', preproc_type_descr:'HDF5 GLS NC'},
+                { preproc_type:'NASA_FIRMS', preproc_type_descr:'NASA FIRMS'},
+                { preproc_type:'GZIP', preproc_type_descr:'GZIP'},
+                { preproc_type:'NETCDF', preproc_type_descr:'NETCDF'},
+                { preproc_type:'JRC_WBD_GEE', preproc_type_descr:'JRC WBD GEE'},
+                { preproc_type:'ECMWF_MARS', preproc_type_descr:'ECMWF MARS'},
+                { preproc_type:'CPC_BINARY', preproc_type_descr:'CPC BINARY'},
+                { preproc_type:'GSOD', preproc_type_descr:'GSOD'},
+                { preproc_type:'NETCDF_S3_WRR', preproc_type_descr:'NETCDF S3 WRR'},
+                { preproc_type:'NETCDF_GPT_SUBSET', preproc_type_descr:'NETCDF GPT SUBSET'},
+                { preproc_type:'NETCDF_S3_WST', preproc_type_descr:'NETCDF S3 WST'},
+                { preproc_type:'TARZIP', preproc_type_descr:'TARZIP'},
+                { preproc_type:'NETCDF_AVISO', preproc_type_descr:'NETCDF AVISO'}
+            ]
+        });
+
+
         me.items = [{
             xtype: 'form',
             //bind: '{theEumetcastSource}',     // NO BIND otherwise does not work with formula on store.
@@ -90,11 +138,11 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
                     xtype: 'fieldset',
                     title: '<b>'+esapp.Utils.getTranslation('eumetcastdatasourceinfo')+'</b>',    // '<b>Eumetcast data source info</b>',
                     collapsible: false,
-                    width: 525,
+                    width: 425,
                     margin: '10 5 10 10',
                     padding: '10 10 10 10',
                     defaults: {
-                        width: 500,
+                        width: 400,
                         labelWidth: 120,
                         labelAlign: 'top'
                     },
@@ -116,6 +164,25 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
                         //dataIndex: 'filter_expression_jrc',
                         allowBlank: false,
                         grow: true
+                    }, {
+                        xtype: 'displayfield',
+                        fieldLabel: esapp.Utils.getTranslation('tipicalfilename'),    // 'Typical file name',
+                        reference: 'typical_file_name',
+                        msgTarget: 'side',
+                        minHeight: 80,
+                        shrinkWrap: 2,
+                        bind: '{theEumetcastSource.typical_file_name}'
+                        //dataIndex: 'typical_file_name'
+                    }, {
+                        xtype: 'displayfield',
+                        fieldLabel: esapp.Utils.getTranslation('description'),    // 'Description',
+                        reference: 'description',
+                        msgTarget: 'side',
+                        shrinkWrap: 2,
+                        minHeight: 160,
+                        grow: true,
+                        bind: '{theEumetcastSource.description}'
+                        //dataIndex: 'description'
                     }, {
                         xtype: 'displayfield',
                         fieldLabel: esapp.Utils.getTranslation('collectionname'),    // 'Collection name',
@@ -143,45 +210,34 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
                         shrinkWrap: 2,
                         bind: '{theEumetcastSource.keywords_societal_benefit_area}'
                         //dataIndex: 'keywords_societal_benefit_area'
-                    }, {
-                        xtype: 'displayfield',
-                        fieldLabel: esapp.Utils.getTranslation('tipicalfilename'),    // 'Typical file name',
-                        reference: 'typical_file_name',
-                        msgTarget: 'side',
-                        minHeight: 80,
-                        shrinkWrap: 2,
-                        bind: '{theEumetcastSource.typical_file_name}'
-                        //dataIndex: 'typical_file_name'
-                    }, {
-                        xtype: 'displayfield',
-                        fieldLabel: esapp.Utils.getTranslation('description'),    // 'Description',
-                        reference: 'description',
-                        msgTarget: 'side',
-                        shrinkWrap: 2,
-                        minHeight: 160,
-                        grow: true,
-                        bind: '{theEumetcastSource.description}'
-                        //dataIndex: 'description'
                     }]
                 },{
                     xtype: 'fieldset',
                     title: '<b>'+esapp.Utils.getTranslation('datasourcedescription')+'</b>',    // '<b>Data source description</b>',
                     collapsible: false,
-                    width: 525,
+                    width: 375,
                     margin: '10 10 10 5',
                     padding: '10 10 10 10',
                     defaults: {
-                        width: 500,
-                        labelWidth: 200
+                        width: 275,
+                        labelWidth: 130
                     },
                     items: [{
-                        xtype: 'textfield',
+                        xtype: 'combobox',
                         fieldLabel: esapp.Utils.getTranslation('format_type'),    // 'Format type',
                         reference: 'format_type',
-                        msgTarget: 'side',
                         bind: '{theEumetcastSource.format_type}',
-                        //dataIndex: 'format_type',
-                        allowBlank: false
+                        store: formattypes,
+                        // store: {
+                        //     type: 'formattypes'
+                        // },
+                        valueField: 'format_type',
+                        displayField: 'format_type_descr',
+                        allowBlank: true,
+                        typeAhead: false,
+                        queryMode: 'local',
+                        msgTarget: 'side',
+                        emptyText: esapp.Utils.getTranslation('selectaformattype')    // 'Select a format type...'
                     }, {
                         xtype: 'textfield',
                         fieldLabel: esapp.Utils.getTranslation('file_extension'),    // 'File extension',
@@ -201,6 +257,7 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
                         fieldLabel: esapp.Utils.getTranslation('date_format'),    // 'Date format',
                         reference: 'date_format',
                         allowBlank: false,
+                        width: 350,
                         store: {
                             type: 'dateformats'
                         },
@@ -223,12 +280,15 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
                         bind: '{theEumetcastSource.date_position}'
                         //dataIndex: 'date_position'
                     }, {
-                        xtype: 'textfield',
+                        xtype: 'textareafield',
                         fieldLabel: esapp.Utils.getTranslation('product_identifier'),    // 'Product identifier',
                         reference: 'product_identifier',
+                        labelAlign: 'top',
                         msgTarget: 'side',
-                        bind: '{theEumetcastSource.product_identifier}'
-                        //dataIndex: 'product_identifier'
+                        bind: '{theEumetcastSource.product_identifier}',
+                        height: 30,
+                        width: 350,
+                        grow: true
                     }, {
                         xtype: 'numberfield',
                         fieldLabel: esapp.Utils.getTranslation('prod_id_position'),    // 'Product ID position',
@@ -252,12 +312,21 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
                         bind: '{theEumetcastSource.prod_id_length}'
                         //dataIndex: 'prod_id_length'
                     }, {
-                        xtype: 'textfield',
+                        xtype: 'combobox',
                         fieldLabel: esapp.Utils.getTranslation('area_type'),    // 'Area type',
                         reference: 'area_type',
+                        bind: '{theEumetcastSource.area_type}',
+                        store: areatypes,
+                        // store: {
+                        //     type: 'areatypes'
+                        // },
+                        valueField: 'area_type',
+                        displayField: 'area_type_descr',
+                        allowBlank: true,
+                        typeAhead: false,
+                        queryMode: 'local',
                         msgTarget: 'side',
-                        bind: '{theEumetcastSource.area_type}'
-                        //dataIndex: 'description'
+                        emptyText: esapp.Utils.getTranslation('selectanareatype')    // 'Select an area type...'
                     }, {
                         xtype: 'numberfield',
                         fieldLabel: esapp.Utils.getTranslation('area_position'),    // 'Area position',
@@ -281,12 +350,23 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
                         bind: '{theEumetcastSource.area_length}'
                         //dataIndex: 'area_length'
                     }, {
-                        xtype: 'textfield',
+                        xtype: 'combobox',
                         fieldLabel: esapp.Utils.getTranslation('preproc_type'),    // 'Preproc type',
                         reference: 'preproc_type',
+                        bind: '{theEumetcastSource.preproc_type}',
+                        store: preproctypes,
+                        // store: {
+                        //     type: 'preproctypes'
+                        // },
+                        valueField: 'preproc_type',
+                        displayField: 'preproc_type_descr',
+                        // itemTpl: '<div class=""><span>{preproc_type}</span>{preproc_type_descr}</div>',
+                        width: 350,
+                        allowBlank: true,
+                        typeAhead: false,
+                        queryMode: 'local',
                         msgTarget: 'side',
-                        bind: '{theEumetcastSource.preproc_type}'
-                        //dataIndex: 'preproc_type'
+                        emptyText: esapp.Utils.getTranslation('selectanapreproctype')    // 'Select a pre-processing type...'
                     }, {
                         xtype: 'textfield',
                         fieldLabel: esapp.Utils.getTranslation('product_release'),    // 'Product release',
@@ -317,12 +397,23 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
                         bind: '{theEumetcastSource.release_length}'
                         //dataIndex: 'release_length'
                     }, {
-                        xtype: 'textfield',
+                        xtype: 'combobox',
                         fieldLabel: esapp.Utils.getTranslation('native_mapset'),    // 'Native mapset',
                         reference: 'native_mapset',
+                        bind: '{theEumetcastSource.native_mapset}',
+                        // store: mapsets,
+                        store: {
+                            type: 'mapsets'
+                        },
+                        valueField: 'mapsetcode',
+                        displayField: 'descriptive_name',
+                        // itemTpl: '<div class=""><span>{mapsetcode}</span>{descriptive_name}</div>',
+                        width: 350,
+                        allowBlank: true,
+                        typeAhead: false,
+                        queryMode: 'local',
                         msgTarget: 'side',
-                        bind: '{theEumetcastSource.native_mapset}'
-                        //dataIndex: 'native_mapset'
+                        emptyText: esapp.Utils.getTranslation('selectanamapset')    // 'Select a mapset...'
                     }]
                 }]
             }]

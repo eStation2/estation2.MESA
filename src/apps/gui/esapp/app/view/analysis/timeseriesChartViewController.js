@@ -1201,12 +1201,14 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             //     me.timeseriesGraph.yaxes[yaxescount].opposite == true ||
             //     me.timeseriesGraph.yaxes[yaxescount].opposite == 'true')
             //     opposite = true;
-
-            var unit = me.timeseriesGraph.yaxes[yaxescount].unit;
-            if (unit == null || unit.trim() == '')
-                unit = ''
-            else unit = ' (' + unit + ')'
-
+            // console.info(Ext.util.JSON.decode(me.selectedTimeseries));
+            var unit = '';
+            if (!Ext.util.JSON.decode(me.selectedTimeseries)[0].zscore) {
+                unit = me.timeseriesGraph.yaxes[yaxescount].unit;
+                if (unit == null || unit.trim() == '')
+                    unit = ''
+                else unit = ' (' + unit + ')'
+            }
             var min = me.timeseriesGraph.yaxes[yaxescount].min;
             if (min != null){
                 min =  parseFloat(me.timeseriesGraph.yaxes[yaxescount].min)

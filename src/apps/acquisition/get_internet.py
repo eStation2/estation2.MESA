@@ -546,7 +546,7 @@ def get_file_from_url(remote_url_file, target_dir, target_file=None, userpwd='',
     try:
         outputfile=open(target_fullpath, 'wb')
         logger.debug('Output File: '+target_fullpath)
-        remote_url_file = remote_url_file.replace('\\','') #Pierluigi
+        remote_url_file = remote_url_file.replace('\\', '')  # Pierluigi
         c.setopt(c.URL,remote_url_file)
         c.setopt(c.WRITEFUNCTION,outputfile.write)
         if remote_url_file.startswith('https'):

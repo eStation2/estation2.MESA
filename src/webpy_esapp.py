@@ -175,7 +175,8 @@ urls = (
     "/legends/unassignlegend", "UnassignLegend",
     "/legends/assigneddatasets", "GetAssignedDatasets",
 
-    "/getmapsets", "GetMapsets",
+    "/getmapsetsforingest", "GetMapsetsForIngest",
+    "/getmapsetsall", "GetMapsets",
     "/addingestmapset", "AddIngestMapset",
     "/deleteingestmapset", "DisableIngestMapset",
 
@@ -1509,6 +1510,7 @@ class GetInternetSources:
                                   'frequency_id': row_dict['frequency_id'],
                                   'start_date': startdate,
                                   'end_date': enddate,
+                                  'https_params': row_dict['https_params'],
                                   'datasource_descr_id': row_dict['datasource_descr_id'],
                                   'format_type': row_dict['format_type'],
                                   'file_extension': row_dict['file_extension'],
@@ -1614,6 +1616,7 @@ class UpdateInternetSource:
                                   'frequency_id': getparams['internetsources']['frequency_id'],
                                   'start_date': startdate,
                                   'end_date': enddate,
+                                  'https_params': getparams['internetsources']['https_params'],
                                   'datasource_descr_id': getparams['internetsources']['internet_id']}
 
             datasourcedescrinfo = {'datasource_descr_id': getparams['internetsources']['internet_id'],
@@ -2109,7 +2112,7 @@ class DisableIngestMapset:
         return deletestatus
 
 
-class GetMapsets:
+class GetMapsetsForIngest:
     def __init__(self):
         self.lang = "eng"
 
@@ -2118,6 +2121,38 @@ class GetMapsets:
 
         mapsets_dict_all = []
         mapsets = querydb.get_mapsets_for_ingest(productcode=getparams['productcode'], version=getparams['version'], subproductcode=getparams['subproductcode'])
+
+        if hasattr(mapsets, "__len__") and mapsets.__len__() > 0:
+            for mapset in mapsets:
+                mapset_dict = functions.row2dict(mapset)
+                mapsets_dict_all.append(mapset_dict)
+
+            mapsets_json = json.dumps(mapsets_dict_all,
+                                   ensure_ascii=False,
+                                   encoding='utf-8',
+                                   sort_keys=True,
+                                   indent=4,
+                                   separators=(', ', ': '))
+
+            mapsets_json = '{"success":"true", "total":'\
+                                  + str(mapsets.__len__())\
+                                  + ',"mapsets":'+mapsets_json+'}'
+
+        else:
+            mapsets_json = '{"success":false, "error":"No Mapsets defined!"}'
+
+        return mapsets_json
+
+
+class GetMapsets:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+
+        mapsets_dict_all = []
+        mapsets = querydb.get_mapsets()
 
         if hasattr(mapsets, "__len__") and mapsets.__len__() > 0:
             for mapset in mapsets:
@@ -2378,7 +2413,8 @@ class GetLogFile:
                 # logfilename = '/var/log/rsyncd.log'
                 logfilename = es_constants.es2globals['log_dir']+'rsync.log'
             if getparams['service'] == 'ingestarchive':
-                logfilename = es_constants.es2globals['log_dir']+'apps.es2system.ingest_archive.log'   # 'apps.tools.ingest_historical_archives.log'
+                logfilename = es_constants.es2globals['log_dir']+'apps.es2system.ingest_archive.log'
+                # logfilename = es_constants.es2globals['log_dir']+'apps.tools.ingest_historical_archives.log'
 
         # logfilepath = es_constants.es2globals['log_dir']+logfilename
         # Display only latest (most recent file) - see #69-1
@@ -2393,18 +2429,6 @@ class GetLogFile:
                     # logfilecontent = logfile.read()
                     for line in reversed(open(logfilepath).readlines()):
                         logfilecontent += line
-
-            # logfilecontent = logfilecontent.replace('\'', '')
-            # logfilecontent = logfilecontent.replace(chr(10), '<br />')
-            # logfilecontent = logfilecontent.replace(' TRACE ', '<b style="color:gray"> TRACE </b>')
-            # logfilecontent = logfilecontent.replace(' DEBUG ', '<b style="color:gray"> DEBUG </b>')
-            # logfilecontent = logfilecontent.replace(' INFO ', '<b style="color:green"> INFO </b>')
-            # logfilecontent = logfilecontent.replace(' WARNING ', '<b style="color:orange"> WARN </b>')
-            # logfilecontent = logfilecontent.replace(' WARN ', '<b style="color:orange"> WARN </b>')
-            # logfilecontent = logfilecontent.replace(' ERROR ', '<b style="color:red"> ERROR </b>')
-            # logfilecontent = logfilecontent.replace(' CRITICAL ', '<b style="color:red"> FATAL </b>')
-            # logfilecontent = logfilecontent.replace(' FATAL ', '<b style="color:red"> FATAL </b>')
-            # logfilecontent = logfilecontent.replace(' CLOSED ', '<b style="color:brown"> CLOSED </b>')
 
             logfilecontent = logfilecontent.replace('\'', '')
             logfilecontent = logfilecontent.replace('"', '')
@@ -3389,60 +3413,8 @@ class IngestArchive:
         self.lang = "eng"
 
     def POST(self):
-        # from apps.es2system import service_ingest_archive as sia
         getparams = web.input()
-        service = getparams['service']
-        task = getparams['task']
-        # if task == 'run':
-        #     task = 'start'
-        # print task
-
-        pid_file = es_constants.es2globals['ingest_archive_pid_filename']
-        ingestarchive_daemon = es2system.IngestArchiveDaemon(pid_file, dry_run=True)
-        status = ingestarchive_daemon.status()
-        if status:
-            message = 'Ingest Archive service is running'
-        else:
-            message = 'Ingest Archive service is not running'
-
-        ingestarchive_service_script = es_constants.es2globals['system_service_dir']+os.sep+'service_ingest_archive.py'
-        if getparams.task == 'stop':
-            if status:
-                os.system("python " + ingestarchive_service_script + " stop")
-                message = 'Ingest Archive service stopped'
-            else:
-                message = 'Ingest Archive service is already down'
-
-        elif getparams.task == 'run':
-            if not status:
-                os.system("python " + ingestarchive_service_script + " start")
-                message = 'Ingest Archive service started'
-            else:
-                message = 'Ingest Archive service was already up'
-
-        elif getparams.task == 'restart':
-            os.system("python " + ingestarchive_service_script + " restart")
-            # os.system("python " + ingestarchive_service_script + " stop")
-            # os.system("python " + ingestarchive_service_script + " start")
-            message = 'Ingest Archive service restarted'
-
-        status = ingestarchive_daemon.status()
-
-        running = 'false'
-        if status:
-            running = 'true'
-        response = '{"success":"true", "running":"'+running+'", "message":"'+message+'"}'
-        # running = sia.service_ingest_archive(command=task)
-        #
-        # if not running:
-        #     if task == 'status':
-        #         response = '{"success":"false", "running":"false", "message":"Ingest archive is not running!"}'
-        #     else:
-        #         response = '{"success":"false", "message":"Ingest archive stopped!"}'
-        # else:
-        #     response = '{"success":"true", "running":"true", "message":"Ingest archive is running!"}'
-
-        return response
+        return webpy_esapp_helpers.IngestArchive(getparams)
 
 
 class GetProductLayer:

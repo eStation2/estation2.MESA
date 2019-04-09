@@ -3,13 +3,13 @@ Ext.define('esapp.view.acquisition.selectMapsetForIngestModel', {
     alias: 'viewmodel.acquisition-selectmapsetforingest',
     stores: {
         mapsets: {
-            model: 'esapp.model.MapSet',
+            model: 'esapp.model.MapSetForIngest',
             autoLoad: false,
             session: true,
 
             proxy: {
                 type : 'ajax',
-                url : 'getmapsets',
+                url : 'getmapsetsforingest',
                 //extraParams:{
                 //    productcode: this.productcode,
                 //    version: this.productversion,
