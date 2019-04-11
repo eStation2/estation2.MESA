@@ -32,7 +32,7 @@ from database import querydb
 from lib.python import functions
 from apps.productmanagement import datasets
 from apps.tools import motu_api
-# from apps.tools import sentinelsat_api
+from apps.tools import sentinelsat_api
 
 logger = log.my_logger(__name__)
 
@@ -318,51 +318,51 @@ def build_list_matching_files_tmpl(base_url, template, from_date, to_date, frequ
 #           to_date: end date for the dataset (datetime.datetime object)
 #           frequency: dataset 'frequency' (see DB 'frequency' table)
 #
-# def build_list_matching_files_sentinel_sat(base_url, template, from_date, to_date, frequency_id,  username, password):
-#
-#     # Add a check on frequency
-#     try:
-#         frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
-#     except Exception as inst:
-#         logger.debug("Error in datasets.Dataset.get_frequency: %s" %inst.args[0])
-#         raise
-#
-#     # Manage the start_date (mandatory).
-#     try:
-#         # If it is a date, convert to datetime
-#         if functions.is_date_yyyymmdd(str(from_date), silent=True):
-#             datetime_start=datetime.datetime.strptime(str(from_date),'%Y%m%d')
-#         else:
-#             # If it is a negative number, subtract from current date
-#             if isinstance(from_date,int) or isinstance(from_date,long):
-#                 if from_date < 0:
-#                     datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
-#             else:
-#                 logger.debug("Error in Start Date: must be YYYYMMDD or -Ndays")
-#                 raise Exception("Start Date not valid")
-#     except:
-#         raise Exception("Start Date not valid")
-#
-#     # Manage the end_date (mandatory).
-#     try:
-#         if functions.is_date_yyyymmdd(str(to_date), silent=True):
-#             datetime_end=datetime.datetime.strptime(str(to_date),'%Y%m%d')
-#         # If it is a negative number, subtract from current date
-#         elif isinstance(to_date,int) or isinstance(to_date,long):
-#             if to_date < 0:
-#                 datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
-#         else:
-#             datetime_end=datetime.datetime.today()
-#     except:
-#         pass
-#
-#     try:
-#         list_filenames = sentinelsat_api.sentinelsat_getlists(base_url, template, datetime_start, datetime_end)#frequency.get_dates(datetime_start, datetime_end)
-#     except Exception as inst:
-#         logger.debug("Error in sentinelsat.get_lists: %s" %inst.args[0])
-#         raise
-#
-#     return list_filenames
+def build_list_matching_files_sentinel_sat(base_url, template, from_date, to_date, frequency_id,  username, password):
+
+    # Add a check on frequency
+    try:
+        frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
+    except Exception as inst:
+        logger.debug("Error in datasets.Dataset.get_frequency: %s" %inst.args[0])
+        raise
+
+    # Manage the start_date (mandatory).
+    try:
+        # If it is a date, convert to datetime
+        if functions.is_date_yyyymmdd(str(from_date), silent=True):
+            datetime_start=datetime.datetime.strptime(str(from_date),'%Y%m%d')
+        else:
+            # If it is a negative number, subtract from current date
+            if isinstance(from_date,int) or isinstance(from_date,long):
+                if from_date < 0:
+                    datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
+            else:
+                logger.debug("Error in Start Date: must be YYYYMMDD or -Ndays")
+                raise Exception("Start Date not valid")
+    except:
+        raise Exception("Start Date not valid")
+
+    # Manage the end_date (mandatory).
+    try:
+        if functions.is_date_yyyymmdd(str(to_date), silent=True):
+            datetime_end=datetime.datetime.strptime(str(to_date),'%Y%m%d')
+        # If it is a negative number, subtract from current date
+        elif isinstance(to_date,int) or isinstance(to_date,long):
+            if to_date < 0:
+                datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
+        else:
+            datetime_end=datetime.datetime.today()
+    except:
+        pass
+
+    try:
+        list_filenames = sentinelsat_api.sentinelsat_getlists(base_url, template, datetime_start, datetime_end)#frequency.get_dates(datetime_start, datetime_end)
+    except Exception as inst:
+        logger.debug("Error in sentinelsat.get_lists: %s" %inst.args[0])
+        raise
+
+    return list_filenames
 
 
 ######################################################################################
@@ -493,31 +493,31 @@ def get_file_from_motu_command(motu_command,  target_dir,userpwd=''):
 #           target_dir: target directory (by default a tmp dir is created)
 #   Output: full pathname is returned (or positive number for error)
 
-# def get_file_from_sentinelsat_url(uuid,  target_dir, target_file=None,userpwd=''):
-#
-#     # Create a tmp directory for download
-#     tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.es2globals['base_tmp_dir'])
-#
-#     # if target_file is None:
-#     #     target_file='test_output_file'
-#     #
-#     target_fullpath=tmpdir+os.sep
-#     target_final=target_dir+os.sep
-#
-#     try:
-#         sentinelsat_api.download_sentinelsat_getlists(uuid, target_fullpath )
-#         #TODO Below command has to be changed for windows version
-#         mv_cmd = "mv "+target_fullpath+'* '+target_final
-#         os.system(mv_cmd)
-#         #outputfile.close()
-#         #shutil.move(target_fullpath, target_final)
-#
-#         return 0
-#     except:
-#         logger.warning('Output NOT downloaded: %s - error : %i' %(uuid))
-#         return 1
-#     finally:
-#         shutil.rmtree(tmpdir)
+def get_file_from_sentinelsat_url(uuid,  target_dir, target_file=None,userpwd=''):
+
+    # Create a tmp directory for download
+    tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.es2globals['base_tmp_dir'])
+
+    # if target_file is None:
+    #     target_file='test_output_file'
+    #
+    target_fullpath=tmpdir+os.sep
+    target_final=target_dir+os.sep
+
+    try:
+        sentinelsat_api.download_sentinelsat_getlists(uuid, target_fullpath )
+        #TODO Below command has to be changed for windows version
+        mv_cmd = "mv "+target_fullpath+'* '+target_final
+        os.system(mv_cmd)
+        #outputfile.close()
+        #shutil.move(target_fullpath, target_final)
+
+        return 0
+    except:
+        logger.warning('Output NOT downloaded: %s - error : %i' %(uuid))
+        return 1
+    finally:
+        shutil.rmtree(tmpdir)
 
 
 ######################################################################################
