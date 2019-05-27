@@ -104,6 +104,18 @@ def get_one_source(internet_source, target_dir=None):
                 except:
                     logger.error("Error in creating date lists. Continue")
 
+            elif internet_type == 'ftp_tmpl':
+                # Create the full filename from a 'template' which contains
+                try:
+                    current_list = build_list_matching_files_ftp_tmpl(str(internet_source['url']),
+                                                                str(internet_source['include_files_expression']),
+                                                                internet_source['start_date'],
+                                                                internet_source['end_date'],
+                                                                str(internet_source['frequency_id']),
+                                                                str(usr_pwd),
+                                                                str(internet_source['files_filter_expression']))
+                except:
+                    logger.error("Error in creating date lists. Continue")
 
             elif internet_type == 'motu_client':
                 # Create the motu command which contains
@@ -1108,6 +1120,65 @@ class TestGetInternet(unittest.TestCase):
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
 
+
+    #   ---------------------------------------------------------------------------
+    #   Get contents of a remote MODIS BA  (id: UMD:MCD45A1:TIF:51)
+    #   ---------------------------------------------------------------------------
+    def TestRemoteFtp_SMOS_NC(self):
+
+        remote_url = 'ftp://smos-diss.eo.esa.int/SMOS/L2OS/MIR_OSUDP2_nc/'
+        from_date = '20190501' #datetime.date(2015,1,1)
+        to_date = '20190515' #datetime.date(2015,12,31)
+        template='/%Y/%m/%d/'
+        file_exp = 'SM_OPER_MIR_OSUDP2_.*.nc'
+        # usr_pwd='eStation2:eStation2019!'
+        frequency = 'e1day'
+        # target_dir = '/data/ingest/temp/'
+        # files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
+        # # files_list = [remote_url+'2015_01/JRC_EXPORT_20160225110837299-0000000000-0000065536']
+        # # get_file_from_url(files_list[0], target_dir, target_file=None, userpwd='', https_params='')
+        # print files_list
+
+        usr_pwd='eStation2:eStation2019!'
+        full_regex   ='SM_OPER_MIR_OSUDP2_.*.nc'
+        file_to_check='/%Y/%m/SM_OPER_MIR_OSUDP2_.*.nc'
+        internet_type = 'http'
+
+        #list = get_list_matching_files(remote_url, usr_pwd, full_regex,internet_type)
+        list =  build_list_matching_files_ftp_tmpl(remote_url, template, from_date, to_date, frequency, usr_pwd, file_exp)
+        self.assertTrue(file_to_check in list)
+
+    def TestFTP_TEMP_SMOS_NC(self):
+
+        internet_id='ESAEO:SMOS:L2OS:OSUDP2:SSS'
+
+        # Direct test !
+        if False:
+            return
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':-10,
+                         'end_date': -1,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type,
+                         'files_filter_expression':internet_source.files_filter_expression,
+                         'https_params': '',
+
+        }
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
 
 if __name__ == '__main__':
         unittest.main()

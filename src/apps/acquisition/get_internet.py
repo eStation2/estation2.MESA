@@ -32,7 +32,7 @@ from database import querydb
 from lib.python import functions
 from apps.productmanagement import datasets
 from apps.tools import motu_api
-from apps.tools import sentinelsat_api
+# from apps.tools import sentinelsat_api
 
 logger = log.my_logger(__name__)
 
@@ -224,6 +224,8 @@ def get_list_matching_files_subdirs(list, remote_url, usr_pwd, full_regex, level
     if internet_type == 'http' or (internet_type == 'ftp' and proxy_exists):
         #my_list = get_list_current_subdirs_ftp(remote_url, usr_pwd)
         my_list = get_list_current_subdirs_http(remote_url, usr_pwd, internet_type)
+    elif internet_type == 'ftp_tmpl':
+        my_list = get_list_current_subdirs_http(remote_url, usr_pwd, 'ftp')
     else:
         my_list = get_list_current_subdirs_ftp(remote_url, usr_pwd)
 
@@ -308,17 +310,17 @@ def build_list_matching_files_tmpl(base_url, template, from_date, to_date, frequ
 
 
 ######################################################################################
-#   build_list_matching_files_sentinel_sat
+#   build_list_matching_files_ftp_tmpl
 #   Purpose: return the list of file names matching a 'template' with 'date' placeholders
-#            It is the entry point for the 'http_templ' source type
-#   Author: Vijay Charan Venkatachalam, JRC, European Commission
-#   Date: 2019/02/18
-#   Inputs: template: regex including subdirs (e.g. 'Collection51/TIFF/Win1[01]/201[1-3]/MCD45monthly.A20.*burndate.tif.gz'
+#            It is the entry point for the 'ftp_templ' source type
+#   Author: Vijay CHaran Venkatachalam, JRC, European Commission
+#   Date: 2019/05/16
+#   Inputs: template: regex including subdirs (e.g. 'Collection51/TIFF/Win1[01]/201[1-3]/'
 #           from_date: start date for the dataset (datetime.datetime object)
 #           to_date: end date for the dataset (datetime.datetime object)
 #           frequency: dataset 'frequency' (see DB 'frequency' table)
 #
-def build_list_matching_files_sentinel_sat(base_url, template, from_date, to_date, frequency_id,  username, password):
+def build_list_matching_files_ftp_tmpl(base_url, template, from_date, to_date, frequency_id, usr_pwd, files_filter_expression):
 
     # Add a check on frequency
     try:
@@ -357,12 +359,111 @@ def build_list_matching_files_sentinel_sat(base_url, template, from_date, to_dat
         pass
 
     try:
-        list_filenames = sentinelsat_api.sentinelsat_getlists(base_url, template, datetime_start, datetime_end)#frequency.get_dates(datetime_start, datetime_end)
+        dates = frequency.get_dates(datetime_start, datetime_end)
     except Exception as inst:
-        logger.debug("Error in sentinelsat.get_lists: %s" %inst.args[0])
+        logger.debug("Error in frequency.get_dates: %s" %inst.args[0])
         raise
 
-    return list_filenames
+    try:
+        if sys.platform == 'win32':
+            template.replace("-","#")
+        list_ftp_pathes = frequency.get_internet_dates(dates, template)
+    except Exception as inst:
+        logger.debug("Error in frequency.get_internet_dates: %s" %inst.args[0])
+        raise
+
+    # Check the arguments (remote_url must end with os.sep and full_regex should begin with os.sep)
+    remote_url = functions.ensure_sep_present(base_url, 'end')
+    full_regex = functions.ensure_sep_present(files_filter_expression, 'begin')
+
+    # Get list from a remote ftp
+    list_matches = []
+    init_level = 1
+
+    for ftp_path in list_ftp_pathes:
+        # Get contents of the current folder
+        get_list_matching_files_subdirs(list_matches, remote_url+ftp_path, usr_pwd, full_regex, init_level, ftp_path, 'ftp_tmpl',
+                                        my_logger=logger)
+
+    # Manage end_date
+    # if end_date is not None:
+    #     if isinstance(end_date, int) or isinstance(end_date, long):
+    #         if (end_date < 0):
+    #             try:
+    #                 sorted_list = sorted(list_matches)
+    #                 if len(sorted_list) >= -end_date:
+    #                     list_matches = sorted_list[:end_date]
+    #             except:
+    #                 use_logger.warning('Error managing end_date: %i' % end_date)
+
+    # Debug
+        toprint = ''
+        for elem in list_matches:
+            toprint += elem + ','
+
+        logger.info('List in get_list_matching_files: %s' % toprint)
+
+    return list_matches
+
+
+
+
+######################################################################################
+#   build_list_matching_files_sentinel_sat
+#   Purpose: return the list of file names matching a 'template' with 'date' placeholders
+#            It is the entry point for the 'http_templ' source type
+#   Author: Vijay Charan Venkatachalam, JRC, European Commission
+#   Date: 2019/02/18
+#   Inputs: template: regex including subdirs (e.g. 'Collection51/TIFF/Win1[01]/201[1-3]/MCD45monthly.A20.*burndate.tif.gz'
+#           from_date: start date for the dataset (datetime.datetime object)
+#           to_date: end date for the dataset (datetime.datetime object)
+#           frequency: dataset 'frequency' (see DB 'frequency' table)
+#
+# def build_list_matching_files_sentinel_sat(base_url, template, from_date, to_date, frequency_id,  username, password):
+#
+#     # Add a check on frequency
+#     try:
+#         frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
+#     except Exception as inst:
+#         logger.debug("Error in datasets.Dataset.get_frequency: %s" %inst.args[0])
+#         raise
+#
+#     # Manage the start_date (mandatory).
+#     try:
+#         # If it is a date, convert to datetime
+#         if functions.is_date_yyyymmdd(str(from_date), silent=True):
+#             datetime_start=datetime.datetime.strptime(str(from_date),'%Y%m%d')
+#         else:
+#             # If it is a negative number, subtract from current date
+#             if isinstance(from_date,int) or isinstance(from_date,long):
+#                 if from_date < 0:
+#                     datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
+#             else:
+#                 logger.debug("Error in Start Date: must be YYYYMMDD or -Ndays")
+#                 raise Exception("Start Date not valid")
+#     except:
+#         raise Exception("Start Date not valid")
+#
+#     # Manage the end_date (mandatory).
+#     try:
+#         if functions.is_date_yyyymmdd(str(to_date), silent=True):
+#             datetime_end=datetime.datetime.strptime(str(to_date),'%Y%m%d')
+#         # If it is a negative number, subtract from current date
+#         elif isinstance(to_date,int) or isinstance(to_date,long):
+#             if to_date < 0:
+#                 datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
+#         else:
+#             datetime_end=datetime.datetime.today()
+#     except:
+#         pass
+#
+#     try:
+#         list_filenames = sentinelsat_api.sentinelsat_getlists(base_url, template, datetime_start, datetime_end)#frequency.get_dates(datetime_start, datetime_end)
+#     except Exception as inst:
+#         logger.debug("Error in sentinelsat.get_lists: %s" %inst.args[0])
+#         raise
+#
+#     return list_filenames
 
 
 ######################################################################################
@@ -493,31 +594,31 @@ def get_file_from_motu_command(motu_command,  target_dir,userpwd=''):
 #           target_dir: target directory (by default a tmp dir is created)
 #   Output: full pathname is returned (or positive number for error)
 
-def get_file_from_sentinelsat_url(uuid,  target_dir, target_file=None,userpwd=''):
-
-    # Create a tmp directory for download
-    tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.es2globals['base_tmp_dir'])
-
-    # if target_file is None:
-    #     target_file='test_output_file'
-    #
-    target_fullpath=tmpdir+os.sep
-    target_final=target_dir+os.sep
-
-    try:
-        sentinelsat_api.download_sentinelsat_getlists(uuid, target_fullpath )
-        #TODO Below command has to be changed for windows version
-        mv_cmd = "mv "+target_fullpath+'* '+target_final
-        os.system(mv_cmd)
-        #outputfile.close()
-        #shutil.move(target_fullpath, target_final)
-
-        return 0
-    except:
-        logger.warning('Output NOT downloaded: %s - error : %i' %(uuid))
-        return 1
-    finally:
-        shutil.rmtree(tmpdir)
+# def get_file_from_sentinelsat_url(uuid,  target_dir, target_file=None,userpwd=''):
+#
+#     # Create a tmp directory for download
+#     tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.es2globals['base_tmp_dir'])
+#
+#     # if target_file is None:
+#     #     target_file='test_output_file'
+#     #
+#     target_fullpath=tmpdir+os.sep
+#     target_final=target_dir+os.sep
+#
+#     try:
+#         sentinelsat_api.download_sentinelsat_getlists(uuid, target_fullpath )
+#         #TODO Below command has to be changed for windows version
+#         mv_cmd = "mv "+target_fullpath+'* '+target_final
+#         os.system(mv_cmd)
+#         #outputfile.close()
+#         #shutil.move(target_fullpath, target_final)
+#
+#         return 0
+#     except:
+#         logger.warning('Output NOT downloaded: %s - error : %i' %(uuid))
+#         return 1
+#     finally:
+#         shutil.rmtree(tmpdir)
 
 
 ######################################################################################
@@ -546,7 +647,7 @@ def get_file_from_url(remote_url_file, target_dir, target_file=None, userpwd='',
     try:
         outputfile=open(target_fullpath, 'wb')
         logger.debug('Output File: '+target_fullpath)
-        remote_url_file = remote_url_file.replace('\\', '')  # Pierluigi
+        remote_url_file = remote_url_file.replace('\\','') #Pierluigi
         c.setopt(c.URL,remote_url_file)
         c.setopt(c.WRITEFUNCTION,outputfile.write)
         if remote_url_file.startswith('https'):
@@ -713,6 +814,19 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                 except:
                                     logger.error("Error in creating file lists. Continue")
                                     continue
+
+                            elif internet_type == 'ftp_tmpl':
+                                # Create the full filename from a 'template' which contains
+                                try:
+                                    current_list = build_list_matching_files_ftp_tmpl(str(internet_source.url),
+                                                                                str(internet_source.include_files_expression),
+                                                                                internet_source.start_date,
+                                                                                internet_source.end_date,
+                                                                                str(internet_source.frequency_id),str(usr_pwd), str(internet_source.files_filter_expression) )
+                                except:
+                                    logger.error("Error in creating date lists. Continue")
+                                    continue
+
 
                             elif internet_type == 'http_tmpl':
                                 # Create the full filename from a 'template' which contains
