@@ -1875,7 +1875,7 @@ def pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=None):
     return interm_files_list
 
 
-def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=None):
+def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=None, zipped=False):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
 #   Returns -1 if nothing has to be done on the passed files
@@ -1907,19 +1907,29 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
         my_logger.debug('No any file captured during the day. Return')
         return -1
 
-    # Unzips the files
+    # Unzips the file
     for input_file in list_input_files:
 
-        # Unzip the .tar file in 'tmpdir'
-        command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep # ' --strip-components 1'
-        # print(command)
-        status = os.system(command)
-        # ToDo : check the status or use try/except
-        # TODO: Change the code to OS independent
-        # import tarfile
-        # tar = tarfile.open(input_file)
-        # tar.extractall(path=tmpdir + os.path.sep)  # untar file into same directory
-        # tar.close()
+        if zipped:
+            # Unzip the .tar file in 'tmpdir'
+            command = 'unzip ' + input_file + ' -d ' + tmpdir + os.path.sep  # ' --strip-components 1'
+            print(command)
+            status = os.system(command)
+            # TODO: Change the code to OS independent
+            # from zipfile import ZipFile
+            # with ZipFile('input_file','r') as zipObj:
+            #     zipObj.extractall(tmpdir + os.path.sep)
+
+        else:
+            # Unzip the .tar file in 'tmpdir'
+            command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep  # ' --strip-components 1'
+            print(command)
+            status = os.system(command)
+            # TODO: Change the code to OS independent
+            # import tarfile
+            # tar = tarfile.open(input_file)
+            # tar.extractall(path=tmpdir + os.path.sep)  # untar file into same directory
+            # tar.close()
 
     # Loop over subproducts and extract associated files. In case of more Mapsets, more sprods exist
     for sprod in subproducts:
@@ -3008,6 +3018,9 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
         elif preproc_type == 'GSOD':
             interm_files = pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
+
+        elif preproc_type == 'NETCDF_S3_WRR_ZIP':
+            interm_files = pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=in_date, zipped=True)
 
         elif preproc_type == 'NETCDF_S3_WRR':
             interm_files = pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=in_date)

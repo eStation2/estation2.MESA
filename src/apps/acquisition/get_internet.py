@@ -33,6 +33,7 @@ from lib.python import functions
 from apps.productmanagement import datasets
 from apps.tools import motu_api
 # from apps.tools import sentinelsat_api
+from apps.tools import coda_eum_api
 
 logger = log.my_logger(__name__)
 
@@ -537,6 +538,75 @@ def build_list_matching_files_motu(base_url, template, from_date, to_date, frequ
     return list_filenames
 
 ######################################################################################
+#   build_list_matching_files_eum_http
+#   Purpose: return the list of uuid/filename matching a query object with 'date' placeholders
+#            It is the entry point for the 'eum_http' source type
+#   Author: Vijay Charan, JRC, European Commission
+#   Date: 2019/06/04
+#   Inputs: base_url: base url of motu client
+#   `       template: regex including subdirs (e.g. 'Collection51/TIFF/Win1[01]/201[1-3]/MCD45monthly.A20.*burndate.tif.gz'
+#           from_date: start date for the dataset (datetime.datetime object)
+#           to_date: end date for the dataset (datetime.datetime object)
+#           frequency: dataset 'frequency' (see DB 'frequency' table)
+#           username: username
+#           password: password
+#
+def build_list_matching_files_eum_http(base_url, template, from_date, to_date, frequency_id, username, password):
+
+    # Add a check on frequency
+    try:
+        frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
+    except Exception as inst:
+        logger.debug("Error in datasets.Dataset.get_frequency: %s" %inst.args[0])
+        raise
+
+    # Manage the start_date (mandatory).
+    try:
+        # If it is a date, convert to datetime
+        if functions.is_date_yyyymmdd(str(from_date), silent=True):
+            datetime_start=datetime.datetime.strptime(str(from_date),'%Y%m%d')
+        else:
+            # If it is a negative number, subtract from current date
+            if isinstance(from_date,int) or isinstance(from_date,long):
+                if from_date < 0:
+                    datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
+            else:
+                logger.debug("Error in Start Date: must be YYYYMMDD or -Ndays")
+                raise Exception("Start Date not valid")
+    except:
+        raise Exception("Start Date not valid")
+
+    # Manage the end_date (mandatory).
+    try:
+        if functions.is_date_yyyymmdd(str(to_date), silent=True):
+            datetime_end=datetime.datetime.strptime(str(to_date),'%Y%m%d')
+        # If it is a negative number, subtract from current date
+        elif isinstance(to_date,int) or isinstance(to_date,long):
+            if to_date < 0:
+                datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
+            elif to_date > 0:
+                datetime_end = datetime.datetime.today() + datetime.timedelta(days=to_date)
+        else:
+            datetime_end=datetime.datetime.today()
+    except:
+        pass
+
+    try:
+        dates = frequency.get_dates(datetime_start, datetime_end)
+    except Exception as inst:
+        logger.debug("Error in frequency.get_dates: %s" %inst.args[0])
+        raise
+
+    try:
+        list_filenames = coda_eum_api.generate_list_uuid(dates, template, base_url, username, password)
+    except Exception as inst:
+        logger.debug("Error in coda_eum_api.coda_getlists: %s" %inst.args[0])
+        raise
+
+    return list_filenames
+
+
+######################################################################################
 #   get_file_from_motu_command
 #   Purpose: download and save motu file
 #   Author: Vijay Charan Venkatachalam, JRC, European Commission
@@ -874,6 +944,24 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                             #         logger.error("Error in creating sentinel_sat lists. Continue")
                             #         continue
 
+
+                            elif internet_type == 'http_coda_eum':
+                                # Create the full filename from a 'template' which contains
+                                try:
+                                    current_list = build_list_matching_files_eum_http(str(internet_source.url),
+                                                                                str(internet_source.include_files_expression),
+                                                                                internet_source.start_date,
+                                                                                internet_source.end_date,
+                                                                                str(internet_source.frequency_id),
+                                                                                str(internet_source.user_name),
+                                                                                str(internet_source.password),
+                                                                                  )
+
+                                except:
+                                    logger.error("Error in creating http_coda_eum lists. Continue")
+                                    continue
+
+
                             elif internet_type == 'local':
                                 logger.info("This internet source is meant to copy data on local filesystem")
                                 try:
@@ -928,6 +1016,10 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                 # elif internet_type == 'sentinel_sat':
                                                 #     result = get_file_from_sentinelsat_url(str(filename),
                                                 #                                            target_dir=es_constants.ingest_dir)
+
+                                                elif internet_type == 'sentinel_sat':
+                                                    download_link = 'https://coda.eumetsat.int/odata/v1/Products(\'{0}\')/$value'.format(os.path.split(filename)[0])
+                                                    result = get_file_from_url(str(download_link), target_dir=es_constants.ingest_dir, target_file=os.path.basename(filename) + '.zip', userpwd=str(usr_pwd), https_params=str(internet_source.https_params))
                                                 else:
                                                     result = get_file_from_url(
                                                         str(internet_source.url) + os.path.sep + filename,
