@@ -696,7 +696,7 @@ def drive_pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger):
     # Check the input files (corrupted would stop the detached process)
     for infile in input_files:
         try:
-            command = 'bunzip2 -t {0} > /dev/null 2>dev/null'.format(infile)
+            command = 'bunzip2 -t {0} > /dev/null 2>/dev/null'.format(infile)
             status = os.system(command)
             if status:
                 my_logger.error('File {0} is not a valid bz2. Exit'.format(os.path.basename(infile)))
