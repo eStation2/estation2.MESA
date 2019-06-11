@@ -2725,6 +2725,27 @@ def day_length(day, latitude):
     return dl
 
 
+#####################################################################################
+#   Purpose: Check the passed date belongs to current month
+#   Author: Vijay Charan Venkatachalam, JRC, European Commission
+#   Date: 2019/06/06
+#   Inputs: date_as_YYYYMMDD
+#   Output: Boolean
+#
+def is_date_current_month(year_month_day):
+    current_month = False
+    if is_date_yyyymmdd(year_month_day):
+        year = int(str(year_month_day)[0:4])
+        month = int(str(year_month_day)[4:6])
+
+    today = datetime.date.today()
+    YYYYMM = today.strftime('%Y%m')
+
+    if int(str(YYYYMM)[0:4]) == year:
+        if int(str(YYYYMM)[4:6]) == month:
+            current_month = True
+
+    return current_month
 
 ######################################################################################
 #                            PROCESSING CHAINS

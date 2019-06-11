@@ -1324,10 +1324,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     # @follows(vgt_ndvi_ratio_linearx2)
     def vgt_ndvi_monndvi(input_file, output_file):
 
-        output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
-        raster_image_math.do_avg_image(**args)
+        #ES2- 235 Do not show temporary products like composite not complete (ex monthly composite available mid month...)
+        input_file_date = functions.get_date_from_path_full(input_file[0])
+
+        if len(input_file) == 3:
+            if not functions.is_date_current_month(input_file_date):
+                output_file = functions.list_to_element(output_file)
+                functions.check_output_dir(os.path.dirname(output_file))
+                args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+                raster_image_math.do_avg_image(**args)
 
     #   ---------------------------------------------------------------------
     #   3.C baresoil monthly product (avg)
@@ -1360,10 +1365,15 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     @collate(starting_files_baresoil_linearx2_all, formatter(formatter_in), formatter_out)
     @follows(vgt_ndvi_baresoil_linearx2)
     def vgt_ndvi_monbaresoil(input_file, output_file):
-        output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
-        raster_image_math.do_avg_image(**args)
+        #ES2- 235 Do not show temporary products like composite not complete (ex monthly composite available mid month...)
+        input_file_date = functions.get_date_from_path_full(input_file[0])
+
+        if len(input_file) == 3:
+            if not functions.is_date_current_month(input_file_date):
+                output_file = functions.list_to_element(output_file)
+                functions.check_output_dir(os.path.dirname(output_file))
+                args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+                raster_image_math.do_avg_image(**args)
 
 
     #   ---------------------------------------------------------------------

@@ -336,11 +336,21 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     @active_if(activate_monthly_comput, activate_1moncum_comput)
     @collate(starting_files, formatter(formatter_in), formatter_out)
     def std_precip_1moncum(input_file, output_file):
+        #ES2- 235 Do not show temporary products like composite not complete (ex monthly composite available mid month...)
+        # ex: monthly RFE in the middle of the month should not be available because incomplete and lead to wrong analysis...
+        # Check current month  ---> yes  ---> skip
+        #                      ----> NO   ---> Check No of days (10% tolerance)
+        #                                       acceptable ---->
+        #                                                   Yes ---> proceed
+        #                                                   No ----> Skip
+        input_file_date = functions.get_date_from_path_full(input_file[0])
 
-        output_file = functions.list_to_element(output_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file,"output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
-        raster_image_math.do_cumulate(**args)
+        if len(input_file) == 3:
+            if not functions.is_date_current_month(input_file_date):
+                output_file = functions.list_to_element(output_file)
+                functions.check_output_dir(os.path.dirname(output_file))
+                args = {"input_file": input_file,"output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw"}
+                raster_image_math.do_cumulate(**args)
 
     #   ---------------------------------------------------------------------
     #   Monthly Average

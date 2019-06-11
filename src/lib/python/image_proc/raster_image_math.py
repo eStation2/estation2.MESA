@@ -47,7 +47,8 @@ import numpy as N
 import copy
 import os, re, os.path, time, sys
 import pymorph
-
+import tempfile
+import shutil
 # Jur: not working in windows version. Conflict with scipy version 1.1.0 and its ndimage functionality.
 # I tried to install scipy version 0.15.1 but need older numpy version 1.19.2 (numpy 1.11.0 is installed)
 # installing numpy 1.19.2 gives problems with installed gdal version 2.1.2)
@@ -67,6 +68,12 @@ def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata
     try:
         # Force input to be a list
         input_list = return_as_list(input_file)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_list[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -206,16 +213,25 @@ def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata
         if output_stddev != None:
             if os.path.isfile(output_stddev):
                 os.remove(output_stddev)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_stddev_image(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
                     output_type=None, options='', output_stddev='', ):
     # Note: no 'update' functionality is foreseen -> creates output EVERY TIME
-    # In this method make sure you pass the output_file as avg_file and output_stddev as output file to ease calculation
+    # In this method make sure you pass the output_file as avg_file and output_stddev as output file to ease calculation TODO rename output_file to avg_file
     try:
         # Force input to be a list
         input_list = return_as_list(input_file)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_list[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_stddev
+        output_stddev = tmpdir + os.sep +os.path.basename(output_stddev)
 
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -366,6 +382,10 @@ def do_stddev_image(input_file='', output_file='', input_nodata=None, output_nod
         if os.path.isfile(output_stddev):
             os.remove(output_stddev)
 
+    else:
+        shutil.move(output_stddev, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_min_image(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
@@ -378,6 +398,12 @@ def do_min_image(input_file='', output_file='', input_nodata=None, output_nodata
     try:
         # Force input to be a list
         input_list = return_as_list(input_file)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_list[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -496,7 +522,10 @@ def do_min_image(input_file='', output_file='', input_nodata=None, output_nodata
         logger.warning('Error in do_min_image. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_max_image(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
@@ -509,6 +538,12 @@ def do_max_image(input_file='', output_file='', input_nodata=None, output_nodata
     try:
         # Force input to be a list
         input_list = return_as_list(input_file)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_list[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -635,8 +670,10 @@ def do_max_image(input_file='', output_file='', input_nodata=None, output_nodata
         logger.warning('Error in do_max_image. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 #   _____________________________
 def do_med_image(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
                  output_type=None, options='', min_num_valid=None):
@@ -648,6 +685,12 @@ def do_med_image(input_file='', output_file='', input_nodata=None, output_nodata
     try:
         # Force input to be a list
         input_list = return_as_list(input_file)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_list[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -737,7 +780,10 @@ def do_med_image(input_file='', output_file='', input_nodata=None, output_nodata
         logger.warning('Error in do_med_image. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
@@ -749,6 +795,12 @@ def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # Open input files
         fid0 = gdal.Open(input_file[0], GA_ReadOnly)
@@ -831,7 +883,10 @@ def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output
         logger.warning('Error in do_oper_subtraction. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_oper_division_perc(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
@@ -844,6 +899,12 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # Open input files
         fid0 = gdal.Open(input_file[0], GA_ReadOnly)
@@ -926,8 +987,10 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
         logger.warning('Error in do_oper_division_perc. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 # _____________________________
 def do_oper_scalar_multiplication(input_file='', output_file='', scalar=1, input_nodata=None, output_nodata=None,
                                   output_format=None,
@@ -939,6 +1002,12 @@ def do_oper_scalar_multiplication(input_file='', output_file='', scalar=1, input
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # Open input file
         fid0 = gdal.Open(input_file[0], GA_ReadOnly)
@@ -1011,7 +1080,10 @@ def do_oper_scalar_multiplication(input_file='', output_file='', scalar=1, input
         logger.warning('Error in do_oper_scalar_multiplication. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_make_vci(input_file='', min_file='', max_file='', output_file='', input_nodata=None, output_nodata=None,
@@ -1021,6 +1093,12 @@ def do_make_vci(input_file='', min_file='', max_file='', output_file='', input_n
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # open files
         fileFID = gdal.Open(input_file, GA_ReadOnly)
@@ -1116,7 +1194,10 @@ def do_make_vci(input_file='', min_file='', max_file='', output_file='', input_n
         logger.warning('Error in do_make_vci. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_make_baresoil(input_file='', avg_file='', min_file='', max_file='', output_file='', input_nodata=None,
@@ -1145,6 +1226,12 @@ def do_make_baresoil(input_file='', avg_file='', min_file='', max_file='', outpu
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # open files
         fileFID = gdal.Open(input_file, GA_ReadOnly)
@@ -1280,7 +1367,10 @@ def do_make_baresoil(input_file='', avg_file='', min_file='', max_file='', outpu
         logger.warning('Error in do_make_baresoil. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_mask_image(input_file='', mask_file='', output_file='', output_format=None,
@@ -1294,6 +1384,12 @@ def do_mask_image(input_file='', mask_file='', output_file='', output_format=Non
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # open files
         fileFID = gdal.Open(input_file, GA_ReadOnly)
@@ -1362,7 +1458,10 @@ def do_mask_image(input_file='', mask_file='', output_file='', output_format=Non
             outDrv = None
             outDS = None
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
@@ -1373,6 +1472,12 @@ def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # Open input file
         fid0 = gdal.Open(input_file[0], GA_ReadOnly)
@@ -1501,7 +1606,10 @@ def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=
         logger.warning('Error in do_cumulate. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_compute_perc_diff_vs_avg(input_file='', avg_file='', output_file='', input_nodata=None, output_nodata=None,
@@ -1514,6 +1622,12 @@ def do_compute_perc_diff_vs_avg(input_file='', avg_file='', output_file='', inpu
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # open files
         fileFID = gdal.Open(input_file, GA_ReadOnly)
@@ -1601,7 +1715,10 @@ def do_compute_perc_diff_vs_avg(input_file='', avg_file='', output_file='', inpu
         logger.warning('Error in do_compute_perc_diff_vs_avg. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_file='',
@@ -1612,6 +1729,12 @@ def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_fil
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(chla_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # open files
         chla_fileID = gdal.Open(chla_file, GA_ReadOnly)
@@ -1724,7 +1847,10 @@ def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_fil
         logger.warning('Error in do_compute_primary_production. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 def DetectEdgesInSingleImage(image, histogramWindowStride, \
                              minTheta, histogramWindowSize, minPopProp, minPopMeanDifference, minSinglePopCohesion,
@@ -2151,6 +2277,12 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
     rid = ''
     debug = 0
 
+    tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                              dir=es_constants.base_tmp_dir)
+
+    output_file_final = output_file
+    output_file = tmpdir + os.sep + os.path.basename(output_file)
+
     # Manage options
     options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
@@ -2246,6 +2378,8 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
     outDS = None
     assign_metadata_processing(input_list, output_file, parameters=parameters)
 
+    shutil.move(output_file, output_file_final)
+    shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_ts_linear_filter(input_file='', before_file='', after_file='', output_file='', input_nodata=None,
@@ -2258,6 +2392,12 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
     # Manage options
     options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
+
+    tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                              dir=es_constants.base_tmp_dir)
+
+    output_file_final = output_file
+    output_file = tmpdir + os.sep + os.path.basename(output_file)
 
     # Open the threee files (add checks)
     f0 = gdal.Open(input_file, GA_ReadOnly)
@@ -2344,6 +2484,8 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
 
     assign_metadata_processing(input_list, output_file)
 
+    shutil.move(output_file, output_file_final)
+    shutil.rmtree(tmpdir)
 
 def do_rain_onset(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
                   output_type=None, options='', current_dekad=None):
@@ -2352,6 +2494,11 @@ def do_rain_onset(input_file='', output_file='', input_nodata=None, output_nodat
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
 
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
         # Determines if it is the first dekad of the season
         if len(input_file) == 2:
             first_dekad = True
@@ -2457,7 +2604,10 @@ def do_rain_onset(input_file='', output_file='', input_nodata=None, output_nodat
         logger.warning('Error in rain-onset. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 #   Merge/move wrt processing.py functions
@@ -2536,6 +2686,12 @@ def do_reproject(inputfile, output_file, native_mapset_name, target_mapset_name)
     target_mapset = mapset.MapSet()
     target_mapset.assigndb(target_mapset_name)
 
+    tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(inputfile),
+                              dir=es_constants.base_tmp_dir)
+
+    output_file_final = output_file
+    output_file = tmpdir + os.sep + os.path.basename(output_file)
+
     # Open the input file
     orig_ds = gdal.Open(inputfile)
 
@@ -2590,6 +2746,8 @@ def do_reproject(inputfile, output_file, native_mapset_name, target_mapset_name)
     meta_data.assign_mapset(target_mapset_name)
     meta_data.write_to_file(output_file)
 
+    shutil.move(output_file, output_file_final)
+    shutil.rmtree(tmpdir)
 
 #   -------------------------------------------------------------------------------------------
 def getRasterBox(fid, xstart, xend, ystart, yend, band):
@@ -2649,6 +2807,12 @@ def create_surface_area_raster(input_file=None, output_file='', output_format=No
     # Notes:
 
     try:
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         if input_file is not None:
             f1Fid = gdal.Open(input_file, GA_ReadOnly)
@@ -2727,7 +2891,10 @@ def create_surface_area_raster(input_file=None, output_file='', output_format=No
         logger.warning('Error in create_surface_area_raster. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 #   -------------------------------------------------------------------------------------------
 def do_raster_stats(fid, fidID, outDS, iband, roi, minId, maxId, nodata, operation, args=None):
@@ -2875,6 +3042,13 @@ def do_raster_stats(fid, fidID, outDS, iband, roi, minId, maxId, nodata, operati
 #
 def do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapset_name, grid_mapset_name,
                       output_format=None, nodata=None, output_type=None, options=None, args=None):
+
+    tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                              dir=es_constants.base_tmp_dir)
+
+    output_file_final = output_file
+    output_file = tmpdir + os.sep + os.path.basename(output_file)
+
     # Manage input arguments
     if output_format is None:
         output_format = 'GTiff'
@@ -2958,7 +3132,10 @@ def do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapse
         logger.warning('Error in do_stats_4_raster. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 ################################
 ##  Compute chla gradient   ####
@@ -2968,6 +3145,13 @@ def do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapse
 def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_nodata=None, output_format=None,
                              output_type=None, options=''):
     try:
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
+
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
@@ -3060,7 +3244,10 @@ def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_
         logger.warning('Error in do_compute_chla_gradient. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # ##########################
 #   Compute chla gradient  #
@@ -3070,7 +3257,11 @@ def compute_extrapolated_chla_gradient(input_file='', nodata=None, output_file='
                                        output_format=None,
                                        output_type=None, options=''):
     try:
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
 
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
         ##############
         #  constants #
         ##############
@@ -3262,7 +3453,10 @@ def compute_extrapolated_chla_gradient(input_file='', nodata=None, output_file='
         logger.warning('Error in compute_opFish_indicator. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # ##########################
 #  Compute opFish indicator#
@@ -3271,6 +3465,11 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
                              output_type=None, options=''):
     try:
 
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
         ##############
         #  constants #
         ##############
@@ -3548,8 +3747,10 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         logger.warning('Error in compute_opFish_indicator. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 # ##########################
 #   Compute median_filter  #
 #     NOT USED             #
@@ -3561,6 +3762,12 @@ def compute_difference(input_file='', nodata=None, output_file='', output_nodata
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         # open file
         data_fileID = gdal.Open(input_file, GA_ReadOnly)
@@ -3641,7 +3848,10 @@ def compute_difference(input_file='', nodata=None, output_file='', output_nodata
         logger.warning('Error in compute_median_filter. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 #   Write metadata to an output file.
