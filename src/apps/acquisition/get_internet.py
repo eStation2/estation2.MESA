@@ -1017,7 +1017,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                 #     result = get_file_from_sentinelsat_url(str(filename),
                                                 #                                            target_dir=es_constants.ingest_dir)
 
-                                                elif internet_type == 'sentinel_sat':
+                                                elif internet_type == 'http_coda_eum':
                                                     download_link = 'https://coda.eumetsat.int/odata/v1/Products(\'{0}\')/$value'.format(os.path.split(filename)[0])
                                                     result = get_file_from_url(str(download_link), target_dir=es_constants.ingest_dir, target_file=os.path.basename(filename) + '.zip', userpwd=str(usr_pwd), https_params=str(internet_source.https_params))
                                                 else:
