@@ -154,6 +154,12 @@ urls = (
     "/analysis/userworkspaces", "getUserWorkspaces",
     "/analysis/userworkspaces/delete", "DeleteWorkspace",
 
+    "/logos", "GetLogos",
+    "/logos/create", "CreateLogo",
+    "/logos/update", "UpdateLogo",
+    "/logos/delete", "DeleteLogo",
+    "/logos/import", "ImportLogo",
+
     "/layers", "GetLayers",
     "/layers/create", "CreateLayer",
     "/layers/update", "UpdateLayer",
@@ -422,6 +428,155 @@ class checkECASlogin:
                 login_json = '{"success":false, "error":"Error reading login data!"}'
 
         return login_json
+
+
+class GetLogos:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        # getparams = web.input()
+        logos_json = webpy_esapp_helpers.GetLogos()
+        return logos_json
+
+
+class ImportLogo:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        # getparams = json.loads(web.data())  # get PUT data
+        getparams = web.input() # get POST data
+
+        logosfiledir = es_constants.es2globals['estation2_logos_dir']
+        if 'logofilename' in getparams: # to check if the file-object is created
+            try:
+                filepath=getparams.logofilename.replace('\\','/') # replaces the windows-style slashes with linux ones.
+                filename=filepath.split('/')[-1] # splits the and chooses the last part (the filename with extension)
+
+                # Separate base from extension
+                base, extension = os.path.splitext(filename)
+
+                # Initial new name
+                new_name = os.path.join(logosfiledir, filename).encode('utf-8')
+                new_name_final = logosfiledir + '/' + filename
+
+                if not os.path.exists(new_name):  # file does not exist in <layerfiledir>
+                    fout = open(new_name,'w') # creates the file where the uploaded file should be stored
+                    fout.write(getparams.logofile) # .read()  writes the uploaded file to the newly created file.
+                    fout.close() # closes the file, upload complete.
+                else:  # file exists in <logosfiledir>
+                    ii = 1
+                    while True:
+                        new_name = os.path.join(logosfiledir, base + "_" + str(ii) + extension).encode('utf-8')
+                        new_name_final = os.path.join(logosfiledir, base + "_" + str(ii) + extension)
+                        if not os.path.exists(new_name):
+                            fout = open(new_name,'w') # creates the file where the uploaded file should be stored
+                            fout.write(getparams.logofile) # .read()  writes the uploaded file to the newly created file.
+                            fout.close() # closes the file, upload complete.
+                            break
+                        ii += 1
+
+                finalfilename = new_name_final.split('/')[-1] # splits the and chooses the last part (the filename with extension)
+                success = True
+            except:
+                success = False
+        else:
+            success = False
+
+        if success:
+            status = '{"success":"true", "filename":"'+ finalfilename + '","message":"Logo imported!"}'
+        else:
+            status = '{"success":false, "message":"An error occured while importing the logo!"}'
+
+        return status
+
+
+class DeleteLogo:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def DELETE(self):
+        getparams = json.loads(web.data())  # get PUT data
+        # getparams = web.input() # get POST data
+        if 'logo' in getparams:
+            logo = {
+                'logo_id': getparams['logo']['logo_id'],
+            }
+
+
+            if self.crud_db.delete('logos', **logo):
+                status = '{"success":"true", "message":"Logo deleted!"}'
+            else:
+                status = '{"success":false, "message":"An error occured while deleting the logo!"}'
+
+        else:
+            status = '{"success":false, "message":"No logo info passed!"}'
+
+        return status
+
+
+class CreateLogo:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def POST(self):
+        getparams = json.loads(web.data())  # get PUT data
+        # getparams = web.input() # get POST data
+        if 'logo' in getparams:
+            logo = {
+                # 'logo_id': getparams['logo']['logo_id'],
+                'logo_filename': getparams['logo']['logo_filename'],
+                'logo_description': getparams['logo']['logo_description'],
+                'active': getparams['logo']['active'],
+                'deletable': getparams['logo']['deletable'],
+                'defined_by': getparams['logo']['defined_by'],
+                'isdefault': getparams['logo']['isdefault'],
+                'orderindex_defaults': getparams['logo']['orderindex_defaults']
+            }
+
+            if self.crud_db.create('logos', logo):
+                status = '{"success":"true", "message":"Logo created!"}'
+            else:
+                status = '{"success":false, "message":"An error occured while creating the new logo!"}'
+
+        else:
+            status = '{"success":false, "message":"No logo info passed!"}'
+
+        return status
+
+
+class UpdateLogo:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def PUT(self):
+        getparams = json.loads(web.data())  # get PUT data
+        if 'logo' in getparams:
+            logo = {
+                'logo_id': getparams['logo']['logo_id'],
+                'logo_filename': getparams['logo']['logo_filename'],
+                'logo_description': getparams['logo']['logo_description'],
+                'active': getparams['logo']['active'],
+                'deletable': getparams['logo']['deletable'],
+                'defined_by': getparams['logo']['defined_by'],
+                'isdefault': getparams['logo']['isdefault'],
+                'orderindex_defaults': getparams['logo']['orderindex_defaults']
+            }
+
+
+            if self.crud_db.update('logos', logo):
+                updatestatus = '{"success":"true", "message":"Logo updated!"}'
+            else:
+                updatestatus = '{"success":false, "message":"An error occured while updating the logo!"}'
+
+        else:
+            updatestatus = '{"success":false, "message":"No logo info passed!"}'
+
+        return updatestatus
 
 
 class GetAssignedDatasets:
@@ -3197,7 +3352,6 @@ class GetVectorLayer:
     def GET(self):
         getparams = web.input()
         filename = getparams['file']
-        # layerfilepath = '/srv/www/eStation2_Layers/'+filename
         layerfilepath = es_constants.estation2_layers_dir + os.path.sep + filename.encode('utf-8')
         # if isFile(layerfilepath):
         layerfile = open(layerfilepath, 'r')

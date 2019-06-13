@@ -1,12 +1,12 @@
-Ext.define('esapp.store.LogoImages', {
+Ext.define('esapp.store.HeaderLogoImages', {
     extend  : 'Ext.data.Store',
 
     requires : [
-        'esapp.model.LogoImage'
+        'esapp.model.HeaderLogoImage'
     ],
 
-    storeId : 'LogoImages',
-    model   : 'esapp.model.LogoImage'
+    storeId : 'HeaderLogoImages',
+    model   : 'esapp.model.HeaderLogoImage'
 
     // ,data: [
     //     { src:'resources/img/logo/MESA_h110.jpg', height: 70, caption:'MESA logo' },

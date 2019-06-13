@@ -336,7 +336,10 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
             productsensor: me.productsensor
         };
 
-        colorschemesgrid.columns[1].setText('<div class="grid-header-style">' + esapp.Utils.getTranslation('colorschemes') +
+        // colorschemesgrid.columns[1].setText('<div class="grid-header-style">' + esapp.Utils.getTranslation('colorschemes') +
+        //     ' <b class="smalltext">' + esapp.Utils.getTranslation('for') + ' ' + record.get('descriptive_name') +
+        //     ' ' + record.get('version') + ' - ' + record.get('subproductcode') + '</b></div>');
+        colorschemesgrid.columns[1].setText('<div class="grid-header-style">' +
             ' <b class="smalltext">' + esapp.Utils.getTranslation('for') + ' ' + record.get('descriptive_name') +
             ' ' + record.get('version') + ' - ' + record.get('subproductcode') + '</b></div>');
 

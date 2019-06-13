@@ -38,7 +38,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
     autoWidth:  true,
     minWidth: 340,
     width: 340,
-    height: 610,
+    height: 593,    // 610,
     // height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-10 : 750,  // 600,
     // autoHeight:  true,
     // minHeight: 550,
@@ -177,7 +177,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
             }],
 
             listeners: {
-                // afterrender: 'loadProductsGrid',
+                afterrender: 'loadProductsGrid',
                 rowclick: 'productsGridRowClick'
             },
 
@@ -301,7 +301,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 reference: 'product-mapsets-dataview',
                 border: true,
                 autoWidth: true,
-                maxHeight: 190,
+                maxHeight: 150,
                 collapsible: false,
                 focusable: false,
                 layout: 'fit',
@@ -313,15 +313,15 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     tpl: Ext.create('Ext.XTemplate',
                         '<tpl for=".">',
                             '<div class="mapset" id="{mapsetcode:stripTags}">',
-                                '<img src="{footprint_image}" title="{descriptive_name:htmlEncode}">',
+                                '<img width="100px" height="80px" src="{footprint_image}" title="{descriptive_name:htmlEncode}">',
                                 '<span><strong>{descriptive_name:htmlEncode}</strong></span>',
                             '</div>',
                         '</tpl>',
                         '<div class="x-clear"></div>'
                     ),
                     multiSelect: false,
-                    height: 170,
-                    width: 140,
+                    // height: 170,
+                    // width: 140,
                     trackOver: true,
                     cls:'mapsets',
                     overItemCls: 'mapset-hover',
@@ -427,8 +427,9 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 xtype: 'grid',
                 reference: 'colorschemesGrid',
                 autoWidth: true,
-                autoHeight: true,
-                maxHeight: 190,
+                // autoHeight: true,
+                // maxHeight: 190,
+                height: 165,
                 layout: 'fit',
                 scrollable: 'vertical',
                 reserveScrollbar: true,
@@ -487,7 +488,11 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         scale: 'small',
                         hidden: false
                     },
-                    items: ['->',{
+                    items: [{
+                        xtype: 'container',
+                        html: '<div class="grid-header-style">' + esapp.Utils.getTranslation('colorschemes') + '</div>'
+                    },
+                    '->',{
                         xtype: 'button',
                         text: esapp.Utils.getTranslation('assign_legend'),    // 'Assign legend to product',
                         name: 'assign_legend',

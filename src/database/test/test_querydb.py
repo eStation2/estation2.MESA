@@ -11,7 +11,18 @@ logger = log.my_logger(__name__)
 from database import querydb
 from lib.python import functions
 
+
 class TestQuerydb(TestCase):
+
+    def test_getProductNative(self):
+        productcode = 'vgt-lai'
+        version = 'V2.0'
+
+        product_native = querydb.get_product_native(productcode, version)
+        # print product_native
+        print product_native[0]['category_id']
+        self.assertEqual(1, 1)
+
 
     def test_update_yaxe(self):
         params = {

@@ -21,7 +21,7 @@ Ext.define('esapp.model.ProductNavigator', {
     ,autoSync: false
     ,remoteSort: false
     ,remoteGroup: false
-    ,loadMask: false
+    ,loadMask: true
 
     ,proxy: {
         type: 'rest',

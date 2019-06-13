@@ -1,4 +1,4 @@
-Ext.define('esapp.model.LogoImage', {
+Ext.define('esapp.model.HeaderLogoImage', {
     extend : 'esapp.model.Base',
 //    extend: 'Ext.data.Model',
     

@@ -59,6 +59,58 @@ logger = log.my_logger(__name__)
 WEBPY_COOKIE_NAME = "webpy_session_id"
 
 
+def GetLogos():
+    logos_dict_all = []
+    logos = querydb.get_logos()
+    if hasattr(logos, "__len__") and logos.__len__() > 0:
+        for logo in logos:
+            logofilepath = es_constants.estation2_logos_dir + os.path.sep + logo['logo_filename'].encode('utf-8')
+            if os.path.exists(logofilepath):
+                logofile = open(logofilepath, 'rb')
+                logofilecontent = logofile.read()
+                encoded = base64.b64encode(logofilecontent)
+                # encoded = base64.b64encode(open(logofilepath, "rb").read())
+                filename, file_extension = os.path.splitext(logofilepath)
+                if file_extension == '.png':
+                    mime = 'png'
+                elif file_extension == '.jpg':
+                    mime = 'jpeg'
+                elif file_extension == '.gif':
+                    mime = 'gif'
+                src = "data:image/"+mime+";base64," + encoded
+            else:
+                src = ''
+
+            logo = {
+                'logo_id': logo['logo_id'],
+                'logo_filename': logo['logo_filename'],
+                'logo_description': logo['logo_description'],
+                'active': logo['active'],
+                'deletable': logo['deletable'],
+                'defined_by': logo['defined_by'],
+                'isdefault': logo['isdefault'],
+                'orderindex_defaults': logo['orderindex_defaults'],
+                'src': src,
+                'width': '20%',
+                'height': '60px'
+            }
+
+            logos_dict_all.append(logo)
+
+        logos_json = json.dumps(logos_dict_all,
+                                ensure_ascii=False,
+                                encoding='utf-8',
+                                sort_keys=True,
+                                indent=4,
+                                separators=(', ', ': '))
+
+        logos_json = '{"success":"true", "total":' + str(logos.__len__()) + ',"logos":' + logos_json + '}'
+    else:
+        logos_json = '{"success":"true", "total":' + str(logos.__len__()) + ',"logos":[]}'
+
+    return logos_json
+
+
 def IngestArchive(params):
     # from apps.es2system import service_ingest_archive as sia
     # service = params['service']
@@ -2839,10 +2891,11 @@ def matrixTimeseries(params):
                     'title': passedyaxe['title'],
                     'title_color': passedyaxe['title_color'].replace("  ", " "),
                     'title_font_size': passedyaxe['title_font_size'],
-                    'unit': passedyaxe['unit'],
+                    'unit': passedyaxe['unit'], 'unit_orig': passedyaxe['unit_orig'],
                     'opposite': passedyaxe['opposite'],
                     'min': min,
                     'max': max,
+                    # 'productcategory': passedyaxe['productcategory'],
                     'aggregation_type': passedyaxe['aggregation_type'],
                     'aggregation_min': passedyaxe['aggregation_min'],
                     'aggregation_max': passedyaxe['aggregation_max']}
@@ -2858,10 +2911,11 @@ def matrixTimeseries(params):
                     'title': yaxe.title,
                     'title_color': yaxe.title_color.replace("  ", " "),
                     'title_font_size': yaxe.title_font_size,
-                    'unit': yaxe.unit,
+                    'unit': yaxe.unit, 'unit_orig': yaxe.unit,
                     'opposite': yaxe.opposite,
                     'min': min,
                     'max': max,
+                    # 'productcategory': yaxe.productcategory,
                     'aggregation_type': yaxe.aggregation_type,
                     'aggregation_min': yaxe.aggregation_min,
                     'aggregation_max': yaxe.aggregation_max
@@ -3061,8 +3115,11 @@ def rankTimeseries(params):
             min = None
             max = None
             yaxe = {'id': passedyaxe['id'], 'title': passedyaxe['title'], 'title_color': passedyaxe['title_color'].replace("  ", " "),
-                    'title_font_size': passedyaxe['title_font_size'], 'unit': passedyaxe['unit'], 'opposite': passedyaxe['opposite'],
+                    'title_font_size': passedyaxe['title_font_size'],
+                    'unit': passedyaxe['unit'], 'unit_orig': passedyaxe['unit_orig'],
+                    'opposite': passedyaxe['opposite'],
                     'min': min, 'max': max,
+                    # 'productcategory': passedyaxe['productcategory'],
                     'aggregation_type': passedyaxe['aggregation_type'],
                     'aggregation_min': passedyaxe['aggregation_min'],
                     'aggregation_max': passedyaxe['aggregation_max']}
@@ -3074,9 +3131,15 @@ def rankTimeseries(params):
             max = None    # yaxe.max
 
             yaxe = {'id': yaxe.yaxe_id,
-                    'title': yaxe.title, 'title_color': yaxe.title_color.replace("  ", " "), 'title_font_size': yaxe.title_font_size,
-                    'unit': yaxe.unit, 'opposite': yaxe.opposite, 'min': min, 'max': max,
-                    'aggregation_type': yaxe.aggregation_type, 'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max}
+                    'title': yaxe.title, 'title_color': yaxe.title_color.replace("  ", " "),
+                    'title_font_size': yaxe.title_font_size,
+                    'unit': yaxe.unit, 'unit_orig': yaxe.unit,
+                    'opposite': yaxe.opposite,
+                    'min': min, 'max': max,
+                    # 'productcategory': yaxe.productcategory,
+                    'aggregation_type': yaxe.aggregation_type,
+                    'aggregation_min': yaxe.aggregation_min,
+                    'aggregation_max': yaxe.aggregation_max}
             yaxes.append(yaxe)
 
     ts_json = {"data_available": data_available,
@@ -3182,6 +3245,9 @@ def classicTimeseries(params):
         aggregate = {'aggregation_type': 'mean',
                      'aggregation_min': None,
                      'aggregation_max': None}
+
+        # product_native = querydb.get_product_native(productcode, version)
+        # productcategory = product_native[0]['category_id']
 
         product_yaxe = querydb.get_product_yaxe(product, userid, istemplate, graphtype, graph_tpl_id, graph_tpl_name)
         for yaxe_info in product_yaxe:
@@ -3427,9 +3493,13 @@ def classicTimeseries(params):
             else:
                 min = passedyaxe['min']
                 max = passedyaxe['max']
-            yaxe = {'id': passedyaxe['id'], 'title': passedyaxe['title'], 'title_color': passedyaxe['title_color'].replace("  ", " "),
-                    'title_font_size': passedyaxe['title_font_size'], 'unit': passedyaxe['unit'], 'opposite': passedyaxe['opposite'],
+            yaxe = {'id': passedyaxe['id'], 'title': passedyaxe['title'],
+                    'title_color': passedyaxe['title_color'].replace("  ", " "),
+                    'title_font_size': passedyaxe['title_font_size'],
+                    'unit': passedyaxe['unit'], 'unit_orig': passedyaxe['unit_orig'],
+                    'opposite': passedyaxe['opposite'],
                     'min': min, 'max': max,
+                    # 'productcategory': passedyaxe['productcategory'],
                     'aggregation_type': passedyaxe['aggregation_type'],
                     'aggregation_min': passedyaxe['aggregation_min'],
                     'aggregation_max': passedyaxe['aggregation_max']}
@@ -3458,8 +3528,10 @@ def classicTimeseries(params):
                 min = yaxe.min
                 max = yaxe.max
             yaxe = {'id': yaxe.yaxe_id, 'title': yaxe.title, 'title_color': yaxe.title_color.replace("  ", " "),
-                    'title_font_size': yaxe.title_font_size, 'unit': yaxe.unit, 'opposite': yaxe.opposite,
+                    'title_font_size': yaxe.title_font_size, 'unit': yaxe.unit, 'unit_orig': yaxe.unit,
+                    'opposite': yaxe.opposite,
                     'min': min, 'max': max,
+                    # 'productcategory': yaxe.productcategory,
                     'aggregation_type': yaxe.aggregation_type,
                     'aggregation_min': yaxe.aggregation_min,
                     'aggregation_max': yaxe.aggregation_max}

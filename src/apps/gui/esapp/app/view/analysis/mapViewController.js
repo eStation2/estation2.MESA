@@ -320,8 +320,21 @@ Ext.define('esapp.view.analysis.mapViewController', {
             'product_date': mydate
         });
 
-        mapTitleObj.changesmade =true;
+        mapTitleObj.changesmade = true;
         // mapTitleObj.fireEvent('refreshimage');
+    }
+
+    ,refreshDisclaimerData: function(){
+        var me = this.getView();
+        var mapDisclaimerObj = me.lookupReference('disclaimer_obj_' + me.id);
+        var content = me.productsensor + '<BR>' + mapDisclaimerObj.getContent();
+
+        if (mapDisclaimerObj.getContent() != '' ){  // && !me.isTemplate
+            mapDisclaimerObj.update(content);
+            mapDisclaimerObj.setContent(content);
+            mapDisclaimerObj.changesmade = true;
+            mapDisclaimerObj.fireEvent('refreshimage');
+        }
     }
 
     ,addProductLayer: function(productcode, productversion, mapsetcode, subproductcode, tpl_productdate, legendid,
@@ -425,6 +438,9 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
                 Ext.fly('mapview_title_productname_' + me.id).dom.innerHTML = mapviewTitle;
                 //me.setTitle(mapviewTitle);
+                me.getController().refreshTitleData();
+
+                // me.getController().refreshDisclaimerData();
 
 
                 // Set the timeline data, its rangeselector selected button and show product time line
@@ -467,7 +483,8 @@ Ext.define('esapp.view.analysis.mapViewController', {
                         type: 'base',
                         wrapX: false,
                         noWrap: true,
-                        crossOrigin: '', // 'anonymous',
+                        crossOrigin: null, // 'anonymous',
+                        cacheSize: 0,
                         attributions: [new ol.Attribution({
                             html: '&copy; <a href="https://ec.europa.eu/jrc/">'+esapp.Utils.getTranslation('estation2')+'</a>'
                         })],
@@ -526,7 +543,6 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 //}
                 //else outmask_togglebtn.hide();
 
-                me.getController().refreshTitleData();
             },
             //callback: function ( callinfo,responseOK,response ) {},
             failure: function ( result, request) {}
@@ -670,7 +686,8 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 //maxGetUrlProperty: 10,
                 source: new ol.source.TileWMS({     // ol.source.TileWMS or ol.source.ImageWMS
                     url: 'analysis/getproductlayer',
-                    crossOrigin: '',  // 'anonymous',
+                    crossOrigin: null,  // 'anonymous',
+                    cacheSize: 0,
                     wrapX: false,
                     noWrap: true,
                     attributions: [new ol.Attribution({
@@ -730,6 +747,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             //me.setTitle(mapviewTitle);
 
             me.getController().refreshTitleData();
+
         }
     }
 
@@ -1961,7 +1979,10 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 var regionname_html = '';
                 for (var i = 0; i < feature_columns.length; i++) {
                     regionname_html += topfeature.get(feature_columns[i].trim());
-                    if (i != feature_columns.length - 1) {
+                    if (i==0){
+                         regionname_html += '<BR>';
+                    }
+                    else if (i != feature_columns.length - 1) {
                         regionname_html += ' - ';
                     }
                 }
@@ -2030,7 +2051,10 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 var regionname_html = '';
                 for (var i = 0; i < feature_columns.length; i++) {
                     regionname_html += feature.get(feature_columns[i].trim());
-                    if (i != feature_columns.length-1){
+                    if (i==0){
+                        regionname_html += '<BR>';
+                    }
+                    else if (i != feature_columns.length-1){
                         regionname_html += ' - ';
                     }
                 }
@@ -2611,9 +2635,9 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 xtype: 'container',
                 // layout: 'fit',
                 autoWidth: true,
-                maxWidth: 190,
+                // maxWidth: 190,
                 // width: 350,
-                height: 35,
+                height: 37,
                 top: 0,
                 align:'left',
                 defaults: {

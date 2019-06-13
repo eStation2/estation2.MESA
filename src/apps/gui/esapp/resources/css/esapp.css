@@ -230,6 +230,12 @@
 
 }
 
+
+.maplogos {
+    height: 60px;
+    max-height: 65px;
+}
+
 .pin_red {
     color: red;
 }
@@ -241,7 +247,6 @@
 .newworkspacetab .x-tab-inner-workspace{
     color: darkred !important;
 }
-
 
 .table-header-rotated{
     border-spacing:0;
@@ -458,6 +463,11 @@ p {
 .chartfitlayout{width:100% !important; height:100% !important;}
 
 
+.refresh {
+    background-image:url(../img/icons/refresh18.png);
+    background-repeat: no-repeat;
+}
+
 .expand {
     background-image:url(../img/icons/expand.png);
     background-repeat: no-repeat;
@@ -533,6 +543,11 @@ p {
 .layers {
     background-image:url(../img/layers_small.png);
     /*background-size: 16px 16px;*/
+}
+
+.logos {
+    background-image:url(../img/logos.png);
+    background-size: 16px 16px;
 }
 
 .legends {
@@ -877,7 +892,7 @@ p {
     font-size: 10px;
     font-weight: bold;
     margin-right: 5px;
-    width: 185px;
+    /*width: 185px;*/
     height: 25px;
     float: left;
     /*display: inline-block;*/
@@ -927,6 +942,7 @@ p {
 .btntransparent {background:rgb(222, 239, 252) !important; color:deepskyblue !important; border-color: lightskyblue !important;}
 .x-btn-icon-el-default-small.x-btn-glyph  {color:deepskyblue !important;}
 
+.btn-refresh-transparent {background:rgb(222, 239, 252) !important; color:black !important; border-color: gray !important;}
 
 .menu-glyph-color-green .x-menu-item-glyph {
     color: green !important;

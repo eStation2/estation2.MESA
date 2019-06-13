@@ -39,7 +39,7 @@ Ext.define("esapp.view.analysis.mapView",{
     focusable: true,
 
     width:650,
-    height: Ext.getBody().getViewSize().height < 650 ? Ext.getBody().getViewSize().height-100 : 650,
+    height: Ext.getBody().getViewSize().height < 670 ? Ext.getBody().getViewSize().height-100 : 670,
 
     minWidth:603,
     minHeight:550,
@@ -105,7 +105,7 @@ Ext.define("esapp.view.analysis.mapView",{
         me.selectedFeatureFromDrawLayer = false;
 
         me.title = '<span id="mapview_title_templatename_' + me.id + '" class="map-templatename"></span><span id="mapview_title_productname_' + me.id + '"></span>';
-        me.height = Ext.getBody().getViewSize().height < 650 ? Ext.getBody().getViewSize().height-100 : 650;
+        me.height = Ext.getBody().getViewSize().height < 670 ? Ext.getBody().getViewSize().height-100 : 670;
 
         me.controller.createToolBar();
 
@@ -226,11 +226,11 @@ Ext.define("esapp.view.analysis.mapView",{
                             text: esapp.Utils.getTranslation('zoom_factor')
                         });
 
-                        btn.setPosition(me.getWidth() - 48, 120);
+                        btn.setPosition(me.getWidth() - 42, 120);
                     }
                 },
                 menu: {
-                    maxWidth: 200,
+                    // maxWidth: 200,
                     hideOnClick: false,
                     listeners: {
                         mouseout: function(menuitem){
@@ -370,7 +370,7 @@ Ext.define("esapp.view.analysis.mapView",{
                             title: '',
                             text: esapp.Utils.getTranslation('opacity_slider')  // 'Product layer opacity slider'
                         });
-                        btn.setPosition(me.getWidth() - 48, 155);
+                        btn.setPosition(me.getWidth() - 42, 155);
                     }
                 },
                 menu: {
@@ -547,14 +547,17 @@ Ext.define("esapp.view.analysis.mapView",{
                 }]
             }],
             listeners: {
-                // beforerender: function(timeline){
-                //     Ext.util.Observable.capture(timeline, function(e){console.log('timeline - ' + timeline.id + ': ' + e);});
-                // },
-                show: function (timeline) {
+                beforerender: function(timeline){
+                    // Ext.util.Observable.capture(timeline, function(e){console.log('timeline - ' + timeline.id + ': ' + e);});
+                }
+                ,beforeshow: function () {
+                    me.setHeight(me.height+125);
+                }
+                ,show: function (timeline) {
                     // console.info(me);
                     var mapviewtimeline = me.lookupReference('product-time-line_' + me.id);
                     if (me.showtimeline) {
-                        mapviewtimeline.fireEvent('beforeexpand');
+                        // mapviewtimeline.fireEvent('beforeexpand');
                         mapviewtimeline.fireEvent('expand');
                         // mapviewtimeline.expand();
                         // me.getController().redrawTimeLine(me);
@@ -1018,6 +1021,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     // me.setLogoData(me.logosObjContent);
                     // logoObj.setLogoData(me.logosObjContent);
                     logoObj.getViewModel().data.logoData = me.logosObjContent;
+                    logoObj.setLogoData(me.logosObjContent);
                 }
                 if (esapp.Utils.objectExists(me.scalelineObjPosition)) {
                     scalelineObj.scalelinePosition = me.scalelineObjPosition;
@@ -1130,11 +1134,11 @@ Ext.define("esapp.view.analysis.mapView",{
                 me.getController().redrawTimeLine();
 
                 if (!me.lookupReference('opacityslider_' + me.id.replace(/-/g,'_')).hidden) {
-                    me.lookupReference('opacityslider_' + me.id.replace(/-/g, '_')).setPosition(me.getWidth() - 48, 155);
+                    me.lookupReference('opacityslider_' + me.id.replace(/-/g, '_')).setPosition(me.getWidth() - 42, 155);
                 }
                 //me.lookupReference('opacityslider_' + me.id.replace(/-/g,'_')).doConstrain();
 
-                me.lookupReference('zoomFactorBtn_' + me.id.replace(/-/g, '_')).setPosition(me.getWidth() - 48, 120);
+                me.lookupReference('zoomFactorBtn_' + me.id.replace(/-/g, '_')).setPosition(me.getWidth() - 42, 120);
                 me.updateLayout();
             }
 

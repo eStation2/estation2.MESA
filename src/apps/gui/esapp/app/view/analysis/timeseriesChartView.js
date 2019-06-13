@@ -332,6 +332,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                 xtype: 'button',
                 tooltip: esapp.Utils.getTranslation('graph_refresh'),   //  'Refresh graph',
                 iconCls: 'fa fa-refresh fa-2x',
+                hidden: false,
                 style: { color: 'gray' },
                 enableToggle: false,
                 scale: 'medium',

@@ -85,12 +85,16 @@ Ext.define("esapp.view.analysis.workspace",{
                                 if (!me.pinned && me.pinable) {
                                     me.setIconCls('fa fa-thumb-tack pin_green');
                                     me.pinned = true;
-                                    me.getController().savePin();
+                                    if (!me.isNewWorkspace){
+                                        me.getController().savePin();
+                                    }
                                 }
                                 else if (me.pinned && me.pinable){
                                     me.setIconCls('fa fa-thumb-tack pin_red');
                                     me.pinned = false;
-                                    me.getController().savePin();
+                                    if (!me.isNewWorkspace){
+                                        me.getController().savePin();
+                                    }
                                 }
                             });
                             // e.btnIconEl.on('mouseover', function(e) {
@@ -211,6 +215,15 @@ Ext.define("esapp.view.analysis.workspace",{
                 style: { color: 'gray' },
                 scale: 'small',
                 handler: 'layerAdmin'
+            },{
+                xtype: 'button',
+                name: 'analysismain_logosbtn',
+                reference: 'analysismain_logosbtn',
+                text: esapp.Utils.getTranslation('logos'),  // 'LOGOS',
+                iconCls: 'logos',
+                style: { color: 'gray' },
+                scale: 'small',
+                handler: 'logosAdmin'
             },
                 { xtype: 'tbspacer'
             },

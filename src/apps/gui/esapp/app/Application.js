@@ -25,7 +25,7 @@ Ext.define('esapp.Application', {
     //],
 
     stores: [
-         'LogoImages'
+         'HeaderLogoImages'
         ,'ProcessingStore'          // no autoload
         ,'i18nStore'
         ,'LanguagesStore'
@@ -34,7 +34,8 @@ Ext.define('esapp.Application', {
         ,'FrequenciesStore'
         ,'DateFormatsStore'
         ,'DataTypesStore'
-        ,'LogosMapView'
+        // ,'LogosMapView'
+        ,'LogosStore'
         ,'LayersStore'
         ,'LegendsStore'
         ,'EumetcastSourceStore'
@@ -85,7 +86,7 @@ Ext.define('esapp.Application', {
 
         esapp.globals = [];
 
-        // esapp.globals['typeinstallation'] = 'full';
+        esapp.globals['typeinstallation'] = '';
         // esapp.globals['role'] = 'pc2';
         // esapp.globals['mode'] = 'nominal';
         Ext.Ajax.request({
@@ -142,9 +143,10 @@ Ext.define('esapp.Application', {
                         var splashscreen = Ext.getBody().mask(esapp.Utils.getTranslation('splashscreenmessage'), 'splashscreen');
                         // fade out the body mask
                         splashscreen.fadeOut({
-                            duration: 1000,
+                            duration: 500,
                             remove: true
                         });
+                        // console.info(splashscreen);
 
                         Ext.Loader.loadScript({
                             url: 'app/CustomVTypes.js',
@@ -153,23 +155,10 @@ Ext.define('esapp.Application', {
                             }
                         });
 
-                        //Ext.apply(Ext.form.VTypes, {
-                        //    GeoJSON:  function(v) {
-                        //        v = v.replace(/^\s|\s$/g, ""); //trims string
-                        //        if (v.match(/([^\/\\]+)\.(geojson)$/i) )
-                        //            return true;
-                        //        else
-                        //            return false;
-                        //    },
-                        //    GeoJSONText: esapp.Utils.getTranslation('vtype_geojson')    // 'Must be a .geojson file.'
-                        //});
-                        //
-                        //Ext.create('esapp.view.main.Main');
-
                         var taskLaunch = new Ext.util.DelayedTask(function() {
                             me.launch();
                         });
-                        taskLaunch.delay(50);
+                        taskLaunch.delay(1000);
 
                     }
                 });

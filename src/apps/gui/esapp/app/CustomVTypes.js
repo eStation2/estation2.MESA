@@ -51,6 +51,15 @@ Ext.apply(Ext.form.field.VTypes, {
     ,GeoJSONText: esapp.Utils.getTranslation('vtype_geojson')    // 'Must be a .geojson file.'
 
 
+   ,imagefile:  function(v) {
+       v = v.replace(/^\s|\s$/g, ""); //trims string
+       if (v.match(/([^\/\\]+)\.(gif|png|jpg|jpeg)$/i) )
+           return true;
+       else
+           return false;
+   }
+   ,imagefileText: esapp.Utils.getTranslation('vtype_imagefile')    // 'Must be a .gif, .png, .jpg or .jpeg file.'
+
     // custom Vtype for vtype:'IPAddress'
     ,IPAddress:  function(v) {
         return /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(v);

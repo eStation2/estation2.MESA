@@ -25,6 +25,25 @@ db = connectdb.ConnectDB(schema='products').db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
 
 
+def get_logos():
+    global db
+    try:
+        query = "SELECT * FROM analysis.logos " \
+                "ORDER BY isdefault DESC, orderindex_defaults ASC, logo_description ASC"
+
+        logos = db.execute(query)
+        logos = logos.fetchall()
+
+        return logos
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_logos: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
 def get_last_map_tpl_id(userid, workspaceid):
     global dbschema_analysis
     try:

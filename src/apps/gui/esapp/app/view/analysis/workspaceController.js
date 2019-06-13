@@ -304,7 +304,12 @@ Ext.define('esapp.view.analysis.workspaceController', {
         newLayerAdminWin.show();
         // this.getView().lookupReference('analysismain_layersbtn').disable();
     }
-
+    ,logosAdmin: function(){
+        var newLogosAdminWin = new esapp.view.analysis.logoAdmin();
+        this.getView().add(newLogosAdminWin);
+        newLogosAdminWin.show();
+        // this.getView().lookupReference('analysismain_logosbtn').disable();
+    }
     ,legendAdmin: function(){
         var newLegendAdminWin = new esapp.view.analysis.legendAdmin();
         this.getView().add(newLegendAdminWin);

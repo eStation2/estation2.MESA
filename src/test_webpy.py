@@ -27,6 +27,10 @@ logger = log.my_logger(__name__)
 
 class TestWebpy(unittest.TestCase):
 
+    def test_GetLogos(self):
+        logos_json = webpy_esapp_helpers.GetLogos()
+        return logos_json
+
     def test_IngestArchive(self):
         params = {
             'task': 'run',

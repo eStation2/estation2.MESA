@@ -2129,10 +2129,10 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
         var selectedProductsAndTimeFramePanel = Ext.getCmp(me.getId()+'-select_products_timeframe');
         me.tsdrawprops = selectedProductsAndTimeFramePanel.down('timeseriesproductselection').getController().getSelectedTSDrawProperties();
 
-        var chartdrawpropertiespanel = this.lookupReference('chart_draw_properties_' + me.id);
-        if (chartdrawpropertiespanel != null){
-            chartdrawpropertiespanel.destroy();
-        }
+        // var chartdrawpropertiespanel = this.lookupReference('chart_draw_properties_' + me.id);
+        // if (chartdrawpropertiespanel != null){
+        //     chartdrawpropertiespanel.destroy();
+        // }
 
         // if (!me.isTemplate){
         //     timeseriesselections = me.workspace.lookupReference('timeserieschartselection'+me.workspace.id).getController().getTimeseriesSelections(me.graphtype);
@@ -2231,7 +2231,12 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 triggerAction: 'all',
                 allowBlank: false,
                 editable: false
-            }
+            };
+
+            var aggregationTypeStoreYaxe1 = ['mean', 'count', 'percent'];
+            var aggregationTypeStoreYaxe2 = ['mean', 'count', 'percent'];
+            var aggregationTypeStoreYaxe3 = ['mean', 'count', 'percent'];
+            var aggregationTypeStoreYaxe4 = ['mean', 'count', 'percent'];
 
             source = {
                 // graph_width: me.graphProperties.width,
@@ -2264,6 +2269,16 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             source.yaxe1_aggregation_type = me.timeseriesGraph.yaxes[0].aggregation_type;
             source.yaxe1_aggregation_min = me.timeseriesGraph.yaxes[0].aggregation_min;
             source.yaxe1_aggregation_max = me.timeseriesGraph.yaxes[0].aggregation_max;
+            // console.info(me.timeseriesGraph.yaxes[0].id);
+            if (me.timeseriesGraph.yaxes[0].id.includes("rain")){
+                aggregationTypeStoreYaxe1 = ['mean', 'count', 'percent', 'precip'];
+            }
+            else if (me.timeseriesGraph.yaxes[0].id.includes("WBD"))  {       // "inlandwater"
+                aggregationTypeStoreYaxe1 = ['mean', 'count', 'percent', 'surface'];
+            }
+            else if (me.timeseriesGraph.yaxes[0].id.includes("fire")){
+                aggregationTypeStoreYaxe1 = ['mean', 'count', 'percent', 'cumulate'];
+            }
 
             if (me.timeseriesGraph.yaxes.length > 1) {
                 source.yaxe2_id = me.timeseriesGraph.yaxes[1].id;
@@ -2279,6 +2294,16 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 source.yaxe2_aggregation_min = me.timeseriesGraph.yaxes[1].aggregation_min;
                 source.yaxe2_aggregation_max = me.timeseriesGraph.yaxes[1].aggregation_max;
 
+                // console.info(me.timeseriesGraph.yaxes[1].id);
+                if (me.timeseriesGraph.yaxes[1].id.includes("rain")){
+                    aggregationTypeStoreYaxe2 = ['mean', 'count', 'percent', 'precip'];
+                }
+                else if (me.timeseriesGraph.yaxes[1].id.includes("WBD"))  {       // "inlandwater"
+                    aggregationTypeStoreYaxe2 = ['mean', 'count', 'percent', 'surface'];
+                }
+                else if (me.timeseriesGraph.yaxes[1].id.includes("fire")){
+                    aggregationTypeStoreYaxe2 = ['mean', 'count', 'percent', 'cumulate'];
+                }
             }
             if (me.timeseriesGraph.yaxes.length > 2) {
                 source.yaxe3_id = me.timeseriesGraph.yaxes[2].id;
@@ -2293,6 +2318,16 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 source.yaxe3_aggregation_type = me.timeseriesGraph.yaxes[2].aggregation_type;
                 source.yaxe3_aggregation_min = me.timeseriesGraph.yaxes[2].aggregation_min;
                 source.yaxe3_aggregation_max = me.timeseriesGraph.yaxes[2].aggregation_max;
+
+                if (me.timeseriesGraph.yaxes[2].id.includes("rain")){
+                    aggregationTypeStoreYaxe3 = ['mean', 'count', 'percent', 'precip'];
+                }
+                else if (me.timeseriesGraph.yaxes[2].id.includes("WBD"))  {       // "inlandwater"
+                    aggregationTypeStoreYaxe3 = ['mean', 'count', 'percent', 'surface'];
+                }
+                else if (me.timeseriesGraph.yaxes[2].id.includes("fire")){
+                    aggregationTypeStoreYaxe3 = ['mean', 'count', 'percent', 'cumulate'];
+                }
             }
             if (me.timeseriesGraph.yaxes.length > 3) {
                 source.yaxe4_id = me.timeseriesGraph.yaxes[3].id;
@@ -2307,6 +2342,16 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 source.yaxe4_aggregation_type = me.timeseriesGraph.yaxes[3].aggregation_type;
                 source.yaxe4_aggregation_min = me.timeseriesGraph.yaxes[3].aggregation_min;
                 source.yaxe4_aggregation_max = me.timeseriesGraph.yaxes[3].aggregation_max;
+
+                if (me.timeseriesGraph.yaxes[3].id.includes("rain")){
+                    aggregationTypeStoreYaxe4 = ['mean', 'count', 'percent', 'precip'];
+                }
+                else if (me.timeseriesGraph.yaxes[3].id.includes("WBD"))  {       // "inlandwater"
+                    aggregationTypeStoreYaxe4 = ['mean', 'count', 'percent', 'surface'];
+                }
+                else if (me.timeseriesGraph.yaxes[3].id.includes("fire")){
+                    aggregationTypeStoreYaxe4 = ['mean', 'count', 'percent', 'cumulate'];
+                }
             }
 
             chartDrawPropertiesPanel = Ext.create('Ext.panel.Panel', {
@@ -2489,7 +2534,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                                 displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('aggregation_type'),   // 'Aggregation type',
                                 editor: {
                                     xtype: 'combobox',
-                                    store: ['mean', 'count', 'percent', 'cumulate', 'surface'],
+                                    store: aggregationTypeStoreYaxe1,
                                     forceSelection: true
                                 }
                             },
@@ -2554,7 +2599,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                                 displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('aggregation_type'),   // 'Aggregation type',
                                 editor: {
                                     xtype: 'combobox',
-                                    store: ['mean', 'count', 'percent', 'cumulate', 'surface'],
+                                    store: aggregationTypeStoreYaxe2,
                                     forceSelection: true
                                 }
                             },
@@ -2619,7 +2664,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                                 displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('aggregation_type'),   // 'Aggregation type',
                                 editor: {
                                     xtype: 'combobox',
-                                    store: ['mean', 'count', 'percent', 'cumulate', 'surface'],
+                                    store: aggregationTypeStoreYaxe3,
                                     forceSelection: true
                                 }
                             },
@@ -2685,7 +2730,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                                 displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('aggregation_type'),   // 'Aggregation type',
                                 editor: {
                                     xtype: 'combobox',
-                                    store: ['mean', 'count', 'percent', 'cumulate', 'surface'],
+                                    store: aggregationTypeStoreYaxe4,
                                     forceSelection: true
                                 }
                             },
@@ -2831,6 +2876,13 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                                         if (recordId == 'yaxe1_aggregation_type') {
                                             me.timeseriesGraph.yaxes[0].aggregation_type = value;
                                             me.graphProperties.localRefresh = false;
+
+                                            if (value == 'mean') me.timeseriesGraph.yaxes[0].unit = me.timeseriesGraph.yaxes[0].unit_orig;
+                                            if (value == 'count') me.timeseriesGraph.yaxes[0].unit = 'nr';
+                                            if (value == 'percent') me.timeseriesGraph.yaxes[0].unit = '%';
+                                            if (value == 'cumulate') me.timeseriesGraph.yaxes[0].unit = 'nr';
+                                            if (value == 'surface') me.timeseriesGraph.yaxes[0].unit = 'km2';
+                                            if (value == 'precip') me.timeseriesGraph.yaxes[0].unit = 'm3';
                                             // saveYaxeProperty(me.timeseriesGraph.yaxes[0]);
                                         }
                                         if (recordId == 'yaxe1_aggregation_min') {
@@ -2877,6 +2929,13 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                                         if (recordId == 'yaxe2_aggregation_type') {
                                             me.timeseriesGraph.yaxes[1].aggregation_type = value;
                                             me.graphProperties.localRefresh = false;
+
+                                            if (value == 'mean') me.timeseriesGraph.yaxes[1].unit = me.timeseriesGraph.yaxes[1].unit_orig;
+                                            if (value == 'count') me.timeseriesGraph.yaxes[1].unit = 'nr';
+                                            if (value == 'percent') me.timeseriesGraph.yaxes[1].unit = '%';
+                                            if (value == 'cumulate') me.timeseriesGraph.yaxes[1].unit = 'nr';
+                                            if (value == 'surface') me.timeseriesGraph.yaxes[1].unit = 'km2';
+                                            if (value == 'precip') me.timeseriesGraph.yaxes[1].unit = 'm3';
                                             // saveYaxeProperty(me.timeseriesGraph.yaxes[1]);
                                         }
                                         if (recordId == 'yaxe2_aggregation_min') {
@@ -2923,6 +2982,13 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                                         if (recordId == 'yaxe3_aggregation_type') {
                                             me.timeseriesGraph.yaxes[2].aggregation_type = value;
                                             me.graphProperties.localRefresh = false;
+
+                                            if (value == 'mean') me.timeseriesGraph.yaxes[2].unit = me.timeseriesGraph.yaxes[2].unit_orig;
+                                            if (value == 'count') me.timeseriesGraph.yaxes[2].unit = 'nr';
+                                            if (value == 'percent') me.timeseriesGraph.yaxes[2].unit = '%';
+                                            if (value == 'cumulate') me.timeseriesGraph.yaxes[2].unit = 'nr';
+                                            if (value == 'surface') me.timeseriesGraph.yaxes[2].unit = 'km2';
+                                            if (value == 'precip') me.timeseriesGraph.yaxes[2].unit = 'm3';
                                             // saveYaxeProperty(me.timeseriesGraph.yaxes[2]);
                                         }
                                         if (recordId == 'yaxe3_aggregation_min') {
@@ -2968,6 +3034,13 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                                         if (recordId == 'yaxe4_aggregation_type') {
                                             me.timeseriesGraph.yaxes[3].aggregation_type = value;
                                             me.graphProperties.localRefresh = false;
+
+                                            if (value == 'mean') me.timeseriesGraph.yaxes[3].unit = me.timeseriesGraph.yaxes[3].unit_orig;
+                                            if (value == 'count') me.timeseriesGraph.yaxes[3].unit = 'nr';
+                                            if (value == 'percent') me.timeseriesGraph.yaxes[3].unit = '%';
+                                            if (value == 'cumulate') me.timeseriesGraph.yaxes[3].unit = 'nr';
+                                            if (value == 'surface') me.timeseriesGraph.yaxes[3].unit = 'km2';
+                                            if (value == 'precip') me.timeseriesGraph.yaxes[3].unit = 'm3';
                                             // saveYaxeProperty(me.timeseriesGraph.yaxes[3]);
                                         }
                                         if (recordId == 'yaxe4_aggregation_min') {
@@ -2982,14 +3055,20 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                                         }
                                     }
 
-                                    if (me.graphtype == 'ranking') {
-                                        me.getController().createRankingChart(me);
-                                    }
-                                    else if (me.graphtype == 'matrix') {
-                                        me.getController().createMatrixChart(me);
+                                    if (me.graphProperties.localRefresh){
+                                        if (me.graphtype == 'ranking') {
+                                            me.getController().createRankingChart(me);
+                                        }
+                                        else if (me.graphtype == 'matrix') {
+                                            me.getController().createMatrixChart(me);
+                                        }
+                                        else {
+                                            me.getController().createDefaultChart(me);
+                                        }
                                     }
                                     else {
-                                        me.getController().createDefaultChart(me);
+                                        chartDrawPropertiesPanel.hide();
+                                        me.getController().refreshChart();
                                     }
                                 }
                             },
