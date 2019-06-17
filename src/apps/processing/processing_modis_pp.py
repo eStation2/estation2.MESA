@@ -197,10 +197,13 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
         elif chla_frequency == 'e1modis8day':
             frequency_string = '8 days'
             output_sprod = '8daysavg'
-            activate_pp_stats_clim_comput = 0
-            activate_pp_stats_min_comput = 0
-            activate_pp_stats_max_comput = 0
-            # sub_product_group = '8daysstat'
+            activate_pp_stats_clim_comput = 1
+            activate_pp_stats_min_comput = 1
+            activate_pp_stats_max_comput = 1
+            sub_product_group = '8daysstat'
+            output_sprod_clim = '8daysclim'
+            output_sprod_min = '8daysmin'
+            output_sprod_max = '8daysmax'
         else:
             spec_logger.error('Frequency not recognized: %s. Exit!', chla_frequency)
             return
@@ -277,18 +280,55 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
     formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
     formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir_clim + "{MMDD[0]}" + out_prod_ident_clim]
 
-    @follows(modis_pp_comp)
-    @active_if(activate_stats_comput, activate_pp_stats_clim_comput)
-    @collate(starting_files, formatter(formatter_in), formatter_out)
-    def std_yearly_clim(input_file, output_file):
+    # Fixes ES2-304
+    def generate_input_files_pp_stats():
 
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
-                "options": "compress=lzw"}
-        raster_image_math.do_avg_image(**args)
+        # MMDD_nonleap_list = ['0101', '0109', '0117', '0125', '0202', '0210', '0218', '0226', '0306', '0314', '0314',
+        #                        '0330', '0407', '0415', '0423', '0501', '0509', '0517', '0525', '0602', '0610', '0618',
+        #                        '0626', '0704', '0712', '0720', '0728', '0805', '0813', '0821', '0829', '0906', '0914',
+        #                        '0922', '0930', '1008', '1016', '1024', '1101', '1109', '1117', '1125', '1203', '1211',
+        #                        '1219', '1227']
 
+        MMDD_nonleap_dict = {'0101': '0101', '0109': '0109', '0117': '0117', '0125': '0125','0202':'0202','0210':'0210','0218':'0218','0226':'0226','0306':'0305','0314':'0313', '0314':'0313','0330':'0329','0407':'0406','0415':'0414',
+                             '0423':'0422','0501':'0430','0509':'0508', '0517':'0516', '0525':'0524', '0602':'0601', '0618':'0617','0626':'0625','0704':'0703','0712':'0711','0720':'0719','0728':'0727','0805':'0804', '0813':'0812',
+                             '0821':'0820', '0829':'0828','0906':'0905','0914':'0913','0922':'0921','0930':'0929','1008':'1007','1016':'1015','1024':'1023','1101':'1031', '1109':'1108', '1117':'1116','1125':'1124', '1203':'1202', '1211':'1210','1219':'1218', '1227':'1226'  }
+        # for MMDD_nonleap in MMDD_nonleap_list:
+        for MMDD_nonleap, MMDD_leap in MMDD_nonleap_dict.iteritems():
+            formatter_in_nonleap = es2_data_dir +in_prod_subdir + "*" +MMDD_nonleap + in_prod_ident
+            nonleap_files = sorted(glob.glob(formatter_in_nonleap))
+            formatter_in_leap = es2_data_dir +in_prod_subdir + "*" +MMDD_leap + in_prod_ident
+            leap_files = sorted(glob.glob(formatter_in_leap))
+
+            my_inputs = leap_files+nonleap_files
+            input_files_unique = list(set(my_inputs))
+            output_file = es_constants.processing_dir + output_subdir_clim + os.path.sep + MMDD_nonleap + out_prod_ident_clim
+            yield (input_files_unique, output_file)
+
+    if frequency_string != 'monthly':
+        @follows(modis_pp_comp)
+        @active_if(activate_stats_comput, activate_pp_stats_clim_comput)
+        @files(generate_input_files_pp_stats)
+        def std_yearly_clim(input_file, output_file):
+
+            output_file = functions.list_to_element(output_file)
+            reduced_list = exclude_current_year(input_file)
+            functions.check_output_dir(os.path.dirname(output_file))
+            args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
+                    "options": "compress=lzw"}
+            raster_image_math.do_avg_image(**args)
+
+    else:
+        @follows(modis_pp_comp)
+        @active_if(activate_stats_comput, activate_pp_stats_clim_comput)
+        @collate(starting_files, formatter(formatter_in), formatter_out)
+        def std_yearly_clim(input_file, output_file):
+
+            output_file = functions.list_to_element(output_file)
+            reduced_list = exclude_current_year(input_file)
+            functions.check_output_dir(os.path.dirname(output_file))
+            args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
+                    "options": "compress=lzw"}
+            raster_image_math.do_avg_image(**args)
     # #   ---------------------------------------------------------------------
     # #   Minimum
     output_sprod = proc_lists.proc_add_subprod(output_sprod_min, sub_product_group, final=False,
@@ -306,17 +346,54 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
     formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
     formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir_min + "{MMDD[0]}" + out_prod_ident_min]
 
-    @follows(modis_pp_comp)
-    @active_if(activate_stats_comput, activate_pp_stats_min_comput)
-    @collate(starting_files, formatter(formatter_in), formatter_out)
-    def std_yearly_min(input_file, output_file):
+    def generate_input_files_pp_stats_min():
 
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
-                "options": "compress=lzw"}
-        raster_image_math.do_min_image(**args)
+        # MMDD_nonleap_list = ['0101', '0109', '0117', '0125', '0202', '0210', '0218', '0226', '0306', '0314', '0314',
+        #                        '0330', '0407', '0415', '0423', '0501', '0509', '0517', '0525', '0602', '0610', '0618',
+        #                        '0626', '0704', '0712', '0720', '0728', '0805', '0813', '0821', '0829', '0906', '0914',
+        #                        '0922', '0930', '1008', '1016', '1024', '1101', '1109', '1117', '1125', '1203', '1211',
+        #                        '1219', '1227']
+
+        MMDD_nonleap_dict = {'0101': '0101', '0109': '0109', '0117': '0117', '0125': '0125','0202':'0202','0210':'0210','0218':'0218','0226':'0226','0306':'0305','0314':'0313', '0314':'0313','0330':'0329','0407':'0406','0415':'0414',
+                             '0423':'0422','0501':'0430','0509':'0508', '0517':'0516', '0525':'0524', '0602':'0601', '0618':'0617','0626':'0625','0704':'0703','0712':'0711','0720':'0719','0728':'0727','0805':'0804', '0813':'0812',
+                             '0821':'0820', '0829':'0828','0906':'0905','0914':'0913','0922':'0921','0930':'0929','1008':'1007','1016':'1015','1024':'1023','1101':'1031', '1109':'1108', '1117':'1116','1125':'1124', '1203':'1202', '1211':'1210','1219':'1218', '1227':'1226'  }
+        # for MMDD_nonleap in MMDD_nonleap_list:
+        for MMDD_nonleap, MMDD_leap in MMDD_nonleap_dict.iteritems():
+            formatter_in_nonleap = es2_data_dir +in_prod_subdir + "*" +MMDD_nonleap + in_prod_ident
+            nonleap_files = sorted(glob.glob(formatter_in_nonleap))
+            formatter_in_leap = es2_data_dir +in_prod_subdir + "*" +MMDD_leap + in_prod_ident
+            leap_files = sorted(glob.glob(formatter_in_leap))
+
+            my_inputs = leap_files+nonleap_files
+            input_files_unique = list(set(my_inputs))
+            output_file = es_constants.processing_dir + output_subdir_min + os.path.sep + MMDD_nonleap + out_prod_ident_min
+            yield (input_files_unique, output_file)
+
+    if frequency_string != 'monthly':
+        @follows(modis_pp_comp)
+        @active_if(activate_stats_comput, activate_pp_stats_min_comput)
+        @files(generate_input_files_pp_stats_min)
+        def std_yearly_min(input_file, output_file):
+
+            output_file = functions.list_to_element(output_file)
+            reduced_list = exclude_current_year(input_file)
+            functions.check_output_dir(os.path.dirname(output_file))
+            args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
+                    "options": "compress=lzw"}
+            raster_image_math.do_min_image(**args)
+
+    else:
+        @follows(modis_pp_comp)
+        @active_if(activate_stats_comput, activate_pp_stats_min_comput)
+        @collate(starting_files, formatter(formatter_in), formatter_out)
+        def std_yearly_min(input_file, output_file):
+
+            output_file = functions.list_to_element(output_file)
+            reduced_list = exclude_current_year(input_file)
+            functions.check_output_dir(os.path.dirname(output_file))
+            args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
+                    "options": "compress=lzw"}
+            raster_image_math.do_min_image(**args)
 
     # #   ---------------------------------------------------------------------
     # #   Monthly Maximum
@@ -335,17 +412,49 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
     formatter_in = "[0-9]{4}(?P<MMDD>[0-9]{4})" + in_prod_ident
     formatter_out = ["{subpath[0][5]}" + os.path.sep + output_subdir_max + "{MMDD[0]}" + out_prod_ident_max]
 
-    @follows(modis_pp_comp)
-    @active_if(activate_stats_comput, activate_pp_stats_max_comput)
-    @collate(starting_files, formatter(formatter_in), formatter_out)
-    def std_yearly_max(input_file, output_file):
+    def generate_input_files_pp_stats_max():
 
-        output_file = functions.list_to_element(output_file)
-        reduced_list = exclude_current_year(input_file)
-        functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
-                "options": "compress=lzw"}
-        raster_image_math.do_max_image(**args)
+        MMDD_nonleap_dict = {'0101': '0101', '0109': '0109', '0117': '0117', '0125': '0125','0202':'0202','0210':'0210','0218':'0218','0226':'0226','0306':'0305','0314':'0313', '0314':'0313','0330':'0329','0407':'0406','0415':'0414',
+                             '0423':'0422','0501':'0430','0509':'0508', '0517':'0516', '0525':'0524', '0602':'0601', '0618':'0617','0626':'0625','0704':'0703','0712':'0711','0720':'0719','0728':'0727','0805':'0804', '0813':'0812',
+                             '0821':'0820', '0829':'0828','0906':'0905','0914':'0913','0922':'0921','0930':'0929','1008':'1007','1016':'1015','1024':'1023','1101':'1031', '1109':'1108', '1117':'1116','1125':'1124', '1203':'1202', '1211':'1210','1219':'1218', '1227':'1226'  }
+        # for MMDD_nonleap in MMDD_nonleap_list:
+        for MMDD_nonleap, MMDD_leap in MMDD_nonleap_dict.iteritems():
+            formatter_in_nonleap = es2_data_dir +in_prod_subdir + "*" +MMDD_nonleap + in_prod_ident
+            nonleap_files = sorted(glob.glob(formatter_in_nonleap))
+            formatter_in_leap = es2_data_dir +in_prod_subdir + "*" +MMDD_leap + in_prod_ident
+            leap_files = sorted(glob.glob(formatter_in_leap))
+
+            my_inputs = leap_files+nonleap_files
+            input_files_unique = list(set(my_inputs))
+            output_file = es_constants.processing_dir + output_subdir_max + os.path.sep + MMDD_nonleap + out_prod_ident_max
+            yield (input_files_unique, output_file)
+
+    if frequency_string != 'monthly':
+        @follows(modis_pp_comp)
+        @active_if(activate_stats_comput, activate_pp_stats_max_comput)
+        @files(generate_input_files_pp_stats_max)
+        def std_yearly_max(input_file, output_file):
+
+            output_file = functions.list_to_element(output_file)
+            reduced_list = exclude_current_year(input_file)
+            functions.check_output_dir(os.path.dirname(output_file))
+            args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
+                    "options": "compress=lzw"}
+            raster_image_math.do_max_image(**args)
+
+
+    else:
+        @follows(modis_pp_comp)
+        @active_if(activate_stats_comput, activate_pp_stats_max_comput)
+        @collate(starting_files, formatter(formatter_in), formatter_out)
+        def std_yearly_max(input_file, output_file):
+
+            output_file = functions.list_to_element(output_file)
+            reduced_list = exclude_current_year(input_file)
+            functions.check_output_dir(os.path.dirname(output_file))
+            args = {"input_file": reduced_list, "output_file": output_file, "output_format": 'GTIFF',
+                    "options": "compress=lzw"}
+            raster_image_math.do_max_image(**args)
 
 
 #   ---------------------------------------------------------------------
