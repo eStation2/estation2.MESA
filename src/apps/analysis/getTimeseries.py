@@ -273,12 +273,12 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
     #    It applies to a single dataset (prod/sprod/version/mapset) and between 2 dates
     #    Several types of aggregation foreseen:
     #
-    #       mean :      Sum(Xi)/N(Xi)        -> min/max not considered          e.g. Rain
-    #       cumulate:   Sum(Xi)              -> min/max not considered          e.g. Fire
+    #       mean :      Sum(Xi)/N(Xi)        -> min/max not considered          e.g. Rain/Vegetation
+    #       cumulate:   Sum(Xi)              -> min/max not considered          e.g. Active Fires
     #
-    #       count:      N(Xi where min < Xi < max)                              e.g. Vegetation anomalies
+    #       count:      N(Xi where min < Xi < max)                              e.g. Active Fires (not used so far)
     #       surface:    count * PixelArea                                       e.g. Water Bodies
-    #       percent:    count/Ntot                                              e.g. Vegetation anomalies
+    #       percent:    count/Ntot                                              e.g. Vegetation anomalies (not used so far)
     #
     #   History: 1.0 :  Initial release - since 2.0.1 -> now renamed '_green' from greenwich package
     #            1.1 :  Since Feb. 2017, it is based on a different approach (gdal.RasterizeLayer instead of greenwich)
@@ -426,12 +426,11 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
 
                     # Apply on top of it the geo mask
                     mxnodata = ma.masked_where(geo_mask, masked_data)
-                    # mxnodata = masked_data  # TEMP !!!!
 
                     # Test ONLY
                     # write_ds_to_geotiff(mem_ds, '/data/processing/exchange/Tests/mem_ds.tif')
 
-                    if aggregate['aggregation_type'] == 'count' or aggregate['aggregation_type'] == 'percent' or aggregate['aggregation_type'] == 'surface':
+                    if aggregate['aggregation_type'] == 'count' or aggregate['aggregation_type'] == 'percent' or aggregate['aggregation_type'] == 'surface' or aggregate['aggregation_type'] == 'precip':
 
                         if mxnodata.count() == 0:
                             meanResult = None
@@ -464,10 +463,23 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, start_d
                                 # Estimate 'average' Latitude
                                 y_avg = (y_min + y_max)/2.0
                                 pixelAvgArea = area_km_equator * math.cos(y_avg / 180 * math.pi)
+                                # This is applicable/important for the WD_GEE (between 0 to 100% -> both avg/occur)
                                 # Consider the percent (%) as a weight - see ES2-271
-                                # This is important for the avg (between 0 to 100%)
+                                # The sum() has to be used - rather than the count() - not to overestimate the avg
+                                # (for occur the aline below was also ok).
                                 # meanResult = float(mxrange.count()) * pixelAvgArea
+
                                 meanResult = float(mxrange.sum()/100.0) * pixelAvgArea
+
+                            elif aggregate['aggregation_type'] == 'precip':
+                                # 'precip'
+                                # Estimate 'average' Latitude
+                                y_avg = (y_min + y_max)/2.0
+                                pixelAvgArea = area_km_equator * math.cos(y_avg / 180 * math.pi)
+                                # This is applicable/important for the WD_GEE (between 0 to 100% -> both avg/occur)
+                                # The correction factor 1E-3 is applied to have the final result in millions m3
+                                # Units are: surface: km2 (1E6 m2) - precip: mm (1E-3 m) -> 1E3 m3
+                                meanResult = float(mxrange.sum()) * pixelAvgArea * 1e-3
 
                             else:
                                 # 'count'

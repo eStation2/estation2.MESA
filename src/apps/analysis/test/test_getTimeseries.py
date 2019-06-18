@@ -235,6 +235,23 @@ class TestTS(unittest.TestCase):
 
         self.assertEquals(len(list_values), 1)
 
+    def test_values_chirps_precip(self):
+
+        productcode="chirps-dekad"
+        subproductcode="10d"
+        version="2.0"
+        mapsetcode="WD-GEE-ECOWAS-AVG"
+        from_date=date(2018,01,01)
+        to_date=date(2018,01,01)
+        aggregate = {'aggregation_type': 'surface',
+                     'aggregation_min': 1,
+                     'aggregation_max': 100}
+
+        list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt, from_date, to_date, aggregate)
+        print(list_values)
+
+        self.assertEquals(len(list_values), 1)
+
 
 
     def test_values_chirps_10d_green(self):
