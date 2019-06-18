@@ -1,22 +1,25 @@
-#!/bin/sh
+#!/bin/bash
 # Correct and Normalize permission of the ingest and processing folder after the debug run.
+# This scrip as to be executed as ROOT (e.g. from its crontab)
 # Ticket ES2-262 Correct/normalize permissions
+#
+old_user='adminuser'
+new_user='analyst'
 
-#chmod 755 -R /var/www/eStation2-%{version}
+# tmp dir
+dir='/tmp/eStation2/'
+find ${dir} -user ${old_user} -exec chown ${new_user}:estation {} \; -exec chmod 775 {} \;
 
-sudo chown -R analyst:estation /tmp/eStation2/
-sudo chmod 775 -R /tmp/eStation2/
+# eStation2 dir
+dir='/eStation2/'
+find ${dir} -user ${old_user} -exec chown ${new_user}:estation {} \; -exec chmod 775 {} \;
 
-sudo chown -R analyst:estation /eStation2/
-sudo chmod 775 -R /eStation2/
+# data dir
+dir='/data/'
+find ${dir} -user ${old_user} -exec chown ${new_user}:estation {} \; -exec chmod 775 {} \;
 
-# Change owner of /data/
-# echo "`date +'%Y-%m-%d %H:%M '` Assign /data to analyst User"
-sudo chown -R analyst:estation /data/
-sudo chmod 775 -R /data/
-
-# Change permissions /var/www (for allowing analyst to change version)
-# chmod 777 /var/www
+# Change permissions /var/www/ (for allowing analyst to change version)
+# chmod 777 /var/www/
 
 # Change permissions for writing in Desktop
 #chown -R adminuser:adminuser /home/adminuser/*
