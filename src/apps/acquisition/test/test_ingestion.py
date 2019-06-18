@@ -158,12 +158,11 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-                                                                              source_id=datasource_descrID):
+        datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
+                                                      source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
-
-            self.assertEqual(1, 1)
+        self.assertEqual(1, 1)
 
     def test_ingest_modis_chlor_netcdf(self):
 
@@ -195,12 +194,11 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-                                                                              source_id=datasource_descrID):
+        datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
+                                                      source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
-
-            self.assertEqual(1, 1)
+        self.assertEqual(1, 1)
 
     def test_ingest_modis_kd490_netcdf(self):
 
@@ -231,13 +229,11 @@ class TestIngestion(unittest.TestCase):
 
         subproducts=[]
         subproducts.append(sprod)
+        datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
+                                                      source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-                                                                              source_id=datasource_descrID):
-
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
-
-            self.assertEqual(1, 1)
+        self.assertEqual(1, 1)
 
     def test_ingest_modis_par_netcdf(self):
 
@@ -268,13 +264,11 @@ class TestIngestion(unittest.TestCase):
 
         subproducts=[]
         subproducts.append(sprod)
+        datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
+                                                      source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-                                                                              source_id=datasource_descrID):
-
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
-
-            self.assertEqual(1, 1)
+        self.assertEqual(1, 1)
 
     def test_ingest_pml_modis_sst(self):
 
@@ -305,13 +299,11 @@ class TestIngestion(unittest.TestCase):
 
         subproducts=[]
         subproducts.append(sprod)
+        datasource_descr=querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                      source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                                              source_id=datasource_descrID):
-
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1, nodata_value=-999)
-
-            self.assertEqual(1, 1)
+        self.assertEqual(1, 1)
 
     def test_ingest_pml_modis_oc(self):
 
@@ -343,47 +335,18 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                                              source_id=datasource_descrID):
+        datasource_descr=querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                      source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1, nodata_value=-999)
+        self.assertEqual(1, 1)
 
-            self.assertEqual(1, 1)
-
-    def test_ingest_lsasaf_et(self):
-
-        date_fileslist = ['/data/ingest/test/S-LSA_-HDF5_LSASAF_MSG_ET_NAfr_201511040900.bz2','/data/ingest/test/S-LSA_-HDF5_LSASAF_MSG_ET_SAfr_201511040900.bz2']
-        in_date = '201511040900'
-        productcode = 'lsasaf-et'
-        productversion = 'undefined'
-        subproductcode = 'et'
-        mapsetcode = 'MSG-satellite-3km'
-        datasource_descrID='EO:EUM:DAT:MSG:ET-SEVIRI'
-
-        product = {"productcode": productcode,
-                   "version": productversion}
-        args = {"productcode": productcode,
-                "subproductcode": subproductcode,
-                "datasource_descr_id": datasource_descrID,
-                "version": productversion}
-
-        product_in_info = querydb.get_product_in_info(**args)
-
-        re_process = product_in_info.re_process
-        re_extract = product_in_info.re_extract
-
-        sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
-
-        subproducts=[]
-        subproducts.append(sprod)
 
     def test_ingest_lsasaf_et_disk(self):
 
-        date_fileslist = ['/data/temp/lsasaf-et/HDF5_LSASAF_MSG_ET_MSG-Disk_201601010000.bz2']
-        in_date = '201601011200'
+        date_fileslist = ['/data/ingest/test/S-LSA_-HDF5_LSASAF_MSG_ET_MSG-Disk_201905290900.bz2']
+        os.system('cp /data/ingest/S-LSA_-HDF5_LSASAF_MSG_ET_MSG-Disk_201905290900.bz2 /data/ingest/test/')
+        in_date = '201905290900'
 
         productcode = 'lsasaf-et'
         productversion = 'undefined'
@@ -410,13 +373,11 @@ class TestIngestion(unittest.TestCase):
 
         subproducts=[]
         subproducts.append(sprod)
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                                              source_id=datasource_descrID):
-
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
-
-            self.assertEqual(1, 1)
+        self.assertEqual(1, 1)
 
     def test_ingest_lsasaf_et(self):
 
@@ -448,12 +409,11 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                                              source_id=datasource_descrID):
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
-
-            self.assertEqual(1, 1)
+        self.assertEqual(1, 1)
 
     def test_ingest_vgt_lai(self):
 
@@ -485,12 +445,11 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                                              source_id=datasource_descrID):
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
-
-            self.assertEqual(1, 1)
+        self.assertEqual(1, 1)
 
     def test_ingest_vgt_fcover(self):
 
@@ -522,12 +481,11 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                                              source_id=datasource_descrID):
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
-
-            self.assertEqual(1, 1)
+        self.assertEqual(1, 1)
 
     def test_ingest_vgt_fapar(self):
 
@@ -559,12 +517,11 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                                              source_id=datasource_descrID):
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
-
-            self.assertEqual(1, 1)
+        self.assertEqual(1, 1)
 
     def test_ingest_vgt_dmp(self):
 
@@ -596,10 +553,11 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                                              source_id=datasource_descrID):
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+        self.assertEqual(1, 1)
 
     def test_ingest_vgt_ndvi(self):
 
@@ -631,10 +589,11 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                                              source_id=datasource_descrID):
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+        self.assertEqual(1, 1)
 
     def test_ingest_chirps(self):
 
@@ -667,13 +626,9 @@ class TestIngestion(unittest.TestCase):
         subproducts.append(sprod)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
-
-        # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-        #                                                                       source_id=datasource_descrID):
-
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            #self.assertEqual(1, 1)
+        self.assertEqual(1, 1)
 
     def test_ingest_chirps_tif(self):
 
@@ -831,12 +786,12 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-                                                                              source_id=datasource_descrID):
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+        self.assertEqual(1, 1)
 
-            #self.assertEqual(1, 1)
 
     def test_ingest_eumetcast(self):
 
@@ -880,8 +835,6 @@ class TestIngestion(unittest.TestCase):
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
-        #for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',  source_id=datasource_descrID):
-
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -916,10 +869,11 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-                                                                              source_id=datasource_descrID):
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+        self.assertEqual(1, 1)
 
     def test_ingest_msg_mpe(self):
 
@@ -953,8 +907,6 @@ class TestIngestion(unittest.TestCase):
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
-        #for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-         #                                                                     source_id=datasource_descrID):
 
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
@@ -1045,15 +997,12 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-                                                                              source_id=datasource_descrID):
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            ingestion.ingestion(date_fileslist, '20160503', product, subproducts, datasource_descr, logger, echo_query=1)
-            ingestion.ingestion(date_fileslist, '20160504', product, subproducts, datasource_descr, logger, echo_query=1)
-            ingestion.ingestion(date_fileslist, '20160505', product, subproducts, datasource_descr, logger, echo_query=1)
-            ingestion.ingestion(date_fileslist, '20160506', product, subproducts, datasource_descr, logger, echo_query=1)
-            ingestion.ingestion(date_fileslist, '20160507', product, subproducts, datasource_descr, logger, echo_query=1)
-            ingestion.ingestion(date_fileslist, '20160508', product, subproducts, datasource_descr, logger, echo_query=1)
+        self.assertEqual(1, 1)
+
 
     def test_ingest_cpc_soilmoisture(self):
 
@@ -1088,10 +1037,11 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-                                                                              source_id=datasource_descrID):
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+        self.assertEqual(1, 1)
 
     def test_ingest_sadc_wrsi(self):
 
@@ -1125,10 +1075,11 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-                                                                              source_id=datasource_descrID):
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+        self.assertEqual(1, 1)
 
     def test_ingest_mpe_umarf(self):
 
@@ -1160,10 +1111,11 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-                                                                              source_id=datasource_descrID):
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+        self.assertEqual(1, 1)
 
     def test_ingest_g_cls_ndvi_2_2_netcdf(self):
 
@@ -1248,9 +1200,11 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                                              source_id=datasource_descrID):
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
+        self.assertEqual(1, 1)
 
     def test_ingest_g_cls_ndvi_2_2_global(self):
 
@@ -1294,10 +1248,6 @@ class TestIngestion(unittest.TestCase):
             subproducts.append(sprod)
             datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                             source_id=datasource_descrID)
-            # ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger,
-            #                     echo_query=1)
-            # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-            #                                                                       source_id=datasource_descrID):
             ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
     def test_ingest_g_cls_ndvi_300m_global(self):
@@ -1338,10 +1288,6 @@ class TestIngestion(unittest.TestCase):
             subproducts.append(sprod)
             datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                             source_id=datasource_descrID)
-            # ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger,
-            #                     echo_query=1)
-            # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-            #                                                                       source_id=datasource_descrID):
             ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
 
@@ -1380,9 +1326,11 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                                              source_id=datasource_descrID):
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
+        self.assertEqual(1, 1)
 
     def test_ingest_g_cls_dmp_2_0_1(self):
 
@@ -1456,9 +1404,11 @@ class TestIngestion(unittest.TestCase):
         subproducts=[]
         subproducts.append(sprod)
 
-        for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                                              source_id=datasource_descrID):
-            ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
+        self.assertEqual(1, 1)
 
     def test_ingest_s3_olci_wrr(self):
 
@@ -1539,8 +1489,6 @@ class TestIngestion(unittest.TestCase):
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
-        # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-        #                                                                       source_id=datasource_descrID):
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
     def test_ingest_s3_slstr_sst(self):
@@ -1590,8 +1538,6 @@ class TestIngestion(unittest.TestCase):
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
-        # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-        #                                                                       source_id=datasource_descrID):
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
 
@@ -1631,8 +1577,6 @@ class TestIngestion(unittest.TestCase):
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
-        # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-        #                                                                       source_id=datasource_descrID):
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
     def test_ingest_aviso_mwind(self):
@@ -1670,8 +1614,6 @@ class TestIngestion(unittest.TestCase):
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
-        # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
-        #                                                                       source_id=datasource_descrID):
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
 
