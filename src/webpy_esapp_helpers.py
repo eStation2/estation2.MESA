@@ -48,6 +48,7 @@ from apps.productmanagement import requests
 from apps.analysis import generateLegendHTML
 from apps.analysis.getTimeseries import (getTimeseries, getFilesList)
 # from multiprocessing import (Process, Queue)
+from apps.tools import ingest_historical_archives as iha
 
 from lib.python import functions
 from lib.python import es_logging as log
@@ -56,6 +57,69 @@ logger = log.my_logger(__name__)
 
 
 WEBPY_COOKIE_NAME = "webpy_session_id"
+
+
+def IngestArchive(params):
+    # from apps.es2system import service_ingest_archive as sia
+    # service = params['service']
+    task = params['task']
+    # # if task == 'run':
+    # #     task = 'start'
+    # print task
+
+    pid_file = es_constants.es2globals['ingest_archive_pid_filename']
+    ingestarchive_daemon = es2system.IngestArchiveDaemon(pid_file, dry_run=False)
+    status = ingestarchive_daemon.status()
+    if status:
+        message = 'Ingest Archive service is running'
+    else:
+        message = 'Ingest Archive service is not running'
+
+    ingestarchive_service_script = es_constants.es2globals['system_service_dir'] + os.sep + 'service_ingest_archive.py'
+    if task == 'stop':
+        if status:
+            os.system("python " + ingestarchive_service_script + " stop")
+            message = 'Ingest Archive service stopped'
+        else:
+            message = 'Ingest Archive service is already down'
+
+    elif task == 'run':
+        if not status:
+            os.system("python " + ingestarchive_service_script + " start")
+            message = 'Ingest Archive service started'
+        else:
+            message = 'Ingest Archive service was already up'
+
+    elif task == 'restart':
+        # os.system("python " + ingestarchive_service_script + " restart")
+        os.system("python " + ingestarchive_service_script + " stop")
+        os.system("python " + ingestarchive_service_script + " start")
+        message = 'Ingest Archive service restarted'
+
+    status = ingestarchive_daemon.status()
+
+    running = 'false'
+    if status:
+        running = 'true'
+    response = '{"success":"true", "running":"' + running + '", "message":"' + message + '"}'
+    # running = sia.service_ingest_archive(command=task)
+    #
+    # if not running:
+    #     if task == 'status':
+    #         response = '{"success":"false", "running":"false", "message":"Ingest archive is not running!"}'
+    #     else:
+    #         response = '{"success":"false", "message":"Ingest archive stopped!"}'
+    # else:
+    #     response = '{"success":"true", "running":"true", "message":"Ingest archive is running!"}'
+
+    # task = params['task']
+    # running = 'false'
+    # if task == 'run':
+    #     iha.ingest_historical_archives(input_dir=None, dry_run=False)
+    #     running = 'true'
+    # message = 'Ingest Archive service is running'
+    # response = '{"success":"true", "running":"' + running + '", "message":"' + message + '"}'
+    return response
 
 
 def ChangeThema(thema):
@@ -97,6 +161,7 @@ def ChangeThema(thema):
         changethema_json = '{"success":false, "error":"Changing thema in database error!"}'
 
     return changethema_json
+
 
 def checkCreateSubproductDir(productcode, version):
     subproducts = querydb.get_product_subproducts(productcode=productcode, version=version)
@@ -1431,9 +1496,9 @@ def saveWorkspace(params):
         #   Insert all open/passed maps and graphs in the new workspace
         if params['isNewWorkspace'] == 'true':
             if crud_db.create('user_workspaces', workspace):
-                createdWorkspace = querydb.getCreatedUserWorkspace(params['userid'])
-                for row in createdWorkspace:
-                    newworkspaceid = row['lastworkspaceid']
+                newworkspaceid = querydb.getCreatedUserWorkspace(params['userid'], params['workspacename'])
+                # for row in createdWorkspace:
+                #     newworkspaceid = row['lastworkspaceid']
 
                 saveWorkspaceMaps(wsmaps, newworkspaceid)
                 saveWorkspaceGraphs(wsgraphs, newworkspaceid)

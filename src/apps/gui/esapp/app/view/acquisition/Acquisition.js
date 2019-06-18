@@ -347,7 +347,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
 
 
                     //me.getController().renderHiddenColumnsWhenUnlocked();
-
+                    //
                     //Ext.resumeLayouts(true);
                     // acq_main.updateLayout();
                     //var toggleFn = newValue ? 'disable' : 'enable';

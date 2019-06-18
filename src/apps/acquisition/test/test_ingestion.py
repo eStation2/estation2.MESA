@@ -1491,11 +1491,52 @@ class TestIngestion(unittest.TestCase):
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
+    def test_ingest_smos_sss(self):
+        # Test the ingestion of the Sentinel-3/OLCI Level-2 WRR product (on d6-dev-vm19 !!!!!)
+        date_fileslist = glob.glob('/data/ingest/SM_OPER_MIR_OSUDP2_20190513T*.nc')
+        single_date = os.path.basename(date_fileslist[0])
+        in_date = single_date.split('_')[7]
+        in_date = '20190513' #in_date.split('T')[0]  # + '0000'
+        productcode = 'smos-nc'
+        productversion = '1.0'
+        subproductcode = 'sss'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID = 'ESAEO:SMOS:L2OS:OSUDP2:SSS'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+        no_data = product_in_info.no_data
+
+        sprod = {'subproduct': subproductcode,
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process,
+                 'nodata': no_data}
+
+        subproducts = []
+        subproducts.append(sprod)
+
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                        source_id=datasource_descrID)
+        # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+        #                                                                       source_id=datasource_descrID):
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger,
+                            echo_query=1)
+
     def test_ingest_s3_slstr_sst(self):
 
         # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
         #date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180306T095629_20180306T095929_20180306T114727_0179_028_307_3420_MAR_O_NR_002.SEN3.tar')
-        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/slstr/S3A_SL_2_WST____20180*.SEN3.tar')
+        date_fileslist = glob.glob('/data/ingest/S3A_SL_2_WST____20190405T09*.SEN3.tar')
         single_date =  os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
         in_date = in_date.split('T')[0] #+ '0000'
@@ -1538,6 +1579,56 @@ class TestIngestion(unittest.TestCase):
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
+    def test_ingest_s3_slstr_sst_zipped(self):
+
+        # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
+        # date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180306T095629_20180306T095929_20180306T114727_0179_028_307_3420_MAR_O_NR_002.SEN3.tar')
+        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/SLSTR/S3A_SL_2_WST____20190406T*.zip')
+        single_date = os.path.basename(date_fileslist[0])
+        in_date = single_date.split('_')[7]
+        in_date = in_date.split('T')[0]  # + '0000'
+        # for one_file in date_fileslist:
+        #
+        #     one_filename = os.path.basename(one_file)
+        #     in_date = one_filename.split('_')[7]
+        #     day_data = functions.is_data_captured_during_day(in_date)
+        #
+        #     if day_data:
+        #         date_fileslist_day.append(one_file)
+        productcode = 'slstr-sst'
+        productversion = '1.0'
+        subproductcode = 'wst'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID = 'CODA:EUM:S3A:WST'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+        no_data = product_in_info.no_data
+
+        sprod = {'subproduct': subproductcode,
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process,
+                 'nodata': no_data}
+
+        subproducts = []
+        subproducts.append(sprod)
+
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                        source_id=datasource_descrID)
+        # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
+        #                                                                       source_id=datasource_descrID):
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
 

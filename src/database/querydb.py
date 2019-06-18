@@ -107,14 +107,30 @@ def get_user_workspaces(userid):
             dbschema_analysis.session.close()
 
 
-def getCreatedUserWorkspace(userid):
+def getCreatedUserWorkspace(userid, workspacename):
     global dbschema_analysis
     try:
-        query = "SELECT max(workspaceid) as lastworkspaceid FROM analysis.user_workspaces WHERE userid = '" + userid + "'"
+        # query = "SELECT max(workspaceid) as lastworkspaceid FROM analysis.user_workspaces WHERE userid = '" + userid + "';"
+
+        query = "SELECT workspaceid as lastworkspaceid FROM analysis.user_workspaces " \
+                " WHERE userid = '" + userid + "'" \
+                "  AND workspacename = '" + workspacename + "';"
         result = dbschema_analysis.execute(query)
         result = result.fetchall()
 
-        return result
+        query2 = "SELECT currval(pg_get_serial_sequence('analysis.user_workspaces','workspaceid')) as lastworkspaceid;"
+        result2 = dbschema_analysis.execute(query)
+        result2 = result2.fetchall()
+        lastworkspaceid = -1
+        for row in result2:
+            lastworkspaceid = row['lastworkspaceid']
+
+        newworkspaceid = -1
+        for row in result:
+            if row['lastworkspaceid'] == lastworkspaceid:
+                newworkspaceid = row['lastworkspaceid']
+
+        return newworkspaceid
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
@@ -1626,6 +1642,25 @@ def get_mapsets_for_ingest(productcode, version, subproductcode):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_mapsets_for_ingest: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
+def get_mapsets():
+    global db
+    try:
+        query = "SELECT * FROM products.mapset " \
+                "ORDER BY descriptive_name"
+
+        mapsets = db.execute(query)
+        mapsets = mapsets.fetchall()
+
+        return mapsets
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_mapsets: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if db.session:
             db.session.close()

@@ -39,6 +39,7 @@ Ext.define('esapp.Application', {
         ,'LegendsStore'
         ,'EumetcastSourceStore'
         ,'InternetSourceStore'
+        ,'MapsetsStore'
         // ,'ProductsInactiveStore' // Not used anymore, instead esapp.model.Product is used.
         ,'ProductsActiveStore'      // no autoload
         ,'DataAcquisitionsStore'    // no autoload
