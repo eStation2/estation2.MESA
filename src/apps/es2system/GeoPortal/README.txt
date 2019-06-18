@@ -64,3 +64,31 @@ NOTE: in my implementation all files are in /var/www/eStation2/apps/es2system/Ge
 
   It is then uploaded to geoserver as Style, and assigned as default Style for the Layer
 
+
+--------------------------------------
+  syncGeoserver() flow
+--------------------------------------
+
+FOREACH product
+
+    IF NOT isWorkspace() -> createWorkspace()
+
+    FOREACH file
+
+        uploadAndRegisterRaster():  IF NOT isStyle() ->  createStyle()
+                                    IF NOT isRaster() ->
+                                        IF NOT existsRemote() -> uploadRemote()
+                                        registerRaster()
+
+Methods used by each routine:
+
+isWorkspace()       -> requests.get()
+createWorkspace()   -> curl -s -u ...
+isStyle()           -> requests.get()
+createStyle()       -> requests.put()
+isRaster()          -> requests.get()
+registerRaster()    -> requests.put()
+setDefaultStyle()   -> requests.put()      NOT USED ??
+
+existRemote()       -> ssh test -f
+uploadRemote()      -> scp
