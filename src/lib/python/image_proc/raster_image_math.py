@@ -3488,18 +3488,21 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
 
         # % FROM CHL fronts   to         daily          feeding         habitat
         # For OPFish, here are the updated values for MODIS-Aqua CHL compared to the Arctic report:
-        chl_grad_min = 0.00026;  # perc.5th of all species reconstructed OBS by group
+        # chl_grad_min = 0.00026;  # perc.5th of all species reconstructed OBS by group
+        chl_grad_min = 0.00032131;  # perc.5th of all species reconstructed OBS by group -- NEW VALUES BY JEON
         # # perc.1.2th total MESOZOOPK
         # # min value among species is
         # # 0.00022(mesozoo) & 0.00025 (blue shark)
-        chl_grad_int = 0.009784  # linear fit from 0.09 to 1 (minimum mobility of species)
+        # chl_grad_int = 0.009784  # linear fit from 0.09 to 1 (minimum mobility of species)
+        chl_grad_int = 0.019162  # linear fit from 0.09 to 1 (minimum mobility of species)
         # # 0.017138 from 0.091 to 1 with min=0.00026 prior to MESOZOOPK;
         # # 0.00623 from 0.3 to 1 with min=0.00025 of blue shark;
         # # linear fit OLD prior to SKJ Spanish+ small pel. GoL 0.0176;
         chl_feed_min = 0.08  # mgChl/m3 - minimum among species
         # # (perc.15 cluster/perc.5 tot. blue shark)
         # # (perc.1.8 red cluster/perc.0.5 tot. mesozoopk)
-        chl_feed_max = 12.0  # perc.98th green MESOZOOPK, perc.99.3th total MESOZOOPK;
+        # chl_feed_max = 12.0  # perc.98th green MESOZOOPK, perc.99.3th total MESOZOOPK;
+        chl_feed_max = 11.0  # perc.98th green MESOZOOPK, perc.99.3th total MESOZOOPK;
         # # perc.99.8th all species (not by subgroup)
         # # Approx. limit to eutrophication
 
@@ -3726,7 +3729,7 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
 
             if wtp.any():
                 opFish[wtp] = data[wtp] * (daylength_val / 24)
-                # opFish[wtp] = ((data[wtp] - gradCHL_min)/(gradCHL_max - gradCHL_min)) * (daylength_val/24) #* 100
+                # opFish[wtp] = ((data[wtp] - chl_grad_min) / (chl_feed_max - chl_feed_min)) * (daylength_val / 24) #* 100
 
             opFish.shape = (1, -1)
 

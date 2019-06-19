@@ -650,6 +650,23 @@ def my_proc_vgt_dmp(pipe_run=0, pipe_print=3, start_date=None, end_date=None, to
     request_queue = Queue()
     proc_lists=processing_std_dmp_all(request_queue, **args)
 
+from apps.processing.processing_std_opfish import *
+def test_proc_modis_chla_opfish(pipe_run=0, pipe_print=3, touch_files_only=False):
+
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': 'modis-chla',\
+            'starting_sprod':'chla-day',\
+            'mapset': 'MODIS-Africa-4km',\
+            'version':'v2013.1',
+            'logfile':'modis-chla',
+            'touch_files_only':touch_files_only
+            }
+    res_queue = None
+
+    processing_std_opfish(res_queue, **args)
+
 #   ---------------------------------------------------------------------
 # modis-ba (not yet there ?!?)
 #   ---------------------------------------------------------------------
@@ -728,7 +745,7 @@ def my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=Fa
 #my_proc_std_modis_sst(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_std_modis_par(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_std_modis_kd490(pipe_run=0, pipe_print=3, touch_files_only=False)
-my_proc_modis_pp(pipe_run=3, pipe_print=0, touch_files_only=False)
+# my_proc_modis_pp(pipe_run=3, pipe_print=0, touch_files_only=False)
 #my_proc_std_median_filter()
 #my_proc_tamsat_rfe(pipe_run=4, pipe_print=0, start_date='19830101', end_date='20171231', touch_files_only=False)
 # proc_list=my_proc_fewsnet_rfe(pipe_run=0, pipe_print=8, start_date=None, end_date=None, touch_files_only=False)                       # OK
@@ -749,7 +766,7 @@ my_proc_modis_pp(pipe_run=3, pipe_print=0, touch_files_only=False)
 #my_proc_vgt_dmp(pipe_run=4, pipe_print=0, start_date='19990101', end_date='20171231', touch_files_only=False)
 #my_proc_std_ba(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None, touch_files_only=False)
 #my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=False)
-
+test_proc_modis_chla_opfish(pipe_run=3, pipe_print=0, touch_files_only=False)
 #   ---------------------------------------------------------------------
 #   OFF-LINE Tests (on raster-math functions)
 #   ---------------------------------------------------------------------
