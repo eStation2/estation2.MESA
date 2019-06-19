@@ -188,8 +188,11 @@ class TestQuerydb(TestCase):
         # for row in datasource_descr:
         #     print row
 
-        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                        source_id='UCSB:CHIRPS:PREL:DEKAD')
+        # datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+        #                                                 source_id='UCSB:CHIRPS:PREL:DEKAD')
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                        source_id='EO:EUM:DAT:MSG:ET-SEVIRI')
+
         logger.info("Internet source description is: %s", datasource_descr)
         for row in datasource_descr:
             print row

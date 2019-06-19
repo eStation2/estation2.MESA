@@ -97,7 +97,7 @@ class TestgeoserverREST(TestCase):
     #   WorkSpaces
     # ----------------------------------------------------
 
-    def TestListWorkspaces(self):
+    def test_ListWorkspaces(self):
 
         WorkSpaces=geoserverREST.listWorkspaces()
         print 'List of workspaces'
