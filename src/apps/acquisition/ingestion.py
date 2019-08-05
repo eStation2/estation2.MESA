@@ -677,6 +677,134 @@ def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files, my_logger):
     return pre_processed_list
 
 
+def pre_process_merge_tile(subproducts, tmpdir, input_files, my_logger):
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process Merge tiled files from PROBAV 100 and 300 meters
+#   Uses Gdal_merge to merge the file and gdal_translate to compress the file and assign BIGTIFF NO
+#
+    # Prepare the output file list
+    pre_processed_list = []
+
+    # Check at least 1 file is reprojected file is there
+    if len(input_files) == 0:
+        my_logger.debug('No files. Return')
+        return -1
+
+    sprod = subproducts[0]
+    nodata = sprod['nodata']
+
+    if len(input_files) > 0:
+        # OUTPUT FILES
+        output_file         = tmpdir+os.path.sep + 'merge_output.tif'
+        # output_file_vrt = tmpdir + os.path.sep + 'merge_output_rescaled.vrt'
+        output_file_compressed  = tmpdir+os.path.sep + 'merge_output_compressed.tif'
+
+        # -------------------------------------------------------------------------
+        # STEP 1: Merge all input products into a 'tmp' file
+        # -------------------------------------------------------------------------
+        try:
+            command = es_constants.gdal_merge
+            # command += ' -co \"compress=lzw\"'
+            # command += ' -co \"BIGTIFF=Yes\"'
+            command += ' -init '+str(nodata)
+            command += ' -o ' + output_file
+            command += ' -ot BYTE '
+            for file in input_files:
+                command += ' '+file
+
+            my_logger.debug('Command for merging is: ' + command)
+            os.system(command)
+        except:
+            pass
+
+        # # Rescale the data using gdal_calc( In this case of 300m and 100m rescale is possible with gdal_calc but due the storage problem we are storing it in BYTE
+        # rescale_func = "\"(A*0.004-0.08)*1000\""
+        # rescale_command = "gdal_calc.py --NoDataValue=-32768 --type Int16 --co \"TILED=YES\" --co \"COMPRESS=LZW\" -A "+ retile_file+" --calc=\"(A*0.004-0.08)*1000\" --outfile=
+        # os.system(rescale_command)
+
+        try:
+            command = es_constants.gdal_translate
+            command += ' -co \"compress=lzw\"'
+            command += ' -co \"BIGTIFF=No\"'
+            command += ' -ot BYTE '
+            command += ' '+output_file
+            # command += ' ' + output_file_vrt #To be changed if rescaling is done
+            command += ' '+output_file_compressed
+
+            my_logger.debug('Command for compress is: ' + command)
+            os.system(command)
+
+        except:
+            pass
+
+        pre_processed_list.append(output_file_compressed)
+
+    # Else pass the single input file
+    else:
+        pre_processed_list.append(input_files[0])
+
+    return pre_processed_list
+
+
+def pre_process_retile_vito (subproducts, tmpdir, input_files, my_logger):
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process Merge tiled files
+#
+#   TODO-M.C.: add a mechanism to check input_files vs. mapsets ??
+#              Optimize by avoiding repetition of the gdal_merge for the same sub_product, different mapset ?
+#
+    # Prepare the output file list
+    pre_processed_list = []
+    # # Build a list of subdatasets to be extracted
+    # Check at least 1 file is reprojected file is there
+    if len(input_files) == 0:
+        my_logger.debug('No files. Return')
+        return -1
+
+    args = {"productcode": product['productcode'],
+            "subproductcode": subproducts[ii]['subproduct'],
+            "datasource_descr_id": datasource_descr.datasource_descr_id,
+            "version": product['version']}
+
+    # Get information from sub_dataset_source table
+    product_in_info = querydb.get_product_in_info(**args)
+
+    # Loop over input file to create VRT files
+    if len(input_files) > 1:
+        for input_file in input_files:
+            out_vrt_file = tmpdir + os.path.sep+ os.path.split(input_file)[-1]+ ".vrt"
+            # convert_vrt_cmd = "gdalwarp -of vrt -ot Float32 "+ input_file + " " + input_file +".vrt"
+            convert_vrt_cmd = "gdal_translate -of vrt -ot Float32 " + input_file + " " + out_vrt_file
+            os.system(convert_vrt_cmd)
+
+        # List all the vrt file and store in text file
+        text_file_ls = tmpdir + os.path.sep + "list.txt"
+        os.system("ls "+tmpdir+"/*.vrt >" + text_file_ls)
+
+        # Merge all the vrt files with gdalbuildvrt
+        merged_vrt_file = tmpdir + os.path.sep+ "merged_vrt.vrt"#tmpdir + os.path.sep + "merged_vrt.vrt"
+        os.system("gdalbuildvrt -input_file_list " + text_file_ls + " "+ merged_vrt_file)
+
+        # Create retile dir functions.check_output_dir(output_dir)
+        output_retile_dir = tmpdir + os.path.sep + "retiled"
+        functions.check_output_dir(output_retile_dir)
+
+        # Convert merged vrt file to Gtiff file with the compression
+        cmd_retile = "gdal_retile.py -v -ps 16384 16384 -co \"TILED=YES\" -co \"COMPRESS=LZW\" -targetDir "+output_retile_dir+" "+tmpdir+"/*.vrt"
+        os.system(cmd_retile)
+        pre_processed_list.append(glob.glob(output_retile_dir))
+
+        for retile_file in glob.glob(output_retile_dir):
+            gdal_calc_cmd = "gdal_calc.py --format=VRT --type Int16 -A "+retile_file+" --calc=\"(A*0.004-0.08)*1000\" --outfile=/data/ingest/test_calc_int16.vrt"
+
+    else:
+        pre_processed_list.append(input_files[0])
+            # sds_tmp = None
+
+    return pre_processed_list
+
+
+
 def drive_pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger):
 # -------------------------------------------------------------------------------------------------------
 #   Drive the Pre-process LSASAF HDF5 files
@@ -1574,7 +1702,7 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         pass
 
     #Manually save tar file in the /data/ingest and send it to mesa-proc for the processing
-    command = 'tar -cvzf /data/ingest/MESA_JRC_wd-gee_occurr_20190401_WD-GEE-ECOWAS-AVG_1.0.tgz -C ' + os.path.dirname(output_file_mapset) + ' ' + os.path.basename(output_file_mapset)
+    command = 'tar -cvzf /data/ingest/MESA_JRC_wd-gee_occurr_20190601_WD-GEE-ECOWAS-AVG_1.0.tgz -C ' + os.path.dirname(output_file_mapset) + ' ' + os.path.basename(output_file_mapset)
     my_logger.debug('Command for tar the file is: ' + command)
     os.system(command)
     # Assign output file
@@ -2944,6 +3072,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 #           BINARY: .bil product (e.g. GEOWRSI)
 #           NETCDF_S3_WRR: S3A OLCI WRR data treatment using SNAP-GPT to do band subset, reproject.
 #           NETCDF_S3_WST: S3A SLSTR WST data treatment using SNAP-GPT to do band subset, reproject.
+#           MERGE_TILE: Merge the tiles from VITO website and convert to nobigtif format
 #           JRC_WBD_GEE: merges the various tiles of the .tif files retrieved from GEE application and remove the bigtif tag(works only in developement machine)
 #       native_mapset_code: id code of the native mapset (from datasource_descr)
 #       subproducts: list of subproducts to be extracted from the file. Contains dictionaries such as:
@@ -2968,6 +3097,9 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
         elif preproc_type == 'MODIS_HDF4_TILE':
             interm_files = pre_process_modis_hdf4_tile (subproducts, tmpdir, input_files, my_logger)
+
+        elif preproc_type == 'MERGE_TILE':
+            interm_files = pre_process_merge_tile (subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'LSASAF_HDF5':
             interm_files = drive_pre_process_lsasaf_hdf5 (subproducts, tmpdir, input_files, my_logger)
@@ -4026,6 +4158,12 @@ def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in
     # Create output array
     trg_data = N.zeros(in_data.shape, dtype=out_data_type)
 
+    # # ES2-385 Option 1 Check if the rescale has to be skipped and assign trg_data to in_data
+    # if in_scale_type == 'skip_rescale':
+    #     trg_data = in_data
+    #     my_logger.info('Skip rescaling because of memory problem')
+    #     return trg_data
+
     # Get position of input nodata
     if in_nodata is not None:
         idx_nodata = (in_data == in_nodata)
@@ -4054,7 +4192,11 @@ def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in
         phys_value =  N.power(10,phys_value)
 
     # Assign to the output array
-    trg_data = (phys_value - out_offset) / out_scale_factor
+    # Option 2: ES2-385 Check if Output rescaling has to be done
+    if out_scale_factor != 1 or out_offset != 0:
+        trg_data = (phys_value - out_offset) / out_scale_factor
+    else:
+        trg_data = phys_value
 
     # Assign output nodata to in_nodata and mask range
     if idx_nodata.any():

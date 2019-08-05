@@ -311,6 +311,89 @@ def build_list_matching_files_tmpl(base_url, template, from_date, to_date, frequ
 
 
 ######################################################################################
+#   build_list_matching_files_tmpl_probavito
+#   Purpose: return the list of file names matching a 'template' with 'date' placeholders
+#            It is the entry point for the 'http_templ' source type
+#   Author: VIJAY CHARAN VENKATACHALAM, JRC, European Commission
+#   Date: 2019/07
+#   Inputs: template: regex including subdirs (e.g. 'Collection51/TIFF/Win1[01]/201[1-3]/MCD45monthly.A20.*burndate.tif.gz'
+#           from_date: start date for the dataset (datetime.datetime object)
+#           to_date: end date for the dataset (datetime.datetime object)
+#           frequency: dataset 'frequency' (see DB 'frequency' table)
+#
+def build_list_matching_files_tmpl_vito(base_url, template, from_date, to_date, frequency_id):
+
+    # Add a check on frequency
+    try:
+        frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
+    except Exception as inst:
+        logger.debug("Error in datasets.Dataset.get_frequency: %s" %inst.args[0])
+        raise
+
+    # Manage the start_date (mandatory).
+    try:
+        # If it is a date, convert to datetime
+        if functions.is_date_yyyymmdd(str(from_date), silent=True):
+            datetime_start=datetime.datetime.strptime(str(from_date),'%Y%m%d')
+        else:
+            # If it is a negative number, subtract from current date
+            if isinstance(from_date,int) or isinstance(from_date,long):
+                if from_date < 0:
+                    datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
+            else:
+                logger.debug("Error in Start Date: must be YYYYMMDD or -Ndays")
+                raise Exception("Start Date not valid")
+    except:
+        raise Exception("Start Date not valid")
+
+    # Manage the end_date (mandatory).
+    try:
+        if functions.is_date_yyyymmdd(str(to_date), silent=True):
+            datetime_end=datetime.datetime.strptime(str(to_date),'%Y%m%d')
+        # If it is a negative number, subtract from current date
+        elif isinstance(to_date,int) or isinstance(to_date,long):
+            if to_date < 0:
+                datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
+        else:
+            datetime_end=datetime.datetime.today()
+    except:
+        pass
+
+    try:
+        dates = frequency.get_dates(datetime_start, datetime_end)
+    except Exception as inst:
+        logger.debug("Error in frequency.get_dates: %s" %inst.args[0])
+        raise
+
+    try:
+        if sys.platform == 'win32':
+            template.replace("-","#")
+        #TODO store this list in factory settings or similar location
+        xy_africa_list = ['X16Y04','X16Y05','X16Y06','X17Y03','X17Y04','X17Y05','X17Y06','X17Y07','X18Y03','X18Y04','X18Y05','X18Y06','X18Y07','X19Y03','X19Y04','X19Y05','X19Y06','X19Y07','X19Y08','X19Y09','X19Y10','X20Y04','X20Y05','X20Y06','X20Y07','X20Y08','X20Y09','X20Y10','X21Y04','X21Y05','X21Y06','X21Y07','X21Y08','X21Y09','X21Y10','X22Y05','X22Y06','X22Y07','X22Y08','X22Y09','X22Y10','X23Y06','X23Y08','X23Y09']
+        list_filenames_vito = frequency.get_internet_dates(dates, template)
+    except Exception as inst:
+        logger.debug("Error in frequency.get_internet_dates: %s" %inst.args[0])
+        raise
+
+    list_matches = []
+    # init_level = 1
+
+    for xy_value in xy_africa_list:
+        for filename_vito in list_filenames_vito:
+        # Get contents of the current folder
+            filename_vito_replaced = filename_vito.replace("@@@@", xy_value)
+            list_matches.append(filename_vito_replaced)
+
+    # toprint = ''
+    # for elem in list_matches:
+    #     toprint += elem + ','
+    #
+    #     logger.info('List in get_list_matching_files: %s' % toprint)
+
+    return list_matches
+
+
+######################################################################################
 #   build_list_matching_files_ftp_tmpl
 #   Purpose: return the list of file names matching a 'template' with 'date' placeholders
 #            It is the entry point for the 'ftp_templ' source type
@@ -910,6 +993,18 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                     logger.error("Error in creating date lists. Continue")
                                     continue
 
+                            elif internet_type == 'http_tmpl_vito':
+                                # Create the full filename from a 'template' which contains
+                                try:
+                                    current_list = build_list_matching_files_tmpl(str(internet_source.url),
+                                                                                str(internet_source.include_files_expression),
+                                                                                internet_source.start_date,
+                                                                                internet_source.end_date,
+                                                                                str(internet_source.frequency_id))
+                                except:
+                                    logger.error("Error in creating date lists. Continue")
+                                    continue
+
                             elif internet_type == 'motu_client':
                                 # Create the full filename from a 'template' which contains
                                 try:
@@ -1016,6 +1111,13 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                 # elif internet_type == 'sentinel_sat':
                                                 #     result = get_file_from_sentinelsat_url(str(filename),
                                                 #                                            target_dir=es_constants.ingest_dir)
+                                                elif internet_type == 'http_tmpl_vito':
+                                                    download_link = 'https://coda.eumetsat.int/odata/v1/Products(\'{0}\')/$value'.format(
+                                                        os.path.split(filename)[0])
+                                                    result = get_file_from_url(str(download_link) + os.path.sep + filename,
+                                                                               target_dir=es_constants.ingest_dir,
+                                                                               target_file=os.path.basename(filename),
+                                                                               userpwd=str(usr_pwd), https_params='Referer: '+str(download_link)+os.path.dirname(filename)+'?mode=tif')
 
                                                 elif internet_type == 'http_coda_eum':
                                                     download_link = 'https://coda.eumetsat.int/odata/v1/Products(\'{0}\')/$value'.format(os.path.split(filename)[0])

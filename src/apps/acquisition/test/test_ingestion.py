@@ -706,6 +706,42 @@ class TestIngestion(unittest.TestCase):
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
+    def test_ingest_tamsat_rfe(self):
+
+        date_fileslist = glob.glob('/data/ingest/rfe2018_08-dk1.v3.nc')
+        in_date = '2018_08-dk1'
+        productcode = 'tamsat-rfe'
+        productversion = '3.0'
+        subproductcode = '10d'
+        mapsetcode = 'TAMSAT-Africa-4km'
+        datasource_descrID = 'READINGS:TAMSAT:3.0:10D:NC'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+        no_data = product_in_info.no_data
+
+        sprod = {'subproduct': subproductcode,
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process,
+                 'nodata': no_data}
+
+        subproducts = []
+        subproducts.append(sprod)
+
+
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
 
     def test_ingest_jrc_wbd(self):
@@ -804,9 +840,9 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_jrc_wbd(self):
 
-        date_fileslist = glob.glob('/data/ingest/JRC-WBD_20190201*')
+        date_fileslist = glob.glob('/data/ingest/JRC-WBD_20190601*')
         #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
-        in_date = '20190201'
+        in_date = '20190601'
         productcode = 'wd-gee'
         productversion = '1.0'
         subproductcode = 'occurr'
@@ -1203,6 +1239,87 @@ class TestIngestion(unittest.TestCase):
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
+        self.assertEqual(1, 1)
+
+    def test_ingest_probav_ndvi_100(self):
+
+        # Test Copernicus Products version 2.2 (starting with NDVI 2.2.1)
+        # Products released from VITO in March 2017
+
+        date_fileslist = glob.glob('/data/ingest/PROBAV_S1_TOC_*20190611*')
+        in_date = '20190611'
+        productcode = 'vgt-ndvi'
+        productversion = 'proba100-v1.0'
+        subproductcode = 'ndv'
+        mapsetcode = 'PROBAV-Africa-100m'
+        datasource_descrID='PDF:VITO:PROBA-V1:NDVI100'
+
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
+        self.assertEqual(1, 1)
+
+    def test_ingest_probav_ndvi_300(self):
+        # Test Copernicus Products version 2.2 (starting with NDVI 2.2.1)
+        # Products released from VITO in March 2017
+
+        date_fileslist = glob.glob('/data/ingest/PROBAV_S10_TOC_*20190621**')
+        in_date = '20190621'
+        productcode = 'vgt-ndvi'
+        productversion = 'proba300-v1.0'
+        subproductcode = 'ndv'
+        mapsetcode = 'SENTINEL-Africa-300m'
+        datasource_descrID = 'PDF:VITO:PROBA-V1:NDVI300'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+        nodata = product_in_info.no_data
+
+        sprod = {'subproduct': subproductcode,
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process,
+                 'nodata': nodata}
+
+        subproducts = []
+        subproducts.append(sprod)
+
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                        source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger,
+                               echo_query=1)
 
         self.assertEqual(1, 1)
 
