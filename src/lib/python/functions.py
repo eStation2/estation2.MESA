@@ -2334,8 +2334,8 @@ def write_graph_xml_subset(input_file, output_dir, band_name):
         outFile.write('      <region>0,0,1217,14952</region>\n')
         outFile.write(
             '            <geoRegion/>\n')
-        # outFile.write(
-        #     '     <geoRegion>POLYGON ((-33.23047637939453 41.53836441040039, 65.0774154663086 41.53836441040039, 65.0774154663086 -42.923343658447266, -33.23047637939453 -42.923343658447266, -33.23047637939453 41.53836441040039, -33.23047637939453 41.53836441040039))</geoRegion>\n')
+        outFile.write(
+            '     <geoRegion>POLYGON ((-33.23047637939453 41.53836441040039, 65.0774154663086 41.53836441040039, 65.0774154663086 -42.923343658447266, -33.23047637939453 -42.923343658447266, -33.23047637939453 41.53836441040039, -33.23047637939453 41.53836441040039))</geoRegion>\n')
 
         outFile.write('      <subSamplingX>1</subSamplingX>\n')
         outFile.write('      <subSamplingY>1</subSamplingY>\n')

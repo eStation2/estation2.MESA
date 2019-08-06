@@ -1610,10 +1610,10 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_smos_sss(self):
         # Test the ingestion of the Sentinel-3/OLCI Level-2 WRR product (on d6-dev-vm19 !!!!!)
-        date_fileslist = glob.glob('/data/ingest/SM_OPER_MIR_OSUDP2_20190513T*.nc')
+        date_fileslist = glob.glob('/data/ingest/SM_OPER_MIR_OSUDP2_20190805T*.nc')
         single_date = os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
-        in_date = '20190513' #in_date.split('T')[0]  # + '0000'
+        in_date = '20190805' #in_date.split('T')[0]  # + '0000'
         productcode = 'smos-nc'
         productversion = '1.0'
         subproductcode = 'sss'

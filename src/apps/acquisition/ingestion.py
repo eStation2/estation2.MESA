@@ -2229,7 +2229,7 @@ def pre_process_snap_subset_nc(subproducts, tmpdir, input_files, my_logger, in_d
             command = es_constants.gpt_exec+' '+ graph_xml_subset   #es_constants.gpt_exec
             status=os.system(command)
 
-            pre_processed_list.append(output_subset_tif)
+            # pre_processed_list.append(output_subset_tif)
             # # ToDo : check the status or use try/except
             if os.path.exists(output_subset_tif):
                 interm_files_list.append(output_subset_tif)
@@ -2245,7 +2245,7 @@ def pre_process_snap_subset_nc(subproducts, tmpdir, input_files, my_logger, in_d
             for file_add in interm_files_list:
                 input_files_str += ' '
                 input_files_str += file_add
-            command = 'gdalwarp -srcnodata "{}" -dstnodata "{}" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(int(no_data), int(no_data),
+            command = 'gdalwarp -srcnodata "{}" -dstnodata "{}" -ot Float32 {} {}'.format(int(no_data), int(no_data),
                  input_files_str, out_tmp_file_gtiff)
             # command = 'gdalwarp -srcnodata "103.69266" -dstnodata "1000" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
             #     input_files_str, out_tmp_file_gtiff)

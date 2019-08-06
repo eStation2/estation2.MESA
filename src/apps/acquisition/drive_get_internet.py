@@ -11,7 +11,7 @@ logger = log.my_logger(__name__)
 do_start = True
 dry_run  = False
 service  = False
-only_source = 'PDF:VITO:PROBA-V1:NDVI300'  # 'JRC:S3A:WRR'
+only_source = 'ESAEO:SMOS:L2OS:OSUDP2:SSS'  # 'JRC:S3A:WRR'
 
 # service is always False because this module is used by the windows version or for testing
 # ToDo: The code under the if statement can be deleted, service_get_internet.py is now used by non windows versions
