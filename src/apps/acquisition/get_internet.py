@@ -996,7 +996,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                             elif internet_type == 'http_tmpl_vito':
                                 # Create the full filename from a 'template' which contains
                                 try:
-                                    current_list = build_list_matching_files_tmpl(str(internet_source.url),
+                                    current_list = build_list_matching_files_tmpl_vito(str(internet_source.url),
                                                                                 str(internet_source.include_files_expression),
                                                                                 internet_source.start_date,
                                                                                 internet_source.end_date,
@@ -1112,12 +1112,10 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                 #     result = get_file_from_sentinelsat_url(str(filename),
                                                 #                                            target_dir=es_constants.ingest_dir)
                                                 elif internet_type == 'http_tmpl_vito':
-                                                    download_link = 'https://coda.eumetsat.int/odata/v1/Products(\'{0}\')/$value'.format(
-                                                        os.path.split(filename)[0])
-                                                    result = get_file_from_url(str(download_link) + os.path.sep + filename,
+                                                    result = get_file_from_url(str(internet_source.url) + os.path.sep + filename,
                                                                                target_dir=es_constants.ingest_dir,
                                                                                target_file=os.path.basename(filename),
-                                                                               userpwd=str(usr_pwd), https_params='Referer: '+str(download_link)+os.path.dirname(filename)+'?mode=tif')
+                                                                               userpwd=str(usr_pwd), https_params='Referer: '+str(internet_source.url)+os.path.dirname(filename)+'?mode=tif')
 
                                                 elif internet_type == 'http_coda_eum':
                                                     download_link = 'https://coda.eumetsat.int/odata/v1/Products(\'{0}\')/$value'.format(os.path.split(filename)[0])

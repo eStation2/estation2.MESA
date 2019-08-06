@@ -2,7 +2,7 @@
 from config import es_constants
 from apps.acquisition.get_internet import *
 from apps.acquisition.get_eumetcast import *
-from apps.tools import coda_eumetcast_http
+from apps.tools import coda_eum_api
 
 import unittest
 import shutil
@@ -1212,8 +1212,8 @@ class TestGetInternet(unittest.TestCase):
                          'pull_frequency': internet_source.pull_frequency,
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
-                         'start_date':20180630,
-                         'end_date': 20180630,
+                         'start_date':20190704,
+                         'end_date': 20190704,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type,
                          'files_filter_expression':internet_source.files_filter_expression,

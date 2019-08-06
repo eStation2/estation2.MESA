@@ -1286,8 +1286,8 @@ class TestIngestion(unittest.TestCase):
         # Test Copernicus Products version 2.2 (starting with NDVI 2.2.1)
         # Products released from VITO in March 2017
 
-        date_fileslist = glob.glob('/data/ingest/PROBAV_S10_TOC_*20190621**')
-        in_date = '20190621'
+        date_fileslist = glob.glob('/data/ingest/PROBAV_S10_TOC_*20190521**')
+        in_date = '20190521'
         productcode = 'vgt-ndvi'
         productversion = 'proba300-v1.0'
         subproductcode = 'ndv'
