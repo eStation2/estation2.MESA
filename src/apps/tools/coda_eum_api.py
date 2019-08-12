@@ -1,9 +1,9 @@
 #
-#	purpose: Define the get CMEMS data routine
-#	author:  M.Clerici
-#	date:	 08.10.2018
-#   descr:	 Gets data from CMEMS
-#	history: 2.0
+#	purpose: Define the get CODA EUM data routine
+#	author:  Vijay Charan
+#	date:	 06.2019
+#   descr:	 Gets data from CODA EUM
+
 
 import requests
 # import pycurl

@@ -116,6 +116,20 @@ def get_one_source(internet_source, target_dir=None):
                 except:
                     logger.error("Error in creating date lists. Continue")
 
+            elif internet_type == 'http_tmpl_theia':
+                # Create the full filename from a 'template' which contains
+                try:
+                    current_list = build_list_matching_files_tmpl_theia(str(internet_source['url']),
+                                                                str(internet_source['include_files_expression']),
+                                                                internet_source['start_date'],
+                                                                internet_source['end_date'],
+                                                                str(internet_source['frequency_id']),
+                                                                user_name,
+                                                                password)
+                except:
+                    logger.error("Error in creating date lists. Continue")
+
+
             elif internet_type == 'ftp_tmpl':
                 # Create the full filename from a 'template' which contains
                 try:
@@ -223,6 +237,12 @@ def get_one_source(internet_source, target_dir=None):
                                 result = get_file_from_url(str(internet_source['url']) + os.path.sep + filename,
                                                            target_dir=es_constants.ingest_dir,
                                                            target_file=os.path.basename(filename), userpwd=str(usr_pwd), https_params='Referer: '+str(internet_source['url'])+os.path.dirname(filename)+'?mode=tif')
+
+                            elif internet_type == 'http_tmpl_theia':
+                                result = get_file_from_url(str(internet_source['url'] + os.path.sep + os.path.split(filename)[0]),
+                                                           target_dir=es_constants.ingest_dir,
+                                                           target_file=os.path.basename(os.path.split(filename)[1]), userpwd=str(usr_pwd), https_params='')
+
 
                             elif internet_type == 'http_coda_eum':
                                 download_link = 'https://coda.eumetsat.int/odata/v1/Products(\'{0}\')/$value'.format(os.path.split(filename)[0])#os.path.split('asdasdad/dasdasds')[0]
@@ -1097,6 +1117,38 @@ class TestGetInternet(unittest.TestCase):
                          'password':internet_source.password,
                          'start_date':20190521,
                          'end_date': 20190521,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type,
+                         'https_params': internet_source.https_params}
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
+
+    def TestRemoteHttps_WATERLEVEL(self):
+
+        internet_id='THEIA:HYDRO:LEGOS:WATERLEVEL'
+
+        # Direct test !
+        if False:
+            filename='c_gls_DMP-RT6_201801100000_GLOBE_PROBAV_V2.0.1.nc'
+            remote_url = 'https://land.copernicus.vgt.vito.be/PDF/datapool/Vegetation/Dry_Matter_Productivity/DMP_1km_V2/2018/1/10/DMP-RT6_201801100000_GLOBE_PROBAV_V2.0/'+filename
+            status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd='estation:estation2018')
+            return
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20150501,
+                         'end_date': 20150701,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type,
                          'https_params': internet_source.https_params}
