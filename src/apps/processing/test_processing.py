@@ -13,7 +13,9 @@ def my_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False):
     subproductcode='ndv'
     version='sv2-pv2.2'
     start_date='19990101'
-    end_date='20171231'
+    end_date='20171221'
+    start_date=None
+    end_date=None
 
     list_dates = proc_functions.get_list_dates_for_dataset(productcode, subproductcode, version, start_date=start_date, end_date=end_date)
 
@@ -26,12 +28,12 @@ def my_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False):
             'version': version,
             'starting_dates': list_dates,
             'logfile':'test_processing_ndvi',
-            'touch_files_only':False}
+            'touch_files_only':touch_files_only}
 
     #res_queue = Queue()
     res_queue = None
     proc_lists = processing_std_ndvi_prods_only(res_queue,**args)
-    #proc_lists = processing_std_ndvi_stats_only(res_queue,**args)
+    # proc_lists = processing_std_ndvi_stats_only(res_queue,**args)
     #proc_lists = processing_std_ndvi_all(res_queue,**args)
 
 #   ---------------------------------------------------------------------
@@ -720,7 +722,7 @@ def my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=Fa
 #   ---------------------------------------------------------------------
 #   Call a specific processing chain - To be TESTED after 03.3.2019
 #   ---------------------------------------------------------------------
-#my_proc_std_ndvi(pipe_run=0, pipe_print=4, touch_files_only=False)
+my_proc_std_ndvi(pipe_run=4, pipe_print=0, touch_files_only=False)
 #my_proc_ndvi_merge(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_pml_modis_fronts(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_std_fronts(pipe_run=0, pipe_print=3, touch_files_only=False)
@@ -734,7 +736,7 @@ def my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=Fa
 # proc_list=my_proc_fewsnet_rfe(pipe_run=0, pipe_print=8, start_date=None, end_date=None, touch_files_only=False)                       # OK
 
 # my_proc_chirps_dekad(pipe_run=0, pipe_print=9, start_date='19810101', end_date='20171231', upsert_db=False, touch_files_only=False)
-my_proc_arc2rain_dekad(pipe_run=0, pipe_print=6, start_date='19810101', end_date='20171231', upsert_db=False, touch_files_only=False)
+# my_proc_arc2rain_dekad(pipe_run=0, pipe_print=6, start_date='19810101', end_date='20171231', upsert_db=False, touch_files_only=False)
 # my_proc_chirps_lp(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False, type='')
 #my_proc_std_lsasaf_et(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
 #my_proc_std_lsasaf_lst(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
