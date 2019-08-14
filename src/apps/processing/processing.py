@@ -297,6 +297,10 @@ def loop_processing(dry_run=False, serialize=False, test_one_product=None):
                 else:
                     logger.debug("Processing already running for ID: %s " % processing_unique_id)
 
+        if do_processing_singleproduct:
+            logger.info("End of the loop for single product ... Exit")
+            return
+
         logger.info("End of the loop ... wait a while")
         time.sleep(1)
 
