@@ -243,8 +243,8 @@ class TestProducts4UI(unittest.TestCase):
             return d
 
         # Select prod/vers
-        productcode = 'vgt-ndvi'
-        version = 'proba-v2.1'
+        productcode = 'vgt-fapar'
+        version = 'V2.0'
         product = Product(product_code=productcode, version=version)
         # does the product have mapsets AND subproducts?
         all_prod_mapsets = product.mapsets
