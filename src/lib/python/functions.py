@@ -1174,6 +1174,24 @@ def extract_from_date(str_date):
 
     return [str_year, str_month, str_day, str_hour]
 
+######################################################################################
+#   Purpose: Exclude current year from the data list
+#   Author: Vijay Charan Venkatachalam
+#   Date: 2018/11/23
+#   Input: datelist
+#   Output: list with excluded current yeat
+#
+def exclude_current_year(input_list):
+
+    output_list = []
+    today = datetime.date.today()
+    current_year = today.strftime('%Y')
+
+    for myfile in input_list:
+        if os.path.basename(myfile)[0:4] != current_year:
+            output_list.append(myfile)
+    return output_list
+
 
 ######################################################################################
 #
@@ -2332,8 +2350,8 @@ def write_graph_xml_subset(input_file, output_dir, band_name):
         outFile.write('      <sourceBands>'+band_name+'</sourceBands>\n')
         # outFile.write('      <region>0,0,1217,15037</region>\n')
         outFile.write('      <region>0,0,1217,14952</region>\n')
-        outFile.write(
-            '            <geoRegion/>\n')
+        # outFile.write(
+        #     '            <geoRegion/>\n')
         outFile.write(
             '     <geoRegion>POLYGON ((-33.23047637939453 41.53836441040039, 65.0774154663086 41.53836441040039, 65.0774154663086 -42.923343658447266, -33.23047637939453 -42.923343658447266, -33.23047637939453 41.53836441040039, -33.23047637939453 41.53836441040039))</geoRegion>\n')
 
