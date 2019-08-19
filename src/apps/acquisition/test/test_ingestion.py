@@ -487,6 +487,42 @@ class TestIngestion(unittest.TestCase):
 
         self.assertEqual(1, 1)
 
+    def test_ingest_vgt_fcover(self):
+
+        date_fileslist = ['/data/ingest/c_gls_FCOVER_199901200000_GLOBE_VGT_V2.0.2.nc']
+        in_date = '199901200000'
+        productcode = 'vgt-fcover'
+        productversion = 'V2.0'
+        subproductcode = 'fcover'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID='PDF:GLS:VGT-V2.0:FCOVER'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
+        self.assertEqual(1, 1)
+
     def test_ingest_vgt_fapar(self):
 
         date_fileslist = ['/data/ingest.wrong/g2_BIOPAR_FAPAR_201510240000_AFRI_PROBAV_V1.4.zip']
@@ -840,9 +876,9 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_jrc_wbd(self):
 
-        date_fileslist = glob.glob('/data/ingest/JRC-WBD_20190601*')
+        date_fileslist = glob.glob('/data/ingest/JRC-WBD_20190701*')
         #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
-        in_date = '20190601'
+        in_date = '20190701'
         productcode = 'wd-gee'
         productversion = '1.0'
         subproductcode = 'occurr'
@@ -1286,8 +1322,8 @@ class TestIngestion(unittest.TestCase):
         # Test Copernicus Products version 2.2 (starting with NDVI 2.2.1)
         # Products released from VITO in March 2017
 
-        date_fileslist = glob.glob('/data/ingest/PROBAV_S10_TOC_*20190521**')
-        in_date = '20190521'
+        date_fileslist = glob.glob('/data/ingest/PROBAV_S10_TOC_*20190601**')
+        in_date = '20190601'
         productcode = 'vgt-ndvi'
         productversion = 'proba300-v1.0'
         subproductcode = 'ndv'
