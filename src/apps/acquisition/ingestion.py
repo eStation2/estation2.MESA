@@ -1702,7 +1702,7 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         pass
 
     #Manually save tar file in the /data/ingest and send it to mesa-proc for the processing
-    command = 'tar -cvzf /data/ingest/MESA_JRC_wd-gee_occurr_20190601_WD-GEE-ECOWAS-AVG_1.0.tgz -C ' + os.path.dirname(output_file_mapset) + ' ' + os.path.basename(output_file_mapset)
+    command = 'tar -cvzf /data/ingest/MESA_JRC_wd-gee_occurr_20190701_WD-GEE-ECOWAS-AVG_1.0.tgz -C ' + os.path.dirname(output_file_mapset) + ' ' + os.path.basename(output_file_mapset)
     my_logger.debug('Command for tar the file is: ' + command)
     os.system(command)
     # Assign output file
@@ -4158,12 +4158,6 @@ def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in
     # Create output array
     trg_data = N.zeros(in_data.shape, dtype=out_data_type)
 
-    # # ES2-385 Option 1 Check if the rescale has to be skipped and assign trg_data to in_data
-    # if in_scale_type == 'skip_rescale':
-    #     trg_data = in_data
-    #     my_logger.info('Skip rescaling because of memory problem')
-    #     return trg_data
-
     # Get position of input nodata
     if in_nodata is not None:
         idx_nodata = (in_data == in_nodata)
@@ -4181,6 +4175,23 @@ def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in
         idx_mask_max = (in_data >= in_mask_max)
     else:
         idx_mask_max = N.zeros(1, dtype=bool)
+
+    # # ES2-385 If input scale factor , offset and output scale factor, offsets are the same then return trg_data as in_data
+    if in_scale_factor == out_scale_factor and in_offset == out_offset:
+        trg_data = in_data
+        my_logger.info('Skip rescaling because input scale factor , offset and output scale factor, offsets are the same')
+
+        # Assign output nodata to in_nodata and mask range
+        if idx_nodata.any():
+            trg_data[idx_nodata] = out_nodata
+
+        if idx_mask_min.any():
+            trg_data[idx_mask_min] = out_nodata
+
+        if idx_mask_max.any():
+            trg_data[idx_mask_max] = out_nodata
+
+        return trg_data
 
     # Check if input rescaling has to be done
     if in_scale_factor != 1 or in_offset != 0:
