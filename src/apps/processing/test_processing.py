@@ -13,7 +13,7 @@ def my_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False):
     subproductcode='ndv'
     version='sv2-pv2.2'
     start_date='19990101'
-    end_date='20171231'
+    end_date='20181231'
 
     list_dates = proc_functions.get_list_dates_for_dataset(productcode, subproductcode, version, start_date=start_date, end_date=end_date)
 
@@ -30,8 +30,8 @@ def my_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False):
 
     #res_queue = Queue()
     res_queue = None
-    proc_lists = processing_std_ndvi_prods_only(res_queue,**args)
-    #proc_lists = processing_std_ndvi_stats_only(res_queue,**args)
+    # proc_lists = processing_std_ndvi_prods_only(res_queue,**args)
+    proc_lists = processing_std_ndvi_stats_only(res_queue,**args)
     #proc_lists = processing_std_ndvi_all(res_queue,**args)
 
 #   ---------------------------------------------------------------------
@@ -177,7 +177,10 @@ def my_proc_modis_pp(pipe_run=0, pipe_print=3, touch_files_only=False):
             'pipeline_printout_level':pipe_print,
             'input_products': input_products,
             'output_product' : output_products,
-            'logfile': 'test_processing.log'}
+            'logfile': 'test_processing.log',
+            'nrt_products' : False,
+            'update_stats' : True
+            }
 
     res_queue = None
     processing_modis_pp(res_queue, **args)
@@ -309,33 +312,33 @@ def my_proc_arc2rain_dekad(pipe_run=0, pipe_print=3, start_date=None, end_date=N
 #   ---------------------------------------------------------------------
 # chirps-lp
 #   ---------------------------------------------------------------------
-from apps.processing.processing_std_precip_lp import *
-def my_proc_chirps_lp(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False, type=''):
-
-    # Create the list of dates -> returns empty if start==end==None
-    if start_date is not None and end_date is not None:
-        starting_dates = proc_functions.get_list_dates_for_dataset('chirps-dekad', '1moncum', '2.0', start_date=start_date, end_date=end_date)
-    else:
-        starting_dates = None
-
-    args = {'pipeline_run_level':pipe_run, \
-            'pipeline_printout_level':pipe_print, \
-            'pipeline_printout_graph_level': 0, \
-            'prod': 'chirps-dekad',\
-            'starting_sprod':'1moncum',\
-            'starting_dates': starting_dates,\
-            'mapset': 'CHIRP-Africa-5km',\
-            'version':'2.0',
-            'logfile':'ruffus-chirps',
-            'touch_only':touch_files_only}
-
-    request_queue = Queue()
-    if type == 'prods':
-        proc_lists=processing_std_precip_lp_prods(request_queue, **args)
-    elif type == 'stats':
-        proc_lists=processing_std_precip_lp_stats(request_queue, **args)
-    elif type == 'anoms':
-        proc_lists=processing_std_precip_lp_anoms(request_queue, **args)
+# from apps.processing.processing_std_precip_lp import *
+# def my_proc_chirps_lp(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False, type=''):
+#
+#     # Create the list of dates -> returns empty if start==end==None
+#     if start_date is not None and end_date is not None:
+#         starting_dates = proc_functions.get_list_dates_for_dataset('chirps-dekad', '1moncum', '2.0', start_date=start_date, end_date=end_date)
+#     else:
+#         starting_dates = None
+#
+#     args = {'pipeline_run_level':pipe_run, \
+#             'pipeline_printout_level':pipe_print, \
+#             'pipeline_printout_graph_level': 0, \
+#             'prod': 'chirps-dekad',\
+#             'starting_sprod':'1moncum',\
+#             'starting_dates': starting_dates,\
+#             'mapset': 'CHIRP-Africa-5km',\
+#             'version':'2.0',
+#             'logfile':'ruffus-chirps',
+#             'touch_only':touch_files_only}
+#
+#     request_queue = Queue()
+#     if type == 'prods':
+#         proc_lists=processing_std_precip_lp_prods(request_queue, **args)
+#     elif type == 'stats':
+#         proc_lists=processing_std_precip_lp_stats(request_queue, **args)
+#     elif type == 'anoms':
+#         proc_lists=processing_std_precip_lp_anoms(request_queue, **args)
 
 #   ---------------------------------------------------------------------
 # lsasaf-et
@@ -343,10 +346,11 @@ def my_proc_chirps_lp(pipe_run=0, pipe_print=3, start_date=None, end_date=None, 
 from apps.processing.processing_std_lsasaf_et import *
 def my_proc_std_lsasaf_et(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False):
     # # Create the list of dates -> returns empty if start==end==None
-    # start_date='201510010000'
-    # end_date='201510102345'
-    # starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-et', 'et', 'undefined', start_date=start_date, end_date=end_date)
-    starting_dates = None
+    if (start_date) or (end_date):
+        starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-et', 'et', 'undefined', start_date=start_date, end_date=end_date)
+    else:
+        starting_dates = None
+
     native_mapset='MSG-satellite-3km'
     target_mapset='SPOTV-Africa-1km'
 
@@ -734,12 +738,120 @@ def my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=Fa
 
     processing_std_gradient(res_queue, **args)
 
+from apps.processing.processing_std_vgt import *
+def test_subprocess_vgt_fapar(pipe_run=4, pipe_print=0, touch_files_only=False):
+    start_date = '19990101'
+    end_date = '20181221'
+
+    if start_date is not None and end_date is not None:
+        starting_dates = proc_functions.get_list_dates_for_dataset('vgt-fapar', 'fapar', 'V2.0', start_date=start_date, end_date=end_date)
+    else:
+        starting_dates = None
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': 'vgt-fapar',\
+            'starting_sprod':'fapar',\
+            'mapset': 'SPOTV-Africa-1km',\
+            'version':'V2.0',
+            'starting_dates': starting_dates,
+            'logfile':'vgt-fapar',
+            'upsert_db' : True,
+            'touch_only':touch_files_only
+            }
+    res_queue = None
+
+    processing_std_vgt_stats_only(res_queue, **args)
+
+def test_subprocess_vgt_fcover(pipe_run=4, pipe_print=0, touch_files_only=False):
+    start_date = '19990101'
+    end_date = '20181221'
+
+    if start_date is not None and end_date is not None:
+        starting_dates = proc_functions.get_list_dates_for_dataset('vgt-fcover', 'fcover', 'V2.0', start_date=start_date, end_date=end_date)
+    else:
+        starting_dates = None
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': 'vgt-fcover',\
+            'starting_sprod':'fcover',\
+            'mapset': 'SPOTV-Africa-1km',\
+            'version':'V2.0',
+            'starting_dates': starting_dates,
+            'logfile':'vgt-fcover',
+            'upsert_db' : False,
+            'touch_only':touch_files_only
+            }
+    res_queue = None
+
+    processing_std_vgt_stats_only(res_queue, **args)
+
+def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
+    #     # Create the list of dates -> returns empty if start==end==None
+    start_date = '19990101'
+    end_date = '20181221'
+
+    if start_date is not None and end_date is not None:
+        starting_dates = proc_functions.get_list_dates_for_dataset('vgt-lai', 'lai', 'V2.0', start_date=start_date, end_date=end_date)
+    else:
+        starting_dates = None
+
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': 'vgt-lai',\
+            'starting_sprod':'lai',\
+            'mapset': 'SPOTV-Africa-1km',\
+            'version':'V2.0',
+            'logfile':'vgt-lai',
+            'starting_dates':starting_dates,
+            'upsert_db' : True,
+            'touch_only':touch_files_only
+            }
+    res_queue = None
+
+    processing_std_vgt_stats_only(res_queue, **args)
+
+# from apps.processing.processing_std_swi import *
+# def test_subprocess_swi(pipe_run=4, pipe_print=0, touch_files_only=False):
+#     start_date = '19990101'
+#     end_date = '20181221'
+#
+#     if start_date is not None and end_date is not None:
+#         starting_dates = proc_functions.get_list_dates_for_dataset('vgt-ba', 'ba', 'V1.5', start_date=start_date, end_date=end_date)
+#     else:
+#         starting_dates = None
+#     args = {'pipeline_run_level':pipe_run, \
+#             'pipeline_printout_level':pipe_print, \
+#             'pipeline_printout_graph_level': 0, \
+#             'prod': 'ascat-swi',\
+#             'starting_sprod':'swi',\
+#             'mapset': 'ASCAT-Africa-12-5km',\
+#             'version':'V3.1',
+#             'starting_dates': starting_dates,
+#             'logfile':'ascat-swi',
+#             'upsert_db' : True,
+#             'touch_only':touch_files_only
+#             }
+#     res_queue = None
+#
+#     processing_std_swi_stats_only(res_queue, **args)
+
+
+
+
 #   ---------------------------------------------------------------------
 #   Call a specific processing chain - To be TESTED after 03.3.2019
 #   ---------------------------------------------------------------------
-#my_proc_std_ndvi(pipe_run=0, pipe_print=4, touch_files_only=False)
+
+# test_subprocess_swi(pipe_run=3, pipe_print=0, touch_files_only=False)
+#test_subprocess_vgt_lai(pipe_run=0, pipe_print=4, touch_files_only=False)
+# test_subprocess_vgt_fcover(pipe_run=3, pipe_print=0, touch_files_only=False)
+
+# my_proc_std_ndvi(pipe_run=3, pipe_print=0, touch_files_only=False)
 #my_proc_ndvi_merge(pipe_run=0, pipe_print=3, touch_files_only=False)
-#my_proc_pml_modis_fronts(pipe_run=0, pipe_print=3, touch_files_only=False)
+my_proc_pml_modis_fronts(pipe_run=3, pipe_print=0, touch_files_only=False)
 #my_proc_std_fronts(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_std_modis_chla(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_std_modis_sst(pipe_run=0, pipe_print=3, touch_files_only=False)
@@ -753,7 +865,10 @@ def my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=Fa
 # my_proc_chirps_dekad(pipe_run=3, pipe_print=0, start_date='20180101', end_date='20181231', upsert_db=False, touch_files_only=False)
 # my_proc_arc2rain_dekad(pipe_run=0, pipe_print=6, start_date='19810101', end_date='20171231', upsert_db=False, touch_files_only=False)
 # my_proc_chirps_lp(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False, type='')
-#my_proc_std_lsasaf_et(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
+start_y='2019'; start_m='01'; start_d='01';       start_date=start_y+start_m+start_d+'0000'
+end_y  ='2019'; end_m  ='12'; end_d  ='31';       end_date=end_y+end_m+end_d+'2345'
+start_date=None; end_date=None
+#my_proc_std_lsasaf_et(pipe_run=6, pipe_print=0, start_date=start_date, end_date=end_date, touch_files_only=False)
 #my_proc_std_lsasaf_lst(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
 #my_proc_std_modis_firms(pipe_run=4, pipe_print=0, start_date='20020701', end_date='20180630',touch_files_only=False)
 #my_proc_std_rain_onset(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False)
@@ -766,7 +881,7 @@ def my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=Fa
 #my_proc_vgt_dmp(pipe_run=4, pipe_print=0, start_date='19990101', end_date='20171231', touch_files_only=False)
 #my_proc_std_ba(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None, touch_files_only=False)
 #my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=False)
-test_proc_modis_chla_opfish(pipe_run=3, pipe_print=0, touch_files_only=False)
+#test_proc_modis_chla_opfish(pipe_run=3, pipe_print=0, touch_files_only=False)
 #   ---------------------------------------------------------------------
 #   OFF-LINE Tests (on raster-math functions)
 #   ---------------------------------------------------------------------
