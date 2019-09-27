@@ -33,7 +33,7 @@ class TestGetEumetcast(unittest.TestCase):
 #
 #         self.assertEqual(1, 1)
 
-    def TestGetEumetcats_PC2_nodir(self):
+    def test_GetEumetcats_PC2_nodir(self):
 
         remote_url='ftp://mesa-pc1//space/efts/fromTellicast/forEstation/'
         usr_pwd='mesadata:mesadata'
@@ -57,14 +57,14 @@ class TestGetEumetcast(unittest.TestCase):
         return current_list
 
 
-    def TestGetEumetcats_PC2_homedir(self):
+    def test_GetEumetcats_PC2_homedir(self):
         filter_expression_jrc='/data/processing/*'
         ftp_eumetcast_url='ftp://mesa-pc2'
         ftp_eumetcast_userpwd='root:rootroot'
         current_list = get_list_matching_files_dir_ftp(ftp_eumetcast_url, ftp_eumetcast_userpwd, filter_expression_jrc)
 
 
-    def TestGetEumetcast_Archives(self):
+    def test_GetEumetcast_Archives(self):
 
         print('Start Test')
         get_archives_eumetcast()

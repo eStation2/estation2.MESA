@@ -47,7 +47,8 @@ import numpy as N
 import copy
 import os, re, os.path, time, sys
 import pymorph
-
+import tempfile
+import shutil
 # Jur: not working in windows version. Conflict with scipy version 1.1.0 and its ndimage functionality.
 # I tried to install scipy version 0.15.1 but need older numpy version 1.19.2 (numpy 1.11.0 is installed)
 # installing numpy 1.19.2 gives problems with installed gdal version 2.1.2)
@@ -64,11 +65,17 @@ logger = log.my_logger(__name__)
 
 # _____________________________
 def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
-                 output_type=None, options='', output_stddev=None, ):
+                 output_type=None, options='', output_stddev=None):
     # Note: no 'update' functionality is foreseen -> creates output EVERY TIME
     try:
         # Force input to be a list
         input_list = return_as_list(input_file)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_list[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -78,7 +85,7 @@ def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata
         if input_nodata is None:
             sds_meta = metadata.SdsMetadata()
             if os.path.exists(input_list[0]):
-                input_nodata = float(sds_meta.get_nodata_value(input_list[0]))
+                input_nodata=float(sds_meta.get_nodata_value(input_list[0]))
             else:
                 logger.info('Test file not existing: do not assign metadata')
 
@@ -208,16 +215,32 @@ def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata
         if output_stddev != None:
             if os.path.isfile(output_stddev):
                 os.remove(output_stddev)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
-def do_stddev_image(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
-                    output_type=None, options='', output_stddev='', ):
+def do_stddev_image(input_file='', avg_file='', input_nodata=None, output_nodata=None, output_format=None,
+           output_type=None, options='', output_stddev=''):
+
     # Note: no 'update' functionality is foreseen -> creates output EVERY TIME
     # In this method make sure you pass the output_file as avg_file and output_stddev as output file to ease calculation
+    # The method is corrected on 27.06.19 (see ES2-400) with the following logic:
+    #   1. LTA is passed as mandatory input and it is used for the computation
+    #   2. The original procedure is changed, since the upper-rounding of the LTA leads to negative values in the term:
+    #      stdData[wnz]/(counter[wnz]) - N.multiply(avgVal[wnz],avgVal[wnz]) !!!
+
+    # debug = True
     try:
         # Force input to be a list
         input_list = return_as_list(input_file)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_list[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_stddev
+        output_stddev = tmpdir + os.sep +os.path.basename(output_stddev)
 
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -247,7 +270,11 @@ def do_stddev_image(input_file='', output_file='', input_nodata=None, output_nod
         driver_type = fidT.GetDriver().ShortName
 
         # Get info from avg file
-        avgFID = gdal.Open(output_file, GA_ReadOnly)
+        if avg_file is not None and os.path.exists(avg_file):
+                avgFID = gdal.Open(avg_file, GA_ReadOnly)
+        else:
+            logger.error('Avg file does not existing: cannot proceed. Exit')
+            return
 
         # manage out_type (take the input one as default)
         if output_type is None:
@@ -261,13 +288,7 @@ def do_stddev_image(input_file='', output_file='', input_nodata=None, output_nod
         else:
             outFormat = output_format
 
-        # instantiate output/sll
-        # outDrv=gdal.GetDriverByName(outFormat)
-        # outDS=outDrv.Create(output_file, ns, nl, nb, outType, options_list)
-        # outDS.SetProjection(projection)
-        # outDS.SetGeoTransform(geotransform)
-
-        # if output_stddev != None:
+        # Instanciate output for STD
         outStd = gdal.GetDriverByName(output_format)
         stdDs = outStd.Create(output_stddev, ns, nl, nb, outType, options_list)
         stdDs.SetProjection(projection)
@@ -283,52 +304,41 @@ def do_stddev_image(input_file='', output_file='', input_nodata=None, output_nod
 
         # Loop over bands
         for ib in range(nb):
-            # outband = outDS.GetRasterBand(ib+1)
-            inavg = avgFID.GetRasterBand(ib + 1)
+            inavg = avgFID.GetRasterBand(ib+1)
 
             # parse image by line
             for il in rangenl:
                 counter = N.zeros(ns)
-                accum = N.zeros(ns)
                 # for all files:
                 for ifile in rangeFile:
-                    data = N.ravel(fid[ifile].GetRasterBand(ib + 1).ReadAsArray(0, il, ns, 1).astype(float))
-                    avgVal = N.ravel(inavg.ReadAsArray(0, il, inavg.XSize, 1))
-                    # avgVal = N.ravel(fid[ifile].GetRasterBand(ib + 1).ReadAsArray(0, il, ns, 1).astype(float))
-
+                    data = N.ravel(fid[ifile].GetRasterBand(ib+1).ReadAsArray(0, il, ns, 1).astype(float))
+                    # if debug:  print data[ipix]  # debug only
+                    avgVal = N.ravel(inavg.ReadAsArray(0, il, inavg.XSize, 1).astype(float))
+                    # if debug:  print avgVal[ipix] # debug only
                     # variable initialization
                     if (ifile == 0):
                         if input_nodata is None:
-                            # avgData = data
-                            avgData = avgVal
-                            stdData = N.multiply(data, data)
+                            stdData = N.multiply(data , data)
                             counter[:] = 1.0
                         else:
-                            wts = (data != input_nodata) * (avgVal != input_nodata)
-                            avgData = N.zeros(data.shape)
+                            wts = (data != input_nodata) *  (avgVal != input_nodata)
                             stdData = N.zeros(data.shape)
                             if wts.any():
                                 counter[wts] = 1.0
-                                avgData[wts] = avgVal[wts]
-                                stdData[wts] = N.multiply(data[wts], data[wts])
+                                stdData[wts] = N.multiply(data[wts] - avgVal[wts], data[wts]- avgVal[wts])
 
                     else:
                         if input_nodata is None:
-                            avgData = avgVal
                             counter = counter + 1.0
                             stdData = stdData + N.multiply(data, data)
                         else:
                             wts = (data != input_nodata) * (avgVal != input_nodata)
                             if wts.any():
-                                avgData[wts] = avgVal[wts]
-                                # avgData[wts] = avgData[wts] + data[wts]
                                 counter[wts] = counter[wts] + 1.0
-                                stdData[wts] = stdData[wts] + N.multiply(data[wts], data[wts])
+                                stdData[wts] = stdData[wts] + N.multiply(data[wts] - avgVal[wts], data[wts]- avgVal[wts])
 
                 wnz = (counter != 0)
                 outData = N.zeros(ns)
-                if wnz.any():
-                    outData[wnz] = avgData[wnz] / (counter[wnz])
 
                 if output_nodata != None:
                     wzz = (counter == 0)
@@ -336,17 +346,23 @@ def do_stddev_image(input_file='', output_file='', input_nodata=None, output_nod
                         outData[wzz] = output_nodata
 
                 # Check if stddev also required
-                # if output_stddev != None:
                 outDataStd = N.zeros(ns)
+                outDataStd_2 = N.zeros(ns)
                 if wnz.any():
-                    outDataStd[wnz] = N.sqrt(stdData[wnz] / (counter[wnz]) - N.multiply(outData[wnz], outData[wnz]))
+                    outDataStd_2[wnz] = stdData[wnz]/(counter[wnz])
+                    neg_val = (outDataStd < 0.0)
+                    if neg_val.any():
+                        logger.error('Unconsistent results. Check AVG is up-to-date. Continue')
+                    outDataStd[wnz] = N.sqrt(outDataStd_2[wnz])
+
+                    # if debug: print stdData[ipix], counter[ipix], avgVal[ipix], outDataStd[ipix]
                 if output_nodata != None:
                     wzz = (counter == 0)
                     if wzz.any():
                         outDataStd[wzz] = output_nodata
 
                 outDataStd.shape = (1, -1)
-                stdDs.GetRasterBand(ib + 1).WriteArray(N.array(outDataStd), 0, il)
+                stdDs.GetRasterBand(ib+1).WriteArray(N.array(outDataStd), 0, il)
 
                 # reshape before writing
                 # outData.shape = (1, -1)
@@ -368,6 +384,10 @@ def do_stddev_image(input_file='', output_file='', input_nodata=None, output_nod
         if os.path.isfile(output_stddev):
             os.remove(output_stddev)
 
+    else:
+        shutil.move(output_stddev, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_min_image(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
@@ -380,6 +400,12 @@ def do_min_image(input_file='', output_file='', input_nodata=None, output_nodata
     try:
         # Force input to be a list
         input_list = return_as_list(input_file)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_list[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -498,7 +524,10 @@ def do_min_image(input_file='', output_file='', input_nodata=None, output_nodata
         logger.warning('Error in do_min_image. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_max_image(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
@@ -511,6 +540,12 @@ def do_max_image(input_file='', output_file='', input_nodata=None, output_nodata
     try:
         # Force input to be a list
         input_list = return_as_list(input_file)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_list[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -637,8 +672,10 @@ def do_max_image(input_file='', output_file='', input_nodata=None, output_nodata
         logger.warning('Error in do_max_image. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 #   _____________________________
 def do_med_image(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
                  output_type=None, options='', min_num_valid=None):
@@ -650,6 +687,12 @@ def do_med_image(input_file='', output_file='', input_nodata=None, output_nodata
     try:
         # Force input to be a list
         input_list = return_as_list(input_file)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_list[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -739,7 +782,10 @@ def do_med_image(input_file='', output_file='', input_nodata=None, output_nodata
         logger.warning('Error in do_med_image. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
@@ -751,6 +797,12 @@ def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # Open input files
         fid0 = gdal.Open(input_file[0], GA_ReadOnly)
@@ -833,7 +885,10 @@ def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output
         logger.warning('Error in do_oper_subtraction. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_oper_division_perc(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
@@ -846,6 +901,12 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # Open input files
         fid0 = gdal.Open(input_file[0], GA_ReadOnly)
@@ -911,8 +972,9 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
                     dataout = N.zeros(ns).astype(float) + output_nodata
 
                 if wtc.any():
-                    dataout[wtc] = data0[wtc] / data1[wtc]
-                    dataout[wtc] = dataout[wtc] * 100.00
+                    dataout[wtc] = data0[wtc]*100.00/data1[wtc]
+                    # dataout[wtc] = dataout[wtc]
+
 
                 dataout = dataout.round()
                 dataout.shape = (1, -1)
@@ -928,8 +990,10 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
         logger.warning('Error in do_oper_division_perc. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 # _____________________________
 def do_oper_scalar_multiplication(input_file='', output_file='', scalar=1, input_nodata=None, output_nodata=None,
                                   output_format=None,
@@ -941,6 +1005,12 @@ def do_oper_scalar_multiplication(input_file='', output_file='', scalar=1, input
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # Open input file
         fid0 = gdal.Open(input_file[0], GA_ReadOnly)
@@ -1013,7 +1083,10 @@ def do_oper_scalar_multiplication(input_file='', output_file='', scalar=1, input
         logger.warning('Error in do_oper_scalar_multiplication. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_make_vci(input_file='', min_file='', max_file='', output_file='', input_nodata=None, output_nodata=None,
@@ -1023,6 +1096,12 @@ def do_make_vci(input_file='', min_file='', max_file='', output_file='', input_n
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # open files
         fileFID = gdal.Open(input_file, GA_ReadOnly)
@@ -1118,7 +1197,10 @@ def do_make_vci(input_file='', min_file='', max_file='', output_file='', input_n
         logger.warning('Error in do_make_vci. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_make_baresoil(input_file='', avg_file='', min_file='', max_file='', output_file='', input_nodata=None,
@@ -1147,6 +1229,12 @@ def do_make_baresoil(input_file='', avg_file='', min_file='', max_file='', outpu
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # open files
         fileFID = gdal.Open(input_file, GA_ReadOnly)
@@ -1282,7 +1370,10 @@ def do_make_baresoil(input_file='', avg_file='', min_file='', max_file='', outpu
         logger.warning('Error in do_make_baresoil. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_mask_image(input_file='', mask_file='', output_file='', output_format=None,
@@ -1296,6 +1387,12 @@ def do_mask_image(input_file='', mask_file='', output_file='', output_format=Non
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # open files
         fileFID = gdal.Open(input_file, GA_ReadOnly)
@@ -1364,7 +1461,10 @@ def do_mask_image(input_file='', mask_file='', output_file='', output_format=Non
             outDrv = None
             outDS = None
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
@@ -1375,6 +1475,12 @@ def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # Open input file
         fid0 = gdal.Open(input_file[0], GA_ReadOnly)
@@ -1503,7 +1609,10 @@ def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=
         logger.warning('Error in do_cumulate. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_compute_perc_diff_vs_avg(input_file='', avg_file='', output_file='', input_nodata=None, output_nodata=None,
@@ -1516,6 +1625,12 @@ def do_compute_perc_diff_vs_avg(input_file='', avg_file='', output_file='', inpu
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # open files
         fileFID = gdal.Open(input_file, GA_ReadOnly)
@@ -1603,7 +1718,10 @@ def do_compute_perc_diff_vs_avg(input_file='', avg_file='', output_file='', inpu
         logger.warning('Error in do_compute_perc_diff_vs_avg. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_file='',
@@ -1614,6 +1732,12 @@ def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_fil
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(chla_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
 
         # open files
         chla_fileID = gdal.Open(chla_file, GA_ReadOnly)
@@ -1726,7 +1850,10 @@ def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_fil
         logger.warning('Error in do_compute_primary_production. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 def DetectEdgesInSingleImage(image, histogramWindowStride, \
                              minTheta, histogramWindowSize, minPopProp, minPopMeanDifference, minSinglePopCohesion,
@@ -2153,6 +2280,12 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
     rid = ''
     debug = 0
 
+    tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                              dir=es_constants.base_tmp_dir)
+
+    output_file_final = output_file
+    output_file = tmpdir + os.sep + os.path.basename(output_file)
+
     # Manage options
     options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
@@ -2248,6 +2381,8 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
     outDS = None
     assign_metadata_processing(input_list, output_file, parameters=parameters)
 
+    shutil.move(output_file, output_file_final)
+    shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_ts_linear_filter(input_file='', before_file='', after_file='', output_file='', input_nodata=None,
@@ -2260,6 +2395,12 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
     # Manage options
     options_list = [es_constants.ES2_OUTFILE_OPTIONS]
     options_list.append(options)
+
+    tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                              dir=es_constants.base_tmp_dir)
+
+    output_file_final = output_file
+    output_file = tmpdir + os.sep + os.path.basename(output_file)
 
     # Open the threee files (add checks)
     f0 = gdal.Open(input_file, GA_ReadOnly)
@@ -2346,6 +2487,8 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
 
     assign_metadata_processing(input_list, output_file)
 
+    shutil.move(output_file, output_file_final)
+    shutil.rmtree(tmpdir)
 
 def do_rain_onset(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
                   output_type=None, options='', current_dekad=None):
@@ -2354,6 +2497,11 @@ def do_rain_onset(input_file='', output_file='', input_nodata=None, output_nodat
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
 
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file[0]),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
         # Determines if it is the first dekad of the season
         if len(input_file) == 2:
             first_dekad = True
@@ -2459,7 +2607,10 @@ def do_rain_onset(input_file='', output_file='', input_nodata=None, output_nodat
         logger.warning('Error in rain-onset. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 #   Merge/move wrt processing.py functions
@@ -2521,6 +2672,7 @@ def ReturnNoData(type):
 
 
 def return_as_list(input_args):
+
     my_list = []
     if isinstance(input_args, list):
         my_list = input_args
@@ -2531,12 +2683,19 @@ def return_as_list(input_args):
 
 
 def do_reproject(inputfile, output_file, native_mapset_name, target_mapset_name):
+
     native_mapset = mapset.MapSet()
     native_mapset.assigndb(native_mapset_name)
 
     # Define the Native mapset
     target_mapset = mapset.MapSet()
     target_mapset.assigndb(target_mapset_name)
+
+    tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(inputfile),
+                              dir=es_constants.base_tmp_dir)
+
+    output_file_final = output_file
+    output_file = tmpdir + os.sep + os.path.basename(output_file)
 
     # Open the input file
     orig_ds = gdal.Open(inputfile)
@@ -2592,6 +2751,8 @@ def do_reproject(inputfile, output_file, native_mapset_name, target_mapset_name)
     meta_data.assign_mapset(target_mapset_name)
     meta_data.write_to_file(output_file)
 
+    shutil.move(output_file, output_file_final)
+    shutil.rmtree(tmpdir)
 
 #   -------------------------------------------------------------------------------------------
 def getRasterBox(fid, xstart, xend, ystart, yend, band):
@@ -2651,6 +2812,12 @@ def create_surface_area_raster(input_file=None, output_file='', output_format=No
     # Notes:
 
     try:
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         if input_file is not None:
             f1Fid = gdal.Open(input_file, GA_ReadOnly)
@@ -2729,7 +2896,10 @@ def create_surface_area_raster(input_file=None, output_file='', output_format=No
         logger.warning('Error in create_surface_area_raster. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 #   -------------------------------------------------------------------------------------------
 def do_raster_stats(fid, fidID, outDS, iband, roi, minId, maxId, nodata, operation, args=None):
@@ -2877,6 +3047,13 @@ def do_raster_stats(fid, fidID, outDS, iband, roi, minId, maxId, nodata, operati
 #
 def do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapset_name, grid_mapset_name,
                       output_format=None, nodata=None, output_type=None, options=None, args=None):
+
+    tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                              dir=es_constants.base_tmp_dir)
+
+    output_file_final = output_file
+    output_file = tmpdir + os.sep + os.path.basename(output_file)
+
     # Manage input arguments
     if output_format is None:
         output_format = 'GTiff'
@@ -2960,7 +3137,10 @@ def do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapse
         logger.warning('Error in do_stats_4_raster. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 ################################
 ##  Compute chla gradient   ####
@@ -2970,6 +3150,13 @@ def do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapse
 def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_nodata=None, output_format=None,
                              output_type=None, options=''):
     try:
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final =  output_file
+        output_file = tmpdir + os.sep +os.path.basename(output_file)
+
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
@@ -3062,7 +3249,10 @@ def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_
         logger.warning('Error in do_compute_chla_gradient. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # ##########################
 #   Compute chla gradient  #
@@ -3072,7 +3262,11 @@ def compute_extrapolated_chla_gradient(input_file='', nodata=None, output_file='
                                        output_format=None,
                                        output_type=None, options=''):
     try:
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
 
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
         ##############
         #  constants #
         ##############
@@ -3264,7 +3458,10 @@ def compute_extrapolated_chla_gradient(input_file='', nodata=None, output_file='
         logger.warning('Error in compute_opFish_indicator. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # ##########################
 #  Compute opFish indicator#
@@ -3273,6 +3470,11 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
                              output_type=None, options=''):
     try:
 
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
         ##############
         #  constants #
         ##############
@@ -3291,18 +3493,21 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
 
         # % FROM CHL fronts   to         daily          feeding         habitat
         # For OPFish, here are the updated values for MODIS-Aqua CHL compared to the Arctic report:
-        chl_grad_min = 0.00026;  # perc.5th of all species reconstructed OBS by group
+        # chl_grad_min = 0.00026;  # perc.5th of all species reconstructed OBS by group
+        chl_grad_min = 0.00032131;  # perc.5th of all species reconstructed OBS by group -- NEW VALUES BY JEON
         # # perc.1.2th total MESOZOOPK
         # # min value among species is
         # # 0.00022(mesozoo) & 0.00025 (blue shark)
-        chl_grad_int = 0.009784  # linear fit from 0.09 to 1 (minimum mobility of species)
+        # chl_grad_int = 0.009784  # linear fit from 0.09 to 1 (minimum mobility of species)
+        chl_grad_int = 0.019162  # linear fit from 0.09 to 1 (minimum mobility of species)
         # # 0.017138 from 0.091 to 1 with min=0.00026 prior to MESOZOOPK;
         # # 0.00623 from 0.3 to 1 with min=0.00025 of blue shark;
         # # linear fit OLD prior to SKJ Spanish+ small pel. GoL 0.0176;
         chl_feed_min = 0.08  # mgChl/m3 - minimum among species
         # # (perc.15 cluster/perc.5 tot. blue shark)
         # # (perc.1.8 red cluster/perc.0.5 tot. mesozoopk)
-        chl_feed_max = 12.0  # perc.98th green MESOZOOPK, perc.99.3th total MESOZOOPK;
+        # chl_feed_max = 12.0  # perc.98th green MESOZOOPK, perc.99.3th total MESOZOOPK;
+        chl_feed_max = 11.0  # perc.98th green MESOZOOPK, perc.99.3th total MESOZOOPK;
         # # perc.99.8th all species (not by subgroup)
         # # Approx. limit to eutrophication
 
@@ -3529,7 +3734,7 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
 
             if wtp.any():
                 opFish[wtp] = data[wtp] * (daylength_val / 24)
-                # opFish[wtp] = ((data[wtp] - gradCHL_min)/(gradCHL_max - gradCHL_min)) * (daylength_val/24) #* 100
+                # opFish[wtp] = ((data[wtp] - chl_grad_min) / (chl_feed_max - chl_feed_min)) * (daylength_val / 24) #* 100
 
             opFish.shape = (1, -1)
 
@@ -3550,8 +3755,10 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         logger.warning('Error in compute_opFish_indicator. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 # ##########################
 #   Compute median_filter  #
 #     NOT USED             #
@@ -3563,6 +3770,12 @@ def compute_difference(input_file='', nodata=None, output_file='', output_nodata
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         # open file
         data_fileID = gdal.Open(input_file, GA_ReadOnly)
@@ -3643,7 +3856,10 @@ def compute_difference(input_file='', nodata=None, output_file='', output_nodata
         logger.warning('Error in compute_median_filter. Remove outputs')
         if os.path.isfile(output_file):
             os.remove(output_file)
-
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 #   Write metadata to an output file.
@@ -3734,80 +3950,3 @@ def get_daylength(dayOfYear, lat):
     else:
         hourAngle = N.rad2deg(N.arccos(-N.tan(latInRad) * N.tan(N.deg2rad(declinationOfEarth))))
         return 2.0 * hourAngle / 15.0
-
-#
-# def d2dgauss(n1,sigma1,n2,sigma2,theta):
-#     r_var = [ [math.cos(theta), - math.sin(theta)] , [math.sin(theta) , math.cos(theta)] ]
-#     h=N.zeros((n2, n1))
-#     for i in range (n2) :
-#         for j in range (n1):
-#             u = r_var * N.transpose([j - (n1 + 1) / 2,  i - (n2 + 1) / 2])
-#             # h(i, j) = gauss(u(1), sigma1) * dgauss(u(2), sigma2);
-#             gauss_val = gauss(u[0,0], sigma1)
-#             dgauss_val = dgauss(u[1, 0], sigma2)
-#             h[i][j] = gauss_val * dgauss_val
-#
-#     return h
-#
-# def gauss(x,std):
-#     # y = math.exp(-x ^ 2 / (2 * std ^ 2)) / (std * math.sqrt(2 * pi));
-#     # Matlab x^2 is not equal to Numpy  x*x -
-#     y = math.exp(- x.dot(x) / (2 * std.dot(std))) / (std * math.sqrt(2 * math.pi))
-#     # y = math.exp(- x * x / (2 * std * std)) / (std * math.sqrt(2 * math.pi))
-#     return y
-#
-# def dgauss(x,std):
-#     # y = -x * gauss(x, std) / std ^ 2;
-#     gauss_val = gauss(x, std)
-#     y = - x * gauss_val / std * std
-#     return y
-#
-# def first_der_kernal():
-#     sigma_x1 = 1
-#     sigma_x2 = 1
-#     sigma_y1 = 1
-#     sigma_y2 = 1
-#     # Nx and Ny1 are 3
-#     n_x1 = 3
-#     n_x2 = 3
-#     n_y1 = 3
-#     n_y2 = 3
-#
-#     theta1 = math.pi / 2
-#     theta2 = 0
-#     filter_x = d2dgauss(n1=n_x1, sigma1=sigma_x1, n2=n_x2, sigma2=sigma_x2, theta=theta1)
-#
-#     # canny_x = gaussian_filter1d(filtData, sigma_x1, axis=0, order=1, truncate=1)
-#
-#     filter_y = d2dgauss(n1=n_y1, sigma1=sigma_y1, n2=n_y2, sigma2=sigma_y2, theta=theta2)
-#
-#     # canny_y = gaussian_filter1d(filtData, sigma_y1, axis=0, order=1, truncate=1)
-
-# def habitat_gradCHL2FeedingFit_v2(gradCHL,satCHL):
-# Define the daily feeding habitat value from gradCHL using:
-# - chl_grad_min and chl_grad_max below and above which habitat is 0
-# - a linear fit from habitat  = 0.3 to 1 OR from 0.1/0 to 1 for
-#   pelagic/OPFish/MESOZOOPLANKTON
-#   in log for chl_grad_min < gradCHL < chl_grad_int
-#   based on the distribution of gradCHL for each species
-# - the habitat value of 1 for chl_grad_int < gradCHL < chl_grad_max
-
-
-# For OPFish, here are the updated values for MODIS-Aqua CHL compared to the Arctic report:
-
-# dc = 0.91; (1-dc = 0.09, it is 0.10 in the Arctic report)
-
-# chl_grad_min.MA = 0.00026;# perc.5th of all species reconstructed OBS by group
-# # perc.1.2th total MESOZOOPK
-# # min value among species is
-# # 0.00022(mesozoo) & 0.00025 (blue shark)
-# chl_grad_int.MA = 0.009784;# linear fit from 0.09 to 1 (minimum mobility of species)
-# # 0.017138 from 0.091 to 1 with min=0.00026 prior to MESOZOOPK;
-# # 0.00623 from 0.3 to 1 with min=0.00025 of blue shark;
-# # linear fit OLD prior to SKJ Spanish+ small pel. GoL 0.0176;
-# chl_feed_min.MA = 0.08;   # mgChl/m3 - minimum among species
-# # (perc.15 cluster/perc.5 tot. blue shark)
-# # (perc.1.8 red cluster/perc.0.5 tot. mesozoopk)
-# chl_feed_max.MA = 12.0 ;  # perc.98th green MESOZOOPK, perc.99.3th total MESOZOOPK;
-# # perc.99.8th all species (not by subgroup)
-# # Approx. limit to eutrophication

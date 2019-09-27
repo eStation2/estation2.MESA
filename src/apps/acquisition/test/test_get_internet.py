@@ -2,6 +2,7 @@
 from config import es_constants
 from apps.acquisition.get_internet import *
 from apps.acquisition.get_eumetcast import *
+from apps.tools import coda_eum_api
 
 import unittest
 import shutil
@@ -104,6 +105,31 @@ def get_one_source(internet_source, target_dir=None):
                 except:
                     logger.error("Error in creating date lists. Continue")
 
+            elif internet_type == 'http_tmpl_vito':
+                # Create the full filename from a 'template' which contains
+                try:
+                    current_list = build_list_matching_files_tmpl_vito(str(internet_source['url']),
+                                                                str(internet_source['include_files_expression']),
+                                                                internet_source['start_date'],
+                                                                internet_source['end_date'],
+                                                                str(internet_source['frequency_id']))
+                except:
+                    logger.error("Error in creating date lists. Continue")
+
+            elif internet_type == 'http_tmpl_theia':
+                # Create the full filename from a 'template' which contains
+                try:
+                    current_list = build_list_matching_files_tmpl_theia(str(internet_source['url']),
+                                                                str(internet_source['include_files_expression']),
+                                                                internet_source['start_date'],
+                                                                internet_source['end_date'],
+                                                                str(internet_source['frequency_id']),
+                                                                user_name,
+                                                                password)
+                except:
+                    logger.error("Error in creating date lists. Continue")
+
+
             elif internet_type == 'ftp_tmpl':
                 # Create the full filename from a 'template' which contains
                 try:
@@ -128,6 +154,22 @@ def get_one_source(internet_source, target_dir=None):
                                                                   str(internet_source['user_name']),
                                                                   str(internet_source['password']),
                                                                   str(internet_source['files_filter_expression'])
+                                                                  )
+
+                except:
+                    logger.error("Error in creating date lists. Continue")
+
+            elif internet_type == 'http_coda_eum':
+                # Create the motu command which contains
+                try:
+                    current_list = build_list_matching_files_eum_http(str(internet_source['url']),
+                                                                  str(internet_source['include_files_expression']),
+                                                                  internet_source['start_date'],
+                                                                  internet_source['end_date'],
+                                                                  str(internet_source['frequency_id']),
+                                                                  str(internet_source['user_name']),
+                                                                  str(internet_source['password'])
+                                                                  #str(internet_source['files_filter_expression'])
                                                                   )
 
                 except:
@@ -188,8 +230,24 @@ def get_one_source(internet_source, target_dir=None):
                                                            #target_file=internet_source['files_filter_expression'],
                                                            target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
 
-                            elif internet_type == 'sentinel_sat':
-                                result = get_file_from_sentinelsat_url(str(filename), target_dir=es_constants.ingest_dir)
+                            # elif internet_type == 'sentinel_sat':
+                            #     result = get_file_from_sentinelsat_url(str(filename), target_dir=es_constants.ingest_dir)
+
+                            elif internet_type == 'http_tmpl_vito':
+                                result = get_file_from_url(str(internet_source['url']) + os.path.sep + filename,
+                                                           target_dir=es_constants.ingest_dir,
+                                                           target_file=os.path.basename(filename), userpwd=str(usr_pwd), https_params='Referer: '+str(internet_source['url'])+os.path.dirname(filename)+'?mode=tif')
+
+                            elif internet_type == 'http_tmpl_theia':
+                                result = get_file_from_url(str(internet_source['url'] + os.path.sep + os.path.split(filename)[0]),
+                                                           target_dir=es_constants.ingest_dir,
+                                                           target_file=os.path.basename(os.path.split(filename)[1]), userpwd=str(usr_pwd), https_params='')
+
+
+                            elif internet_type == 'http_coda_eum':
+                                download_link = 'https://coda.eumetsat.int/odata/v1/Products(\'{0}\')/$value'.format(os.path.split(filename)[0])#os.path.split('asdasdad/dasdasds')[0]
+                                result = get_file_from_url(str(download_link), target_dir=es_constants.ingest_dir,
+                                                           target_file=os.path.basename(filename)+'.zip', userpwd=str(usr_pwd), https_params='')
                             else:
                                 result = get_file_from_url(str(internet_source['url']) + os.path.sep + filename,
                                                            target_dir=es_constants.ingest_dir,
@@ -1001,6 +1059,103 @@ class TestGetInternet(unittest.TestCase):
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
 
+
+    def TestRemoteHttps_NDVI100(self):
+
+        internet_id='PDF:VITO:PROBA-V1:NDVI100'
+
+        # Direct test !
+        if False:
+            filename='c_gls_DMP-RT6_201801100000_GLOBE_PROBAV_V2.0.1.nc'
+            remote_url = 'https://land.copernicus.vgt.vito.be/PDF/datapool/Vegetation/Dry_Matter_Productivity/DMP_1km_V2/2018/1/10/DMP-RT6_201801100000_GLOBE_PROBAV_V2.0/'+filename
+            status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd='estation:estation2018')
+            return
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20190601,
+                         'end_date': 20190601,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type,
+                         'https_params': internet_source.https_params}
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
+
+    def TestRemoteHttps_NDVI300(self):
+
+        internet_id='PDF:VITO:PROBA-V1:NDVI300'
+
+        # Direct test !
+        if False:
+            filename='c_gls_DMP-RT6_201801100000_GLOBE_PROBAV_V2.0.1.nc'
+            remote_url = 'https://land.copernicus.vgt.vito.be/PDF/datapool/Vegetation/Dry_Matter_Productivity/DMP_1km_V2/2018/1/10/DMP-RT6_201801100000_GLOBE_PROBAV_V2.0/'+filename
+            status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd='estation:estation2018')
+            return
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20190521,
+                         'end_date': 20190521,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type,
+                         'https_params': internet_source.https_params}
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
+
+    def TestRemoteHttps_WATERLEVEL(self):
+
+        internet_id='THEIA:HYDRO:LEGOS:WATERLEVEL'
+
+        # Direct test !
+        if False:
+            filename='c_gls_DMP-RT6_201801100000_GLOBE_PROBAV_V2.0.1.nc'
+            remote_url = 'https://land.copernicus.vgt.vito.be/PDF/datapool/Vegetation/Dry_Matter_Productivity/DMP_1km_V2/2018/1/10/DMP-RT6_201801100000_GLOBE_PROBAV_V2.0/'+filename
+            status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd='estation:estation2018')
+            return
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20150501,
+                         'end_date': 20150701,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type,
+                         'https_params': internet_source.https_params}
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
+
     def TestLocal_S3A_WRR(self):
 
         internet_id='JRC:S3A:WRR'
@@ -1079,6 +1234,38 @@ class TestGetInternet(unittest.TestCase):
                          'password':internet_source.password,
                          'start_date':20181128,
                          'end_date': +2,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type,
+                         'files_filter_expression':internet_source.files_filter_expression,
+
+        }
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
+
+
+    def TestLocal_CODA_EUM(self):
+
+        internet_id='CODA:EUM:S3A:OLCI:WRR'
+
+        # Direct test !
+        if False:
+            return
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20190704,
+                         'end_date': 20190704,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type,
                          'files_filter_expression':internet_source.files_filter_expression,
@@ -1168,8 +1355,8 @@ class TestGetInternet(unittest.TestCase):
                          'pull_frequency': internet_source.pull_frequency,
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
-                         'start_date':-10,
-                         'end_date': -1,
+                         'start_date':20190805,
+                         'end_date': 20190805,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type,
                          'files_filter_expression':internet_source.files_filter_expression,

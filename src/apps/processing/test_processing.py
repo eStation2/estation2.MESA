@@ -185,25 +185,25 @@ def my_proc_modis_pp(pipe_run=0, pipe_print=3, touch_files_only=False):
 #   ---------------------------------------------------------------------
 # olci-wrr median filter
 #   ---------------------------------------------------------------------
-from apps.processing.processing_std_median_filter import *
-def my_proc_std_median_filter(pipe_run=0, pipe_print=3, touch_files_only=False):
-    start_date = '20181125'
-    end_date = '20181201'
-    starting_dates = proc_functions.get_list_dates_for_dataset('olci-wrr', 'chl-oc4me', 'V02.0',
-                                                               start_date=start_date, end_date=end_date)
-
-    args = {'pipeline_run_level':pipe_run, \
-            'pipeline_printout_level':pipe_print, \
-            'pipeline_printout_graph_level': 0, \
-            'prod': 'olci-wrr',\
-            'starting_sprod':'chl-oc4me',\
-            'mapset': 'SPOTV-Africa-1km',\
-            'version':'V02.0',
-            'logfile':'olci-wrr',
-            'starting_dates':starting_dates
-            }
-    res_queue = None
-    processing_std_median_filter(res_queue, **args)
+# from apps.processing.processing_std_median_filter import *
+# def my_proc_std_median_filter(pipe_run=0, pipe_print=3, touch_files_only=False):
+#     start_date = '20181125'
+#     end_date = '20181201'
+#     starting_dates = proc_functions.get_list_dates_for_dataset('olci-wrr', 'chl-oc4me', 'V02.0',
+#                                                                start_date=start_date, end_date=end_date)
+#
+#     args = {'pipeline_run_level':pipe_run, \
+#             'pipeline_printout_level':pipe_print, \
+#             'pipeline_printout_graph_level': 0, \
+#             'prod': 'olci-wrr',\
+#             'starting_sprod':'chl-oc4me',\
+#             'mapset': 'SPOTV-Africa-1km',\
+#             'version':'V02.0',
+#             'logfile':'olci-wrr',
+#             'starting_dates':starting_dates
+#             }
+#     res_queue = None
+#     processing_std_median_filter(res_queue, **args)
 #   ---------------------------------------------------------------------
 # tamsat-rfe
 #   ---------------------------------------------------------------------
@@ -650,6 +650,23 @@ def my_proc_vgt_dmp(pipe_run=0, pipe_print=3, start_date=None, end_date=None, to
     request_queue = Queue()
     proc_lists=processing_std_dmp_all(request_queue, **args)
 
+from apps.processing.processing_std_opfish import *
+def test_proc_modis_chla_opfish(pipe_run=0, pipe_print=3, touch_files_only=False):
+
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': 'modis-chla',\
+            'starting_sprod':'chla-day',\
+            'mapset': 'MODIS-Africa-4km',\
+            'version':'v2013.1',
+            'logfile':'modis-chla',
+            'touch_files_only':touch_files_only
+            }
+    res_queue = None
+
+    processing_std_opfish(res_queue, **args)
+
 #   ---------------------------------------------------------------------
 # modis-ba (not yet there ?!?)
 #   ---------------------------------------------------------------------
@@ -733,8 +750,8 @@ def my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=Fa
 #my_proc_tamsat_rfe(pipe_run=4, pipe_print=0, start_date='19830101', end_date='20171231', touch_files_only=False)
 # proc_list=my_proc_fewsnet_rfe(pipe_run=0, pipe_print=8, start_date=None, end_date=None, touch_files_only=False)                       # OK
 
-# my_proc_chirps_dekad(pipe_run=0, pipe_print=9, start_date='19810101', end_date='20171231', upsert_db=False, touch_files_only=False)
-my_proc_arc2rain_dekad(pipe_run=0, pipe_print=6, start_date='19810101', end_date='20171231', upsert_db=False, touch_files_only=False)
+# my_proc_chirps_dekad(pipe_run=3, pipe_print=0, start_date='20180101', end_date='20181231', upsert_db=False, touch_files_only=False)
+# my_proc_arc2rain_dekad(pipe_run=0, pipe_print=6, start_date='19810101', end_date='20171231', upsert_db=False, touch_files_only=False)
 # my_proc_chirps_lp(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False, type='')
 #my_proc_std_lsasaf_et(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
 #my_proc_std_lsasaf_lst(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
@@ -749,11 +766,11 @@ my_proc_arc2rain_dekad(pipe_run=0, pipe_print=6, start_date='19810101', end_date
 #my_proc_vgt_dmp(pipe_run=4, pipe_print=0, start_date='19990101', end_date='20171231', touch_files_only=False)
 #my_proc_std_ba(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None, touch_files_only=False)
 #my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=False)
-
+test_proc_modis_chla_opfish(pipe_run=3, pipe_print=0, touch_files_only=False)
 #   ---------------------------------------------------------------------
 #   OFF-LINE Tests (on raster-math functions)
 #   ---------------------------------------------------------------------
-import numpy
+# import numpy
 # args = {"input_file": '/data/processing/exchange/Sentinel-3/gradient/20180202_olci-wrr_median-filter_SPOTV-Africa-1km_V02.0.tif', "output_file": '/data/processing/exchange/Sentinel-3/gradient/20180202_olci-wrr_extrapolated5_SPOTV-Africa-1km_V02.0.tif', "nodata": 1000,"output_format": 'GTIFF',
 #         "options": "compress = lzw"}
 # args = {"input_file": '/data/processing/exchange/Sentinel-3/gradient/CHL_orig_10-12-2018.tif', "output_file": '/data/processing/exchange/Sentinel-3/gradient/CHL_ord_1IT_10_sd_2_10-12-2018.tif', "nodata": numpy.nan,"output_format": 'GTIFF',
