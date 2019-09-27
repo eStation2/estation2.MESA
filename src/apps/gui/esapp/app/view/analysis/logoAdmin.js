@@ -10,7 +10,6 @@ Ext.define("esapp.view.analysis.logoAdmin",{
     requires: [
         'esapp.view.analysis.logoAdminModel',
         'esapp.view.analysis.logoAdminController',
-        'esapp.view.analysis.addEditLogo',
 
         'Ext.grid.column.Action'
     ],
@@ -51,6 +50,7 @@ Ext.define("esapp.view.analysis.logoAdmin",{
 
     initComponent: function () {
         var me = this;
+        var user = esapp.getUser();
 
         me.title = '<div class="panel-title-style-16">' + esapp.Utils.getTranslation('logoadministration') + '</div>';
         me.height = Ext.getBody().getViewSize().height < 830 ? Ext.getBody().getViewSize().height-130 : 830;  // 600,
@@ -160,12 +160,12 @@ Ext.define("esapp.view.analysis.logoAdmin",{
                     width:'35',
                     disabled: false,
                     getClass: function(v, meta, rec) {
-                        if (rec.get('deletable') && rec.get('defined_by')!='JRC'){
+                        if ((rec.get('deletable') && rec.get('defined_by')!='JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
                             return 'delete';
                         }
                     },
                     getTip: function(v, meta, rec) {
-                        if (rec.get('deletable') && rec.get('defined_by')!='JRC'){
+                        if ((rec.get('deletable') && rec.get('defined_by')!='JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
                             return esapp.Utils.getTranslation('deletelogo') + ': ' + rec.get('logo_filename');
                         }
                     },

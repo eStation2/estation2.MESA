@@ -59,11 +59,11 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             wkt_geom: me.wkt_geom,
             selectedregionname: me.selectedregionname,
 
-            disclaimerObjPosition: (esapp.Utils.objectExists(disclaimerObj) && disclaimerObj.rendered) ? disclaimerObj.getPosition(true).toString() : disclaimerObj.disclaimerPosition.toString(),
-            disclaimerObjContent: disclaimerObj.getContent(),
-            logosObjPosition: (esapp.Utils.objectExists(logoObj) && logoObj.rendered) ? logoObj.getPosition(true).toString() : logoObj.logoPosition.toString(),
-            logosObjContent: Ext.encode(logoObj.getLogoData()),
-            showObjects: graphObjectToggleBtn.pressed,
+            disclaimerobjposition: (esapp.Utils.objectExists(disclaimerObj) && disclaimerObj.rendered) ? disclaimerObj.getPosition(true).toString() : disclaimerObj.disclaimerPosition.toString(),
+            disclaimerobjcontent: disclaimerObj.getContent(),
+            logosobjposition: (esapp.Utils.objectExists(logoObj) && logoObj.rendered) ? logoObj.getPosition(true).toString() : logoObj.logoPosition.toString(),
+            logosobjcontent: Ext.encode(logoObj.getLogoData()),
+            showobjects: graphObjectToggleBtn.pressed,
             showtoolbar: !me.getDockedItems('toolbar[dock="top"]')[0].hidden
         }
 
@@ -83,10 +83,10 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             logoObj.show();
             btn.setStyle({ color: 'green' });
             if (graphviewwin.graphtype == 'matrix'){
-                graphviewwin.tsgraph.options.chart.spacingBottom = 65;
+                graphviewwin.tsgraph.options.chart.spacingBottom = 75;
             }
             else {
-                graphviewwin.tsgraph.options.chart.spacingBottom = 45;
+                graphviewwin.tsgraph.options.chart.spacingBottom = 65;
             }
             // graphviewwin.tsgraph.options.chart.marginBottom = 60+graphviewwin.tsgraph.options.chart.spacingBottom;
             // graphviewwin.tsgraph.options.chart.spacingTop = 60;
@@ -972,6 +972,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                         "fontSize": me.timeseriesGraph.yaxes[yaxescount].title_font_size + 'px'
                     }
                 },
+                showEmpty: false,
                 opposite: opposite,
                 min: min,
                 max: max
@@ -1242,6 +1243,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                         "fontSize": me.timeseriesGraph.yaxes[yaxescount].title_font_size + 'px'
                     }
                 },
+                showEmpty:false,
                 opposite: opposite
                 ,min: min
                 ,max: max
@@ -1577,6 +1579,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                         "fontSize": me.timeseriesGraph.yaxes[yaxescount].title_font_size + 'px'
                     }
                 },
+                showEmpty: false,
                 opposite: opposite
                 ,min: min
                 ,max: max
@@ -1902,6 +1905,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                         "fontSize": me.timeseriesGraph.yaxes[yaxescount].title_font_size + 'px'
                     }
                 },
+                showEmpty:false,
                 opposite: opposite
                 ,min: min
                 ,max: max
@@ -2271,13 +2275,16 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
             source.yaxe1_aggregation_max = me.timeseriesGraph.yaxes[0].aggregation_max;
             // console.info(me.timeseriesGraph.yaxes[0].id);
             if (me.timeseriesGraph.yaxes[0].id.includes("rain")){
-                aggregationTypeStoreYaxe1 = ['mean', 'count', 'percent', 'precip'];
+                aggregationTypeStoreYaxe1 = ['mean', 'percent', 'precip'];
             }
             else if (me.timeseriesGraph.yaxes[0].id.includes("WBD"))  {       // "inlandwater"
-                aggregationTypeStoreYaxe1 = ['mean', 'count', 'percent', 'surface'];
+                aggregationTypeStoreYaxe1 = ['percent', 'surface'];
             }
             else if (me.timeseriesGraph.yaxes[0].id.includes("fire")){
                 aggregationTypeStoreYaxe1 = ['mean', 'count', 'percent', 'cumulate'];
+            }
+            else if (me.timeseriesGraph.yaxes[0].id.includes("ba")){
+                aggregationTypeStoreYaxe1 = ['percent', 'surface','count'];
             }
 
             if (me.timeseriesGraph.yaxes.length > 1) {
@@ -2296,13 +2303,16 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
 
                 // console.info(me.timeseriesGraph.yaxes[1].id);
                 if (me.timeseriesGraph.yaxes[1].id.includes("rain")){
-                    aggregationTypeStoreYaxe2 = ['mean', 'count', 'percent', 'precip'];
+                    aggregationTypeStoreYaxe2 = ['mean', 'percent', 'precip'];
                 }
                 else if (me.timeseriesGraph.yaxes[1].id.includes("WBD"))  {       // "inlandwater"
-                    aggregationTypeStoreYaxe2 = ['mean', 'count', 'percent', 'surface'];
+                    aggregationTypeStoreYaxe2 = ['percent', 'surface'];
                 }
                 else if (me.timeseriesGraph.yaxes[1].id.includes("fire")){
                     aggregationTypeStoreYaxe2 = ['mean', 'count', 'percent', 'cumulate'];
+                }
+                else if (me.timeseriesGraph.yaxes[1].id.includes("ba")){
+                    aggregationTypeStoreYaxe2 = ['percent', 'surface','count'];
                 }
             }
             if (me.timeseriesGraph.yaxes.length > 2) {
@@ -2320,13 +2330,16 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 source.yaxe3_aggregation_max = me.timeseriesGraph.yaxes[2].aggregation_max;
 
                 if (me.timeseriesGraph.yaxes[2].id.includes("rain")){
-                    aggregationTypeStoreYaxe3 = ['mean', 'count', 'percent', 'precip'];
+                    aggregationTypeStoreYaxe3 = ['mean', 'percent', 'precip'];
                 }
                 else if (me.timeseriesGraph.yaxes[2].id.includes("WBD"))  {       // "inlandwater"
-                    aggregationTypeStoreYaxe3 = ['mean', 'count', 'percent', 'surface'];
+                    aggregationTypeStoreYaxe3 = ['percent', 'surface'];
                 }
                 else if (me.timeseriesGraph.yaxes[2].id.includes("fire")){
                     aggregationTypeStoreYaxe3 = ['mean', 'count', 'percent', 'cumulate'];
+                }
+                else if (me.timeseriesGraph.yaxes[2].id.includes("ba")){
+                    aggregationTypeStoreYaxe3 = ['percent', 'surface','count'];
                 }
             }
             if (me.timeseriesGraph.yaxes.length > 3) {
@@ -2344,13 +2357,16 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                 source.yaxe4_aggregation_max = me.timeseriesGraph.yaxes[3].aggregation_max;
 
                 if (me.timeseriesGraph.yaxes[3].id.includes("rain")){
-                    aggregationTypeStoreYaxe4 = ['mean', 'count', 'percent', 'precip'];
+                    aggregationTypeStoreYaxe4 = ['mean', 'percent', 'precip'];
                 }
                 else if (me.timeseriesGraph.yaxes[3].id.includes("WBD"))  {       // "inlandwater"
-                    aggregationTypeStoreYaxe4 = ['mean', 'count', 'percent', 'surface'];
+                    aggregationTypeStoreYaxe4 = ['percent', 'surface'];
                 }
                 else if (me.timeseriesGraph.yaxes[3].id.includes("fire")){
                     aggregationTypeStoreYaxe4 = ['mean', 'count', 'percent', 'cumulate'];
+                }
+                else if (me.timeseriesGraph.yaxes[3].id.includes("ba")){
+                    aggregationTypeStoreYaxe4 = ['percent', 'surface','count'];
                 }
             }
 

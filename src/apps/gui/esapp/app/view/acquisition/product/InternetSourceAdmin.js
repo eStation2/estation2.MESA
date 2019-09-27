@@ -9,7 +9,7 @@ Ext.define("esapp.view.acquisition.product.InternetSourceAdmin",{
     requires: [
         'esapp.view.acquisition.product.InternetSourceAdminModel',
         'esapp.view.acquisition.product.InternetSourceAdminController',
-        'esapp.view.acquisition.product.editInternetSource',
+        'esapp.view.acquisition.editInternetSource',
 
         'Ext.layout.container.Center',
         'Ext.grid.plugin.CellEditing',
@@ -30,14 +30,13 @@ Ext.define("esapp.view.acquisition.product.InternetSourceAdmin",{
     autoScroll:true,
     maximizable: false,
 
-    width: 1000,
+    width: 1200,
     height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-10 : 800,  // 600,
     maxHeight: 800,
 
     frame: true,
     layout: {
-        type: 'vbox',
-        align: 'stretch'
+        type: 'fit'
     },
 
     params: {},
@@ -47,6 +46,7 @@ Ext.define("esapp.view.acquisition.product.InternetSourceAdmin",{
 
     initComponent: function () {
         var me = this;
+        var user = esapp.getUser();
 
         var assignButton = {
             text: esapp.Utils.getTranslation('assign'),  // 'Assign',
@@ -64,32 +64,41 @@ Ext.define("esapp.view.acquisition.product.InternetSourceAdmin",{
             disabled: false,
             handler: 'onAddInternetSourceClick'
         };
-        var deleteButton = {
-            text: esapp.Utils.getTranslation('delete'),  // 'Delete',
-            iconCls: 'fa fa-minus-circle fa-2x',
-            style: {color: 'red'},
+
+        var refreshButton = {
+            xtype: 'button',
+            iconCls: 'fa fa-refresh fa-2x',
+            style: { color: 'gray' },
+            enableToggle: false,
             scale: 'medium',
-            disabled: true,
-            handler: 'onRemoveInternetSourceClick',
-            bind: {
-                disabled: '{!internetSourceGrid.selection}'
-            }
+            handler: 'reloadStore'
         };
+        // var deleteButton = {
+        //     text: esapp.Utils.getTranslation('delete'),  // 'Delete',
+        //     iconCls: 'fa fa-minus-circle fa-2x',
+        //     style: {color: 'red'},
+        //     scale: 'medium',
+        //     disabled: true,
+        //     handler: 'onRemoveInternetSourceClick',
+        //     bind: {
+        //         disabled: '{!internetSourceGrid.selection}'
+        //     }
+        // };
+
+
+        me.tbar = [addButton, '->', refreshButton];
 
         if (me.params.assigntoproduct){
             me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('assigninternetsource')
                 + ': ' + me.params.product.productcode + ' ' + me.params.product.version + '</span>');
 
-            me.bbar = ['->', assignButton, addButton, deleteButton];
+            me.bbar = ['->', assignButton];
         }
         else {
             me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('internetsources') + '</span>');
-
-            me.bbar = ['->', addButton, deleteButton];
         }
 
         me.items = [{
-            flex: 1,
             xtype: 'grid',
             reference: 'internetSourceGrid',
             bind: '{internetsources}',
@@ -99,43 +108,131 @@ Ext.define("esapp.view.acquisition.product.InternetSourceAdmin",{
             selModel: {
                 allowDeselect: true
             },
+            layout: 'fit',
+
+            viewConfig: {
+                stripeRows: false,
+                enableTextSelection: true,
+                draggable:false,
+                markDirty: false,
+                resizable:false,
+                disableSelection: false,
+                trackOver:true
+            },
+
+            bufferedRenderer: false,
+            scrollable: 'y',    // vertical scrolling only
+            collapsible: false,
+            enableColumnMove:false,
+            enableColumnResize:false,
+            multiColumnSort: false,
+            columnLines: false,
+            rowLines: true,
+            frame: false,
+            border: false,
+
             columns: [{
                 xtype: 'actioncolumn',
-                width: 50,
-                //flex: 0.5,
+                hidden: false,
+                width: 40,
                 align: 'center',
+                sortable: false,
+                menuDisabled: true,
                 shrinkWrap: 0,
                 items: [{
-                    icon: 'resources/img/icons/edit.png',
-                    tooltip: esapp.Utils.getTranslation('editinternetsource') // 'Edit Internet Source'
-                    , handler: 'onEditInternetSourceClick'
+                    // icon: 'resources/img/icons/edit.png',
+                    // tooltip: esapp.Utils.getTranslation('editinternetsource') // 'Edit Internet Source'
+                    width:'35',
+                    disabled: false,
+                    getClass: function (v, meta, rec) {
+                       if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)) {
+                           return 'edit';
+                       }
+                       else {
+                           // return 'x-hide-display';
+                           return 'vieweye';
+                       }
+                    },
+                    getTip: function (v, meta, rec) {
+                       if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)) {
+                           return esapp.Utils.getTranslation('editinternetsource');    // 'Edit Internet datasource',
+                       }
+                    },
+                    handler: 'onEditInternetSourceClick'
                 }]
             }, {
                 dataIndex: 'internet_id',
-                flex: 1.5,
-                text: esapp.Utils.getTranslation('id') // 'ID'
+                header: esapp.Utils.getTranslation('id'), // 'ID'
+                width: 280,
+                minWidth: 150,
+                align: 'left',
+                menuDisabled: true,
+                sortable: true,
+                cellWrap:true
             }, {
                 dataIndex: 'descriptive_name',
-                flex: 2,
-                text: esapp.Utils.getTranslation('name') // 'Name'
+                header: esapp.Utils.getTranslation('name'), // 'Name'
+                width: 250,
+                minWidth: 150,
+                align: 'left',
+                menuDisabled: true,
+                sortable: false,
+                cellWrap:true
             }, {
                 dataIndex: 'url',
-                flex: 2,
-                text: esapp.Utils.getTranslation('url') // 'URL'
-            }, {
-                dataIndex: 'update_datetime',
-                flex: 1,
-                text: esapp.Utils.getTranslation('lastupdated') // 'Last updated'
+                header: esapp.Utils.getTranslation('url'), // 'URL'
+                width: 330,
+                minWidth: 200,
+                align: 'left',
+                menuDisabled: true,
+                sortable: false,
+                cellWrap:true
             }, {
                 dataIndex: 'type',
-                flex: 0.5,
-                text: esapp.Utils.getTranslation('type') // 'Type'
+                header: esapp.Utils.getTranslation('type'), // 'Type'
+                width: 110,
+                minWidth: 80,
+                align: 'center',
+                menuDisabled: true,
+                sortable: true,
+                cellWrap:true
             }, {
-                dataIndex: 'status',
-                flex: 0.5,
-                text: esapp.Utils.getTranslation('status') // 'Status'
+                dataIndex: 'update_datetime',
+                header: esapp.Utils.getTranslation('lastupdated'), // 'Last updated'
+                width: 110,
+                minWidth: 80,
+                align: 'center',
+                menuDisabled: true,
+                sortable: false,
+                cellWrap:true
+            },{
+               xtype: 'actioncolumn',
+               hidden: false,
+               width: 35,
+               align: 'center',
+               sortable: false,
+               menuDisabled: true,
+               shrinkWrap: 0,
+               items: [{
+                   width:'35',
+                   disabled: false,
+                   getClass: function(v, meta, rec) {
+                       if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
+                           return 'delete';
+                       }
+                       else {
+                           return 'x-hide-display';
+                       }
+                   },
+                   getTip: function(v, meta, rec) {
+                       if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
+                           return esapp.Utils.getTranslation('deleteinternetsource');    // 'Delete Internet datasource',
+                       }
+                   },
+                   handler: 'onRemoveInternetSourceClick'
+               }]
             }]
-        }]
+        }];
 
 
         me.callParent();

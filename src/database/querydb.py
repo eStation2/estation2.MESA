@@ -18,6 +18,7 @@ from lib.python import es_logging as log
 from database import connectdb
 from database import crud
 from config import es_constants
+from lib.python import functions
 
 logger = log.my_logger(__name__)
 
@@ -47,8 +48,8 @@ def get_logos():
 def get_last_map_tpl_id(userid, workspaceid):
     global dbschema_analysis
     try:
-        query = "SELECT max(map_tpl_id) as map_tpl_id FROM analysis.user_map_templates WHERE workspaceid = " + str(
-            workspaceid) + " AND userid = '" + userid + "'"
+        query = "SELECT max(map_tpl_id) as map_tpl_id FROM analysis.user_map_templates WHERE workspaceid = " + \
+                str(workspaceid) + " AND userid = '" + userid + "'"
 
         result = dbschema_analysis.execute(query)
         result = result.fetchall()
@@ -64,8 +65,8 @@ def get_last_map_tpl_id(userid, workspaceid):
 def get_last_graph_tpl_id(userid, workspaceid):
     global dbschema_analysis
     try:
-        query = "SELECT max(graph_tpl_id) as graph_tpl_id FROM analysis.user_graph_templates WHERE workspaceid = " + str(
-            workspaceid) + " AND userid = '" + userid + "'"
+        query = "SELECT max(graph_tpl_id) as graph_tpl_id FROM analysis.user_graph_templates WHERE workspaceid = " + \
+                str(workspaceid) + " AND userid = '" + userid + "'"
 
         result = dbschema_analysis.execute(query)
         result = result.fetchall()
@@ -78,10 +79,10 @@ def get_last_graph_tpl_id(userid, workspaceid):
             dbschema_analysis.session.close()
 
 
-def get_workspace_maps(workspaceid):
+def get_workspace_maps(workspaceid, userid):
     global dbschema_analysis
     try:
-        query = "SELECT * FROM analysis.user_map_templates WHERE workspaceid = " + str(workspaceid)
+        query = "SELECT * FROM analysis.user_map_templates WHERE workspaceid = " + str(workspaceid) + " AND userid = '" + userid + "'"
 
         result = dbschema_analysis.execute(query)
         result = result.fetchall()
@@ -94,10 +95,10 @@ def get_workspace_maps(workspaceid):
             dbschema_analysis.session.close()
 
 
-def get_workspace_graphs(workspaceid):
+def get_workspace_graphs(workspaceid, userid):
     global dbschema_analysis
     try:
-        query = "SELECT * FROM analysis.user_graph_templates WHERE workspaceid = " + str(workspaceid)
+        query = "SELECT * FROM analysis.user_graph_templates WHERE workspaceid = " + str(workspaceid) + " AND userid = '" + userid + "'"
 
         result = dbschema_analysis.execute(query)
         result = result.fetchall()
@@ -298,7 +299,8 @@ def get_user_map_templates(userid):
     global dbschema_analysis
     try:
         query = " SELECT * FROM analysis.user_map_templates umt " + \
-                " JOIN analysis.user_workspaces uw ON umt.workspaceid = uw.workspaceid AND uw.isdefault = TRUE " + \
+                " JOIN (SELECT workspaceid FROM analysis.user_workspaces WHERE userid='" + userid + "' AND isdefault=TRUE) uw " + \
+                " ON umt.workspaceid = uw.workspaceid " + \
                 " WHERE umt.userid = '" + userid + "'"
 
         result = dbschema_analysis.execute(query)
@@ -347,15 +349,15 @@ def checkUser(userinfo=None):
     global dbschema_analysis
     try:
         if userinfo is None:
-            return False
+            return None
 
         query = "SELECT * FROM analysis.users WHERE userid = '" + userinfo.get('userid') + "'"
         result = dbschema_analysis.execute(query)
         result = result.fetchall()
         if hasattr(result, "__len__") and result.__len__() > 0:
-            return True
+            return result
         else:
-            return False
+            return None
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         logger.error("checkUser: Database query error!\n -> {}".format(exceptionvalue))
@@ -664,6 +666,52 @@ def __get_product_timeseries_drawproperties_orig(product):
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
         # dbschema_analysis = None
+
+
+def get_graph_yaxes(graph_tpl_id='-1'):
+    global dbschema_analysis
+
+    try:
+        graph_yaxes = []
+
+        query = " SELECT * FROM analysis.user_graph_tpl_yaxes " + \
+                " WHERE graph_tpl_id = " + str(graph_tpl_id)
+
+        graph_yaxes = db.execute(query).fetchall()
+
+        return graph_yaxes
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_graph_yaxes: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+        # dbschema_analysis = None
+
+
+def get_graph_tsdrawprops(graph_tpl_id):
+    global dbschema_analysis
+    try:
+        query = " SELECT productcode, subproductcode, version, tsname_in_legend, " \
+                "        charttype, linestyle, linewidth, color, yaxe_id " + \
+                " FROM analysis.user_graph_tpl_timeseries_drawproperties uts " + \
+                " WHERE uts.graph_tpl_id = " + str(graph_tpl_id) + \
+                " ORDER BY productcode ASC, subproductcode ASC, version ASC"
+
+        result = dbschema_analysis.execute(query)
+        result = result.fetchall()
+        # print result
+        return result
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_graph_tsdrawprops: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
 
 
 def get_product_yaxe(product, userid='', istemplate='false', graph_type='', graph_tpl_id='-1', graph_tpl_name='default'):
@@ -1263,20 +1311,20 @@ def __update_timeseries_drawproperties(tsdrawproperties):
 def get_graph_drawproperties(params):
     global dbschema_analysis
     try:
-        if hasattr(params, "userid") and params.userid != '':
+        if hasattr(params, "userid") and params['userid'] != '':
             if hasattr(params, "graph_tpl_id"):
                 query = " SELECT -1 as graph_tpl_id, * " + \
                         " FROM analysis.graph_drawproperties " + \
-                        " WHERE graph_type = '" + params.graphtype + "' " + \
+                        " WHERE graph_type = '" + params['graphtype'] + "' " + \
                         "   AND (graph_type) NOT IN " + \
                         "       (SELECT graph_type FROM analysis.user_graph_tpl_drawproperties ugp " + \
-                        "        WHERE ugp.graph_type = '" + params.graphtype + "' " + \
-                        "        AND ugp.graph_tpl_id = " + params.graph_tpl_id + ")" + \
+                        "        WHERE ugp.graph_type = '" + params['graphtype'] + "' " + \
+                        "        AND ugp.graph_tpl_id = " + params['graph_tpl_id'] + ")" + \
                         " UNION " + \
                         " SELECT * " + \
                         " FROM analysis.user_graph_tpl_drawproperties ugp " + \
-                        " WHERE ugp.graph_type = '" + params.graphtype + "' " + \
-                        "   AND ugp.graph_tpl_id = " + params.graph_tpl_id
+                        " WHERE ugp.graph_type = '" + params['graphtype'] + "' " + \
+                        "   AND ugp.graph_tpl_id = " + params['graph_tpl_id']
 
                 # query = " SELECT -1 as graph_tpl_id, * " + \
                 #         " FROM analysis.graph_drawproperties " + \
@@ -1324,7 +1372,7 @@ def get_graph_drawproperties(params):
         else:
             query = " SELECT -1 as graph_tpl_id, * " \
                     " FROM analysis.graph_drawproperties " \
-                    " WHERE graph_type = '" + params.graphtype + "'"
+                    " WHERE graph_type = '" + params['graphtype'] + "'"
 
         # print query
         result = dbschema_analysis.execute(query)
@@ -1602,31 +1650,155 @@ def get_enabled_ingest_derived_of_product(productcode, version, mapsetcode=None)
             db.session.close()
 
 
+def update_eumetcast_source_info(eumetcastsourceinfo, datasourcedescrinfo):
+    global db
+    status = False
+    try:
+
+        query1 = "UPDATE products.datasource_description SET " + \
+                 "  datasource_descr_id = '" + datasourcedescrinfo['datasource_descr_id'] + "', " + \
+                 "  format_type = '" + datasourcedescrinfo['format_type'] + "', " + \
+                 "  file_extension = '" + datasourcedescrinfo['file_extension'] + "', " + \
+                 "  delimiter = '" + datasourcedescrinfo['delimiter'] + "', " + \
+                 "  date_format = '" + datasourcedescrinfo['date_format'] + "', " + \
+                 "  date_position = '" + datasourcedescrinfo['date_position'] + "', " + \
+                 "  product_identifier = '" + datasourcedescrinfo['product_identifier'] + "', " + \
+                 "  prod_id_position = " + str(datasourcedescrinfo['prod_id_position']) + ", " + \
+                 "  prod_id_length = " + str(datasourcedescrinfo['prod_id_length']) + ", " + \
+                 "  area_type = '" + datasourcedescrinfo['area_type'] + "', " + \
+                 "  area_position = '" + datasourcedescrinfo['area_position'] + "', " + \
+                 "  area_length = " + str(datasourcedescrinfo['area_length']) + ", " + \
+                 "  preproc_type = '" + datasourcedescrinfo['preproc_type'] + "', " + \
+                 "  product_release = '" + datasourcedescrinfo['product_release'] + "', " + \
+                 "  release_position = '" + datasourcedescrinfo['release_position'] + "', " + \
+                 "  release_length = " + str(datasourcedescrinfo['release_length']) + ", " + \
+                 "  native_mapset = '" + datasourcedescrinfo['native_mapset'] + "' " + \
+                 " WHERE datasource_descr_id = '" + eumetcastsourceinfo['orig_eumetcast_id'] + "' "
+
+        result = db.execute(query1)
+        db.commit()
+
+        query = "UPDATE products.internet_source SET " + \
+                "  eumetcast_id = '" + eumetcastsourceinfo['eumetcast_id'] + "', " + \
+                "  filter_expression_jrc = '" + eumetcastsourceinfo['filter_expression_jrc'] + "', " + \
+                "  description = '" + eumetcastsourceinfo['description'] + "', " + \
+                "  typical_file_name = '" + eumetcastsourceinfo['typical_file_name'] + "', " + \
+                "  frequency = '" + eumetcastsourceinfo['frequency'] + "', " + \
+                "  datasource_descr_id = '" + eumetcastsourceinfo['datasource_descr_id'] + "' " + \
+                " WHERE eumetcast_id = '" + eumetcastsourceinfo['orig_eumetcast_id'] + "' "
+
+        result = db.execute(query)
+        db.commit()
+
+        status = True
+
+        return status
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("update_eumetcast_source_info: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+        return status
+
+
+def update_internet_source_info(internetsourceinfo, datasourcedescrinfo):
+    global db
+    status = False
+    try:
+
+        query1 = "UPDATE products.datasource_description SET " + \
+                 "  datasource_descr_id = '" + datasourcedescrinfo['datasource_descr_id'] + "', " + \
+                 "  format_type = '" + datasourcedescrinfo['format_type'] + "', " + \
+                 "  file_extension = '" + datasourcedescrinfo['file_extension'] + "', " + \
+                 "  delimiter = '" + datasourcedescrinfo['delimiter'] + "', " + \
+                 "  date_format = '" + datasourcedescrinfo['date_format'] + "', " + \
+                 "  date_position = '" + datasourcedescrinfo['date_position'] + "', " + \
+                 "  product_identifier = '" + datasourcedescrinfo['product_identifier'] + "', " + \
+                 "  prod_id_position = " + str(datasourcedescrinfo['prod_id_position']) + ", " + \
+                 "  prod_id_length = " + str(datasourcedescrinfo['prod_id_length']) + ", " + \
+                 "  area_type = '" + datasourcedescrinfo['area_type'] + "', " + \
+                 "  area_position = '" + datasourcedescrinfo['area_position'] + "', " + \
+                 "  area_length = " + str(datasourcedescrinfo['area_length']) + ", " + \
+                 "  preproc_type = '" + datasourcedescrinfo['preproc_type'] + "', " + \
+                 "  product_release = '" + datasourcedescrinfo['product_release'] + "', " + \
+                 "  release_position = '" + datasourcedescrinfo['release_position'] + "', " + \
+                 "  release_length = " + str(datasourcedescrinfo['release_length']) + ", " + \
+                 "  native_mapset = '" + datasourcedescrinfo['native_mapset'] + "' " + \
+                 " WHERE datasource_descr_id = '" + internetsourceinfo['orig_internet_id'] + "' "
+
+        result = db.execute(query1)
+        db.commit()
+
+        query = "UPDATE products.internet_source SET " + \
+                "  internet_id = '" + internetsourceinfo['internet_id'] + "', " + \
+                "  defined_by = '" + internetsourceinfo['defined_by'] + "', " + \
+                "  descriptive_name = '" + internetsourceinfo['descriptive_name'] + "', " + \
+                "  description = '" + internetsourceinfo['description'] + "', " + \
+                "  modified_by = '" + internetsourceinfo['modified_by'] + "', " + \
+                "  url = '" + internetsourceinfo['url'] + "', " + \
+                "  user_name = '" + internetsourceinfo['user_name'] + "', " + \
+                "  password = '" + internetsourceinfo['password'] + "', " + \
+                "  type = '" + internetsourceinfo['type'] + "', " + \
+                "  include_files_expression = '" + internetsourceinfo['include_files_expression'] + "', " + \
+                "  files_filter_expression = '" + internetsourceinfo['files_filter_expression'] + "', " + \
+                "  status = " + str(internetsourceinfo['status']) + ", " + \
+                "  pull_frequency = " + str(internetsourceinfo['pull_frequency']) + ", " + \
+                "  datasource_descr_id = '" + internetsourceinfo['datasource_descr_id'] + "', " + \
+                "  frequency_id = '" + internetsourceinfo['frequency_id'] + "', " + \
+                "  start_date = " + str(internetsourceinfo['start_date']) + ", " + \
+                "  end_date = " + str(internetsourceinfo['end_date']) + ", " + \
+                "  https_params = '" + internetsourceinfo['https_params'] + "' " + \
+                " WHERE internet_id = '" + internetsourceinfo['orig_internet_id'] + "' "
+
+        result = db.execute(query)
+        db.commit()
+
+        status = True
+
+        return status
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("update_internet_source_info: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+        return status
+
+
 def update_product_info(productinfo):
     global db
     status = False
     try:
         query = "UPDATE products.product SET " + \
+                "  productcode = '" + productinfo['productcode'] + "', " + \
+                "  version = '" + productinfo['version'] + "', " + \
                 "  subproductcode = '" + productinfo['productcode'] + "_native', " + \
                 "  descriptive_name = '" + productinfo['descriptive_name'] + "', " + \
-                "  description = '" + productinfo['description'] + "' " + \
-                "WHERE productcode = '" + productinfo['orig_productcode'] + "' " + \
+                "  description = '" + productinfo['description'] + "', " + \
+                "  provider = '" + productinfo['provider'] + "', " + \
+                "  category_id = '" + productinfo['category_id'] + "', " + \
+                "  defined_by = '" + productinfo['defined_by'] + "', " + \
+                "  activated = " + productinfo['activated'] + \
+                " WHERE productcode = '" + productinfo['orig_productcode'] + "' " + \
                 "  AND subproductcode = '" + productinfo['orig_productcode'] + "_native' " + \
                 "  AND version = '" + productinfo['orig_version'] + "' "
 
-        result = db.execute(query)
+        db.execute(query)
         db.commit()
 
-        query = "UPDATE products.product SET " + \
-                "  productcode = '" + productinfo['productcode'] + "', " + \
-                "  version = '" + productinfo['version'] + "', " + \
-                "  provider = '" + productinfo['provider'] + "', " + \
-                "  category_id = '" + productinfo['category_id'] + "' " + \
-                " WHERE productcode = '" + productinfo['orig_productcode'] + "' " + \
-                "  AND version = '" + productinfo['orig_version'] + "' "
+        # If changed, update productcode and version for all its sub products. Will not reflect in generated files!
+        if productinfo['productcode'] != productinfo['orig_productcode'] or productinfo['version'] != productinfo['orig_version']:
+            query = "UPDATE products.product SET " + \
+                    "  productcode = '" + productinfo['productcode'] + "', " + \
+                    "  version = '" + productinfo['version'] + "', " + \
+                    " WHERE productcode = '" + productinfo['orig_productcode'] + "' " + \
+                    "  AND version = '" + productinfo['orig_version'] + "' "
 
-        result = db.execute(query)
-        db.commit()
+            db.execute(query)
+            db.commit()
 
         status = True
 
@@ -1641,17 +1813,86 @@ def update_product_info(productinfo):
         return status
 
 
+def update_ingest_subproduct_info(productinfo):
+    global db
+    status = False
+    try:
+        query = "UPDATE products.product SET " + \
+                "  productcode = '" + productinfo['productcode'] + "', " + \
+                "  version = '" + productinfo['version'] + "', " + \
+                "  subproductcode = '" + productinfo['subproductcode'] + "', " + \
+                "  descriptive_name = '" + productinfo['descriptive_name'] + "', " + \
+                "  description = '" + productinfo['description'] + "', " + \
+                "  provider = '" + productinfo['provider'] + "', " + \
+                "  category_id = '" + productinfo['category_id'] + "', " + \
+                "  defined_by = '" + productinfo['defined_by'] + "', " + \
+                "  activated = '" + productinfo['activated'] + "', " + \
+                "  frequency_id = '" + productinfo['frequency_id'] + "', " + \
+                "  date_format = '" + productinfo['date_format'] + "', " + \
+                "  data_type_id = '" + productinfo['data_type_id'] + "', " + \
+                "  scale_factor = " + productinfo['scale_factor'] + ", " + \
+                "  scale_offset = " + productinfo['scale_offset'] + ", " + \
+                "  nodata = " + productinfo['nodata'] + ", " + \
+                "  mask_min = " + productinfo['mask_min'] + ", " + \
+                "  mask_max = " + productinfo['mask_max'] + ", " + \
+                "  unit = '" + productinfo['unit'] + "', " + \
+                "  masked = " + productinfo['masked'] + ", " + \
+                "  timeseries_role = '" + productinfo['timeseries_role'] + "', " + \
+                "  display_index = " + productinfo['display_index'] + " " + \
+                " WHERE productcode = '" + productinfo['productcode'] + "' " + \
+                "  AND subproductcode = '" + productinfo['orig_subproductcode'] + "' " + \
+                "  AND version = '" + productinfo['version'] + "' "
+
+        # print(query)
+        db.execute(query)
+        db.commit()
+
+        status = True
+
+        return status
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("update_ingest_subproduct_info: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+        return status
+
+
 def get_mapsets_for_ingest(productcode, version, subproductcode):
     global db
     try:
-        query = "SELECT * FROM products.mapset " \
-                "WHERE mapsetcode not in (SELECT mapsetcode FROM products.ingestion " \
-                "                         WHERE productcode = '" + productcode + "'" + \
-                "                           AND version = '" + version + "'" + \
-                "                           AND subproductcode = '" + subproductcode + "'" + \
-                "                           AND enabled " + \
+        # query = " SELECT * FROM products.mapset " \
+        query = " SELECT  mapset_new.mapsetcode, " \
+                " 	mapset_new.defined_by, " \
+                " 	mapset_new.descriptive_name, " \
+                " 	mapset_new.description, " \
+                " 	projection.srs_wkt, " \
+                " 	CASE WHEN mapset_new.center_of_pixel  " \
+                "        THEN ROUND(CAST(bbox.upper_left_long - (resolution.pixel_shift_long/2) as NUMERIC), 13) " \
+                "        ELSE bbox.upper_left_long END AS upper_left_long, " \
+                " 	resolution.pixel_shift_long, " \
+                " 	0.0 as rotation_factor_long, " \
+                " 	CASE WHEN mapset_new.center_of_pixel " \
+                "        THEN ROUND(CAST(bbox.upper_left_lat + (resolution.pixel_shift_long/2)as NUMERIC), 13) " \
+                "        ELSE bbox.upper_left_lat END AS upper_left_lat, " \
+                " 	resolution.pixel_shift_lat, " \
+                " 	0.0 as rotation_factor_lat, " \
+                " 	mapset_new.pixel_size_x, " \
+                " 	mapset_new.pixel_size_y, " \
+                " 	mapset_new.footprint_image " \
+                " FROM products.mapset_new AS mapset_new " \
+                " INNER JOIN products.projection AS projection ON mapset_new.proj_code = projection.proj_code " \
+                " INNER JOIN products.resolution AS resolution ON mapset_new.resolutioncode=resolution.resolutioncode "\
+                " INNER JOIN products.bbox ON mapset_new.bboxcode = bbox.bboxcode " \
+                " WHERE mapset_new.mapsetcode not in ( SELECT mapsetcode FROM products.ingestion " \
+                "                                      WHERE productcode = '" + productcode + "' " + \
+                "                                       AND version = '" + version + "' " + \
+                "                                       AND subproductcode = '" + subproductcode + "' " + \
+                "                                       AND enabled " + \
                 "                         ) " \
-                "ORDER BY descriptive_name"
+                " ORDER BY descriptive_name "
 
         mapsets = db.execute(query)
         mapsets = mapsets.fetchall()
@@ -1666,11 +1907,146 @@ def get_mapsets_for_ingest(productcode, version, subproductcode):
             db.session.close()
 
 
+######################################################################################
+#   get_mapset(mapsetcode='', allrecs=False)
+#   Purpose: Query the database to get the records of all mapsets or one specific mapset
+#            from the table mapset.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2014/05/16
+#   Input: mapsetcode       - The mapsetcode of the specific mapset requested. Default=''
+#          allrecs          - If True return all products. Default=False
+#   Output: Return the fields of all or a specific mapset record from the table mapset.
+def get_mapset(mapsetcode='', allrecs=False):
+    global db
+    try:
+        mapset = []
+
+        # "        THEN CASE WHEN bbox.upper_left_long < 0 " \
+        # "                  THEN bbox.upper_left_long - (resolution.pixel_shift_long/2)  " \
+        # "                  ELSE bbox.upper_left_long + (resolution.pixel_shift_long/2) END  " \
+        # "        THEN CASE WHEN bbox.upper_left_lat < 0 " \
+        # "             THEN bbox.upper_left_lat - (resolution.pixel_shift_long/2)  " \
+        # "             ELSE bbox.upper_left_lat + (resolution.pixel_shift_long/2) END " \
+
+        query = " SELECT  mapset_new.mapsetcode, " \
+                " 	mapset_new.defined_by, " \
+                " 	mapset_new.descriptive_name, " \
+                " 	mapset_new.description, " \
+                " 	projection.srs_wkt, " \
+                " 	CASE WHEN mapset_new.center_of_pixel  " \
+                "        THEN ROUND(CAST(bbox.upper_left_long - (resolution.pixel_shift_long/2) as NUMERIC), 13) " \
+                "        ELSE bbox.upper_left_long END AS upper_left_long, " \
+                " 	resolution.pixel_shift_long, " \
+                " 	0.0 as rotation_factor_long, " \
+                " 	CASE WHEN mapset_new.center_of_pixel " \
+                "        THEN ROUND(CAST(bbox.upper_left_lat + (resolution.pixel_shift_long/2)as NUMERIC), 13) " \
+                "        ELSE bbox.upper_left_lat END AS upper_left_lat, " \
+                " 	resolution.pixel_shift_lat, " \
+                " 	0.0 as rotation_factor_lat, " \
+                " 	mapset_new.pixel_size_x, " \
+                " 	mapset_new.pixel_size_y, " \
+                " 	mapset_new.footprint_image " \
+                " FROM products.mapset_new AS mapset_new " \
+                " INNER JOIN products.projection AS projection ON mapset_new.proj_code = projection.proj_code " \
+                " INNER JOIN products.resolution AS resolution ON mapset_new.resolutioncode=resolution.resolutioncode "\
+                " INNER JOIN products.bbox ON mapset_new.bboxcode = bbox.bboxcode "
+
+        order_by = " ORDER BY mapset_new.mapsetcode "
+        if allrecs:
+            query += order_by
+        else:
+            query += " WHERE mapset_new.mapsetcode =  '" + mapsetcode + "' " + order_by
+
+        # print query
+        mapset = db.execute(query)
+        mapset = mapset.fetchall()
+
+        mapset_record = []
+        if mapset != [] and hasattr(mapset, "__len__") and mapset.__len__() > 0:
+            for mapsetinfo in mapset:
+                mapset_record = functions.row2dict(mapsetinfo)
+
+        return mapset_record
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        raise logger.error("get_mapset: Database query error!\n -> {}".format(exceptionvalue))
+        # raise Exception("get_mapset: Database query error!\n ->%s" % exceptionvalue)
+    finally:
+        if db.session:
+            db.session.close()
+
+
+def __get_mapset(mapsetcode='', allrecs=False):
+    global db
+    # my_db = connectdb.ConnectDB().db
+    try:
+        mapset = []
+        if allrecs:
+            if db.mapset.order_by(asc(db.mapset.mapsetcode)).count() >= 1:
+                mapset = db.mapset.order_by(asc(db.mapset.mapsetcode)).all()
+        else:
+            where = db.mapset.mapsetcode == mapsetcode
+            if db.mapset.filter(where).count() == 1:
+                mapset = db.mapset.filter(where).one()
+
+        return mapset
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        raise logger.error("get_mapset: Database query error!\n -> {}".format(exceptionvalue))
+        # raise Exception("get_mapset: Database query error!\n ->%s" % exceptionvalue)
+    finally:
+        if db.session:
+            db.session.close()
+        # my_db = None
+
+
 def get_mapsets():
     global db
     try:
-        query = "SELECT * FROM products.mapset " \
-                "ORDER BY descriptive_name"
+        query = " SELECT mapset_new.mapsetcode, " \
+                " mapset_new.defined_by, " \
+                " mapset_new.descriptive_name, " \
+                " mapset_new.description, " \
+                " mapset_new.center_of_pixel, " \
+                " mapset_new.pixel_size_x, " \
+                " mapset_new.pixel_size_y, " \
+                " mapset_new.footprint_image, " \
+                " projection.proj_code, " \
+                " projection.descriptive_name AS projection_descriptive_name, " \
+                " projection.srs_wkt, " \
+                " bbox.bboxcode, " \
+                " bbox.descriptive_name AS bbox_descriptive_name, " \
+                " bbox.upper_left_long, " \
+                " bbox.upper_left_lat, " \
+                " bbox.lower_right_long, " \
+                " bbox.lower_right_lat, " \
+                " bbox.predefined, " \
+                " resolution.resolutioncode, " \
+                " resolution.descriptive_name AS resolution_descriptive_name, " \
+                " resolution.pixel_shift_long, " \
+                " resolution.pixel_shift_lat, " \
+                " i.ingestions_assigned " \
+                " FROM products.mapset_new AS mapset_new " \
+                " INNER JOIN products.projection AS projection ON mapset_new.proj_code = projection.proj_code " \
+                " INNER JOIN products.resolution AS resolution ON mapset_new.resolutioncode = resolution.resolutioncode " \
+                " INNER JOIN products.bbox ON mapset_new.bboxcode = bbox.bboxcode " \
+                " LEFT OUTER JOIN ( " \
+                " 	SELECT i.mapsetcode, count(i.mapsetcode) as ingestions_assigned " \
+                " 	FROM products.ingestion i " \
+                " 	GROUP BY i.mapsetcode " \
+                " ) i " \
+                " ON i.mapsetcode = mapset_new.mapsetcode "
+
+        # query = " SELECT m.* , i.ingestions_assigned " \
+        #         " FROM products.mapset m " \
+        #         " LEFT OUTER JOIN ( " \
+        #         " 	SELECT i.mapsetcode, count(i.mapsetcode) as ingestions_assigned " \
+        #         " 	FROM products.ingestion i " \
+        #         " 	GROUP BY i.mapsetcode " \
+        #         " ) i " \
+        #         " ON i.mapsetcode = m.mapsetcode "
 
         mapsets = db.execute(query)
         mapsets = mapsets.fetchall()
@@ -1680,6 +2056,57 @@ def get_mapsets():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_mapsets: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
+def get_projections():
+    global db
+    try:
+        query = "SELECT * FROM products.projection ORDER BY proj_code"
+        result = db.execute(query)
+        result = result.fetchall()
+
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_projections: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
+def get_resolutions():
+    global db
+    try:
+        query = "SELECT * FROM products.resolution ORDER BY resolutioncode"
+        result = db.execute(query)
+        result = result.fetchall()
+
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_resolutions: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
+def get_predefined_bboxes():
+    global db
+    try:
+        query = "SELECT * FROM products.bbox WHERE predefined = TRUE ORDER BY bboxcode"
+        result = db.execute(query)
+        result = result.fetchall()
+
+        return result
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_resolutions: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if db.session:
             db.session.close()
@@ -2276,6 +2703,38 @@ def get_legend_assigned_datasets(legendid):
             # dbschema_analysis = None
 
 
+def export_legend_steps(legendid=None):
+    global dbschema_analysis
+    try:
+        # query = " SELECT to_step || ', ' || replace(color_rgb, ' ', ', ') || ', 255, ' || COALESCE('''' || color_label || '''', '') as legendstep " + \
+        #         " FROM analysis.legend_step " + \
+        #         " WHERE legend_id = " + str(legendid) + \
+        #         " ORDER BY from_step ASC "
+
+        query = " SELECT (ls.to_step - pinfo.scale_offset)/pinfo.scale_factor || ', ' || replace(ls.color_rgb, ' ', ', ') || ', 255, ' || COALESCE(ls.color_label, '') as legendstep " + \
+                " FROM analysis.legend_step ls, " + \
+                " (SELECT " + str(legendid) + " as legend_id, p.scale_offset, p.scale_factor " + \
+                "  FROM products.product p" + \
+                "  WHERE (p.productcode, p.subproductcode, p.version) IN (SELECT productcode, subproductcode, version FROM analysis.product_legend WHERE legend_id = " + str(legendid) + " LIMIT 1)) pinfo " + \
+                " WHERE ls.legend_id = " + str(legendid) + \
+                " AND ls.legend_id = pinfo.legend_id " + \
+                " ORDER BY ls.from_step ASC "
+
+        result = dbschema_analysis.execute(query)
+        legend_steps = result.fetchall()
+
+        return legend_steps
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_legend_steps: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if dbschema_analysis.session:
+            dbschema_analysis.session.close()
+        # dbschema_analysis = None
+
+
 ######################################################################################
 #   get_legend_steps(legendid)
 #   Purpose: Query the database to get the legend info needed for mapserver mapfile SCALE_BUCKETS setting.
@@ -2466,7 +2925,7 @@ def get_ingestions():
                 "           (p.productcode = i.productcode AND  " + \
                 "            p.subproductcode = i.subproductcode AND " + \
                 "            p.version = i.version) " + \
-                "     LEFT OUTER JOIN products.mapset m ON i.mapsetcode = m.mapsetcode " + \
+                "     LEFT OUTER JOIN products.mapset_new m ON i.mapsetcode = m.mapsetcode " + \
                 " WHERE p.product_type = 'Ingest' "
 
         result = db.execute(query)
@@ -2580,7 +3039,7 @@ def get_products_acquisition(activated=None):
         p = db.product._table
 
         pads = db.product_acquisition_data_source._table
-        s = select([func.COUNT(pads.c.data_source_id).label('totgets'),
+        s1 = select([func.COUNT(pads.c.data_source_id).label('totgets'),
                     pads.c.productcode.label('pads_productcode'),
                     pads.c.subproductcode.label('pads_subproductcode'),
                     pads.c.version.label('pads_version')],
@@ -2589,12 +3048,27 @@ def get_products_acquisition(activated=None):
                              pads.c.version],
                    from_obj=[pads])
 
-        s = s.alias('pa')
-        db.pa = db.map(s, primary_key=[pads.c.productcode,
+        s1 = s1.alias('pads')
+        db.pads = db.map(s1, primary_key=[pads.c.productcode,
                                        pads.c.subproductcode,
                                        pads.c.version])
 
-        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productid'),
+        subprods = db.product._table
+        s2 = select([func.COUNT(subprods.c.subproductcode).label('totsubprods'),
+                     subprods.c.productcode.label('subprods_productcode'),
+                     # subprods.c.subproductcode.label('subprods_subproductcode'),
+                     subprods.c.version.label('subprods_version')],
+                     group_by=[subprods.c.productcode,
+                               # subprods.c.subproductcode,
+                               subprods.c.version],
+                     from_obj=[subprods]).where(and_(subprods.c.product_type != 'Native'))
+
+        s2 = s2.alias('subprods')
+        db.subprods = db.map(s2, primary_key=[subprods.c.productcode,
+                                              # subprods.c.subproductcode,
+                                              subprods.c.version])
+
+        s3 = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productid'),
                     p.c.productcode,
                     p.c.subproductcode,
                     p.c.version,
@@ -2609,28 +3083,34 @@ def get_products_acquisition(activated=None):
                     pc.c.descriptive_name.label('cat_descr_name'),
                     pc.c.order_index]).select_from(p.outerjoin(pc, p.c.category_id == pc.c.category_id))
 
-        s = s.alias('pl')
-        db.pl = db.map(s, primary_key=[s.c.productid])
+        s3 = s3.alias('pl')
+        db.pl = db.map(s3, primary_key=[s3.c.productid])
 
         if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
             where = and_(db.pl.c.product_type == 'Native',
+                         db.pl.c.masked == 'FALSE',
                          db.pl.c.activated,
-                         db.pa.c.totgets > 0)
+                         db.pads.c.totgets > 0)
         elif activated is False or activated in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
             where = and_(db.pl.c.product_type == 'Native',
-                         db.pl.c.activated != 't',
-                         db.pa.c.totgets > 0)
+                         db.pl.c.masked == 'FALSE',
+                         db.pl.c.activated == 'FALSE',
+                         db.pads.c.totgets > 0)
             # where = and_(db.pl.c.product_type == 'Native',
             #              db.pl.c.defined_by != 'JRC-Test',
             #              db.pl.c.activated != 't')
         else:
-            where = and_(db.pl.c.product_type == 'Native', db.pa.c.totgets > 0)
+            # where = and_(db.pl.c.product_type == 'Native', db.pads.c.totgets > 0)
+            where = and_(db.pl.c.product_type == 'Native')
 
-        productslist = db.join(db.pl, db.pa, and_(db.pl.productcode == db.pa.pads_productcode,
-                                                  db.pl.subproductcode == db.pa.pads_subproductcode,
-                                                  db.pl.version == db.pa.pads_version), isouter=True)
+        # productslist1 = db.join(db.pl, db.pads, and_(db.pl.productcode == db.pads.pads_productcode,
+        #                                             db.pl.subproductcode == db.pads.pads_subproductcode,
+        #                                             db.pl.version == db.pads.pads_version), isouter=True)
 
-        productslist = productslist.filter(where).order_by(asc(db.pl.c.order_index), asc(db.pl.c.productcode)).all()
+        productslist2 = db.join(db.pl, db.subprods, and_(db.pl.productcode == db.subprods.subprods_productcode,
+                                           db.pl.version == db.subprods.subprods_version), isouter=True)
+
+        productslist = productslist2.filter(where).order_by(asc(db.pl.c.order_index), asc(db.pl.c.productcode)).all()
 
         return productslist
 
@@ -3004,40 +3484,6 @@ def get_internet(internet_id='', allrecs=False):
         if db.session:
             db.session.close()
         # db = None
-
-
-######################################################################################
-#   get_mapset(mapsetcode='', allrecs=False)
-#   Purpose: Query the database to get the records of all mapsets or one specific mapset
-#            from the table mapset.
-#   Author: Jurriaan van 't Klooster
-#   Date: 2014/05/16
-#   Input: mapsetcode       - The mapsetcode of the specific mapset requested. Default=''
-#          allrecs          - If True return all products. Default=False
-#   Output: Return the fields of all or a specific mapset record from the table mapset.
-def get_mapset(mapsetcode='', allrecs=False):
-    global db
-    # my_db = connectdb.ConnectDB().db
-    try:
-        mapset = []
-        if allrecs:
-            if db.mapset.order_by(asc(db.mapset.mapsetcode)).count() >= 1:
-                mapset = db.mapset.order_by(asc(db.mapset.mapsetcode)).all()
-        else:
-            where = db.mapset.mapsetcode == mapsetcode
-            if db.mapset.filter(where).count() == 1:
-                mapset = db.mapset.filter(where).one()
-
-        return mapset
-    except:
-        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-        # Exit the script and print an error telling what happened.
-        raise logger.error("get_mapset: Database query error!\n -> {}".format(exceptionvalue))
-        # raise Exception("get_mapset: Database query error!\n ->%s" % exceptionvalue)
-    finally:
-        if db.session:
-            db.session.close()
-        # my_db = None
 
 
 ######################################################################################
@@ -3868,6 +4314,81 @@ def get_product_subproducts(productcode='', version='undefined'):
         logger.error("get_product_subproducts : Database query error!\n -> {}".format(exceptionvalue))
         subproducts = []
         return subproducts
+    finally:
+        if db.session:
+            db.session.close()
+
+
+######################################################################################
+#   get_ingestsubproducts()
+#   Purpose: Query the database to get the records of all ingest subproducts,
+#            with product_type == 'Ingest' from the table product.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2019/07/03
+#
+#   Output: Return the fields of all or a specific product record with product_type='Ingest' from the table product.
+def get_ingestsubproducts():
+    global db
+    try:
+        # || '_' || subproductcode
+        query = " SELECT p.productcode || '_' || p.version as productid, " + \
+                "        p.subproductcode as orig_subproductcode, " \
+                "	     CASE WHEN TRIM(p.timeseries_role) = 'Initial' THEN TRUE ELSE FALSE END AS enable_in_timeseries, * " + \
+                " FROM products.product p" \
+                " WHERE p.product_type = 'Ingest' " \
+                " ORDER BY p.productcode, p.version DESC, p.subproductcode"
+        subproducts = db.execute(query)
+        subproducts = subproducts.fetchall()
+
+        return subproducts
+
+    except exc.NoResultFound:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_ingestsubproducts : Database query error!\n -> {}".format(exceptionvalue))
+        subproducts = []
+        return subproducts
+    finally:
+        if db.session:
+            db.session.close()
+
+
+######################################################################################
+#   get_active_subdatasource_descriptions()
+#   Purpose: Query the database to get the records of all sub datasource descriptions,
+#            of records in the table product_acquisition_data_source.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2019/07/03
+#
+#   Output: Return the fields of all or a specific product record with product_type='Ingest' from the table product.
+def get_active_subdatasource_descriptions():
+    global db
+    try:
+        query = " SELECT pads.productcode as pads_productcode, pads.version as pads_version, pads.data_source_id as pads_data_source_id, pads.type as pads_type, " + \
+                "	CASE WHEN TRIM(i.descriptive_name) != '' THEN i.descriptive_name ELSE e.collection_name END AS datasource_descriptivename, " + \
+                "	dd.preproc_type, dd.native_mapset, sdd.* " + \
+                " FROM products.product_acquisition_data_source pads " + \
+                " LEFT OUTER JOIN products.sub_datasource_description sdd " + \
+                "	ON pads.productcode = sdd.productcode AND pads.version = sdd.version AND pads.data_source_id = sdd.datasource_descr_id " + \
+                " LEFT OUTER JOIN products.internet_source i " + \
+                "	ON i.internet_id = pads.data_source_id " + \
+                " LEFT OUTER JOIN products.eumetcast_source e " + \
+                "	ON e.eumetcast_id = pads.data_source_id " + \
+                " LEFT OUTER JOIN products.datasource_description dd " + \
+                "	ON dd.datasource_descr_id = pads.data_source_id " + \
+                " ORDER BY pads.productcode "
+
+        subdatasource_descriptions = db.execute(query)
+        subdatasource_descriptions = subdatasource_descriptions.fetchall()
+
+        return subdatasource_descriptions
+
+    except exc.NoResultFound:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_active_subdatasource_descriptions : Database query error!\n -> {}".format(exceptionvalue))
+        subdatasource_descriptions = []
+        return subdatasource_descriptions
     finally:
         if db.session:
             db.session.close()

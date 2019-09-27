@@ -75,6 +75,7 @@ Ext.define('esapp.model.MapSetDataSet', {
         {name: 'product_type'},
         {name: 'prod_descriptive_name'},
         {name: 'description'},
+        {name: 'display_index', type: 'number'},
         {name: 'datasetcompletenessimage'},
         {name: 'datasetcompleteness_id', mapping:'datasetID'}
     ]

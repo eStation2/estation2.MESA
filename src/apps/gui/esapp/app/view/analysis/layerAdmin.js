@@ -51,9 +51,11 @@ Ext.define("esapp.view.analysis.layerAdmin",{
 
     initComponent: function () {
         var me = this;
+        var user = esapp.getUser();
 
         me.title = '<div class="panel-title-style-16">' + esapp.Utils.getTranslation('layeradministration') + '</div>';
         me.height = Ext.getBody().getViewSize().height < 830 ? Ext.getBody().getViewSize().height-130 : 830;  // 600,
+        me.width = esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online' ? 1000: 1220;
 
         me.tools = [
         {
@@ -145,7 +147,10 @@ Ext.define("esapp.view.analysis.layerAdmin",{
                     width:'35',
                     disabled: false,
                     getClass: function (v, meta, rec) {
-                        return 'edit';
+                        if (rec.get('defined_by') != 'JRC' || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
+                            return 'edit';
+                        }
+                        else return 'vieweye';
                     },
                     getTip: function (v, meta, rec) {
                         return esapp.Utils.getTranslation('editlayerproperties') + ' ' + rec.get('layername');
@@ -156,12 +161,14 @@ Ext.define("esapp.view.analysis.layerAdmin",{
                     width:'45',
                     disabled: false,
                     getClass: function(v, meta, rec) {
-                        if (rec.get('deletable')){
+                        if (rec.get('deletable') || rec.get('defined_by') != 'JRC' || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
                             return 'delete';
                         }
                     },
                     getTip: function(v, meta, rec) {
-                        return esapp.Utils.getTranslation('deletelayer') + ' ' + rec.get('layername');
+                        if (rec.get('deletable') || rec.get('defined_by') != 'JRC' || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
+                            return esapp.Utils.getTranslation('deletelayer') + ' ' + rec.get('layername');
+                        }
                     },
                     handler: 'deleteLayer'
                 }]

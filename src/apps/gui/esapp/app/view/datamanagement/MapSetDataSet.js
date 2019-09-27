@@ -20,8 +20,10 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
         // 'Ext.grid.column.Widget'
     ],
 
+    // store: 'mapsetdatasets',
     store : {
-        model: 'MapSetDataSet'
+        model: 'esapp.model.MapSetDataSet'
+        ,sorters: [{property: 'display_index', direction: 'ASC'}]
     },
 
     // selModel: {listeners:{}},
@@ -438,12 +440,23 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
             // dataIndex: 'subproductcode',
             xtype:'templatecolumn',
             header: '', // 'Productcode',
+            // tpl: new Ext.XTemplate(
+            //         '<b>{descriptive_name}</b>' +
+            //         '</br>' +
+            //         '<b class="smalltext" style="color:darkgrey;">{subproductcode}</b>' +
+            //         '</br>'
+            //     ),
             tpl: new Ext.XTemplate(
-                    '<b>{descriptive_name}</b>' +
-                    '</br>' +
-                    '<b class="smalltext" style="color:darkgrey">{subproductcode}</b>' +
-                    '</br>'
-                ),
+                '<b>{descriptive_name}</b>' +
+                '</br>' +
+                '<b class="smalltext"style="color:darkgrey;">{productcode}</b>' +
+                '<tpl if="version != \'undefined\'">',
+                '<b class="smalltext" style="color:darkgrey;"> - {version} </b>',
+                '</tpl>',
+                '<b class="smalltext"style="color:darkgrey;"> - {subproductcode}</b>'
+                // '<BR>(display_index: <b style="color:black">{display_index}</b>)'
+            ),
+
             width: 250,
             cellWrap:true
         }, {

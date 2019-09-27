@@ -26,7 +26,12 @@ Ext.define("esapp.view.analysis.mapView",{
 
     header: {
         titlePosition: 2,
-        titleAlign: 'left'
+        titleAlign: 'left',
+        cls: 'mapview-header'
+        // style: {
+        //     // "border-width": "2px 7px 1px 7px !important",
+        //     "line-height": "13px!important"
+        // }
     },
     constrainHeader: true,
     //constrain: true,
@@ -38,11 +43,12 @@ Ext.define("esapp.view.analysis.mapView",{
     resizable: true,
     focusable: true,
 
-    width:650,
-    height: Ext.getBody().getViewSize().height < 670 ? Ext.getBody().getViewSize().height-100 : 670,
+    width: 613,  // 603,
 
-    minWidth:603,
-    minHeight:550,
+    height: 415,    // Ext.getBody().getViewSize().height < 700 ? Ext.getBody().getViewSize().height-100 : 415,
+
+    minWidth:613,
+    minHeight:415,
 
     x: 20,
     y: 20,
@@ -104,17 +110,22 @@ Ext.define("esapp.view.analysis.mapView",{
         me.selectedFeatureOverlay = null;
         me.selectedFeatureFromDrawLayer = false;
 
-        me.title = '<span id="mapview_title_templatename_' + me.id + '" class="map-templatename"></span><span id="mapview_title_productname_' + me.id + '"></span>';
-        me.height = Ext.getBody().getViewSize().height < 670 ? Ext.getBody().getViewSize().height-100 : 670;
+        me.title = '<span id="mapview_title_productname_' + me.id + '"></span>'+ '<span id="mapview_title_templatename_' + me.id + '" class="map-templatename"></span>';
+        // me.height = Ext.getBody().getViewSize().height < 670 ? Ext.getBody().getViewSize().height-100 : 670;
 
-        me.controller.createToolBar();
+
+        if (me.templatename == '' && me.isTemplate){
+            // me.isTemplate = false;
+            me.setIsTemplate(false);
+            me.setIsNewTemplate(true);
+        }
 
         me.tools = [{
             type: 'gear',
             tooltip: esapp.Utils.getTranslation('maptoolsmenu'), // 'Map tools menu',
             callback: function (mapwin) {
                 // toggle hide/show toolbar, without the adjusting the map size, with repositioning the object.
-                var mapLegendObj = me.lookupReference('product-legend_' + me.id),
+                var mapLegendObj = me.lookupReference('product-legend_' + me.id.replace(/-/g,'_')),
                     titleObj = me.lookupReference('title_obj_' + me.id),
                     disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
                     logoObj = me.lookupReference('logo_obj_' + me.id),
@@ -157,6 +168,8 @@ Ext.define("esapp.view.analysis.mapView",{
                 mapwin.map.updateSize();
             }
         }];
+
+        me.controller.createToolBar();
 
         me.mapView = new ol.View({
             projection:me.projection,
@@ -348,7 +361,6 @@ Ext.define("esapp.view.analysis.mapView",{
                 constrain: true,
                 // width: 150,
                 // value: 100,
-
                 hidden: true,
                 cls: 'nobackgroundcolor',
                 iconCls: 'transparencyicon',
@@ -426,8 +438,8 @@ Ext.define("esapp.view.analysis.mapView",{
                 mapView: me
             }, {
                 xtype: 'maplegendobject',
-                id: 'product-legend_' + me.id,
-                reference: 'product-legend_' + me.id,
+                id: 'product-legend_' + me.id.replace(/-/g,'_'),
+                reference: 'product-legend_' + me.id.replace(/-/g,'_'),
                 showlegend: me.showlegend
             }, {
                 xtype: 'maptitleobject',
@@ -476,9 +488,23 @@ Ext.define("esapp.view.analysis.mapView",{
                 xtype: 'toolbar',
                 dock: 'right',
                 items: [{
+                    xtype: 'button',
+                    reference: 'refreshTimeLineBtn_' + me.id,
+                    //scope: me,
+                    tooltip: esapp.Utils.getTranslation('refresh_timeline'), // 'Refresh timeline'
+                    iconCls: 'fa fa-refresh',
+                    //style: { color: 'orange' },
+                    glyph: null,
+                    scale: null, // 'small',
+                    padding: 0,
+                    width: 21,
+                    hidden: false,
+                    handler: 'refreshTimeLine'
+                }, {
                     xtype: 'splitbutton',
                     id: 'playBtn_' + me.id,
                     //reference: 'playBtn_' + me.id,
+                    tooltip: esapp.Utils.getTranslation('play_visible_timeline'), // 'View product dates in visible timeline. Set delay below.'
                     iconCls: 'fa fa-play',
                     style: { color: 'green' },
                     glyph: null,
@@ -517,6 +543,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     xtype: 'button',
                     id: 'pauseBtn_' + me.id,
                     //reference: 'pauseBtn_' + me.id,
+                    tooltip: esapp.Utils.getTranslation('pause'), // 'Pause'
                     iconCls: 'fa fa-pause',
                     style: { color: 'orange' },
                     glyph: null,
@@ -527,6 +554,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     xtype: 'button',
                     id: 'stopBtn_' + me.id,
                     //reference: 'stopBtn_' + me.id,   // Give an error in Ext.mixin.Bindable method applyReference: Invalid reference "stopBtn_mapview-window-1262" for stopBtn_mapview-window-1262 - not a valid identifier
+                    tooltip: esapp.Utils.getTranslation('stop'), // 'Stop'
                     iconCls: 'fa fa-stop',
                     style: {color: 'red'},
                     glyph: null,
@@ -536,6 +564,7 @@ Ext.define("esapp.view.analysis.mapView",{
                 }, ' ', {
                     xtype: 'button',
                     id: 'dateLinkToggleBtn_' + me.id,
+                    tooltip: esapp.Utils.getTranslation('link_unlink_timeline_from_other_mapview'), // 'Unlink/link the timeline from other mapviews.'
                     enableToggle: true,
                     //scope: me,
                     iconCls: 'calendar_linked',
@@ -578,7 +607,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     me.getController().redrawTimeLine();
                 }
                 ,beforecollapse: function () {
-                    var mapLegendObj = me.lookupReference('product-legend_' + me.id),
+                    var mapLegendObj = me.lookupReference('product-legend_' + me.id.replace(/-/g,'_')),
                         titleObj = me.lookupReference('title_obj_' + me.id),
                         disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
                         logoObj = me.lookupReference('logo_obj_' + me.id),
@@ -600,7 +629,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     me.setHeight(me.height-125);
                 }
                 ,collapse: function () {
-                    var mapLegendObj = me.lookupReference('product-legend_' + me.id),
+                    var mapLegendObj = me.lookupReference('product-legend_' + me.id.replace(/-/g,'_')),
                         titleObj = me.lookupReference('title_obj_' + me.id),
                         disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
                         logoObj = me.lookupReference('logo_obj_' + me.id),
@@ -634,7 +663,7 @@ Ext.define("esapp.view.analysis.mapView",{
 
 
         me.listeners = {
-            beforedestroy: function(){
+             beforedestroy: function(){
                 // To fix the error: mapView.js?_dc=1506608907564:56 Uncaught TypeError: binding.destroy is not a function
                 me.bind = null;
             }
@@ -953,7 +982,7 @@ Ext.define("esapp.view.analysis.mapView",{
                 });
 
 
-                var mapLegendObj = me.lookupReference('product-legend_' + me.id),
+                var mapLegendObj = me.lookupReference('product-legend_' + me.id.replace(/-/g,'_')),
                     titleObj = me.lookupReference('title_obj_' + me.id),
                     disclaimerObj = me.lookupReference('disclaimer_obj_' + me.id),
                     logoObj = me.lookupReference('logo_obj_' + me.id),
@@ -1030,19 +1059,21 @@ Ext.define("esapp.view.analysis.mapView",{
                 if (esapp.Utils.objectExists(me.titleObjPosition)){
                     titleObj.titlePosition = me.titleObjPosition;
                 }
-                if (esapp.Utils.objectExists(me.titleObjContent) && me.titleObjContent.trim() != ''){
+                if (esapp.Utils.objectExists(me.titleObjContent) && (me.titleObjContent.trim() != '' )){
                     titleObj.setTpl([]);    // empty template which must be an array
                     titleObj.setTpl(me.titleObjContent);
                     // titleObj.tpl.push(me.titleObjContent);
                     // titleObj.tpl.set(me.titleObjContent, true);
                 }
+                // else {
+                //     titleObj.setTpl(['<div><span style="color:rgb(0,0,0); font-size: 20px; font-weight: bold;">{selected_area}</span></div><div><span style="color:rgb(0,0,0); font-size: 20px;">{product_name}</span></div><div><span style="color:rgb(51,102,255); font-size: 20px;">{product_date}</span></div>']);
+                // }
 
                 if (me.showObjects){
                     var taskToggleObjects = new Ext.util.DelayedTask(function() {
                         //console.info(mapObjectToggleBtn);
                         mapObjectToggleBtn.toggle(true);
                         me.getController().toggleObjects(mapObjectToggleBtn);
-
                     });
                     taskToggleObjects.delay(0);
                 }
@@ -1058,17 +1089,19 @@ Ext.define("esapp.view.analysis.mapView",{
                     Ext.data.StoreManager.lookup('DataSetsStore').each(function(rec){
                         if (rec.get('productcode')== me.productcode && rec.get('version')== me.productversion ){
                             me.productsensor = rec.get('prod_descriptive_name');
-                            rec.get('productmapsets').forEach(function(mapset){
-                                if (mapset.mapsetcode==me.mapsetcode){
-                                    mapset.mapsetdatasets.forEach(function(mapsetdataset){
-                                        if (mapsetdataset.subproductcode==me.subproductcode){
-                                            me.productname = mapsetdataset.descriptive_name;
-                                            me.date_format = mapsetdataset.date_format;
-                                            me.frequency_id = mapsetdataset.frequency_id;
-                                        }
-                                    },this);
-                                }
-                            },this);
+                            if (esapp.Utils.objectExists(rec.get('productmapsets'))) {
+                                rec.get('productmapsets').forEach(function (mapset) {
+                                    if (mapset.mapsetcode == me.mapsetcode) {
+                                        mapset.mapsetdatasets.forEach(function (mapsetdataset) {
+                                            if (mapsetdataset.subproductcode == me.subproductcode) {
+                                                me.productname = mapsetdataset.descriptive_name;
+                                                me.date_format = mapsetdataset.date_format;
+                                                me.frequency_id = mapsetdataset.frequency_id;
+                                            }
+                                        }, this);
+                                    }
+                                }, this);
+                            }
                         }
                     },this);
 
@@ -1103,6 +1136,17 @@ Ext.define("esapp.view.analysis.mapView",{
                     me.getController().loadLayersByID(me.vectorLayers.split(",").map(Number));
                 }
 
+                if (me.outmask && esapp.Utils.objectExists(me.outmaskFeature) && me.outmaskFeature != '' ){
+                    var mapOutmaskToggleBtn = me.lookupReference('outmaskbtn_'+me.id.replace(/-/g,'_'));
+                    var format = new ol.format.WKT();
+                    me.selectedfeature = format.readFeature(me.outmaskFeature, {
+                        dataProjection: 'EPSG:4326',
+                        featureProjection: 'EPSG:4326'
+                    });
+
+                    mapOutmaskToggleBtn.toggle(true);
+                    me.getController().toggleOutmask(mapOutmaskToggleBtn);
+                }
 
                 if (!me.isTemplate && me.isNewTemplate) {
                     me.getController().loadDefaultLayers();
@@ -1151,9 +1195,11 @@ Ext.define("esapp.view.analysis.mapView",{
                 me.updateLayout();
                 //console.info(me.getPosition(true));
             }
+
             ,maximize: function () {
                 me.updateLayout();
             }
+
             ,restore: function () {
                 //console.info(me.getPosition());
                 //me.setPosition(me.getPosition()+1);
@@ -1163,6 +1209,7 @@ Ext.define("esapp.view.analysis.mapView",{
                     maplegendpanel.doConstrain();
                 }
             }
+
             ,close: function(){
                 // var productNavigatorBtn = me.lookupReference('productNavigatorBtn_'+me.id.replace(/-/g,'_'));
                 // if (!me.mapViewProductNavigator.hidden){

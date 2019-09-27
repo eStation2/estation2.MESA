@@ -32,6 +32,7 @@ from socket import socket
 import urllib2
 import ast
 import sys
+import numpy as N
 from osgeo import gdal, osr
 from xml.dom import minidom
 # Import eStation2 modules
@@ -46,6 +47,22 @@ dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'der
 # class ObjectEncoder(JSONEncoder):
 #     def default(self, o):
 #         return o.__dict__
+
+
+def is_float(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
+def is_int(n):
+    try:
+        int(n)
+        return True
+    except ValueError:
+        return False
 
 
 def setThemaOtherPC(server_address, thema):
@@ -453,6 +470,13 @@ def __row2dict(row):
     return d
 
 
+class dotdict(dict):
+    """dot.notation access to dictionary attributes"""
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+
 def row2dict(row):
     d = {}
     if hasattr(row, "c"):
@@ -470,7 +494,8 @@ def row2dict(row):
             d[column] = value
     else:
         d = row
-    return d
+
+    return dotdict(d)
 
 
 def tojson(queryresult):
@@ -1173,6 +1198,24 @@ def extract_from_date(str_date):
         str_hour=str_date[8:12]
 
     return [str_year, str_month, str_day, str_hour]
+
+######################################################################################
+#   Purpose: Exclude current year from the data list
+#   Author: Vijay Charan Venkatachalam
+#   Date: 2018/11/23
+#   Input: datelist
+#   Output: list with excluded current yeat
+#
+def exclude_current_year(input_list):
+
+    output_list = []
+    today = datetime.date.today()
+    current_year = today.strftime('%Y')
+
+    for myfile in input_list:
+        if os.path.basename(myfile)[0:4] != current_year:
+            output_list.append(myfile)
+    return output_list
 
 
 ######################################################################################
@@ -2332,10 +2375,10 @@ def write_graph_xml_subset(input_file, output_dir, band_name):
         outFile.write('      <sourceBands>'+band_name+'</sourceBands>\n')
         # outFile.write('      <region>0,0,1217,15037</region>\n')
         outFile.write('      <region>0,0,1217,14952</region>\n')
-        outFile.write(
-            '            <geoRegion/>\n')
         # outFile.write(
-        #     '     <geoRegion>POLYGON ((-33.23047637939453 41.53836441040039, 65.0774154663086 41.53836441040039, 65.0774154663086 -42.923343658447266, -33.23047637939453 -42.923343658447266, -33.23047637939453 41.53836441040039, -33.23047637939453 41.53836441040039))</geoRegion>\n')
+        #     '            <geoRegion/>\n')
+        outFile.write(
+            '     <geoRegion>POLYGON ((-33.23047637939453 41.53836441040039, 65.0774154663086 41.53836441040039, 65.0774154663086 -42.923343658447266, -33.23047637939453 -42.923343658447266, -33.23047637939453 41.53836441040039, -33.23047637939453 41.53836441040039))</geoRegion>\n')
 
         outFile.write('      <subSamplingX>1</subSamplingX>\n')
         outFile.write('      <subSamplingY>1</subSamplingY>\n')
@@ -2725,6 +2768,27 @@ def day_length(day, latitude):
     return dl
 
 
+#####################################################################################
+#   Purpose: Check the passed date belongs to current month
+#   Author: Vijay Charan Venkatachalam, JRC, European Commission
+#   Date: 2019/06/06
+#   Inputs: date_as_YYYYMMDD
+#   Output: Boolean
+#
+def is_date_current_month(year_month_day):
+    current_month = False
+    if is_date_yyyymmdd(year_month_day):
+        year = int(str(year_month_day)[0:4])
+        month = int(str(year_month_day)[4:6])
+
+    today = datetime.date.today()
+    YYYYMM = today.strftime('%Y%m')
+
+    if int(str(YYYYMM)[0:4]) == year:
+        if int(str(YYYYMM)[4:6]) == month:
+            current_month = True
+
+    return current_month
 
 ######################################################################################
 #                            PROCESSING CHAINS

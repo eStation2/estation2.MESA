@@ -231,6 +231,41 @@
 }
 
 
+.ol-custom-overviewmap,
+.ol-custom-overviewmap.ol-uncollapsible {
+    bottom: auto;
+    left: auto;
+    right: 0;
+    top: 0;
+}
+
+.ol-custom-overviewmap:not(.ol-collapsed)  {
+    border: 0px solid black;
+}
+
+.ol-custom-overviewmap {
+    border: none;
+    width: 175px;
+    height: 175px;
+}
+
+.ol-custom-overviewmap .ol-overviewmap-box {
+    border: 1px solid orange;
+}
+
+.ol-custom-overviewmap:not(.ol-collapsed) button{
+    bottom: auto;
+    left: auto;
+    right: 1px;
+    top: 1px;
+}
+
+
+.greenbold .x-form-display-field {
+    color: green;
+    font-weight:bold;
+}
+
 .maplogos {
     height: 60px;
     max-height: 65px;
@@ -244,9 +279,26 @@
     color: lime;
 }
 
-.newworkspacetab .x-tab-inner-workspace{
+.newworkspacetab .x-tab-inner-workspace {
     color: darkred !important;
 }
+
+
+.defaultworkspacetab.x-tab-workspace-top {
+    background: #9DAFC9 !important;
+}
+.defaultworkspacetab.x-tab-workspace-top.x-tab-active {
+    /* .x-tab-workspace .x-tab .x-tab-top-active .x-tab-default-top-active .x-tab-active */
+    background: #577097 !important;
+}
+
+.refworkspacetab.x-tab-workspace-top {
+    background: #93E134 !important;
+}
+.refworkspacetab.x-tab-workspace-top.x-tab-active {
+    background: #3E7A0C  !important;
+}
+
 
 .table-header-rotated{
     border-spacing:0;
@@ -254,9 +306,9 @@
     padding: 0;
     background: white;
 }
-.table-header-rotated th.row-header{
-    width: auto;
-}
+/*.table-header-rotated th.row-header{*/
+    /*width: auto;*/
+/*}*/
 
 /*.table-header-rotated td{*/
   /*width: 34px;*/
@@ -268,29 +320,31 @@
 /*}*/
 
 .table-header-rotated th.rotate-45{
-  height: 48px;
+  height: 32px;
   /*width: 40px;*/
   /*min-width: 34px;*/
   /*max-width: 34px;*/
   position: relative;
   vertical-align: bottom;
   padding: 0;
-  font-size: 16px;
+  font-size: 12px;
   font-weight: bold;
+  line-height: 12px;
   /*line-height: 0.8;*/
 }
 
 .table-header-rotated th.rotate-45 > div{
   position: relative;
-  top: 0;
-  left: 9px; /* 40px; /* 80 * tan(45) / 2 = 40 where 80 is the height on the cell and 45 is the transform angle*/
+  /*top: 0;*/
+  /*left: 9px; !* 40px; !* 80 * tan(45) / 2 = 40 where 80 is the height on the cell and 45 is the transform angle*!*/
   height: 100%;
-  -ms-transform:skew(-45deg,0deg);
-  -moz-transform:skew(-45deg,0deg);
-  -webkit-transform:skew(-45deg,0deg);
-  -o-transform:skew(-45deg,0deg);
-  transform:skew(-45deg,0deg);
-  overflow: hidden;
+  -ms-transform:skew(-42deg,0deg);
+  -moz-transform:skew(-42deg,0deg);
+  -webkit-transform:skew(-43deg,0deg);
+  -o-transform:skew(-42deg,0deg);
+  transform:skew(-42deg,0deg);
+  /*overflow: hidden;*/
+  text-align: justify;
   /*border-left: 1px solid #000000;*/
   /*border-right: 1px solid #000000;*/
   /*border-top: 1px solid #dddddd;*/
@@ -303,13 +357,13 @@
   -o-transform:skew(45deg,0deg) rotate(315deg);
   transform:skew(45deg,0deg) rotate(315deg);
   position: absolute;
-  bottom: 10px; /* 40 cos(45) = 28 with an additional 2px margin*/
-  left: -21px; /*Because it looked good, but there is probably a mathematical link here as well*/
+  bottom: 30px; /* 40 cos(45) = 28 with an additional 2px margin*/
+  left: -28px; /*Because it looked good, but there is probably a mathematical link here as well*/
   display: inline-block;
-  /*width: 100%;*/
-  width: 59px; /* 80 / cos(45) - 40 cos (45) = 85 where 80 is the height of the cell, 40 the width of the cell and 45 the transform angle*/
-  text-align: right;
-  white-space: nowrap; /* !*whether to display in one line or not*!*/
+  /*width: auto;*/
+  width: 70px; /* 80 / cos(45) - 40 cos (45) = 85 where 80 is the height of the cell, 40 the width of the cell and 45 the transform angle*/
+  /*text-align: right;*/
+  /*white-space: nowrap; !* !*whether to display in one line or not*!*!*/
 }
 
 
@@ -527,6 +581,12 @@ p {
     background-size: 24px 24px;
 }
 
+.download {
+    background-image:url(../img/icons/download.png);
+    background-size: 24px 24px;
+    background-repeat: no-repeat;
+}
+
 .data-sync {
     background-image:url(../img/live_sync_24.png);
 }
@@ -705,6 +765,25 @@ p {
     background-repeat: no-repeat;
 }
 
+
+.eumetsat-icon {
+    background: url('../img/icons/eumetsat-icon.png') no-repeat 0 0 !important;
+    width: 24px;
+    height: 24px;
+}
+
+.internet-icon {
+    background: url('../img/icons/internet-icon.png') no-repeat 0 0 !important;
+    width: 24px;
+    height: 24px;
+}
+
+.mapset-icon {
+    background: url('../img/icons/mapset-icon.png') no-repeat 0 0 !important;
+    width: 24px;
+    height: 24px;
+}
+
 .add {
     background-image: url(../img/icons/add.png ) !important;
     background-repeat: no-repeat;
@@ -754,6 +833,11 @@ p {
 
 .vieweye {
     background-image: url(../img/eye_32_32.png ) !important;
+    background-repeat: no-repeat;
+}
+
+.vieweye18 {
+    background-image: url(../img/eye18.png ) !important;
     background-repeat: no-repeat;
 }
 
@@ -886,6 +970,24 @@ p {
 /*#logo{position:relative;z-index:10;min-height:0;max-width:435px;padding:2px;background-color:#fff;}*/
 #logo{position:relative;z-index:10;min-height:0;padding:2px;background-color:#fff;}
 
+/*.x-window-header-default {*/
+    /*border-width: 2px !important;*/
+/*}*/
+/*.x-window-header-title-default {*/
+    /*line-height: 13px !important;*/
+/*}*/
+
+/*.mapview-header {*/
+    /*padding: 0px !important;*/
+    /*border-width: 2px !important;*/
+    /*line-height: 13px !important;*/
+/*}*/
+.mapview-header .x-window-header-title-default {
+    padding: 0px!important;
+    border-width: 2px!important;
+    line-height: 13px!important;
+}
+
 .mapview-regionname {
     line-height: 14px;
     text-align: left;
@@ -897,7 +999,7 @@ p {
     float: left;
     /*display: inline-block;*/
     word-wrap: break-word;
-    line-height: 13px;
+    line-height: 13px !important;
     white-space: pre-wrap;
 }
 
@@ -907,13 +1009,14 @@ p {
     font-weight: bold;
     margin-right: 10px;
     /*display:inline;*/
-    width: 150px;
-    height: 25px;
-    float: left;
+    width: 200px;
+    height: 15px;
+    float: right;
     /*display: inline-block;*/
     word-wrap: break-word;
-    line-height: 13px;
+    line-height: 13px !important;
     white-space: pre-wrap;
+    text-align: right;
 }
 
 .graph-templatename {
@@ -922,13 +1025,14 @@ p {
     font-weight: bold;
     margin-right: 10px;
     /*display:inline;*/
-    width: 150px;
-    height: 25px;
-    float: left;
+    width: 200px;
+    height: 15px;
+    float: right;
     /*display: inline-block;*/
     word-wrap: break-word;
-    line-height: 13px;
+    line-height: 13px !important;
     white-space: pre-wrap;
+    text-align: right;
 }
 
 .smalltext {font-size:10px;}
@@ -1016,11 +1120,18 @@ p {
     font-size:16px;
 }
 
+.column-header-small-style .x-column-header-inner{
+    font-weight:bold;
+    color:#0065A2;
+    font-size:10px;
+    line-height: 12px!important;
+    padding: 3px 10px 3px 10px;
+}
+
 .grid-header-style {
     font-weight:bold;
     color:#0065A2;
     font-size:16px;
-    height: 20px;
 }
 
 .group-header-style {
@@ -1070,10 +1181,10 @@ p {
 
 .rounded-box-win {
     background-color: #fff;
-    border: 2px solid lightslategray !important;
+    border: 4px solid lightslategray !important;
     /*border-radius: 6px;*/
     /*box-shadow: 2px 2px 2px #bbb;*/
-    padding: 0px;
+    /*padding: 10px;*/
 }
 
 .rounded-box {
@@ -1324,6 +1435,22 @@ p {
     background-image: url(../img/logo/MESA_h110.jpg);
 }
 
+
+.help-main .thumb-gmes {
+    background-image: url(../img/logo/GMES.png);
+    height: 50px;
+    width: 100px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    float: left;
+    margin-right: 5px;
+}
+
+.x-ie8 .help-main .thumb-gmes {
+    background-image: url(../img/logo/GMES.png);
+}
+
+
 .help-main .thumb-copernicus {
     background-image: url(../img/logo/copernicus-logo.png);
     height: 50px;
@@ -1425,6 +1552,13 @@ p {
 /* ------------------
  styling for the tables
    ------------------   */
+
+.legend-style
+{
+    height: inherit !important;
+    border: 0px solid black;
+    padding: 1px 0px 0px 0px;
+}
 
 #gradient-style
 {

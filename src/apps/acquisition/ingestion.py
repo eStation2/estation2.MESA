@@ -43,8 +43,11 @@ from apps.processing import proc_functions
 from apps.productmanagement import products
 from apps.productmanagement import datasets
 
-if sys.platform != 'win32':
+# TODO: On reference machines pygrip works! Not on our development VMs!
+# TODO: Change to  if sys.platform != 'win32':
+if sys.platform == 'win32':
     import pygrib
+
 import fnmatch
 from osgeo import gdal
 from osgeo import osr

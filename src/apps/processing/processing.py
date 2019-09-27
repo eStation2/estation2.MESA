@@ -7,7 +7,7 @@ _author__ = "Marco Clerici"
 #	history: 1.0
 #
 
-# import standard modules
+# # import standard modules
 import os, sys
 import shutil
 import re
@@ -23,7 +23,7 @@ from apps.productmanagement import datasets
 from apps.processing import proc_functions
 
 logger = log.my_logger(__name__)
-data_dir= es_constants.es2globals['data_dir']
+data_dir = es_constants.es2globals['data_dir']
 
 #   Main module in processing, driving a specific pipeline
 

@@ -53,7 +53,7 @@ Ext.define('esapp.TabTitleEditor', {
                     cmp.title = value;
                     cmp.workspacename = value;
                     cmp.up().updateLayout();
-                    if (!cmp.isNewWorkspace){
+                    if (!cmp.isNewWorkspace && (value != startValue)){
                         cmp.getController().saveWorkspaceName();
                     }
                 }

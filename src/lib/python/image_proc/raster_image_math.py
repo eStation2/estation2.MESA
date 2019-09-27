@@ -52,7 +52,9 @@ import pymorph
 # I tried to install scipy version 0.15.1 but need older numpy version 1.19.2 (numpy 1.11.0 is installed)
 # installing numpy 1.19.2 gives problems with installed gdal version 2.1.2)
 # scipy for chla gradient computation
-if sys.platform == 'win32':
+# TODO: On reference machines it has to be -> from scipy import ndimage ! Not on our development VMs!
+# TODO: Change to  if sys.platform == 'win32':
+if sys.platform != 'win32':
     import scipy
 else:
     from scipy import ndimage
@@ -1822,7 +1824,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
                 unbufferedMask[:] = numpy.logical_or(unbufferedMask, masks[i] < maskValues[i])
 
             elif maskTests[i] == u'anybitstrue':
-                print ' Debug: Masking cells where mask ', i, '(mask) bitwise-ANDed with ', X, ' is not zero.'
+                # print ' Debug: Masking cells where mask ', i, '(mask) bitwise-ANDed with ', X, ' is not zero.'
                 unbufferedMask[:] = numpy.logical_or(unbufferedMask, numpy.bitwise_and(masks[i], maskValues[i]) != 0)
 
             else:
@@ -2671,9 +2673,9 @@ def create_surface_area_raster(input_file=None, output_file='', output_format=No
                 return 1
 
             mapset_info = querydb.get_mapset(mapsetcode=mapsetcode)
-            ymin = mapset_info.upper_left_lat
-            nl = mapset_info.pixel_size_y
-            ns = mapset_info.pixel_size_x
+            ymin = float(mapset_info.upper_left_lat)
+            nl = int(mapset_info.pixel_size_y)
+            ns = int(mapset_info.pixel_size_x)
             geoTransform = native_mapset.geo_transform
             projection = native_mapset.spatial_ref.ExportToWkt()
             pixel_shift_lat = native_mapset.pixel_shift_lat

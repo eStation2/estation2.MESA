@@ -27,6 +27,27 @@ logger = log.my_logger(__name__)
 
 class TestWebpy(unittest.TestCase):
 
+    def test_DeleteProduct(self):
+        getparams = {
+            'productcode': 'jur3',
+            'version': 'v1.1'
+        }
+        deletestatus = webpy_esapp_helpers.DeleteProduct(productcode=getparams['productcode'],
+                                                         version=getparams['version'])
+        print deletestatus
+        self.assertEqual(1, 1)
+
+
+    def test_exportLegend(self):
+        params = {
+            'task': 'exportLegend',
+            'legendid': 214,
+            'legendname': 'CHLA Value -  36 steps, 0 to 10'
+        }
+        filename = webpy_esapp_helpers.ExportLegend(params)
+        print filename
+        self.assertEqual(1, 1)
+
     def test_GetLogos(self):
         logos_json = webpy_esapp_helpers.GetLogos()
         return logos_json

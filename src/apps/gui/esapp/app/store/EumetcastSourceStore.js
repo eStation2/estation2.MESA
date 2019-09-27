@@ -2,7 +2,7 @@ Ext.define('esapp.store.EumetcastSourceStore', {
     extend  : 'Ext.data.Store',
     alias: 'store.eumetcastsource',
 
-    model: 'esapp.model.Ingestion',
+    model: 'esapp.model.EumetcastSource',
 
     requires : [
         'esapp.model.EumetcastSource',
@@ -14,7 +14,7 @@ Ext.define('esapp.store.EumetcastSourceStore', {
 
     ,autoLoad: true
     ,autoSync: false
-    ,session: false
+    // ,session: false
 
     ,proxy: {
         type: 'rest',

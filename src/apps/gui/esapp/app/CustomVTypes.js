@@ -51,6 +51,15 @@ Ext.apply(Ext.form.field.VTypes, {
     ,GeoJSONText: esapp.Utils.getTranslation('vtype_geojson')    // 'Must be a .geojson file.'
 
 
+    ,JSON:  function(v) {
+        v = v.replace(/^\s|\s$/g, ""); //trims string
+        if (v.match(/([^\/\\]+)\.(json)$/i) )
+            return true;
+        else
+            return false;
+    }
+    ,JSONText: esapp.Utils.getTranslation('vtype_json')    // 'Must be a .json file.'
+
    ,imagefile:  function(v) {
        v = v.replace(/^\s|\s$/g, ""); //trims string
        if (v.match(/([^\/\\]+)\.(gif|png|jpg|jpeg)$/i) )

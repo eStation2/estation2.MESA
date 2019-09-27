@@ -12,10 +12,13 @@ Ext.define('esapp.store.UserWorkspacesStore', {
     storeId : 'UserWorkspacesStore',
 
     autoLoad: false,
-    autoSync: true,
+    autoSync: false,
     // session: true,
 
     sorters: [{
+        property: 'showindefault',
+        direction: 'DESC'
+    },{
         property: 'workspacename',
         direction: 'ASC'
     }],
@@ -43,27 +46,40 @@ Ext.define('esapp.store.UserWorkspacesStore', {
         },
         writer: {
             type: 'json',
-            writeAllFields: true,
-            rootProperty: 'userworkspace'
+            writeAllFields: true
+            // ,rootProperty: 'userworkspace'
         },
         listeners: {
             exception: function(proxy, response, operation){
-                console.info('USER WORKSPACE VIEW MODEL - REMOTE EXCEPTION - Error querying the users workspaces!');
+                console.info('USER WORKSPACE STORE - REMOTE EXCEPTION - Error querying the users workspaces!');
             }
         }
     },
     listeners: {
         remove: function(store, record,  index , isMove , eOpts  ){
-
+            // console.info(store);
+            // console.info(record);
+            // console.info(index);
+            // console.info(isMove);
+            // var result = Ext.JSON.decode(operation.getResponse().responseText);
+            // if (operation.success) {
+            //     Ext.toast({html: operation.getRecords()[0].get('workspacename') + ' ' + esapp.Utils.getTranslation('deleted'), title: esapp.Utils.getTranslation('workspace_deleted'), width: 300, align: 't'});   // "Workspace deleted"
+            // }
         },
         update: function(store, record, operation, modifiedFieldNames, details, eOpts  ){
+            // console.info(store);
+            // console.info(record);
+            // console.info(operation);
+            // console.info(modifiedFieldNames);
+            // console.info(details);
             // This event is triggered on every change made in a record!
+            // var result = Ext.JSON.decode(operation.getResponse().responseText);
+            // if (operation.success) {
+            //     Ext.toast({html: operation.getRecords()[0].get('workspacename') + ' ' + esapp.Utils.getTranslation('updated'), title: esapp.Utils.getTranslation('workspace_updated'), width: 300, align: 't'});   // "Workspace updated"
+            // }
         },
         write: function(store, operation){
-            var result = Ext.JSON.decode(operation.getResponse().responseText);
-            if (operation.success) {
-                Ext.toast({html: operation.getRecords()[0].get('workspacename') + ' ' + esapp.Utils.getTranslation('deleted'), title: esapp.Utils.getTranslation('workspace_deleted'), width: 300, align: 't'});   // "Workspace deleted"
-            }
+
         }
     }
 

@@ -51,7 +51,7 @@ Ext.define("esapp.view.analysis.addEditLegend",{
     layout: 'vbox',
     // pack: 'center',
     defaultAlign: 't-t',
-    // alignTarget: 'analysismain',
+    alignTarget: 'analysismain',
 
     params: {
         new: false,
@@ -309,11 +309,11 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                             tpl: new Ext.XTemplate(
                                 '<b>{descriptive_name}</b>' +
                                 '</BR>' +
-                                '<span class="smalltext"><b style="color:darkgrey">{productcode}</b>' +
+                                '<span class="smalltext"><b style="color:darkgrey;">{productcode}</b>' +
                                 '<tpl if="version != \'undefined\'">',
-                                    '<b class="smalltext" style="color:darkgrey"> - {version} </b>',
+                                    '<b class="smalltext" style="color:darkgrey;"> - {version} </b>',
                                 '</tpl>',
-                                '<span class="smalltext"><b style="color:darkgrey"> - {subproductcode}</b></span>'
+                                '<span class="smalltext"><b style="color:darkgrey;"> - {subproductcode}</b></span>'
                             ),
                             width: 255,
                             sortable: true
@@ -345,7 +345,7 @@ Ext.define("esapp.view.analysis.addEditLegend",{
             collapsible: false,
             layout: 'column',
             defaults: {
-                margin:'5 5 5 5'
+                margin:'5 20 5 5'
             },
             items: [{
                 xtype: 'grid',
@@ -599,9 +599,9 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                 collapsible: false,
                 // padding: '10 10 10 10',
                 layout: 'fit',
-                defaults: {
-                    margin:'15 5 5 5'
-                },
+                // defaults: {
+                //     margin:'15 5 5 5'
+                // },
                 focusable: false,
                 // focusOnToFront: false,
                 // minHeight: 550,
@@ -612,6 +612,7 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                     scrollable: 'vertical',
                     focusable: false,
                     // focusOnToFront: false,
+                    margin:'0 0 0 0',
                     html: ''
                 }]
             }]

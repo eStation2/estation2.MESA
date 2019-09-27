@@ -36,6 +36,7 @@ Ext.define("esapp.view.analysis.workspace",{
         workspaceid: null,
         workspacename: '',
         isNewWorkspace: true,
+        isrefworkspace: false,
         title: '',
         titleEditable: false,
         closable: false,
@@ -54,11 +55,15 @@ Ext.define("esapp.view.analysis.workspace",{
         var me = this;
 
         //Ext.util.Observable.capture(me, function(e){console.log('AnalysisMain - ' + e);});
+        // console.info(me.isrefworkspace);
 
-        // if (me.isNewWorkspace){
-        //     me.addCls('newworkspacetab');
-        // }
-        me.tooltip = me.workspaceid != 'defaultworkspace' ? esapp.Utils.getTranslation('edit_workspace_name') : '';     // 'Doubleclick to edit workspace name';
+        if (me.isrefworkspace){
+            me.pinable = false;
+            me.titleEditable = false;
+        }
+        else{
+            me.tooltip = me.workspaceid != 'defaultworkspace' ? esapp.Utils.getTranslation('edit_workspace_name') : '';     // 'Doubleclick to edit workspace name';
+        }
 
         if (!me.pinned && me.pinable) {
             me.setIconCls('fa fa-thumb-tack pin_red');
@@ -68,18 +73,25 @@ Ext.define("esapp.view.analysis.workspace",{
             me.setIconCls('fa fa-thumb-tack pin_green');
         }
 
+        // if (me.workspaceid == 'defaultworkspace'){
+        //     me.tabConfig.tabIndex = 2;
+        // }
+
+
         if (me.pinable) {
             me.tabConfig = {
-                cls: me.isNewWorkspace ? 'newworkspacetab' : '',
+                // cls: me.isNewWorkspace ? 'newworkspacetab' : '',
                 listeners: {
                     render: {
                         fn: function(e) {
-                            Ext.tip.QuickTipManager.register({
-                                target: e.btnIconEl.id,
-                                trackMouse: true,
-                                title: esapp.Utils.getTranslation('pin_unpin'),     // Pin/unpin
-                                text: esapp.Utils.getTranslation('pin_unpin_workspace')     // Click to pin or unpin workspace
-                            });
+                            if (!me.isrefworkspace) {
+                                Ext.tip.QuickTipManager.register({
+                                    target: e.btnIconEl.id,
+                                    trackMouse: true,
+                                    title: esapp.Utils.getTranslation('pin_unpin'),     // Pin/unpin
+                                    text: esapp.Utils.getTranslation('pin_unpin_workspace')     // Click to pin or unpin workspace
+                                });
+                            }
                             e.btnIconEl.on('click', function(e) {
                                 // alert('click');
                                 if (!me.pinned && me.pinable) {
@@ -106,6 +118,18 @@ Ext.define("esapp.view.analysis.workspace",{
                     }
                 }
             };
+        }
+
+        me.reorderable = true;
+        if (me.isrefworkspace){
+            me.tabConfig.cls = 'refworkspacetab';
+        }
+        else if (me.isNewWorkspace){
+            me.tabConfig.cls = 'newworkspacetab';
+        }
+        else if (me.workspaceid == 'defaultworkspace'){
+             me.tabConfig.cls = 'defaultworkspacetab';
+             me.reorderable = false;
         }
 
         me.tbar = Ext.create('Ext.toolbar.Toolbar', {
@@ -199,30 +223,33 @@ Ext.define("esapp.view.analysis.workspace",{
             },{ xtype: 'tbspacer'
             },{
                 xtype: 'button',
-                name: 'analysismain_legendsbtn',
-                reference: 'analysismain_legendsbtn',
+                name: 'analysismain_legendsbtn_'+me.id.replace(/-/g,'_'),
+                reference: 'analysismain_legendsbtn_'+me.id.replace(/-/g,'_'),
                 text: esapp.Utils.getTranslation('legends'),  // 'LEGENDS',
                 iconCls: 'legends',
                 style: { color: 'gray' },
                 scale: 'small',
+                hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
                 handler: 'legendAdmin'
             },{
                 xtype: 'button',
-                name: 'analysismain_layersbtn',
-                reference: 'analysismain_layersbtn',
+                name: 'analysismain_layersbtn_'+me.id.replace(/-/g,'_'),
+                reference: 'analysismain_layersbtn_'+me.id.replace(/-/g,'_'),
                 text: esapp.Utils.getTranslation('layers'),  // 'LAYERS',
                 iconCls: 'layers',
                 style: { color: 'gray' },
                 scale: 'small',
+                hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
                 handler: 'layerAdmin'
             },{
                 xtype: 'button',
-                name: 'analysismain_logosbtn',
-                reference: 'analysismain_logosbtn',
+                name: 'analysismain_logosbtn_'+me.id.replace(/-/g,'_'),
+                reference: 'analysismain_logosbtn_'+me.id.replace(/-/g,'_'),
                 text: esapp.Utils.getTranslation('logos'),  // 'LOGOS',
                 iconCls: 'logos',
                 style: { color: 'gray' },
                 scale: 'small',
+                hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null || esapp.globals['typeinstallation'] == 'jrc_online' ? true : false),
                 handler: 'logosAdmin'
             },
                 { xtype: 'tbspacer'
@@ -238,7 +265,7 @@ Ext.define("esapp.view.analysis.workspace",{
                 iconCls: 'fa fa-save fa-2x',
                 style: {color: 'lightblue'},
                 scale: 'medium',
-                hidden:  (me.workspaceid != 'defaultworkspace' || esapp.getUser() == 'undefined' || esapp.getUser() == null) ? true : false,
+                hidden: (!me.isrefworkspace && me.workspaceid != 'defaultworkspace') || esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false,
                 listeners: {
                     afterrender: function (me) {
                         // Register the new tip with an element's ID
@@ -258,7 +285,7 @@ Ext.define("esapp.view.analysis.workspace",{
                 style: {color: 'lightblue'},
                 cls: 'nopadding-splitbtn',
                 scale: 'medium',
-                hidden:  (me.workspaceid == 'defaultworkspace' || esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
+                hidden:  me.isrefworkspace || (me.workspaceid == 'defaultworkspace' || esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
                 arrowVisible: (!me.isNewWorkspace ? true : false),
                 listeners: {
                     afterrender: function (me) {
@@ -314,12 +341,7 @@ Ext.define("esapp.view.analysis.workspace",{
             bodyPadding: 0
         };
         me.items = [{
-            xtype: 'timeserieschartselection',
-            // id: 'timeserieschartselection'+me.id,
-            reference: 'timeserieschartselection'+me.id,
-            workspace: me
-        }, {
-            region: 'center',
+            // region: 'center',
             xtype: 'container',
             id: 'backgroundmap_'+me.id,
             reference: 'backgroundmap_'+me.id,
@@ -327,22 +349,18 @@ Ext.define("esapp.view.analysis.workspace",{
             scrollable: 'vertical',
             closable: false,
             autoWidth: true,
-            height: 2000,
+            height: 700
             // flex: 1,
-            layout: {
-                type: 'fit'
-            }
+            // layout: {
+            //     type: 'fit'
+            // }
             // style: { "background-color": 'white' },
             // html : '<div id="backgroundmap_' + me.id + '" style="width: 100%; height: 100%;"></div>'
-        // }, {
-        //     // region: 'center',
-        //     xtype: 'container',
-        //     id: 'wsscrollarea_'+me.id,
-        //     reference: 'wsscrollarea_'+me.id,
-        //     flex: 1,
-        //     layout: {
-        //         type: 'fit'
-        //     }
+        }, {
+            xtype: 'timeserieschartselection',
+            // id: 'timeserieschartselection'+me.id,
+            reference: 'timeserieschartselection'+me.id,
+            workspace: me
         }];
 
         me.commonMapView = new ol.View({
@@ -519,16 +537,16 @@ Ext.define("esapp.view.analysis.workspace",{
             },
 
             // The resize handle is necessary to set the map!
-            resize: function () {
-                //var size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
-                var size = [document.getElementById('backgroundmap_'+ me.id).offsetWidth, document.getElementById('backgroundmap_'+ me.id).offsetHeight];
-                if (esapp.Utils.objectExists(me.map)) {
-                    me.map.setSize(size);
-                }
-                // console.info('analysis tab resized!');
-                // var timeseriesChartSelectionWindow = this.lookupReference('timeserieschartselection'+me.id);
-                // timeseriesChartSelectionWindow.fireEvent('align');
-            },
+            // resize: function () {
+            //     //var size = [document.getElementById(this.id + "-body").offsetWidth, document.getElementById(this.id + "-body").offsetHeight];
+            //     var size = [document.getElementById('backgroundmap_'+ me.id).offsetWidth, document.getElementById('backgroundmap_'+ me.id).offsetHeight];
+            //     if (esapp.Utils.objectExists(me.map)) {
+            //         me.map.setSize(size);
+            //     }
+            //     // console.info('analysis tab resized!');
+            //     // var timeseriesChartSelectionWindow = this.lookupReference('timeserieschartselection'+me.id);
+            //     // timeseriesChartSelectionWindow.fireEvent('align');
+            // },
             close: function(){
                 // console.info('closing and destroying workspace');
                 this.lookupReference('timeserieschartselection'+me.id).destroy();

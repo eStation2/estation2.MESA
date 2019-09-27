@@ -91,6 +91,11 @@ Ext.define('esapp.view.acquisition.AcquisitionController', {
         selectProductWin.show();
     }
 
+    ,openProductAdmin: function(btn, event) {
+        var ProductAdminWin = new esapp.view.acquisition.product.ProductAdmin();
+        // selectProductWin.down('grid').getStore().load();
+        ProductAdminWin.show();
+    }
 
     ,editProduct: function(grid, rowIndex, row){
         var record = grid.getStore().getAt(rowIndex);

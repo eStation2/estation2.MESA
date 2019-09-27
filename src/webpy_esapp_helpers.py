@@ -37,12 +37,12 @@ from config import es_constants
 from database import querydb
 from database import crud
 
-# from apps.acquisition import get_eumetcast
+from apps.acquisition import get_eumetcast
 from apps.acquisition import acquisition
 from apps.processing import processing      # Comment in WINDOWS version!
 from apps.productmanagement.datasets import Dataset
 from apps.es2system import es2system
-# from apps.productmanagement.datasets import Frequency
+from apps.productmanagement.datasets import Frequency
 from apps.productmanagement.products import Product
 from apps.productmanagement import requests
 from apps.analysis import generateLegendHTML
@@ -249,6 +249,27 @@ def UpdateProduct(productcode, version, activate):
         updatestatus = '{"success":false, "message":"An error occured while updating the product!"}'
 
     return updatestatus
+
+
+def DeleteProduct(productcode, version):
+    # result = querydb.delete_product(productcode=productcode, version=version)
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    if productcode != '':
+        product = {
+            'productcode': productcode,
+            'version': version
+        }
+
+        if crud_db.delete('product', **product):
+            deletestatus = '{"success":true, "productcode": "' + productcode + '", "version": "' + version + '"' + \
+                           ', "message":"Product and all its subproducts and definitions deleted!"}'
+        else:
+            deletestatus = '{"success":false, "message":"An error occured while deleting the product!"}'
+    else:
+        deletestatus = '{"success":false, "message":"No productcode given!"}'
+
+    return deletestatus
 
 
 def ResetUserSettings():
@@ -620,7 +641,7 @@ def restartRequestJob(requestid):
             counter = 0
             while restartingjob and counter <= 3:
                 counter += 1
-                time.sleep(4)
+                time.sleep(12)
                 jobstatus = statusRequestJob(requestid)
                 status = jobstatus['status'].lower()
                 if jobstatus['status'].lower() in ['running']:  # 'finished', 'stopped', 'error', 'running'
@@ -826,7 +847,7 @@ def createRequestJob(params):
             counter = 0
             while creatingjob and counter <= 3:
                 counter += 1
-                time.sleep(4)
+                time.sleep(12)
                 jobstatus = statusRequestJob(requestid)
                 if jobstatus['status'].lower() in ['running']:  # 'finished', 'stopped', 'error', 'running'
                     creatingjob = False
@@ -840,7 +861,7 @@ def createRequestJob(params):
                     #     list_of_jobs.append(jobstatus)
                     # else:
                     #     list_of_jobs.append(jobstatus)
-                    deleteJobDir(requestid)
+                    # deleteJobDir(requestid)
                     createnewrequest = False
                     creatingjob = False
                     message = 'Error connecting to the server, please check if your network is connected to the internet or uses a proxy. Set your proxy settings under the system tab!'
@@ -1279,11 +1300,15 @@ def execServiceTask(getparams):
     return message
 
 
-def getWorkspaceMaps(workspaceid):
-    wsmaps = querydb.get_workspace_maps(workspaceid)
+def getWorkspaceMaps(workspaceid, userid, withoutmaskfeature=False):
+    wsmaps = querydb.get_workspace_maps(workspaceid, userid)
     maps = []
+    outmaskfeature = None
     if hasattr(wsmaps, "__len__") and wsmaps.__len__() > 0:
         for row_dict in wsmaps:
+            if withoutmaskfeature:
+                outmaskfeature = row_dict['outmaskfeature']
+
             wsmap = {
                 'workspaceid': row_dict['workspaceid'],
                 'userid': row_dict['userid'],
@@ -1315,7 +1340,7 @@ def getWorkspaceMaps(workspaceid):
                 'scalelineobjposition': row_dict['scalelineobjposition'],
                 'vectorlayers': row_dict['vectorlayers'],
                 'outmask': row_dict['outmask'],
-                'outmaskfeature': row_dict['outmaskfeature'],
+                'outmaskfeature': outmaskfeature,
                 'auto_open': row_dict['auto_open'],
                 'zoomextent': row_dict['zoomextent'],
                 'mapsize': row_dict['mapsize'],
@@ -1325,11 +1350,86 @@ def getWorkspaceMaps(workspaceid):
     return maps
 
 
-def getWorkspaceGraphs(workspaceid):
-    wsgraphs = querydb.get_workspace_graphs(workspaceid)
+def getWorkspaceGraphs(workspaceid, userid, withwkt=False):
+    wsgraphs = querydb.get_workspace_graphs(workspaceid, userid)
     graphs = []
+    wkt_geom = None
     if hasattr(wsgraphs, "__len__") and wsgraphs.__len__() > 0:
         for row_dict in wsgraphs:
+            if withwkt:
+                wkt_geom = row_dict['wkt_geom']
+
+            graph_tpl_id = row_dict['graph_tpl_id']
+
+            yaxesGraph = querydb.get_graph_yaxes(graph_tpl_id)
+            yAxes = []
+            if hasattr(yaxesGraph, "__len__") and yaxesGraph.__len__() > 0:
+                for row in yaxesGraph:
+                    yAxe = {'graph_tpl_id': graph_tpl_id,
+                            'id': row['yaxe_id'],
+                            'title': row['title'],
+                            'title_color': row['title_color'],
+                            'title_font_size': row['title_font_size'],
+                            'min': row['min'],
+                            'max': row['max'],
+                            'unit': row['unit'],
+                            'opposite': row['opposite'],
+                            'aggregation_type': row['aggregation_type'],
+                            'aggregation_min': row['aggregation_min'],
+                            'aggregation_max': row['aggregation_max']
+                            }
+
+                    yAxes.append(yAxe)
+            # print(yAxes)
+            params = {
+                'userid': row_dict['userid'],
+                'graph_tpl_id': graph_tpl_id,
+                'graphtype': row_dict['graph_type']
+            }
+            graphDrawProps = querydb.get_graph_drawproperties(params)
+            graphproperties = []
+            if hasattr(graphDrawProps, "__len__") and graphDrawProps.__len__() > 0:
+                for row in graphDrawProps:
+
+                    graphproperty = {'graph_tpl_id': graph_tpl_id,
+                                     'graph_type': row['graph_type'],
+                                     'graph_width': row['graph_width'],
+                                     'graph_height': row['graph_height'],
+                                     'graph_title': row['graph_title'],
+                                     'graph_title_font_size': row['graph_title_font_size'],
+                                     'graph_title_font_color': row['graph_title_font_color'],
+                                     'graph_subtitle': row['graph_subtitle'],
+                                     'graph_subtitle_font_size': row['graph_subtitle_font_size'],
+                                     'graph_subtitle_font_color': row['graph_subtitle_font_color'],
+                                     'legend_position': row['legend_position'],
+                                     'legend_font_size': row['legend_font_size'],
+                                     'legend_font_color': row['legend_font_color'],
+                                     'xaxe_font_size': row['xaxe_font_size'],
+                                     'xaxe_font_color': row['xaxe_font_color']
+                                     }
+
+                    graphproperties.append(graphproperty)
+            # print(graphproperties)
+
+            graphTSDrawProps = querydb.get_graph_tsdrawprops(row_dict['graph_tpl_id'])
+            tsdrawprops = []
+            if hasattr(graphTSDrawProps, "__len__") and graphTSDrawProps.__len__() > 0:
+                for row in graphTSDrawProps:
+                    props = {'graph_tpl_id': graph_tpl_id,
+                             'productcode': row['productcode'],
+                             'subproductcode': row['subproductcode'],
+                             'version': row['version'],
+                             'tsname_in_legend': row['tsname_in_legend'],
+                             'charttype': row['charttype'],
+                             'color': row['color'],
+                             'linestyle': row['linestyle'],
+                             'linewidth': row['linewidth'],
+                             'yaxe_id': row['yaxe_id']
+                             }
+
+                    tsdrawprops.append(props)
+            # print(tsdrawprops)
+
             graph = {
                 'userid': row_dict['userid'],
                 'workspaceid': row_dict['workspaceid'],
@@ -1347,7 +1447,7 @@ def getWorkspaceGraphs(workspaceid):
                 'yearstocompare': row_dict['yearstocompare'],
                 'tsfromseason': row_dict['tsfromseason'],
                 'tstoseason': row_dict['tstoseason'],
-                'wkt_geom': row_dict['wkt_geom'],
+                'wkt_geom': wkt_geom,
                 'selectedregionname': row_dict['selectedregionname'],
                 'disclaimerobjposition': row_dict['disclaimerobjposition'],
                 'disclaimerobjcontent': row_dict['disclaimerobjcontent'],
@@ -1355,10 +1455,43 @@ def getWorkspaceGraphs(workspaceid):
                 'logosobjcontent': row_dict['logosobjcontent'],
                 'showobjects': row_dict['showobjects'],
                 'showtoolbar': row_dict['showtoolbar'],
-                'auto_open': row_dict['auto_open']
+                'auto_open': row_dict['auto_open'],
+                'yAxes': yAxes,
+                'graphproperties': graphproperties,
+                'tsdrawprops': tsdrawprops
             }
             graphs.append(graph)
     return graphs
+
+
+def getWorkspaceMapsAndGraphs(params):
+
+    if 'workspaceid' in params:
+            maps = getWorkspaceMaps(params['workspaceid'], params['userid'], True)
+            graphs = getWorkspaceGraphs(params['workspaceid'], params['userid'], True)
+
+            workspace = {
+                'userid': params['userid'],
+                'workspaceid': params['workspaceid'],
+                'workspacename': params['workspacename'],
+                'pinned': params['pinned'],
+                'showindefault': params['showindefault'],
+                'shownewgraph': params['shownewgraph'],
+                'showbackgroundlayer': params['showbackgroundlayer'],
+                'isrefworkspace': params['isrefworkspace'],
+                'maps': maps,
+                'graphs': graphs
+            }
+
+            workspace_json = json.dumps(workspace, ensure_ascii=False, encoding='utf-8',
+                                         sort_keys=True, indent=4, separators=(', ', ': '))
+
+            workspace_json = '{"success":"true","workspace":' + workspace_json + '}'
+
+    else:
+        workspace_json = '{"success":false, "error":"Workspaceid not given!"}'
+
+    return workspace_json
 
 
 def getUserWorkspaces(params):
@@ -1368,18 +1501,20 @@ def getUserWorkspaces(params):
         userworkspaces = querydb.get_user_workspaces(params['userid'])
         if hasattr(userworkspaces, "__len__") and userworkspaces.__len__() > 0:
             for row_dict in userworkspaces:
-                maps = getWorkspaceMaps(row_dict['workspaceid'])
-                graphs = getWorkspaceGraphs(row_dict['workspaceid'])
+                # maps = getWorkspaceMaps(row_dict['workspaceid'], row_dict['userid'])
+                # graphs = getWorkspaceGraphs(row_dict['workspaceid'], row_dict['userid'])
 
                 workspace = {
                     'userid': row_dict['userid'],
                     'workspaceid': row_dict['workspaceid'],
                     'workspacename': row_dict['workspacename'],
                     'pinned': row_dict['pinned'],
+                    'showindefault': row_dict['showindefault'],
                     'shownewgraph': row_dict['shownewgraph'],
                     'showbackgroundlayer': row_dict['showbackgroundlayer'],
-                    'maps': maps,
-                    'graphs': graphs
+                    'isrefworkspace': False,
+                    'maps': [],
+                    'graphs': []
                 }
 
                 workspaces_dict_all.append(workspace)
@@ -1401,13 +1536,56 @@ def getUserWorkspaces(params):
     return workspaces_json
 
 
+def getRefWorkspaces(params):
+    workspaces_dict_all = []
+    refuser = 'jrc_ref'   # 'jrc_ref'
+
+    userworkspaces = querydb.get_user_workspaces(refuser)
+    if hasattr(userworkspaces, "__len__") and userworkspaces.__len__() > 0:
+        for row_dict in userworkspaces:
+            # maps = getWorkspaceMaps(row_dict['workspaceid'], row_dict['userid'])
+            # graphs = getWorkspaceGraphs(row_dict['workspaceid'], row_dict['userid'])
+
+            workspace = {
+                'userid': row_dict['userid'],
+                'workspaceid': row_dict['workspaceid'],
+                'workspacename': row_dict['workspacename'],
+                'pinned': row_dict['pinned'],
+                'showindefault': row_dict['showindefault'],
+                'shownewgraph': row_dict['shownewgraph'],
+                'showbackgroundlayer': row_dict['showbackgroundlayer'],
+                'isrefworkspace': True,
+                'maps': [],
+                'graphs': []
+            }
+
+            workspaces_dict_all.append(workspace)
+
+        workspaces_json = json.dumps(workspaces_dict_all, ensure_ascii=False, encoding='utf-8',
+                                     separators=(',', ': '))    # sort_keys=True, indent=4,
+
+        workspaces_json = '{"success":"true", "total":' \
+                          + str(userworkspaces.__len__()) \
+                          + ',"refworkspaces":' + workspaces_json + '}'
+
+    else:
+        workspaces_json = '{"success":"true", "total":' \
+                          + str(userworkspaces.__len__()) \
+                          + ',"refworkspaces":[]}'
+
+    return workspaces_json
+
+
 def saveWorkspaceGraphs(wsgraphs, workspaceid):
     crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    if type(workspaceid) is not int:
+        workspaceid = int(workspaceid)
 
     for wsgraph in wsgraphs:
         wsgraphSettings = {
             'userid': wsgraph['userid'],
-            'workspaceid': int(workspaceid),
+            'workspaceid': workspaceid,
             # 'graph_tpl_id': wsgraph['graph_tpl_id'],
             'parent_tpl_id': wsgraph['parent_tpl_id'],
             'graph_tpl_name': wsgraph['graph_tpl_name'],
@@ -1424,27 +1602,36 @@ def saveWorkspaceGraphs(wsgraphs, workspaceid):
             'tstoseason': wsgraph['tstoseason'],
             'wkt_geom': wsgraph['wkt_geom'],
             'selectedregionname': wsgraph['selectedregionname'],
-            'disclaimerobjposition': wsgraph['disclaimerObjPosition'],
-            'disclaimerobjcontent': wsgraph['disclaimerObjContent'],
-            'logosobjposition': wsgraph['logosObjPosition'],
-            'logosobjcontent': wsgraph['logosObjContent'],
-            'showobjects': wsgraph['showObjects'],
+            'disclaimerobjposition': wsgraph['disclaimerobjposition'],
+            'disclaimerobjcontent': wsgraph['disclaimerobjcontent'],
+            'logosobjposition': wsgraph['logosobjposition'],
+            'logosobjcontent': wsgraph['logosobjcontent'],
+            'showobjects': wsgraph['showobjects'],
             'showtoolbar': wsgraph['showtoolbar']
         }
 
-        graphproperties = json.loads(wsgraph['graphproperties'])
-        yaxes = json.loads(wsgraph['yAxes'])
-        tsdrawprops = json.loads(wsgraph['tsdrawprops'])
+        if type(wsgraph['graphproperties']) is list:
+            graphproperties = wsgraph['graphproperties'][0]
+        else:
+            graphproperties = json.loads(wsgraph['graphproperties'])
+
+        if type(wsgraph['yAxes']) is list:
+            yaxes = wsgraph['yAxes']
+        else:
+            yaxes = json.loads(wsgraph['yAxes'])
+
+        if type(wsgraph['tsdrawprops']) is list:
+            tsdrawprops = wsgraph['tsdrawprops']
+        else:
+            tsdrawprops = json.loads(wsgraph['tsdrawprops'])
 
         createstatus = '{"success":false, "message":"Error saving the workspace Graph!"}'
         if crud_db.create('user_graph_templates', wsgraphSettings):
-
-            createdGraphTpl = querydb.get_last_graph_tpl_id(wsgraph['userid'], int(workspaceid))
+            createdGraphTpl = querydb.get_last_graph_tpl_id(wsgraph['userid'], workspaceid)
             graphproperties['graph_tpl_id'] = createdGraphTpl[0]['graph_tpl_id']
             crud_db.create('user_graph_tpl_drawproperties', graphproperties)
 
             for yaxe in yaxes:
-                # print yaxe
                 yaxe['graph_tpl_id'] = createdGraphTpl[0]['graph_tpl_id']
                 yaxe['yaxe_id'] = yaxe['id']
                 if yaxe['min'] == '':
@@ -1463,6 +1650,9 @@ def saveWorkspaceGraphs(wsgraphs, workspaceid):
 
 def saveWorkspaceMaps(wsmaps, workspaceid):
     crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    if type(workspaceid) is not int:
+        workspaceid = int(workspaceid)
 
     for wsmap in wsmaps:
         productcode = ''
@@ -1487,13 +1677,13 @@ def saveWorkspaceMaps(wsmaps, workspaceid):
 
         wsmapSettings = {
             'userid': wsmap['userid'],
-            'workspaceid': int(workspaceid),
+            'workspaceid': workspaceid,
             # 'map_tpl_id': None,
             'parent_tpl_id': wsmap['parent_tpl_id'],
             'map_tpl_name': wsmap['map_tpl_name'],
             'istemplate': wsmap['istemplate'],
-            'mapviewposition': wsmap['mapviewPosition'],
-            'mapviewsize': wsmap['mapviewSize'],
+            'mapviewposition': str(wsmap['mapviewposition']),
+            'mapviewsize': wsmap['mapviewsize'],
             'productcode': productcode,
             'subproductcode': subproductcode,
             'productversion': productversion,
@@ -1501,22 +1691,22 @@ def saveWorkspaceMaps(wsmaps, workspaceid):
             'productdate': wsmap['productdate'],
             'legendid': legendid,
             'legendlayout': wsmap['legendlayout'],
-            'legendobjposition': wsmap['legendObjPosition'],
+            'legendobjposition': wsmap['legendobjposition'],
             'showlegend': wsmap['showlegend'],
-            'titleobjposition': wsmap['titleObjPosition'],
-            'titleobjcontent': wsmap['titleObjContent'],
-            'disclaimerobjposition': wsmap['disclaimerObjPosition'],
-            'disclaimerobjcontent': wsmap['disclaimerObjContent'],
-            'logosobjposition': wsmap['logosObjPosition'],
-            'logosobjcontent': wsmap['logosObjContent'],
-            'showobjects': wsmap['showObjects'],
+            'titleobjposition': wsmap['titleobjposition'],
+            'titleobjcontent': wsmap['titleobjcontent'],
+            'disclaimerobjposition': wsmap['disclaimerobjposition'],
+            'disclaimerobjcontent': wsmap['disclaimerobjcontent'],
+            'logosobjposition': wsmap['logosobjposition'],
+            'logosobjcontent': wsmap['logosobjcontent'],
+            'showobjects': wsmap['showobjects'],
             'showtoolbar': wsmap['showtoolbar'],
             'showgraticule': wsmap['showgraticule'],
             'showtimeline': wsmap['showtimeline'],
-            'scalelineobjposition': wsmap['scalelineObjPosition'],
-            'vectorlayers': wsmap['vectorLayers'],
+            'scalelineobjposition': wsmap['scalelineobjposition'],
+            'vectorlayers': wsmap['vectorlayers'],
             'outmask': wsmap['outmask'],
-            'outmaskfeature': wsmap['outmaskFeature'],
+            'outmaskfeature': wsmap['outmaskfeature'],
             'auto_open': wsmap['auto_open'],
             'zoomextent': wsmap['zoomextent'],
             'mapsize': wsmap['mapsize'],
@@ -1541,8 +1731,18 @@ def saveWorkspace(params):
             'shownewgraph': 'true',
             'showbackgroundlayer': 'false'
         }
-        wsmaps = json.loads(params['maps'])
-        wsgraphs = json.loads(params['graphs'])
+
+        if type(params['maps']) is list:
+            wsmaps = params['maps']
+        else:
+            wsmaps = json.loads(params['maps'])
+
+        if type(params['graphs']) is list:
+            wsgraphs = params['graphs']
+        else:
+            wsgraphs = json.loads(params['graphs'])
+
+        # print(wsgraphs)
 
         # If new user workspace, create new user workspace and get its workspaceid
         #   Insert all open/passed maps and graphs in the new workspace
@@ -1579,6 +1779,48 @@ def saveWorkspace(params):
         createstatus = '{"success":false, "message":"No Workspace data given!"}'
 
     return createstatus
+
+
+def importWorkspaces(params):
+    if 'importfilename' in params:
+        try:
+            # print(params.userid)
+
+            filename = params.importfilename + '.json'
+            with open(es_constants.es2globals['base_tmp_dir'] + filename, 'w+') as f:
+                f.write(params.workspacesfile)
+            f.close()
+
+            with open(es_constants.es2globals['base_tmp_dir'] + filename, 'r') as f:
+                workspaces_dict = json.load(f)
+
+            for workspace in workspaces_dict['workspaces']:
+                workspace['isNewWorkspace'] = 'true'
+                workspace['isrefworkspace'] = 'false'
+                workspace['pinned'] = 'false'
+                workspace['showindefault'] = 'false'
+                workspace['userid'] = params.userid
+                workspace['workspaceid'] = None
+                for wsmap in workspace['maps']:
+                    wsmap['userid'] = params.userid
+                for wsgraph in workspace['graphs']:
+                    wsgraph['userid'] = params.userid
+
+                # print(workspace)
+                saveWorkspace(workspace)
+
+            success = True
+        except:
+            success = False
+    else:
+        success = False
+
+    if success:
+        status = '{"success":true,"message":"Workspaces imported!"}'
+    else:
+        status = '{"success":false, "message":"An error occured while importing the workspaces!"}'
+
+    return status
 
 
 def saveWorkspacePin(params):
@@ -1644,6 +1886,30 @@ def saveWorkspaceName(params):
     return createstatus
 
 
+def saveWorkspaceInDefaultWS(params):
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+    # ToDo: Better error handling.
+    createstatus = '{"success":false, "message":"An error occured while saving the Workspace In Default WS change!"}'
+
+    if 'userid' in params and 'workspaceid' in params:
+        workspace = {
+            'userid': params['userid'],
+            'workspaceid': int(params['workspaceid']),
+            'workspacename': params['workspacename'],
+            'showindefault': params['showindefault']
+        }
+
+        if crud_db.update('user_workspaces', workspace):
+            createstatus = '{"success":true, "message":"Workspace In Default WS setting changed!", "workspaceid": ' + str(params['workspaceid']) + '}'
+        else:
+            createstatus = '{"success":false, "message":"Error updating the Workspace on In Default WS setting!"}'
+
+    else:
+        createstatus = '{"success":false, "message":"No user data given when changing the workspace In Default WS setting!"}'
+
+    return createstatus
+
+
 def getMapTemplates(params):
     maptemplate_dict_all = []
     if 'userid' in params:
@@ -1665,6 +1931,7 @@ def getMapTemplates(params):
                     'subproductcode': row_dict['subproductcode'],
                     'productversion': row_dict['productversion'],
                     'mapsetcode': row_dict['mapsetcode'],
+                    'productdate': row_dict['productdate'],
                     'legendid': row_dict['legendid'],
                     'legendlayout': row_dict['legendlayout'],
                     'legendobjposition': row_dict['legendobjposition'],
@@ -1734,8 +2001,8 @@ def saveMapTemplate(params):
             # 'map_tpl_id': None,
             'map_tpl_name': params['map_tpl_name'],
             'istemplate': params['istemplate'],
-            'mapviewposition': params['mapviewPosition'],
-            'mapviewsize': params['mapviewSize'],
+            'mapviewposition': params['mapviewposition'],
+            'mapviewsize': params['mapviewsize'],
             'productcode': params['productcode'],
             'subproductcode': params['subproductcode'],
             'productversion': params['productversion'],
@@ -1743,22 +2010,22 @@ def saveMapTemplate(params):
             'productdate': params['productdate'],
             'legendid': legendid,
             'legendlayout': params['legendlayout'],
-            'legendobjposition': params['legendObjPosition'],
+            'legendobjposition': params['legendobjposition'],
             'showlegend': params['showlegend'],
-            'titleobjposition': params['titleObjPosition'],
-            'titleobjcontent': params['titleObjContent'],
-            'disclaimerobjposition': params['disclaimerObjPosition'],
-            'disclaimerobjcontent': params['disclaimerObjContent'],
-            'logosobjposition': params['logosObjPosition'],
-            'logosobjcontent': params['logosObjContent'],
-            'scalelineobjposition': params['scalelineObjPosition'],
-            'showobjects': params['showObjects'],
+            'titleobjposition': params['titleobjposition'],
+            'titleobjcontent': params['titleobjcontent'],
+            'disclaimerobjposition': params['disclaimerobjposition'],
+            'disclaimerobjcontent': params['disclaimerobjcontent'],
+            'logosobjposition': params['logosobjposition'],
+            'logosobjcontent': params['logosobjcontent'],
+            'scalelineobjposition': params['scalelineobjposition'],
+            'showobjects': params['showobjects'],
             'showtoolbar': params['showtoolbar'],
             'showgraticule': params['showgraticule'],
             'showtimeline': params['showtimeline'],
-            'vectorlayers': params['vectorLayers'],
+            'vectorlayers': params['vectorlayers'],
             'outmask': params['outmask'],
-            'outmaskfeature': params['outmaskFeature'],
+            'outmaskfeature': params['outmaskfeature'],
             'auto_open': params['auto_open'],
             'zoomextent': params['zoomextent'],
             'mapsize': params['mapsize'],
@@ -1940,11 +2207,11 @@ def saveGraphTemplate(params):
             'tstoseason': params['tstoseason'],
             'wkt_geom': params['wkt_geom'],
             'selectedregionname': params['selectedregionname'],
-            'disclaimerobjposition': params['disclaimerObjPosition'],
-            'disclaimerobjcontent': params['disclaimerObjContent'],
-            'logosobjposition': params['logosObjPosition'],
-            'logosobjcontent': params['logosObjContent'],
-            'showobjects': params['showObjects'],
+            'disclaimerobjposition': params['disclaimerobjposition'],
+            'disclaimerobjcontent': params['disclaimerobjcontent'],
+            'logosobjposition': params['logosobjposition'],
+            'logosobjcontent': params['logosobjcontent'],
+            'showobjects': params['showobjects'],
             'showtoolbar': params['showtoolbar']
         }
 
@@ -1986,7 +2253,11 @@ def saveGraphTemplate(params):
             else:
                 createstatus = '{"success":false, "message":"Error creating the Graph Template!"}'
         else:
-            graphTemplate['graph_tpl_id'] = params['parent_tpl_id']
+            if params['parent_tpl_id'] != '':
+                graphTemplate['graph_tpl_id'] = params['parent_tpl_id']
+            else:
+                graphTemplate['graph_tpl_id'] = params['graph_tpl_id']
+
             if crud_db.update('user_graph_templates', graphTemplate):
                 graphproperties['graph_tpl_id'] = params['parent_tpl_id']
                 crud_db.update('user_graph_tpl_drawproperties', graphproperties)
@@ -4187,10 +4458,27 @@ def getProductLayer(getparams):
     dataset = p.get_dataset(mapset=getparams['mapsetcode'], sub_product_code=getparams['subproductcode'])
     # print dataset.fullpath
 
+    # from datetime import datetime as dt
+    dataset.get_filenames()
     if 'date' in getparams:
         filedate = getparams['date']
+        dates_available = dataset.get_dates()
+        # date_present = [True for date in dates_available if date.strftime("%Y%m%d") == filedate]
+        # if not date_present[0]:
+        # print filedate
+        # print datetime.datetime.strptime(filedate, "%Y%m%d")
+        file_exists = False
+        for date in dates_available:
+            if date.strftime("%Y%m%d") == filedate:
+                file_exists = True
+                # print date.strftime("%Y%m%d")
+
+        # if not datetime.datetime.strptime(filedate, "%Y%m%d") in dates_available:
+        if not file_exists:
+            # print "NOT FOUND!"
+            lastdate = dataset.get_dates()[-1].strftime("%Y%m%d")
+            filedate = lastdate
     else:
-        dataset.get_filenames()
         lastdate = dataset.get_dates()[-1].strftime("%Y%m%d")
         filedate = lastdate
 
@@ -4663,6 +4951,29 @@ def SaveLegend(params):
     return message
 
 
+def ExportLegend(params):
+    legendid = params['legendid']
+    legendname = params['legendname']
+    legendname = legendname.replace(':', '_')
+    legendname = legendname.replace(',', '_')
+    legendname = legendname.replace('  ', '_')
+    legendname = legendname.replace(' ', '_')
+    output_filename = es_constants.base_tmp_dir+os.path.sep+legendname+'.txt'
+
+    legend_steps = querydb.export_legend_steps(legendid=legendid)
+
+    file_id = open(output_filename, 'w')
+    if hasattr(legend_steps, "__len__") and legend_steps.__len__() > 0:
+        for legendstep in legend_steps:
+            if legendstep['legendstep'] is not None:
+                lstep = legendstep['legendstep']
+                file_id.write(lstep)
+                file_id.write('\n')
+    file_id.close()
+
+    return output_filename
+
+
 def GetLegendClasses(legendid):
     legendsteps_dict_all = []
     legend_steps = querydb.get_legend_steps(legendid=legendid)
@@ -4799,6 +5110,8 @@ def getAllColorSchemes():
                 os.remove(colorschemes_file)  # remove file and recreate next call
             except OSError:
                 pass
+
+    # colorschemes_json = ColorSchemes().encode('utf-8')
     return colorschemes_json
 
 
@@ -4918,6 +5231,7 @@ def ProductNavigatorDataSets():
             prod_dict = functions.row2dict(row)
             productcode = prod_dict['productcode']
             version = prod_dict['version']
+            # print prod_dict
 
             p = Product(product_code=productcode, version=version)
 
@@ -4928,9 +5242,12 @@ def ProductNavigatorDataSets():
                 prod_dict['productmapsets'] = []
                 for mapset in all_prod_mapsets:
                     mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False)
-                    if mapset_info != []:
-                        mapset_dict = functions.row2dict(mapset_info)
-                        mapset_dict['mapsetdatasets'] = []
+
+                    if mapset_info != [] and hasattr(mapset_info, "__len__") and mapset_info.__len__() > 0:
+                        # for mapsetinfo in mapset_info:
+                        #     mapset_dict = functions.row2dict(mapsetinfo)
+
+                        mapset_info['mapsetdatasets'] = []
                         all_mapset_datasets = p.get_subproducts(mapset=mapset)
                         for subproductcode in all_mapset_datasets:
                             # print productcode + ' - ' + subproductcode
@@ -4947,9 +5264,9 @@ def ProductNavigatorDataSets():
                                 # completeness = dataset.get_dataset_normalized_info()
                                 # dataset_dict['datasetcompleteness'] = completeness
 
-                                mapset_dict['mapsetdatasets'].append(dataset_dict)
-                        if mapset_dict['mapsetdatasets'].__len__() > 0:
-                            prod_dict['productmapsets'].append(mapset_dict)
+                                mapset_info['mapsetdatasets'].append(dataset_dict)
+                        if mapset_info['mapsetdatasets'].__len__() > 0:
+                            prod_dict['productmapsets'].append(mapset_info)
                 products_dict_all.append(prod_dict)
 
         prod_json = json.dumps(products_dict_all,
@@ -5046,14 +5363,16 @@ def DataSets():
                     mapset_dict = []
                     # print mapset
                     mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False)
-                    if mapset_info != []:
-                        mapset_dict = functions.row2dict(mapset_info)
-                        # print mapset_dict
-                        mapset_dict['productcode'] = productcode
-                        mapset_dict['version'] = version
+
+                    if mapset_info != [] and hasattr(mapset_info, "__len__") and mapset_info.__len__() > 0:
+                        # for mapsetinfo in mapset_info:
+                        #     mapset_dict = functions.row2dict(mapsetinfo)
+                            # print mapset_dict
+                        mapset_info['productcode'] = productcode
+                        mapset_info['version'] = version
                         # else:
                         #   mapset_dict['mapsetcode'] = mapset
-                        mapset_dict['mapsetdatasets'] = []
+                        mapset_info['mapsetdatasets'] = []
                         all_mapset_datasets = p.get_subproducts(mapset=mapset)
                         for subproductcode in all_mapset_datasets:
                             # print 'productcode: ' + productcode
@@ -5074,16 +5393,20 @@ def DataSets():
                                         # dataset_dict['nodisplay'] = 'no_minutes_display'
                                         today = datetime.date.today()
                                         from_date = today - datetime.timedelta(days=3)
+                                        to_date = today + datetime.timedelta(days=1)
                                         kwargs = {'mapset': mapset,
                                                   'sub_product_code': subproductcode,
-                                                  'from_date': from_date}
+                                                  'from_date': from_date,
+                                                  'to_date': to_date}
                                     elif dataset_info.frequency_id == 'e30minute':
                                         # dataset_dict['nodisplay'] = 'no_minutes_display'
                                         today = datetime.date.today()
                                         from_date = today - datetime.timedelta(days=6)
+                                        to_date = today + datetime.timedelta(days=1)
                                         kwargs = {'mapset': mapset,
                                                   'sub_product_code': subproductcode,
-                                                  'from_date': from_date}
+                                                  'from_date': from_date,
+                                                  'to_date': to_date}
                                     # elif dataset_info.frequency_id == 'e1year':
                                     #     dataset_dict['nodisplay'] = 'no_minutes_display'
 
@@ -5097,6 +5420,14 @@ def DataSets():
                                         kwargs = {'mapset': mapset,
                                                   'sub_product_code': subproductcode,
                                                   'from_date': from_date}
+
+                                    # elif dataset_info.frequency_id == 'e1dekad' and dataset_info.date_format == 'YYYYMMDD':
+                                    #     today = datetime.date.today()
+                                    #     from_date = today - relativedelta(years=5)
+                                    #
+                                    #     kwargs = {'mapset': mapset,
+                                    #               'sub_product_code': subproductcode,
+                                    #               'from_date': from_date}
                                     else:
                                         kwargs = {'mapset': mapset,
                                                   'sub_product_code': subproductcode}
@@ -5123,13 +5454,13 @@ def DataSets():
                                     # dataset_dict['datasetcompletenessimage'] = createDatasetCompletenessImage(completeness, dataset_info.frequency_id)
                                     dataset_dict['nodisplay'] = 'false'
 
-                                    dataset_dict['mapsetcode'] = mapset_dict['mapsetcode']
-                                    dataset_dict['mapset_descriptive_name'] = mapset_dict['descriptive_name']
+                                    dataset_dict['mapsetcode'] = mapset_info['mapsetcode']
+                                    dataset_dict['mapset_descriptive_name'] = mapset_info['descriptive_name']
 
-                                    mapset_dict['mapsetdatasets'].append(dataset_dict)
+                                    mapset_info['mapsetdatasets'].append(dataset_dict)
                                 else:
                                     pass
-                    prod_dict['productmapsets'].append(mapset_dict)
+                    prod_dict['productmapsets'].append(mapset_info)
             products_dict_all.append(prod_dict)
 
         prod_json = json.dumps(products_dict_all,
@@ -5442,13 +5773,14 @@ def TimeseriesProducts():
             if hasattr(all_prod_mapsets, "__len__") and all_prod_mapsets.__len__() > 0:
                 for mapset in all_prod_mapsets:
                     mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False)
-                    if mapset_info != []:
-                        mapset_record = functions.row2dict(mapset_info)
+                    if mapset_info != [] and hasattr(mapset_info, "__len__") and mapset_info.__len__() > 0:
+                        # for mapsetinfo in mapset_info:
+                        #     mapset_record = functions.row2dict(mapsetinfo)
 
                         tmp_prod_dict = copy.deepcopy(prod_dict)
-                        tmp_prod_dict['productmapsetid'] = prod_record['productid'] + '_' + mapset_record['mapsetcode']
-                        tmp_prod_dict['mapsetcode'] = mapset_record['mapsetcode']
-                        tmp_prod_dict['mapset_name'] = mapset_record['descriptive_name']
+                        tmp_prod_dict['productmapsetid'] = prod_record['productid'] + '_' + mapset_info['mapsetcode']
+                        tmp_prod_dict['mapsetcode'] = mapset_info['mapsetcode']
+                        tmp_prod_dict['mapset_name'] = mapset_info['descriptive_name']
 
                         # t3 = time.time()
                         # print 'before getting dataset info: ' + str(t3)
@@ -5519,8 +5851,8 @@ def TimeseriesProducts():
                                 dataset_dict['subproductcode'] = dataset_record['subproductcode']
                                 dataset_dict['productmapsetid'] = tmp_prod_dict['productmapsetid']
                                 dataset_dict['display_index'] = dataset_record['display_index']
-                                dataset_dict['mapsetcode'] = mapset_record['mapsetcode']
-                                dataset_dict['mapset_name'] = mapset_record['descriptive_name']
+                                dataset_dict['mapsetcode'] = mapset_info['mapsetcode']
+                                dataset_dict['mapset_name'] = mapset_info['descriptive_name']
                                 dataset_dict['group_product_descriptive_name'] = prod_record['group_product_descriptive_name']
                                 dataset_dict['product_descriptive_name'] = dataset_record['descriptive_name']
                                 dataset_dict['product_description'] = dataset_record['description']
@@ -5593,8 +5925,8 @@ def __TimeseriesProducts():
                 prod_dict['productmapsets'] = []
                 for mapset in all_prod_mapsets:
                     mapset_info = querydb.get_mapset(mapsetcode=mapset, allrecs=False)
-                    mapset_dict = functions.row2dict(mapset_info)
-                    mapset_dict['timeseriesmapsetdatasets'] = []
+                    # mapset_dict = functions.row2dict(mapset_info)
+                    mapset_info['timeseriesmapsetdatasets'] = []
                     timeseries_mapset_datasets = querydb.get_timeseries_subproducts(productcode=productcode,
                                                                                     version=version,
                                                                                     subproductcode=subproductcode)
@@ -5618,13 +5950,13 @@ def __TimeseriesProducts():
 
                             dataset_dict['years'] = distinctyears
                             dataset_dict['mapsetcode'] = mapset
-                            mapset_dict['timeseriesmapsetdatasets'].append(dataset_dict)
+                            mapset_info['timeseriesmapsetdatasets'].append(dataset_dict)
 
                     if dataset_dict['years'].__len__() > 0:
                         # tmp_prod_dict = prod_dict.copy()
                         tmp_prod_dict = copy.deepcopy(prod_dict)
 
-                        tmp_prod_dict['productmapsets'].append(mapset_dict)
+                        tmp_prod_dict['productmapsets'].append(mapset_info)
                         products_dict_all.append(tmp_prod_dict)
                         tmp_prod_dict = []
 
@@ -5852,23 +6184,27 @@ def Ingestion():
                     # ingest_dict['nodisplay'] = 'no_minutes_display'
                     today = datetime.date.today()
                     from_date = today - datetime.timedelta(days=3)
+                    to_date = today + datetime.timedelta(days=1)
                     # week_ago = datetime.datetime(2015, 8, 27, 00, 00)   # .strftime('%Y%m%d%H%S')
                     # kwargs.update({'from_date': week_ago})  # datetime.date(2015, 08, 27)
                     kwargs = {'product_code': row.productcode,
                               'sub_product_code': row.subproductcode,
                               'version': row.version,
                               'mapset': row.mapsetcode,
-                              'from_date': from_date}
+                              'from_date': from_date,
+                              'to_date': to_date}
                     # dataset = Dataset(**kwargs)
                     # completeness = dataset.get_dataset_normalized_info()
                 elif row.frequency_id == 'e30minute':
                     today = datetime.date.today()
                     from_date = today - datetime.timedelta(days=6)
+                    to_date = today + datetime.timedelta(days=1)
                     kwargs = {'product_code': row.productcode,
                               'sub_product_code': row.subproductcode,
                               'version': row.version,
                               'mapset': row.mapsetcode,
-                              'from_date': from_date}
+                              'from_date': from_date,
+                              'to_date': to_date}
                 elif row.frequency_id == 'e1day':
                     today = datetime.date.today()
                     from_date = today - relativedelta(years=1)
@@ -5882,6 +6218,16 @@ def Ingestion():
                               'version': row.version,
                               'mapset': row.mapsetcode,
                               'from_date': from_date}
+
+                # elif row.frequency_id == 'e1dekad':
+                #     today = datetime.date.today()
+                #     from_date = today - relativedelta(years=5)
+                #
+                #     kwargs = {'product_code': row.productcode,
+                #               'sub_product_code': row.subproductcode,
+                #               'version': row.version,
+                #               'mapset': row.mapsetcode,
+                #               'from_date': from_date}
                 else:
                     kwargs = {'product_code': row.productcode,
                               'sub_product_code': row.subproductcode,
@@ -5918,6 +6264,223 @@ def Ingestion():
     ingestions_json = ingestions_json.replace("'", "\'")
     ingestions_json = ingestions_json.replace(', ', ',')
     return ingestions_json
+
+
+def getIngestSubProducts():
+    ingestsubproducts = querydb.get_ingestsubproducts()
+
+    ingestsubproducts_json = functions.tojson(ingestsubproducts)
+    ingestsubproducts_json = '{"success":"true", "total":' + str(ingestsubproducts.__len__()) + ',"ingestsubproducts":[' + ingestsubproducts_json + ']}'
+    return ingestsubproducts_json
+
+
+def CreateIngestSubProduct(params):
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    if params['version'] == '':
+        version = 'undefined'
+    else:
+        version = params['version']
+
+    productinfo = {'productcode': params['productcode'],
+                   'version': version,
+                   'subproductcode': params['subproductcode'],
+                   'category_id': params['category_id'],
+                   'product_type': 'Ingest',
+                   'activated': 'f',
+                   'provider': params['provider'],
+                   'descriptive_name': params['descriptive_name'],
+                   'description': params['description'],
+                   'defined_by': params['defined_by'],
+                   'frequency_id': params['frequency_id'],
+                   'date_format': params['date_format'],
+                   'data_type_id': params['data_type_id'],
+                   'scale_factor': params['scale_factor'] if functions.is_float(params['scale_factor']) else None,
+                   'scale_offset': params['scale_offset'] if functions.is_float(params['scale_offset']) else None,
+                   'nodata': params['nodata'] if functions.is_int(params['nodata']) else None,
+                   'mask_min': params['mask_min'] if functions.is_float(params['mask_min']) else None,
+                   'mask_max':  params['mask_max'] if functions.is_float(params['mask_max']) else None,
+                   'unit': params['unit'],
+                   'masked': params['masked'],
+                   'timeseries_role': params['timeseries_role'],
+                   'display_index': int(params['display_index']) if params['display_index'].isdigit() else None
+                   }
+
+    if crud_db.create('product', productinfo):
+        createstatus = '{"success":true, "message":"Ingest Sub Product created!"}'
+    else:
+        createstatus = '{"success":false, "message":"An error occured while creating the Ingest Sub Product!"}'
+
+    return createstatus
+
+
+def UpdateIngestSubProduct(params):
+    if params['version'] == '':
+        version = 'undefined'
+    else:
+        version = params['version']
+
+    productinfo = {'productcode': params['productcode'],
+                   'version': version,
+                   'orig_subproductcode': params['orig_subproductcode'],
+                   'subproductcode': params['subproductcode'],
+                   'category_id': params['category_id'],
+                   'product_type': 'Ingest',
+                   'activated': 'f',
+                   'provider': params['provider'],
+                   'descriptive_name': params['descriptive_name'],
+                   'description': params['description'],
+                   'defined_by': params['defined_by'],
+                   'frequency_id': params['frequency_id'],
+                   'date_format': params['date_format'],
+                   'data_type_id': params['data_type_id'],
+                   'scale_factor': params['scale_factor'] if functions.is_float(params['scale_factor']) else 'NULL',
+                   'scale_offset': params['scale_offset'] if functions.is_float(params['scale_offset']) else 'NULL',
+                   'nodata': params['nodata'] if functions.is_int(params['nodata']) else 'NULL',
+                   'mask_min': params['mask_min'] if functions.is_float(params['mask_min']) else 'NULL',
+                   'mask_max':  params['mask_max'] if functions.is_float(params['mask_max']) else 'NULL',
+                   'unit': params['unit'],
+                   'masked': params['masked'],
+                   'timeseries_role': params['timeseries_role'],
+                   'display_index': params['display_index'] if params['display_index'].isdigit() else 'NULL'
+                   }
+    # print(productinfo)
+    productupdated = querydb.update_ingest_subproduct_info(productinfo)
+
+    if productupdated:
+        updatestatus = '{"success":"true", "message":"Ingest Sub Product updated!"}'
+    else:
+        updatestatus = '{"success":false, "message":"An error occured while updating the Ingest Sub Product!"}'
+
+    return updatestatus
+
+
+def DeleteIngestSubProduct(params):
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+    params = params['ingestproduct']
+
+    if params['productcode'] != '' and params['version'] != '' and params['subproductcode'] != '':
+        ingest_sub_product = {
+            'productcode': params['productcode'],
+            'version': params['version'],
+            'subproductcode': params['subproductcode']
+        }
+
+        if crud_db.delete('product', **ingest_sub_product):
+            deletestatus = '{"success":true, "productcode": "' + params['productcode'] + '", "version": "' + params['version'] + '",' + \
+                           ' "subproductcode": "' + params['subproductcode'] + '", ' + \
+                           ' "message":"Ingest Sub Product deleted!"}'
+        else:
+            deletestatus = '{"success":false, "message":"An error occured while deleting the Ingest Sub Product!"}'
+    else:
+        deletestatus = '{"success":false, "message":"No primary key values given for Ingest Sub Product!"}'
+
+    return deletestatus
+
+
+def getSubDatasourceDescriptions():
+    subdatasource_descriptions = querydb.get_active_subdatasource_descriptions()
+
+    subdatasource_descriptions_json = functions.tojson(subdatasource_descriptions)
+    subdatasource_descriptions_json = '{"success":"true", "total":' + str(subdatasource_descriptions.__len__()) + ',"subdatasourcedescription":[' + subdatasource_descriptions_json + ']}'
+    return subdatasource_descriptions_json
+
+
+def CreateSubDatasourceDescription(params):
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    if params['version'] == '':
+        version = 'undefined'
+    else:
+        version = params['version']
+
+    datasource_description = {
+        'datasource_descr_id': params['pads_data_source_id'],
+        'preproc_type': params['preproc_type'],
+        'native_mapset': params['native_mapset']
+    }
+    sub_datasource_description = {
+        'productcode': params['productcode'],
+        'subproductcode': params['subproductcode'],
+        'version': version,
+        'datasource_descr_id': params['datasource_descr_id'],
+        'scale_factor': params['scale_factor'] if functions.is_float(params['scale_factor']) else None,
+        'scale_offset': params['scale_offset'] if functions.is_float(params['scale_offset']) else None,
+        'no_data': params['no_data'] if functions.is_int(params['no_data']) else None,
+        'data_type_id': params['data_type_id'],
+        'mask_min': params['mask_min'] if functions.is_float(params['mask_min']) else None,
+        'mask_max': params['mask_max'] if functions.is_float(params['mask_max']) else None,
+        're_process': params['re_process'],
+        're_extract': params['re_extract'],
+        'scale_type': params['scale_type'],
+    }
+
+    createstatus = '{"success":false, "message":"An error occured while creating the Sub Datasource Description!"}'
+    if crud_db.create('sub_datasource_description', sub_datasource_description):
+        if crud_db.update('datasource_description', datasource_description):
+            createstatus = '{"success":true, "message":"Sub Datasource Description created!"}'
+
+    return createstatus
+
+
+def UpdateSubDatasourceDescription(params):
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    if params['version'] == '':
+        version = 'undefined'
+    else:
+        version = params['version']
+
+    datasource_description = {
+        'datasource_descr_id': params['pads_data_source_id'],
+        'preproc_type': params['preproc_type'],
+        'native_mapset': params['native_mapset']
+    }
+    sub_datasource_description = {
+        'productcode': params['productcode'],
+        'subproductcode': params['subproductcode'],
+        'version': version,
+        'datasource_descr_id': params['datasource_descr_id'],
+        'scale_factor': params['scale_factor'] if functions.is_float(params['scale_factor']) else None,
+        'scale_offset': params['scale_offset'] if functions.is_float(params['scale_offset']) else None,
+        'no_data': params['no_data'] if functions.is_int(params['no_data']) else None,
+        'data_type_id': params['data_type_id'],
+        'mask_min': params['mask_min'] if functions.is_float(params['mask_min']) else None,
+        'mask_max': params['mask_max'] if functions.is_float(params['mask_max']) else None,
+        're_process': params['re_process'],
+        're_extract': params['re_extract'],
+        'scale_type': params['scale_type'],
+    }
+
+    status = '{"success":false, "message":"An error occured while updating the Sub Datasource Description!"}'
+    if crud_db.update('sub_datasource_description', sub_datasource_description):
+        if crud_db.update('datasource_description', datasource_description):
+            status = '{"success":true, "message":"Sub Datasource Description updated!"}'
+
+    return status
+
+
+def DeleteSubDatasourceDescription(productcode, version, subproductcode, datasource_id):
+    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    if productcode != '' and version != '' and subproductcode != '' and datasource_id != '':
+        sub_datasource_description = {
+            'productcode': productcode,
+            'version': version,
+            'subproductcode': subproductcode,
+            'datasource_id': datasource_id
+        }
+
+        if crud_db.delete('sub_datasource_description', **sub_datasource_description):
+            deletestatus = '{"success":true, "productcode": "' + productcode + '", "version": "' + version + '",' + \
+                           ' "subproductcode": "' + subproductcode + '", "datasource_id": "' + datasource_id + '",' + \
+                           ' "message":"Sub Datasource Description deleted!"}'
+        else:
+            deletestatus = '{"success":false, "message":"An error occured while deleting the Sub Datasource Description!"}'
+    else:
+        deletestatus = '{"success":false, "message":"No primary key values given for Sub Datasource Description!"}'
+
+    return deletestatus
 
 
 def getProcessing(force):

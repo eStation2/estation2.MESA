@@ -676,7 +676,7 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
         var legendClassesStore = me.getViewModel().getStore('legendClassesStore');
         var TotClasses = parseInt(legendClassesStore.getCount());
         var legendname = me.lookupReference('title_in_legend').getValue();
-        var fontSizeLabels = 16;
+        var fontSizeLabels = 14;
         var legendHTMLVertical = '';
         var TotColorLabels = 0;
         var TotGroupLabels = 0;
@@ -694,16 +694,29 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
         legendClassesStore.sort('from_step', 'asc');
 
         if (TotClasses >= 25){
-            var fontSizeTitle = 18;
+            var fontSizeTitle = 16;
             var stepWidth = 28;
             var stepHeight = 1;
+            var rowspan = 15;
+            var lineheight = 14;
+            var classlegendstyle = "legend-style";
 
-            if (TotClasses <= 35)
-                stepHeight = 15;
-            else if (TotClasses <= 65)
+            if (TotClasses <= 35) {
+                stepHeight = 10;
+                rowspan = 1;
+                classlegendstyle = "";
+            }
+            else if (TotClasses <= 65){
                 stepHeight = 5;
-            else if (TotClasses <= 115)
-                stepHeight = 3;
+                rowspan = 2;
+                classlegendstyle = "";
+            }
+            else if (TotClasses <= 130){
+                stepHeight = 2;
+                rowspan = 5;
+                classlegendstyle = "";
+            }
+
 
             var mainTableBegin = '<table style="border-spacing:0px; background:white; padding:0;"> ';
             var mainTableEnd = '</table>';
@@ -729,21 +742,27 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
                 if (TotClasses <= 24)
                     border = "border:1px solid black; ";
 
-                var legendColorColumn = '<td width=' + stepWidth.toString() + 'px; height=' + stepHeight.toString() + 'px; style="' + border + ' background-color: ' + color_html + '"></td>';
+                // var legendColorColumn = '<td width=' + stepWidth.toString() + 'px; height=' + stepHeight.toString() + 'px; style="' + border + ' background-color: ' + color_html + '"></td>';
+                var legendColorColumn = '<td width=' + stepWidth.toString() + 'px; class="'+classlegendstyle+'" style="' + border + ' background-color: ' + color_html + '"></td>';
 
                 // Add label column
                 Counter += 1;
-                var legendColorLabelColumn = '<td height="1px;"></td>';
+                // var legendColorLabelColumn = '<td height="1px;"></td>';
+                var legendColorLabelColumn = '<td class="'+classlegendstyle+'"></td>';
                 if (ColumnSpan > 1) {
                     if (record.get('color_label') != null && record.get('color_label').trim() != '') {
-                        legendColorLabelColumn = '<td rowspan=5 style="font-weight: bold; font-size:' + fontSizeLabels.toString() + 'px; line-height:10px; " valign="top" align="left">' + record.get('color_label') + '</td>'
+                        legendColorLabelColumn = '<td rowspan="'+rowspan+'px;" style="font-weight: bold; font-size:' + fontSizeLabels.toString() + 'px; line-height:'+lineheight+'px; " valign="top" align="left">' + record.get('color_label') + '</td>'
                     }
                 }
                 else if (record.get('color_label') != null && record.get('color_label').trim() != '') {
-                    legendColorLabelColumn = '<td rowspan="' + ColumnSpan.toString() + '" style="font-weight: bold; font-size:' + fontSizeLabels.toString() + 'px; line-height:10px; " align="left">' + record.get('color_label') + '</td>';
+                    legendColorLabelColumn = '<td rowspan="' + ColumnSpan.toString() + '" style="font-weight: bold; font-size:' + fontSizeLabels.toString() + 'px; line-height:'+lineheight+'px; " align="left">' + record.get('color_label') + '</td>';
                 }
-                legendHTMLVertical += '<tr>' + legendColorColumn + legendColorLabelColumn + '</tr>';
+                legendHTMLVertical += '<tr style="height:'+stepHeight+'px;">' + legendColorColumn + legendColorLabelColumn + '</tr>';
 
+                // Add an empty row for the label on last class to have the lable shown at the bottom of the table
+                if (TotClasses == Counter && record.get('color_label') != null && record.get('color_label').trim() != ''){
+                    legendHTMLVertical += '<tr style="height:1px;"></tr>';
+                }
             });
             legendHTMLVertical = mainTableBegin + legendHeaderRow + '<tr><td>' + legendTableBegin + legendHTMLVertical + legendTableEnd + '</td></tr>' + mainTableEnd;
 
@@ -751,17 +770,17 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
         else {
 
             var mainTableBackgroundColor = 'transparent',
-                fontSizeHeader = 18,
+                fontSizeHeader = 16,
                 firstColumnWidth = 35,
                 legendColorTableBackgroundColor = 'white',
                 legendLabelTableBackgroundColor = 'white',
                 extraFirstRowHeight = 14,
-                absoluteMaxRowColorTableHeight = 18,
+                absoluteMaxRowColorTableHeight = 10,
                 colorColumnWidth = 35,
-                colorColumnHeight = 20,
+                colorColumnHeight = 18,
                 tickColumnWidth = 8,
-                tickColumnHeight = 20,
-                labelColumnHeight = 20,
+                tickColumnHeight = 18,
+                labelColumnHeight = 18,
                 bordertop = ' ';
 
             var mainTableBegin = '<table style="background: ' + mainTableBackgroundColor + '; border:0px solid black; border-spacing:0px; border-padding:0px; cellspacing=0px; cellpadding=0px; margin: 0px; padding: 0px; ">';

@@ -4,12 +4,8 @@ Ext.define('esapp.view.analysis.ProductNavigatorModel', {
 
     stores: {
         products: {
-            model: 'esapp.model.ProductNavigator'
+            source: 'ProductNavigatorStore'
             ,session: true
-            ,autoLoad: false
-            ,loadMask: true
-
-            ,sorters: [{property: 'order_index', direction: 'DESC'},{property: 'prod_descriptive_name', direction: 'ASC'},{property: 'version', direction: 'ASC'}]
 
             ,grouper:{
                 groupFn : function (item) {
@@ -20,12 +16,30 @@ Ext.define('esapp.view.analysis.ProductNavigatorModel', {
                 property: 'order_index',
                 sortProperty: 'order_index'
             }
-            ,listeners: {
-                write: function(store, operation){
-                    Ext.toast({ html: operation.getResultSet().message, title: operation.action, width: 300, align: 't' });
-                }
-            }
         },
+        // products: {
+        //     model: 'esapp.model.ProductNavigator'
+        //     ,session: true
+        //     ,autoLoad: false
+        //     ,loadMask: true
+        //
+        //     ,sorters: [{property: 'order_index', direction: 'DESC'},{property: 'prod_descriptive_name', direction: 'ASC'},{property: 'version', direction: 'ASC'}]
+        //
+        //     ,grouper:{
+        //         groupFn : function (item) {
+        //             return esapp.Utils.getTranslation(item.get('category_id'));
+        //             //return "<span style='display: none;'>" + item.get('order_index') + "</span>" + esapp.Utils.getTranslation(item.get('category_id'))
+        //          //return item.get('cat_descr_name')
+        //         },
+        //         property: 'order_index',
+        //         sortProperty: 'order_index'
+        //     }
+        //     ,listeners: {
+        //         write: function(store, operation){
+        //             Ext.toast({ html: operation.getResultSet().message, title: operation.action, width: 300, align: 't' });
+        //         }
+        //     }
+        // },
         productmapsets: {
             model: 'esapp.model.ProductNavigatorMapSet'
             ,session: true

@@ -35,7 +35,7 @@ Ext.define("esapp.view.analysis.legendAdmin",{
     height: Ext.getBody().getViewSize().height < 830 ? Ext.getBody().getViewSize().height-130 : 830,  // 600,
     minHeight: 500,
     maxHeight: 830,
-    width: 910,
+    width: 935,
 
     border:false,
     frame: false,
@@ -53,6 +53,7 @@ Ext.define("esapp.view.analysis.legendAdmin",{
 
     initComponent: function () {
         var me = this;
+        var user = esapp.getUser();
 
         me.title = '<div class="panel-title-style-16">' + esapp.Utils.getTranslation('legendsadministration') + '</div>';
         me.height = Ext.getBody().getViewSize().height < 830 ? Ext.getBody().getViewSize().height-130 : 830;  // 600,
@@ -175,13 +176,15 @@ Ext.define("esapp.view.analysis.legendAdmin",{
                     width:'35',
                     disabled: false,
                     getClass: function (v, meta, rec) {
-                        if (rec.get('defined_by')!='JRC'){
+                        if (rec.get('defined_by')!='JRC' || (esapp.Utils.objectExists(user) && user.userlevel == 1)){   // JRC user has userlevel 1 and can always edit legends.
                             return 'edit';
                         }
                         else return 'vieweye';
                     },
                     getTip: function (v, meta, rec) {
-                        return esapp.Utils.getTranslation('editlegendproperties') + ' "' + rec.get('legend_descriptive_name') + '"';
+                        if (rec.get('defined_by')!='JRC' || (esapp.Utils.objectExists(user) && user.userlevel == 1)){   // JRC user has userlevel 1 and can always edit legends.
+                            return esapp.Utils.getTranslation('editlegendproperties') + ' "' + rec.get('legend_descriptive_name') + '"';
+                        }
                     },
                     handler: 'editLegend'
                 }]
@@ -247,23 +250,37 @@ Ext.define("esapp.view.analysis.legendAdmin",{
                 draggable:false,
                 groupable:false,
                 hideable: false,
-                width: 50,
+                width: 75,
                 align: 'center',
                 stopSelection: false,
 
                 items: [{
                     // scope: me,
-                    width:'35',
+                    width: '35',
                     disabled: false,
-                    getClass: function(v, meta, rec) {
-                        if (rec.get('defined_by')!='JRC'){
+                    getClass: function (v, meta, rec) {
+                        if (rec.get('defined_by') != 'JRC' || (esapp.Utils.objectExists(user) && user.userlevel == 1)) {
                             return 'delete';
                         }
                     },
-                    getTip: function(v, meta, rec) {
+                    getTip: function (v, meta, rec) {
                         return esapp.Utils.getTranslation('deletelegend') + ' "' + rec.get('legend_descriptive_name') + '"';
                     },
                     handler: 'deleteLegend'
+                },{
+                    width:'35',
+                    disabled: false,
+                    getClass: function(v, meta, rec) {
+                        if ((esapp.Utils.objectExists(user) && user.userlevel == 1)){
+                            return 'download';
+                        }
+                    },
+                    getTip: function(v, meta, rec) {
+                        if ((esapp.Utils.objectExists(user) && user.userlevel == 1)){
+                            return esapp.Utils.getTranslation('downloadlegend') + ' "' + rec.get('export_in_qgis_format') + '"';
+                        }
+                    },
+                    handler: 'exportLegend'
                 }]
             }]
         }];

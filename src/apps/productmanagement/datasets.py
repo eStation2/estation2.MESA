@@ -280,33 +280,45 @@ class Dataset(object):
             self._check_date(from_date)
         if to_date is not None:
             self._check_date(to_date)
+
+        self.mapset = mapset
+
         self._db_product = querydb.get_product_out_info(**kwargs)
         if self._db_product is None or self._db_product == []:
             # Todo: raising and error crashes the system. Log the error and create an empty Dataset instance
             # Todo: set all values of self._db_product to 'undefined'?
-            raise NoProductFound(kwargs)
-        if isinstance(self._db_product, list):
-            self._db_product = self._db_product[0]
-        self.mapset = mapset
-        self._path = functions.set_path_sub_directory(product_code,
-                                                      sub_product_code,
-                                                      self._db_product.product_type,
-                                                      version,
-                                                      mapset)
-        self.fullpath = os.path.join(es_constants.es2globals['processing_dir'], self._path)
+            # raise NoProductFound(kwargs)
+            self._path = None
+            self.fullpath = None
+            self.frequency_id = 'undefined'
+            self.date_format = None
+            self._frequency = None
+            self.from_date = None
+            self.to_date = None
+        else:
+            if isinstance(self._db_product, list):
+                self._db_product = self._db_product[0]
 
-        # self._db_frequency = querydb.db.frequency.get(self._db_product.frequency_id)
-        # self._db_frequency = querydb.get_frequency(self._db_product.frequency_id)
-        # if self._db_frequency is None:
-        #    raise NoFrequencyFound(self._db_product)
-        # self._frequency = Frequency(value=self._db_frequency.frequency,
-        #                            unit=self._db_frequency.time_unit,
-        #                            frequency_type=self._db_frequency.frequency_type,
-        #                            dateformat=self._db_product.date_format)
+            self._path = functions.set_path_sub_directory(product_code,
+                                                          sub_product_code,
+                                                          self._db_product.product_type,
+                                                          version,
+                                                          mapset)
+            self.fullpath = os.path.join(es_constants.es2globals['processing_dir'], self._path)
 
-        self.frequency_id = self._db_product.frequency_id
-        self.date_format = self._db_product.date_format
-        self._frequency = self.get_frequency(self._db_product.frequency_id, self._db_product.date_format)
+            # self._db_frequency = querydb.db.frequency.get(self._db_product.frequency_id)
+            # self._db_frequency = querydb.get_frequency(self._db_product.frequency_id)
+            # if self._db_frequency is None:
+            #    raise NoFrequencyFound(self._db_product)
+            # self._frequency = Frequency(value=self._db_frequency.frequency,
+            #                            unit=self._db_frequency.time_unit,
+            #                            frequency_type=self._db_frequency.frequency_type,
+            #                            dateformat=self._db_product.date_format)
+
+            self.frequency_id = self._db_product.frequency_id
+            self.date_format = self._db_product.date_format
+
+        self._frequency = self.get_frequency(self.frequency_id, self.date_format)
 
         if not from_date and self.no_year():
             from_date = datetime.date(datetime.date.today().year, 1, 1)
@@ -331,10 +343,15 @@ class Dataset(object):
     def get_filenames(self, regex='*'):
         # self._regex = regex
         # self._filenames = glob.glob(os.path.join(self.fullpath, regex))
-        return glob.glob(os.path.join(self.fullpath, regex))
+        filenames = []
+        if self.fullpath:
+            filenames = glob.glob(os.path.join(self.fullpath, regex))
+        return filenames
 
     def get_filenames_range(self):
-        all_files = glob.glob(os.path.join(self.fullpath, "*"))
+        all_files = []
+        if self.fullpath:
+            all_files = glob.glob(os.path.join(self.fullpath, "*"))
         filenames = []
         for file in all_files:
             str_date = functions.get_date_from_path_full(file)
@@ -364,7 +381,10 @@ class Dataset(object):
         return self.intervals[0].from_date
 
     def get_last_date(self):
-        return self.intervals[-1].to_date
+        endate = datetime.date.today()
+        if self.intervals.__len__() > 0:
+            endate = self.intervals[-1].to_date
+        return endate
 
     def get_regex_from_range(self, from_date, to_date):
         regex = ''

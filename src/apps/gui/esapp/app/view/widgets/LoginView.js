@@ -50,7 +50,7 @@ Ext.define("esapp.view.widgets.LoginView",{
                         userid: Ext.util.Cookies.get('estation2_userid'),
                         username: Ext.util.Cookies.get('estation2_username'),
                         email: Ext.util.Cookies.get('estation2_useremail'),
-                        userlevel: Ext.util.Cookies.get('estation2_userlevel'),
+                        userlevel: parseInt(Ext.util.Cookies.get('estation2_userlevel')),
                         prefered_language: Ext.util.Cookies.get('estation2_userlanguage')
                     };
 
@@ -253,13 +253,14 @@ Ext.define("esapp.view.widgets.LoginView",{
     } // eo function onKeyPress
 
     ,toggleUserFunctionality:function() {
-        var me = this;
+        // var me = this;
         var user = esapp.getUser();
         var analysisWorkspaces = Ext.ComponentQuery.query('analysisworkspace');
         var mapViewWindows = Ext.ComponentQuery.query('mapview-window');
         var tsChartWindows = Ext.ComponentQuery.query('timeserieschart-window');
         var addWorkspaceBtn = Ext.getCmp('analysismain').lookupReference('analysismain_addworkspacebtn');
         var acquisitionLockBtn = Ext.getCmp('lockunlock');
+        // var productAdminAcquisitionBtn = Ext.getCmp('productadmin-acquisition-btn');
         // var mapTemplateBtn = Ext.getCmp('analysismain').lookupReference('analysismain_maptemplatebtn');
         // var tsChartTemplateBtn = Ext.getCmp('analysismain').lookupReference('analysismain_graph_templatebtn');
         // var tsDrawPropertiesStore  = Ext.data.StoreManager.lookup('TSDrawPropertiesStore');
@@ -268,11 +269,14 @@ Ext.define("esapp.view.widgets.LoginView",{
             // tsDrawPropertiesStore.proxy.extraParams = {userid: user.userid, graph_tpl_name: 'default'};
             // tsDrawPropertiesStore.load();
 
-            // if (user.userlevel == 0){
-            //     if (acquisitionLockBtn != null){
-            //         acquisitionLockBtn.show();
-            //     }
-            // }
+            if (user.userlevel < 2){
+                if (acquisitionLockBtn != null){
+                    acquisitionLockBtn.show();
+                }
+                // if (productAdminAcquisitionBtn != null){
+                //     productAdminAcquisitionBtn.show();
+                // }
+            }
 
             if (addWorkspaceBtn != null){
                 addWorkspaceBtn.show();
@@ -297,6 +301,11 @@ Ext.define("esapp.view.widgets.LoginView",{
             Ext.Object.each(analysisWorkspaces, function(id, workspace, thisObj) {
                 workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).show();
                 workspace.lookupReference('graphtemplateadminbtn_'+workspace.id.replace(/-/g,'_')).show();
+
+                workspace.lookupReference('analysismain_legendsbtn_'+workspace.id.replace(/-/g,'_')).show();
+                workspace.lookupReference('analysismain_layersbtn_'+workspace.id.replace(/-/g,'_')).show();
+                workspace.lookupReference('analysismain_logosbtn_'+workspace.id.replace(/-/g,'_')).show();
+
                 if (workspace.workspaceid != 'defaultworkspace'){
                     workspace.lookupReference('saveWorkspaceBtn').show();
                 }
@@ -336,16 +345,16 @@ Ext.define("esapp.view.widgets.LoginView",{
             // tsDrawPropertiesStore.proxy.extraParams = {};
             // tsDrawPropertiesStore.load();
 
-            // if (acquisitionLockBtn != null){
-            //     if (acquisitionLockBtn.pressed){
-            //         acquisitionLockBtn.toggle();
-            //         acquisitionLockBtn.handler(acquisitionLockBtn);
-            //         acquisitionLockBtn.hide();
-            //     }
-            //     else {
-            //         acquisitionLockBtn.hide();
-            //     }
-            // }
+            if (acquisitionLockBtn != null){
+                if (acquisitionLockBtn.pressed){
+                    acquisitionLockBtn.toggle();
+                    acquisitionLockBtn.handler(acquisitionLockBtn);
+                    acquisitionLockBtn.hide();
+                }
+                else {
+                    acquisitionLockBtn.hide();
+                }
+            }
 
             if (addWorkspaceBtn != null){
                 addWorkspaceBtn.hide();
@@ -379,6 +388,11 @@ Ext.define("esapp.view.widgets.LoginView",{
 
                     workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).hide();
                     workspace.lookupReference('graphtemplateadminbtn_'+workspace.id.replace(/-/g,'_')).hide();
+
+                    workspace.lookupReference('analysismain_legendsbtn_'+workspace.id.replace(/-/g,'_')).hide();
+                    workspace.lookupReference('analysismain_layersbtn_'+workspace.id.replace(/-/g,'_')).hide();
+                    workspace.lookupReference('analysismain_logosbtn_'+workspace.id.replace(/-/g,'_')).hide();
+
                     workspace.lookupReference('saveDefaultWorkspaceAsBtn').hide();
                     if (Ext.isObject(workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).mapTemplateAdminPanel)){
                         workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).mapTemplateAdminPanel.hide();

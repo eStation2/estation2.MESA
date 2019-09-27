@@ -4,20 +4,21 @@ Ext.define('esapp.view.acquisition.product.selectProductModel', {
 
     ,stores: {
         products: {
-            model: 'esapp.model.Product'
-            ,session: false
-            ,autoLoad: true
-            ,loadMask: false
-
-            ,sorters: [{property: 'order_index', direction: 'DESC'},{property: 'prod_descriptive_name', direction: 'ASC'},{property: 'version', direction: 'ASC'}]
-
-            ,grouper:{
-                groupFn : function (item) {
-                    return esapp.Utils.getTranslation(item.get('category_id'));
-                },
-                property: 'order_index',
-                sortProperty: 'order_index'
-            }
+            source:'ProductsInactiveStore'
+            // model: 'esapp.model.Product'
+            // ,session: false
+            // ,autoLoad: true
+            // ,loadMask: false
+            //
+            // ,sorters: [{property: 'order_index', direction: 'DESC'},{property: 'prod_descriptive_name', direction: 'ASC'},{property: 'version', direction: 'ASC'}]
+            //
+            // ,grouper:{
+            //     groupFn : function (item) {
+            //         return esapp.Utils.getTranslation(item.get('category_id'));
+            //     },
+            //     property: 'order_index',
+            //     sortProperty: 'order_index'
+            // }
 
             // ,listeners: {
             //     write: function(store, operation){

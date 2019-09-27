@@ -19,7 +19,7 @@ Ext.define('esapp.store.ProductNavigatorStore', {
     ,remoteGroup: false
     ,loadMask: true
 
-    ,sorters: {property: 'order_index', direction: 'DESC'}
+    ,sorters: [{property: 'order_index', direction: 'DESC'},{property: 'prod_descriptive_name', direction: 'ASC'},{property: 'version', direction: 'ASC'}]
 
     ,proxy: {
         type: 'rest',
@@ -62,14 +62,14 @@ Ext.define('esapp.store.ProductNavigatorStore', {
             }
         }
     }
-    ,grouper:{
-             // property: 'cat_descr_name',
-             groupFn : function (item) {
-                 return "<span style='display: none;'>" + item.get('order_index') + "</span>" + esapp.Utils.getTranslation(item.get('category_id'))
-                 //return item.get('cat_descr_name')
-             },
-             sortProperty: 'order_index'
-    }
+    // ,grouper:{
+    //          // property: 'cat_descr_name',
+    //          groupFn : function (item) {
+    //              return "<span style='display: none;'>" + item.get('order_index') + "</span>" + esapp.Utils.getTranslation(item.get('category_id'))
+    //              //return item.get('cat_descr_name')
+    //          },
+    //          sortProperty: 'order_index'
+    // }
     ,listeners: {
         write: function(store, operation){
             Ext.toast({ html: operation.getResultSet().message, title: operation.action, width: 300, align: 't' });

@@ -277,7 +277,7 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, geom, start_
     # Prepare for computing conversion to area: the pixel size at Lat=0 is computed
     # The correction to the actual latitude (on AVERAGE value - will be computed below)
     const_d2km = 12364.35
-    area_km_equator = abs(mapset_info.pixel_shift_lat) * abs(mapset_info.pixel_shift_long) * const_d2km
+    area_km_equator = abs(float(mapset_info.pixel_shift_lat)) * abs(float(mapset_info.pixel_shift_long)) * const_d2km
 
     # Get Product Info
     product_info = querydb.get_product_out_info(productcode=productcode,
