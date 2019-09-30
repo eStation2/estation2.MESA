@@ -4,9 +4,9 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
  
     requires: [
         "esapp.view.analysis.mapLogoObjectController",
-        "esapp.view.analysis.mapLogoObjectModel",
+        "esapp.view.analysis.mapLogoObjectModel"
 
-        "Ext.layout.container.Center"
+        // "Ext.layout.container.Center"
     ],
     
     controller: "analysis-maplogoobject",
@@ -19,10 +19,14 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
     // id: 'logo_obj',
     // reference: 'logo_obj',
     autoWidth: true,
-    autoHeight: true,
-    minWidth: 100,
-    maxHeight: 50,
-    layout: 'fit',
+    // autoHeight: true,
+    // minWidth: 200,
+    minHeight: 60,
+    maxHeight: 65,
+    layout: {
+        type: 'fit'
+        // ,align: 'stretch'
+    },
     hidden: true,
     floating: true,
     defaultAlign: 'br-br',
@@ -46,14 +50,14 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
 
     config: {
         logoData: [
-            { src:'resources/img/logo/GMES.png', width:'20%', height:'50px' },
-            { src:'resources/img/logo/AUC_h110.jpg', width:'20%', height:'50px' },
-            { src:'resources/img/logo/ACP_h110.jpg', width:'20%', height:'50px' },
-            { src:'resources/img/logo/logo_en.gif', width:'20%', height:'50px' }
+            // { src:'resources/img/logo/GMES.png', width:'20%', height:'60px' },
+            // { src:'resources/img/logo/AUC_h110.jpg', width:'20%', height:'60px' },
+            // { src:'resources/img/logo/ACP_h110.jpg', width:'20%', height:'60px' },
+            // { src:'resources/img/logo/logo_en.gif', width:'20%', height:'60px' }
         ],
         html: '',
         logos_ImageObj: new Image(),
-        logoPosition: [290,518],
+        logoPosition: [185,521],
         changesmade: false
     },
 
@@ -72,14 +76,17 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
     initComponent: function () {
         var me = this;
 
+        // me.setLogoData(Ext.Array.pluck(me.getViewModel().getStore('defaultlogos').getRange(), 'data'));
+        // Ext.util.Observable.capture(me, function(e){console.log('logoobj - ' + me.id + ': ' + e);});
         me.bind = {
             logoData:'{logoData}'
         };
         me.publishes = ['logoData'];
 
-        // me.logoData = me.getViewModel().data.logoData;
-
         me.logos_ImageObj = new Image();
+
+        // me.logoData = me.getViewModel().data.logoData;
+        // console.info(me.getViewModel().getStore('logos'));
         // me.logoPosition = [434, 583];
 
         me.listeners = {
@@ -99,22 +106,42 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                     //console.info(this.component.getLogoData());
                     editorpanel.show();
                 }
-            },
-            afterrender: function () {
+            }
+            ,render: function () {
                 Ext.tip.QuickTipManager.register({
                     target: this.id,
                     trackMouse: true,
                     title: esapp.Utils.getTranslation('logo_object'), // 'Logo object',
                     text: '<img src="resources/img/pencil_cursor.png" alt="" height="18" width="18">' + esapp.Utils.getTranslation('doubleclick_to_edit') // 'Double click to edit.'
                 });
+                if (me.getLogoData().length == 0){
+                    if (me.getViewModel().getStore('defaultlogos').getRange().length != 0){
+                        me.setLogoData(Ext.Array.pluck(me.getViewModel().getStore('defaultlogos').getRange(), 'data'));
+                        // console.info(me.getLogoData());
+                    }
+                    else {
+                        me.setLogoData(me.getViewModel().data.logoDefaultData);
+                    }
+                }
+                me.getViewModel().data.logoData = me.getLogoData();
+                me.changesmade = true;
+                // me.fireEvent('refreshimage');
+                me.setPosition(me.logoPosition);
+                // me.down().refresh();
+                // me.down().updateLayout();
+                me.updateLayout();
 
                 // me.mon(me, {
                 //     move: function() {
                 //        me.logoPosition = me.getPosition(true);
                 //     }
                 // });
-            },
-            refreshimage: function(){
+            }
+            ,show: function(){
+                me.setPosition(me.logoPosition);
+                me.updateLayout();
+            }
+            ,refreshimage: function(){
                 if(!me.hidden) {
                     //var logosObjDomClone = Ext.clone(me.getEl().dom);
                     var logosObjDom = me.getEl().dom;
@@ -131,10 +158,7 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                             }
                         });
                     });
-                    // console.info('refreshimage logosObj');
-                    // console.info(me.getViewModel().data.logoData);
-                    // console.info(me.changesmade);
-                    // console.info(me.logos_ImageObj.src);
+
                     // if ((me.getViewModel().data.logoData != null && me.getViewModel().data.logoData.length > 0) && (me.changesmade || me.logos_ImageObj.src == '')){
                     if ((me.getViewModel().data.logoData != null && me.getViewModel().data.logoData.length > 0)){
                         // console.info('refresh the logo image');
@@ -144,10 +168,6 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                     //     me.logos_ImageObj = new Image();
                     // }
                 }
-            },
-            show: function(){
-                me.setPosition(me.logoPosition);
-                // me.fireEvent('refreshimage');
             }
             // ,move: function(){
             //     me.logoPosition = me.getPosition();
@@ -164,15 +184,29 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
             bind: {
                 data: '{logoData}'
             },
+            // maxHeight: 65,
+            // minHeight: 60,
+            // loadingHeight: 65,
+            // shrinkWrap: true,
             emptyText: esapp.Utils.getTranslation('noimagesavailable'),  // 'No images available'
             tpl:  new Ext.XTemplate(
-                '<div id="maplogos">',
+                '<div class="maplogos">',
                 '<tpl for=".">',
                     '<span style="vertical-align: middle;"></span>',
-                    '<img src="{src}" height="{height}"  style="vertical-align: middle; padding: 0px 5px 0px 0px;"/>',
+                    '<img src="{src}" height="{height}"  style="vertical-align: middle; padding: 0px 5px 0px 5px;"/>',
                 '</tpl>',
                 '</div>'
             )
+            // ,listeners: {
+            //     beforerender: function (dataview) {
+            //         console.info(dataview);
+            //         Ext.util.Observable.capture(dataview, function(e){console.log('logoobj dataview: ' + e);});
+            //     }
+            //     ,viewready: function(dataview){
+            //         // dataview.render();
+            //         dataview.updateLayout();
+            //     }
+            // }
         }];
 
 
@@ -226,9 +260,6 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                         me.updateLayout();
                         me.changesmade = true;
                         me.fireEvent('refreshimage');
-                        //console.info(Ext.Array.pluck(mapLogoEditor.store.getRange(), 'data'));
-                        //console.info(me.getLogoData());
-                        //console.info(me.logoData);
                     }
                 }]
             },
@@ -247,27 +278,16 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                 region: 'center',
                 layout: 'fit',
                 cls: 'rounded-box',
-                // autoHeight: true,
-                // autoWidth: true,
-                // scrollable: true,
                 width: 555,
                 height: 105,
                 autoScroll: true,
                 scrollable: 'vertical',
                 reserveScrollbar: true,
-                // minWidth: 545,
-                // minHeight: 135,
-                // maxHeight: 135,
-                // maxWidth: 540,
                 margin: 5,
                 // flex: 1,
                 items: [{
                     xtype: 'dataview',
                     id: 'logo-editor-view-' + me.id,
-                    // minWidth: 530,
-                    // maxWidth: 530,
-                    // minHeight: 125,
-                    // maxHeight: 130,
                     singleSelect: true,
                     overItemCls: 'x-view-over',
                     itemSelector: 'div.maplogo-wrap',
@@ -287,7 +307,7 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                     //},
                     store: Ext.create('Ext.data.Store', {
                         autoLoad: false,
-                        model: 'esapp.model.LogosMapView'
+                        model: 'esapp.model.Logo'   // 'esapp.model.LogosMapView'
                     }),
                     emptyText: esapp.Utils.getTranslation('noimagesavailable'),  // 'No images available'
                     tpl: new Ext.XTemplate(
@@ -307,21 +327,37 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                 xtype: 'panel',
                 header: {
                     title: esapp.Utils.getTranslation('available_logos'),    // 'Available logos',
-                    cls: 'rounded-box-gray-header'
+                    cls: 'rounded-box-gray-header',
+                    items: [{
+                        xtype:'button',
+                        // itemId: 'stopedit_tool_' + me.id,
+                        tooltip: esapp.Utils.getTranslation('refresh_logos_from_server'), // 'Refresh logos from server',
+                        glyph:0xf01e,
+                        cls: 'btn-refresh-transparent',
+                        hidden: false,
+                        margin: '0 0 0 0',
+                        handler: function (btn) {
+                            Ext.data.StoreManager.lookup('LogosStore').load();
+                        }
+                    }]
                 },
                 region: 'south',
                 layout: 'fit',
                 cls: 'rounded-box',
                 margin: 5,
-                // minHeight: 350,
-                // maxHeight: 400,
-                // scrollable: true,
                 width: 555,
                 height: 310,
                 autoScroll: true,
                 scrollable: 'vertical',
                 reserveScrollbar: true,
                 // flex: 2,
+                // tools: [{
+                //     type:'refresh',
+                //     tooltip: 'Refresh logos',
+                //     handler: function(event, toolEl, panelHeader) {
+                //         Ext.data.StoreManager.lookup('LogosStore').load();
+                //     }
+                // }],
                 items: [{
                     xtype: 'dataview',
                     id: 'logo-chooser-view-' + me.id,
@@ -335,16 +371,18 @@ Ext.define("esapp.view.analysis.mapLogoObject",{
                     singleSelect: true,
                     overItemCls: 'x-view-over',
                     itemSelector: 'div.maplogo-wrap',
-                    store: "LogosMapView",
-                    //bind: '{logos}',
+                    store: me.getViewModel().getStore('logos'),    // "LogosStore",  // "LogosMapView",
+                    // bind: '{logos}',
                     tpl: new Ext.XTemplate(
                         '<tpl for=".">',
+                            // '<tpl if="active">',
                             '<div class="maplogo-wrap" style="cursor: pointer;">',
                                 '<div class="maplogo" data-qtip="'+esapp.Utils.getTranslation('doubleclick_to_add_to_selected_logos')+'">',
                                     '<img src="{src}" width="110" />',
                                 '</div>',
                             '</div>',
                             '<tpl if="xindex % 4 === 0"><div class="x-clear"></div></tpl>',
+                            // '</tpl>',
                         '</tpl>',
                         '<div class="x-clear"></div>'
                     )

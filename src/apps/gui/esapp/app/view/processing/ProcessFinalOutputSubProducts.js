@@ -61,9 +61,9 @@ Ext.define("esapp.view.processing.ProcessFinalOutputSubProducts",{
             tpl: new Ext.XTemplate(
                     '<b>{prod_descriptive_name}</b>' +
                     '</br>' +
-                    '<b class="smalltext" style="color:darkgrey">{productcode}</b>' +
+                    '<b class="smalltext" style="color:darkgrey;">{productcode}</b>' +
                     '<tpl if="version != \'undefined\'">',
-                        '<b class="smalltext" style="color:darkgrey"> - {version}</b>',
+                        '<b class="smalltext" style="color:darkgrey;"> - {version}</b>',
                     '</tpl>',
                     '</br>'
                 ),

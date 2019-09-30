@@ -5,7 +5,6 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
     "viewModel": {
         "type": "acquisition-editeumetcastsource"
     },
-    xtype: 'editeumetcastsource',
 
     requires: [
         'esapp.view.acquisition.editEumetcastSourceController',
@@ -13,6 +12,7 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
 
         'Ext.layout.container.Center'
     ],
+    xtype: 'editeumetcastsource',
 
     title: esapp.Utils.getTranslation('editeumetcastdatasource'),
     header: {
@@ -30,8 +30,8 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
     maximizable: false,
 
     //width: 1100,
-    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-35 : 700,  // 600,
-    maxHeight: 700,
+    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-35 : 680,  // 600,
+    maxHeight: 680,
 
     frame: true,
     border: false,
@@ -40,32 +40,54 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
     viewConfig:{forceFit:true},
     layout:'hbox',
 
-    data_source_id: null,
-
-    //listeners: {
-    //    beforerender: "getEumetcastSource"
-    //},
-
     session:true,
-    //store: 'theEumetcastSource',
+
+    params: {
+        create: false,
+        view: true,
+        edit: false,
+        eumetcastsourcerecord: null,
+        data_source_id: null,
+        orig_eumetcast_id: ''
+    },
 
     initComponent: function () {
         var me = this;
 
-        me.title = esapp.Utils.getTranslation('editeumetcastdatasource');
+        // me.title = esapp.Utils.getTranslation('editeumetcastdatasource');
+
+        if (me.params.edit){
+            me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('editeumetcastdatasource') + '</span>');
+        }
+        else if (me.params.view){
+            me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('vieweumetcastdatasource') + '</span>');
+        }
+        else {
+            me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('neweumetcastdatasource') + '</span>');
+        }
 
         me.buttons = [{
+            text: 'TEST',
+            // iconCls: 'fa fa-save fa-2x',
+            style: {color: 'lightblue'},
+            scale: 'medium',
+            disabled: false,
+            formBind: true,
+            hidden: me.params.view ? true : false,
+            handler: 'onTestClick'
+        },'->',{
             text: esapp.Utils.getTranslation('save'),    // 'Save',
             iconCls: 'fa fa-save fa-2x',
             style: { color: 'lightblue' },
             scale: 'medium',
             disabled: false,
             formBind: true,
+            hidden: me.params.view ? true : false,
             handler: 'onSaveClick'
-        }, {
-            text: esapp.Utils.getTranslation('cancel'),    // 'Cancel',
-            scale: 'medium',
-            handler: 'onCancelClick'
+        // }, {
+        //     text: esapp.Utils.getTranslation('cancel'),    // 'Cancel',
+        //     scale: 'medium',
+        //     handler: 'onCancelClick'
         }];
 
         var formattypes = new Ext.data.Store({
@@ -115,6 +137,21 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
             ]
         });
 
+        me.listeners = {
+            afterrender: function(){
+                if (me.params.create){
+                    me.lookupReference('eumetcast_id').setValue('');
+                }
+            },
+            beforeclose: function(){
+                // console.info('beforeclose');
+                // console.info(Ext.data.StoreManager.lookup('EumetcastSourceStore').getUpdatedRecords());
+                if (Ext.data.StoreManager.lookup('EumetcastSourceStore').getUpdatedRecords() !== []){
+                    Ext.data.StoreManager.lookup('EumetcastSourceStore').rejectChanges();
+                }
+                Ext.data.StoreManager.lookup('EumetcastSourceStore').load();
+            }
+        };
 
         me.items = [{
             xtype: 'form',
@@ -144,17 +181,28 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
                     defaults: {
                         width: 400,
                         labelWidth: 120,
-                        labelAlign: 'top'
+                        labelAlign: 'top',
+                        disabled: me.params.view ? true : false
                     },
                     items: [{
-                        xtype: 'displayfield',
+                        xtype: 'textfield',
                         fieldLabel: esapp.Utils.getTranslation('id'),    // 'ID',
                         labelAlign: 'left',
-                        labelWidth: 50,
+                        labelWidth: 60,
                         reference: 'eumetcast_id',
                         msgTarget: 'side',
-                        bind: '{theEumetcastSource.eumetcast_id}'
-                        //dataIndex: 'eumetcast_id'
+                        bind: '{theEumetcastSource.eumetcast_id}',
+                        allowBlank: false
+                    }, {
+                        xtype: 'textareafield',
+                        fieldLabel: esapp.Utils.getTranslation('description'),    // 'Description',
+                        reference: 'description',
+                        msgTarget: 'side',
+                        shrinkWrap: 2,
+                        minHeight: 160,
+                        grow: true,
+                        bind: '{theEumetcastSource.description}'
+                        //dataIndex: 'description'
                     }, {
                         xtype: 'textareafield',
                         fieldLabel: esapp.Utils.getTranslation('filterexpression'),    // 'Filter expression',
@@ -165,51 +213,50 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
                         allowBlank: false,
                         grow: true
                     }, {
-                        xtype: 'displayfield',
+                        xtype: 'textareafield',
                         fieldLabel: esapp.Utils.getTranslation('tipicalfilename'),    // 'Typical file name',
                         reference: 'typical_file_name',
                         msgTarget: 'side',
                         minHeight: 80,
                         shrinkWrap: 2,
+                        grow: true,
                         bind: '{theEumetcastSource.typical_file_name}'
                         //dataIndex: 'typical_file_name'
                     }, {
-                        xtype: 'displayfield',
-                        fieldLabel: esapp.Utils.getTranslation('description'),    // 'Description',
-                        reference: 'description',
+                        xtype: 'textfield',
+                        fieldLabel: esapp.Utils.getTranslation('frequency'),    // 'Frequency',
+                        reference: 'frequency',
                         msgTarget: 'side',
                         shrinkWrap: 2,
-                        minHeight: 160,
-                        grow: true,
-                        bind: '{theEumetcastSource.description}'
-                        //dataIndex: 'description'
-                    }, {
-                        xtype: 'displayfield',
-                        fieldLabel: esapp.Utils.getTranslation('collectionname'),    // 'Collection name',
-                        labelAlign: 'top',
-                        reference: 'collection_name',
-                        msgTarget: 'side',
-                        shrinkWrap: 2,
-                        bind: '{theEumetcastSource.collection_name}'
+                        bind: '{theEumetcastSource.frequency}'
                         //dataIndex: 'collection_name'
-                    }, {
-                        xtype: 'displayfield',
-                        fieldLabel: esapp.Utils.getTranslation('theme'),    // 'Theme',
-                        labelAlign: 'top',
-                        reference: 'keywords_theme',
-                        msgTarget: 'side',
-                        shrinkWrap: 2,
-                        bind: '{theEumetcastSource.keywords_theme}'
-                        //dataIndex: 'keywords_theme'
-                    }, {
-                        xtype: 'displayfield',
-                        fieldLabel: esapp.Utils.getTranslation('socialbenefitarea'),    // 'Societal benefit area',
-                        labelAlign: 'top',
-                        reference: 'keywords_societal_benefit_area',
-                        msgTarget: 'side',
-                        shrinkWrap: 2,
-                        bind: '{theEumetcastSource.keywords_societal_benefit_area}'
-                        //dataIndex: 'keywords_societal_benefit_area'
+                    // }, {
+                    //     xtype: 'displayfield',
+                    //     fieldLabel: esapp.Utils.getTranslation('collectionname'),    // 'Collection name',
+                    //     labelAlign: 'top',
+                    //     reference: 'collection_name',
+                    //     msgTarget: 'side',
+                    //     shrinkWrap: 2,
+                    //     bind: '{theEumetcastSource.collection_name}'
+                    //     //dataIndex: 'collection_name'
+                    // }, {
+                    //     xtype: 'displayfield',
+                    //     fieldLabel: esapp.Utils.getTranslation('theme'),    // 'Theme',
+                    //     labelAlign: 'top',
+                    //     reference: 'keywords_theme',
+                    //     msgTarget: 'side',
+                    //     shrinkWrap: 2,
+                    //     bind: '{theEumetcastSource.keywords_theme}'
+                    //     //dataIndex: 'keywords_theme'
+                    // }, {
+                    //     xtype: 'displayfield',
+                    //     fieldLabel: esapp.Utils.getTranslation('socialbenefitarea'),    // 'Societal benefit area',
+                    //     labelAlign: 'top',
+                    //     reference: 'keywords_societal_benefit_area',
+                    //     msgTarget: 'side',
+                    //     shrinkWrap: 2,
+                    //     bind: '{theEumetcastSource.keywords_societal_benefit_area}'
+                    //     //dataIndex: 'keywords_societal_benefit_area'
                     }]
                 },{
                     xtype: 'fieldset',
@@ -219,8 +266,9 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
                     margin: '10 10 10 5',
                     padding: '10 10 10 10',
                     defaults: {
-                        width: 275,
-                        labelWidth: 130
+                        width: 290,
+                        labelWidth: 130,
+                        disabled: me.params.view ? true : false
                     },
                     items: [{
                         xtype: 'combobox',

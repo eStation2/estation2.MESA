@@ -49,6 +49,7 @@ WEBPY_COOKIE_NAME = "webpy_session_id"
 urls = (
     "/pa(.*)", "ProductAcquisition",
     "/product/update", "UpdateProduct",
+    "/product/delete", "DeleteProduct",
     "/product/createproduct", "CreateProduct",
     "/product/updateproductinfo", "UpdateProductInfo",
     "/product/unassigndatasource", "UnassignProductDataSource",
@@ -67,6 +68,9 @@ urls = (
     "/frequencies", "GetFrequencies",
     "/dateformats", "GetDateFormats",
     "/datatypes", "GetDataTypes",
+    "/projections", "GetProjections",
+    "/resolutions", "GetResolutions",
+    "/bboxes", "GetPredefinedBboxes",
 
     "/dashboard/getdashboard", "GetDashboard",
     "/dashboard/systemstatus", "GetSystemStatus",
@@ -78,6 +82,16 @@ urls = (
 
     "/ingestion", "Ingestion",
     "/ingestion/update", "UpdateIngestion",
+
+    "/ingestsubproduct", "getIngestSubProducts",
+    "/ingestsubproduct/create", "CreateIngestSubProduct",
+    "/ingestsubproduct/update", "UpdateIngestSubProduct",
+    "/ingestsubproduct/delete", "DeleteIngestSubProduct",
+
+    "/subdatasourcedescription", "getSubDatasourceDescriptions",
+    "/subdatasourcedescription/create", "CreateSubDatasourceDescription",
+    "/subdatasourcedescription/update", "UpdateSubDatasourceDescription",
+    "/subdatasourcedescription/delete", "DeleteSubDatasourceDescription",
 
     "/getlogfile", "GetLogFile",
 
@@ -153,6 +167,20 @@ urls = (
 
     "/analysis/userworkspaces", "getUserWorkspaces",
     "/analysis/userworkspaces/delete", "DeleteWorkspace",
+    "/analysis/userworkspaces/update", "saveWorkspaceInDefaultWS",
+    "/analysis/exportworkspaces", "exportWorkspaces",
+    "/analysis/importworkspaces", "importWorkspaces",
+
+    "/analysis/refworkspaces", "getRefWorkspaces",
+    "/analysis/refworkspaces/update", "saveWorkspaceInDefaultWS",
+
+    "/analysis/workspacemapsgraphs", "getWorkspaceMapsAndGraphs",
+
+    "/logos", "GetLogos",
+    "/logos/create", "CreateLogo",
+    "/logos/update", "UpdateLogo",
+    "/logos/delete", "DeleteLogo",
+    "/logos/import", "ImportLogo",
 
     "/layers", "GetLayers",
     "/layers/create", "CreateLayer",
@@ -169,16 +197,20 @@ urls = (
     "/legends/delete", "DeleteLegend",
     "/legends/copylegend", "copyLegend",
     "/legends/import", "ImportLegend",
-    "/legends/export", "ExportLegend",
+    "/legends/exportlegend", "ExportLegend",
     "/legends/legendclasses", "GetLegendClasses",
     "/legends/assignlegends", "AssignLegends",
     "/legends/unassignlegend", "UnassignLegend",
     "/legends/assigneddatasets", "GetAssignedDatasets",
 
     "/getmapsetsforingest", "GetMapsetsForIngest",
-    "/getmapsetsall", "GetMapsets",
     "/addingestmapset", "AddIngestMapset",
     "/deleteingestmapset", "DisableIngestMapset",
+
+    "/mapsets/getmapsetsall", "GetMapsets",
+    "/mapsets/create", "CreateMapset",
+    "/mapsets/update", "UpdateMapset",
+    "/mapsets/delete", "DeleteMapset",
 
     "/getlanguages", "GetLanguages",
     "/geti18n", "GetI18n",
@@ -241,7 +273,7 @@ class Register:
                 'username': getparams['fullname'],
                 'password': getparams['pass'],
                 'userid': getparams['user'],
-                'userlevel': 1,
+                'userlevel': 2,
                 'email': getparams['email']
             }
 
@@ -401,14 +433,17 @@ class checkECASlogin:
                     'prefered_language': 'eng'
                 }
 
-                userExists = querydb.checkUser(user_info)
-                if userExists is None:
-                    userExists = querydb.checkUser(user_info)
+                userFromDB = querydb.checkUser(user_info)
+                if userFromDB is None:
+                    userFromDB = querydb.checkUser(user_info)
 
                 message = ',"message":"User exists!"'
-                if userExists is not None and not userExists:
+                if userFromDB is None:
                     if self.crud_db.create('users', user_info):
                         message = ',"message":"User created!"'
+                else:
+                    for row in userFromDB:
+                        user_info['userlevel'] = row['userlevel']
 
                 user_info_json = json.dumps(user_info,
                                             ensure_ascii=False,
@@ -422,6 +457,155 @@ class checkECASlogin:
                 login_json = '{"success":false, "error":"Error reading login data!"}'
 
         return login_json
+
+
+class GetLogos:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        # getparams = web.input()
+        logos_json = webpy_esapp_helpers.GetLogos()
+        return logos_json
+
+
+class ImportLogo:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        # getparams = json.loads(web.data())  # get PUT data
+        getparams = web.input() # get POST data
+
+        logosfiledir = es_constants.es2globals['estation2_logos_dir']
+        if 'logofilename' in getparams: # to check if the file-object is created
+            try:
+                filepath=getparams.logofilename.replace('\\','/') # replaces the windows-style slashes with linux ones.
+                filename=filepath.split('/')[-1] # splits the and chooses the last part (the filename with extension)
+
+                # Separate base from extension
+                base, extension = os.path.splitext(filename)
+
+                # Initial new name
+                new_name = os.path.join(logosfiledir, filename).encode('utf-8')
+                new_name_final = logosfiledir + '/' + filename
+
+                if not os.path.exists(new_name):  # file does not exist in <layerfiledir>
+                    fout = open(new_name,'w') # creates the file where the uploaded file should be stored
+                    fout.write(getparams.logofile) # .read()  writes the uploaded file to the newly created file.
+                    fout.close() # closes the file, upload complete.
+                else:  # file exists in <logosfiledir>
+                    ii = 1
+                    while True:
+                        new_name = os.path.join(logosfiledir, base + "_" + str(ii) + extension).encode('utf-8')
+                        new_name_final = os.path.join(logosfiledir, base + "_" + str(ii) + extension)
+                        if not os.path.exists(new_name):
+                            fout = open(new_name,'w') # creates the file where the uploaded file should be stored
+                            fout.write(getparams.logofile) # .read()  writes the uploaded file to the newly created file.
+                            fout.close() # closes the file, upload complete.
+                            break
+                        ii += 1
+
+                finalfilename = new_name_final.split('/')[-1] # splits the and chooses the last part (the filename with extension)
+                success = True
+            except:
+                success = False
+        else:
+            success = False
+
+        if success:
+            status = '{"success":"true", "filename":"'+ finalfilename + '","message":"Logo imported!"}'
+        else:
+            status = '{"success":false, "message":"An error occured while importing the logo!"}'
+
+        return status
+
+
+class DeleteLogo:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def DELETE(self):
+        getparams = json.loads(web.data())  # get PUT data
+        # getparams = web.input() # get POST data
+        if 'logo' in getparams:
+            logo = {
+                'logo_id': getparams['logo']['logo_id'],
+            }
+
+
+            if self.crud_db.delete('logos', **logo):
+                status = '{"success":"true", "message":"Logo deleted!"}'
+            else:
+                status = '{"success":false, "message":"An error occured while deleting the logo!"}'
+
+        else:
+            status = '{"success":false, "message":"No logo info passed!"}'
+
+        return status
+
+
+class CreateLogo:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def POST(self):
+        getparams = json.loads(web.data())  # get PUT data
+        # getparams = web.input() # get POST data
+        if 'logo' in getparams:
+            logo = {
+                # 'logo_id': getparams['logo']['logo_id'],
+                'logo_filename': getparams['logo']['logo_filename'],
+                'logo_description': getparams['logo']['logo_description'],
+                'active': getparams['logo']['active'],
+                'deletable': getparams['logo']['deletable'],
+                'defined_by': getparams['logo']['defined_by'],
+                'isdefault': getparams['logo']['isdefault'],
+                'orderindex_defaults': getparams['logo']['orderindex_defaults']
+            }
+
+            if self.crud_db.create('logos', logo):
+                status = '{"success":"true", "message":"Logo created!"}'
+            else:
+                status = '{"success":false, "message":"An error occured while creating the new logo!"}'
+
+        else:
+            status = '{"success":false, "message":"No logo info passed!"}'
+
+        return status
+
+
+class UpdateLogo:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+
+    def PUT(self):
+        getparams = json.loads(web.data())  # get PUT data
+        if 'logo' in getparams:
+            logo = {
+                'logo_id': getparams['logo']['logo_id'],
+                'logo_filename': getparams['logo']['logo_filename'],
+                'logo_description': getparams['logo']['logo_description'],
+                'active': getparams['logo']['active'],
+                'deletable': getparams['logo']['deletable'],
+                'defined_by': getparams['logo']['defined_by'],
+                'isdefault': getparams['logo']['isdefault'],
+                'orderindex_defaults': getparams['logo']['orderindex_defaults']
+            }
+
+
+            if self.crud_db.update('logos', logo):
+                updatestatus = '{"success":"true", "message":"Logo updated!"}'
+            else:
+                updatestatus = '{"success":false, "message":"An error occured while updating the logo!"}'
+
+        else:
+            updatestatus = '{"success":false, "message":"No logo info passed!"}'
+
+        return updatestatus
 
 
 class GetAssignedDatasets:
@@ -482,6 +666,25 @@ class SaveLegend:
         params = web.input()
         return webpy_esapp_helpers.SaveLegend(params)
 
+
+class ExportLegend:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+        filename = webpy_esapp_helpers.ExportLegend(params)
+        web.header('Content-Type', 'application/force-download')   # 'application/x-compressed')
+        web.header('Content-transfer-encoding', 'binary')
+        web.header('Content-Disposition', 'attachment; filename=' + os.path.basename(filename))  # force browser to show "Save as" dialog.
+        f = open(filename, 'rb')
+        while 1:
+            buf = f.read(1024 * 8)
+            if not buf:
+                break
+            yield buf
+        f.close()
+        os.remove(filename)
 
 class GetLegends:
     def __init__(self):
@@ -553,6 +756,78 @@ class getUserWorkspaces:
         return webpy_esapp_helpers.getUserWorkspaces(params)
 
 
+class getRefWorkspaces:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        params = web.input()
+        return webpy_esapp_helpers.getRefWorkspaces(params)
+
+
+class exportWorkspaces:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+        workspaces_dict_all = []
+
+        # print(params)
+        if hasattr(params, "workspaces"):
+            # print(params['workspaces'])
+            workspaces = json.loads(params['workspaces'])
+
+            # print(isinstance(workspaces, dict))
+            # print(type(workspaces))
+            for workspace in workspaces:
+                workspace['maps'] = webpy_esapp_helpers.getWorkspaceMaps(workspace['workspaceid'], workspace['userid'], True)
+                workspace['graphs'] = webpy_esapp_helpers.getWorkspaceGraphs(workspace['workspaceid'], workspace['userid'], True)
+                workspace['userid'] = ''
+
+                workspaces_dict_all.append(workspace)
+
+            workspaces_json = json.dumps(workspaces_dict_all, ensure_ascii=True, encoding='utf-8',
+                                         sort_keys=True, indent=4, separators=(', ', ': '))
+
+            workspaces_json = '{"workspaces":' + workspaces_json + '}'
+            # print(workspaces_json)
+
+            filename = 'exported_workspaces.json'
+            with open(es_constants.es2globals['base_tmp_dir']+filename, 'w+') as f:
+                f.write(workspaces_json)
+            f.close()
+
+            web.header('Content-Type', 'text/html')   # 'application/x-compressed'  'application/force-download'
+            web.header('Content-transfer-encoding', 'binary')
+            web.header('Content-Disposition', 'attachment; filename=' + filename)  # force browser to show "Save as" dialog.
+            f = open(es_constants.es2globals['base_tmp_dir']+filename, 'rb')
+            while 1:
+                buf = f.read(1024 * 8)
+                if not buf:
+                    break
+                yield buf
+            f.close()
+
+
+class importWorkspaces:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+        return webpy_esapp_helpers.importWorkspaces(params)
+
+
+class getWorkspaceMapsAndGraphs:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+        return webpy_esapp_helpers.getWorkspaceMapsAndGraphs(params)
+
+
 class SaveWorkspacePin:
     def __init__(self):
         self.lang = "eng"
@@ -569,6 +844,16 @@ class SaveWorkspaceName:
     def POST(self):
         params = web.input()
         return webpy_esapp_helpers.saveWorkspaceName(params)
+
+
+class saveWorkspaceInDefaultWS:
+    def __init__(self):
+        self.lang = "eng"
+
+    def PUT(self):
+        # params = web.input()
+        params = json.loads(web.data())  # get PUT data
+        return webpy_esapp_helpers.saveWorkspaceInDefaultWS(params)
 
 
 class SaveWorkspace:
@@ -589,11 +874,11 @@ class DeleteWorkspace:
         params = json.loads(web.data())  # get PUT data
         status = '{"success":false, "message":"An error occured while deleting the Workspace!"}'
 
-        if 'userworkspace' in params:
+        if 'workspaceid' in params:
 
             workspacePK = {
-                'userid': params['userworkspace']['userid'],
-                'workspaceid': params['userworkspace']['workspaceid']
+                'userid': params['userid'],
+                'workspaceid': params['workspaceid']
             }
 
             if self.crud_db.delete('user_workspaces', **workspacePK):
@@ -1112,6 +1397,99 @@ class SaveRequest:
             f.close()
 
 
+class GetProjections:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        projections_dict_all = []
+        projections = querydb.get_projections()
+
+        if hasattr(projections, "__len__") and projections.__len__() > 0:
+            for row in projections:
+                row_dict = functions.row2dict(row)
+
+                projections_dict_all.append(row_dict)
+
+                projections_json = json.dumps(projections_dict_all,
+                                         ensure_ascii=False,
+                                         encoding='utf-8',
+                                         sort_keys=True,
+                                         indent=4,
+                                         separators=(', ', ': '))
+
+                projections_json = '{"success":"true", "total":'\
+                                   + str(projections.__len__())\
+                                   + ',"projections":'+projections_json+'}'
+
+        else:
+            projections_json = '{"success":false, "error":"No Projections defined!"}'
+
+        return projections_json
+
+
+class GetResolutions:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        resolutions_dict_all = []
+        resolutions = querydb.get_resolutions()
+
+        if hasattr(resolutions, "__len__") and resolutions.__len__() > 0:
+            for row in resolutions:
+                row_dict = functions.row2dict(row)
+
+                resolutions_dict_all.append(row_dict)
+
+                resolutions_json = json.dumps(resolutions_dict_all,
+                                         ensure_ascii=False,
+                                         encoding='utf-8',
+                                         sort_keys=True,
+                                         indent=4,
+                                         separators=(', ', ': '))
+
+                resolutions_json = '{"success":"true", "total":'\
+                                   + str(resolutions.__len__())\
+                                   + ',"resolutions":'+resolutions_json+'}'
+
+        else:
+            resolutions_json = '{"success":false, "error":"No resolutions defined!"}'
+
+        return resolutions_json
+
+
+class GetPredefinedBboxes:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        bboxes_dict_all = []
+        bboxes = querydb.get_predefined_bboxes()
+
+        if hasattr(bboxes, "__len__") and bboxes.__len__() > 0:
+            for row in bboxes:
+                row_dict = functions.row2dict(row)
+
+                bboxes_dict_all.append(row_dict)
+
+                bboxes_json = json.dumps(bboxes_dict_all,
+                                         ensure_ascii=False,
+                                         encoding='utf-8',
+                                         sort_keys=True,
+                                         indent=4,
+                                         separators=(', ', ': '))
+
+                bboxes_json = '{"success":"true", "total":'\
+                                   + str(bboxes.__len__())\
+                                   + ',"bboxes":'+bboxes_json+'}'
+
+        else:
+            bboxes_json = '{"success":false, "error":"No predefined bounding boxes defined!"}'
+
+        return bboxes_json
+
+
 class GetCategories:
     def __init__(self):
         self.lang = "eng"
@@ -1257,7 +1635,7 @@ class AssignInternetSource:
             'subproductcode': getparams['subproductcode'],
             'version': version,
             'data_source_id': getparams['data_source_id'],
-            'defined_by': 'USER',
+            'defined_by': getparams['defined_by'],
             'type': 'INTERNET'
         }
 
@@ -1288,7 +1666,7 @@ class AssignEumetcastSource:
             'subproductcode': getparams['subproductcode'],
             'version': version,
             'data_source_id': getparams['data_source_id'],
-            'defined_by': 'USER',
+            'defined_by': getparams['defined_by'],
             'type': 'EUMETCAST'
         }
 
@@ -1336,12 +1714,14 @@ class GetEumetcastSources:
             for row in eumetcastsources:
                 row_dict = functions.row2dict(row)
                 eumetcastsource = {'eumetcast_id': row_dict['eumetcast_id'],
+                                   'orig_eumetcast_id': row_dict['eumetcast_id'],
                                    'collection_name': row_dict['collection_name'],
                                    'filter_expression_jrc': row_dict['filter_expression_jrc'],
                                    'description': row_dict['description'],
                                    'typical_file_name': row_dict['typical_file_name'],
                                    'keywords_theme': row_dict['keywords_theme'],
                                    'keywords_societal_benefit_area': row_dict['keywords_societal_benefit_area'],
+                                   'defined_by': row_dict['defined_by'],
                                    'datasource_descr_id': row_dict['datasource_descr_id'],
                                    'format_type': row_dict['format_type'],
                                    'file_extension': row_dict['file_extension'],
@@ -1389,23 +1769,41 @@ class UpdateEumetcastSource:
         if 'eumetcastsources' in getparams:
 
             prod_id_position = None
-            if getparams['eumetcastsources']['prod_id_position'].isdigit():
-                prod_id_position = int(getparams['eumetcastsources']['prod_id_position'])
+            if getparams['eumetcastsources']['prod_id_position'] != None:
+                try:
+                    prod_id_position = int(getparams['eumetcastsources']['prod_id_position'])
+                except ValueError:
+                    prod_id_position = None
 
             prod_id_length = None
-            if getparams['eumetcastsources']['prod_id_length'].isdigit():
-                prod_id_length = int(getparams['eumetcastsources']['prod_id_length'])
+            if getparams['eumetcastsources']['prod_id_length'] != None:
+                try:
+                    prod_id_length = int(getparams['eumetcastsources']['prod_id_length'])
+                except ValueError:
+                    prod_id_length = None
 
             area_length = None
-            if getparams['eumetcastsources']['area_length'].isdigit():
-                area_length = int(getparams['eumetcastsources']['area_length'])
+            if getparams['eumetcastsources']['area_length'] != None:
+                try:
+                    area_length = int(getparams['eumetcastsources']['area_length'])
+                except ValueError:
+                    area_length = None
 
             release_length = None
-            if getparams['eumetcastsources']['release_length'].isdigit():
-                release_length = int(getparams['eumetcastsources']['release_length'])
+            if getparams['eumetcastsources']['release_length'] != None:
+                try:
+                    release_length = int(getparams['eumetcastsources']['release_length'])
+                except ValueError:
+                    release_length = None
 
             eumetcastsourceinfo = {'eumetcast_id': getparams['eumetcastsources']['eumetcast_id'],
-                                   'filter_expression_jrc': getparams['eumetcastsources']['filter_expression_jrc']}
+                                   'filter_expression_jrc': getparams['eumetcastsources']['filter_expression_jrc'],
+                                   'description': getparams['eumetcastsources']['description'],
+                                   'typical_file_name': getparams['eumetcastsources']['typical_file_name'],
+                                   'frequency': getparams['eumetcastsources']['frequency'],
+                                   'datasource_descr_id': getparams['eumetcastsources']['eumetcast_id'],
+                                   'defined_by': getparams['eumetcastsources']['defined_by']
+                                   }
 
             datasourcedescrinfo = {'datasource_descr_id': getparams['eumetcastsources']['eumetcast_id'],
                                   'format_type': getparams['eumetcastsources']['format_type'],
@@ -1425,18 +1823,136 @@ class UpdateEumetcastSource:
                                   'release_length': release_length,
                                   'native_mapset': getparams['eumetcastsources']['native_mapset']}
 
-            if self.crud_db.update('eumetcast_source', eumetcastsourceinfo):
-                if self.crud_db.update('datasource_description', datasourcedescrinfo):
+            if getparams['eumetcastsources']['eumetcast_id'] != getparams['eumetcastsources']['orig_eumetcast_id']:
+                eumetcastsourceinfo['orig_eumetcast_id'] = getparams['eumetcastsources']['orig_eumetcast_id']
+
+                # if self.crud_db.update('datasource_description', datasourcedescrinfo):
+                if querydb.update_eumetcast_source_info(eumetcastsourceinfo, datasourcedescrinfo):
                     updatestatus = '{"success":"true", "message":"Eumetcast data source and description updated!"}'
                 else:
-                    updatestatus = '{"success":"true", "message":"Eumetcast data source updated!"}'
+                    updatestatus = '{"success":false, "message":"An error occured while updating the Eumetcast data source!"}'
+                # else:
+                #     updatestatus = '{"success":false, "message":"An error occured while updating the Eumetcast data source description!"}'
+
             else:
-                updatestatus = '{"success":false, "message":"An error occured while updating the Eumetcast data source!"}'
+                if self.crud_db.update('eumetcast_source', eumetcastsourceinfo):
+                    if self.crud_db.update('datasource_description', datasourcedescrinfo):
+                        updatestatus = '{"success":"true", "message":"Eumetcast data source and description updated!"}'
+                    else:
+                        updatestatus = '{"success":"true", "message":"Eumetcast data source updated!"}'
+                else:
+                    updatestatus = '{"success":false, "message":"An error occured while updating the Eumetcast data source!"}'
 
         else:
             updatestatus = '{"success":false, "message":"No Eumetcast data source passed!"}'
 
         return updatestatus
+
+
+class CreateEumetcastSource:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def POST(self):
+        getparams = json.loads(web.data())  # get PUT data
+        if 'eumetcastsources' in getparams:
+
+            prod_id_position = None
+            if getparams['eumetcastsources']['prod_id_position'] != None:
+                try:
+                    prod_id_position = int(getparams['eumetcastsources']['prod_id_position'])
+                except ValueError:
+                    prod_id_position = None
+
+            prod_id_length = None
+            if getparams['eumetcastsources']['prod_id_length'] != None:
+                try:
+                    prod_id_length = int(getparams['eumetcastsources']['prod_id_length'])
+                except ValueError:
+                    prod_id_length = None
+
+            area_length = None
+            if getparams['eumetcastsources']['area_length'] != None:
+                try:
+                    area_length = int(getparams['eumetcastsources']['area_length'])
+                except ValueError:
+                    area_length = None
+
+            release_length = None
+            if getparams['eumetcastsources']['release_length'] != None:
+                try:
+                    release_length = int(getparams['eumetcastsources']['release_length'])
+                except ValueError:
+                    release_length = None
+
+            eumetcastsourceinfo = {'eumetcast_id': getparams['eumetcastsources']['eumetcast_id'],
+                                   'filter_expression_jrc': getparams['eumetcastsources']['filter_expression_jrc'],
+                                   'description': getparams['eumetcastsources']['description'],
+                                   'typical_file_name': getparams['eumetcastsources']['typical_file_name'],
+                                   'frequency': getparams['eumetcastsources']['frequency'],
+                                   'datasource_descr_id': getparams['eumetcastsources']['eumetcast_id'],
+                                   'defined_by': getparams['eumetcastsources']['defined_by'],
+                                   # 'update_datetime': getparams['internetsources']['update_datetime']
+                                   }
+
+            datasourcedescrinfo = {'datasource_descr_id': getparams['eumetcastsources']['internet_id'],
+                                  'format_type': getparams['eumetcastsources']['format_type'],
+                                  'file_extension': getparams['eumetcastsources']['file_extension'],
+                                  'delimiter': getparams['eumetcastsources']['delimiter'],
+                                  'date_format': getparams['eumetcastsources']['date_format'],
+                                  'date_position': getparams['eumetcastsources']['date_position'],
+                                  'product_identifier': getparams['eumetcastsources']['product_identifier'],
+                                  'prod_id_position': prod_id_position,
+                                  'prod_id_length': prod_id_length,
+                                  'area_type': getparams['eumetcastsources']['area_type'],
+                                  'area_position': getparams['eumetcastsources']['area_position'],
+                                  'area_length': area_length,
+                                  'preproc_type': getparams['eumetcastsources']['preproc_type'],
+                                  'product_release': getparams['eumetcastsources']['product_release'],
+                                  'release_position': getparams['eumetcastsources']['release_position'],
+                                  'release_length': release_length,
+                                  'native_mapset': getparams['eumetcastsources']['native_mapset']}
+
+            if self.crud_db.create('eumetcast_source', eumetcastsourceinfo):
+                if self.crud_db.create('datasource_description', datasourcedescrinfo):
+                    createstatus = '{"success":"true", "message":"Eumetcast data source and description created!"}'
+                else:
+                    createstatus = '{"success":"true", "message":"Eumetcast data source created!"}'
+            else:
+                createstatus = '{"success":false, "message":"An error occured while creating the Eumetcast data source!"}'
+
+        else:
+            createstatus = '{"success":false, "message":"No Eumetcast data source passed!"}'
+
+        return createstatus
+
+
+class DeleteEumetcastSource:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def DELETE(self):
+        getparams = json.loads(web.data())  # get PUT data
+        # getparams = web.input() # get POST data
+        if 'eumetcastsources' in getparams:
+
+            eumetcastsourceinfo = {'eumetcast_id': getparams['eumetcastsources']['eumetcast_id']}
+            datasourcedescrinfo = {'datasource_descr_id': getparams['eumetcastsources']['eumetcast_id']}
+
+            if self.crud_db.delete('eumetcast_source', **eumetcastsourceinfo):
+                if self.crud_db.delete('datasource_description', **datasourcedescrinfo):
+                    deletetatus = '{"success":"true", "message":"Eumetcast data source and description deleted!"}'
+                else:
+                    deletetatus = '{"success":"true", "message":"Eumetcast data source deleted!"}'
+            else:
+                deletetatus = '{"success":false, "message":"An error occured while deleting the Eumetcast data source!"}'
+
+        else:
+            deletetatus = '{"success":false, "message":"No Eumetcast data source passed!"}'
+
+        return deletetatus
 
 
 class GetInternetSources:
@@ -1450,6 +1966,8 @@ class GetInternetSources:
         if hasattr(internetsources, "__len__") and internetsources.__len__() > 0:
             for row in internetsources:
                 row_dict = functions.row2dict(row)
+
+                # updatedate = row_dict['update_datetime'][0:16]     # datetime.strptime(row_dict['update_datetime'], "%Y-%m-%d  %H:%M")
 
                 startdate = None
                 if row_dict['start_date'] != '':
@@ -1494,11 +2012,12 @@ class GetInternetSources:
                         release_length = None
 
                 internetsource = {'internet_id': row_dict['internet_id'],
+                                  'orig_internet_id': row_dict['internet_id'],
                                   'defined_by': row_dict['defined_by'],
                                   'descriptive_name': row_dict['descriptive_name'],
                                   'description': row_dict['description'],
                                   'modified_by': row_dict['modified_by'],
-                                  'update_datetime': row_dict['update_datetime'],
+                                  'update_datetime': row_dict['update_datetime'][0:16],
                                   'url': row_dict['url'],
                                   'user_name': row_dict['user_name'],
                                   'password': row_dict['password'],
@@ -1604,6 +2123,123 @@ class UpdateInternetSource:
                                   'descriptive_name': getparams['internetsources']['descriptive_name'],
                                   'description': getparams['internetsources']['description'],
                                   'modified_by': getparams['internetsources']['modified_by'],
+                                  # 'update_datetime': datetime.date.today(),     # Created a trigger which updates this field
+                                  'url': getparams['internetsources']['url'],
+                                  'user_name': getparams['internetsources']['user_name'],
+                                  'password': getparams['internetsources']['password'],
+                                  'type': getparams['internetsources']['type'],
+                                  'include_files_expression': getparams['internetsources']['include_files_expression'],
+                                  'files_filter_expression': getparams['internetsources']['files_filter_expression'],
+                                  'status': getparams['internetsources']['status'],
+                                  'pull_frequency': getparams['internetsources']['pull_frequency'],
+                                  'frequency_id': getparams['internetsources']['frequency_id'],
+                                  'start_date': startdate,
+                                  'end_date': enddate,
+                                  'https_params': getparams['internetsources']['https_params'],
+                                  'datasource_descr_id': getparams['internetsources']['internet_id']}
+
+            datasourcedescrinfo = {'datasource_descr_id': getparams['internetsources']['internet_id'],
+                                  'format_type': getparams['internetsources']['format_type'],
+                                  'file_extension': getparams['internetsources']['file_extension'],
+                                  'delimiter': getparams['internetsources']['delimiter'],
+                                  'date_format': getparams['internetsources']['date_format'],
+                                  'date_position': getparams['internetsources']['date_position'],
+                                  'product_identifier': getparams['internetsources']['product_identifier'],
+                                  'prod_id_position': prod_id_position,
+                                  'prod_id_length': prod_id_length,
+                                  'area_type': getparams['internetsources']['area_type'],
+                                  'area_position': getparams['internetsources']['area_position'],
+                                  'area_length': area_length,
+                                  'preproc_type': getparams['internetsources']['preproc_type'],
+                                  'product_release': getparams['internetsources']['product_release'],
+                                  'release_position': getparams['internetsources']['release_position'],
+                                  'release_length': release_length,
+                                  'native_mapset': getparams['internetsources']['native_mapset']}
+
+
+
+            if getparams['internetsources']['internet_id'] != getparams['internetsources']['orig_internet_id']:
+                internetsourceinfo['orig_internet_id'] = getparams['internetsources']['orig_internet_id']
+
+                # if self.crud_db.update('datasource_description', datasourcedescrinfo):
+                if querydb.update_internet_source_info(internetsourceinfo, datasourcedescrinfo):
+                    updatestatus = '{"success":"true", "message":"Internet data source and description updated!"}'
+                else:
+                    updatestatus = '{"success":false, "message":"An error occured while updating the internet data source!"}'
+                # else:
+                #     updatestatus = '{"success":false, "message":"An error occured while updating the internet data source description!"}'
+
+            else:
+                if self.crud_db.update('internet_source', internetsourceinfo):
+                    if self.crud_db.update('datasource_description', datasourcedescrinfo):
+                        updatestatus = '{"success":"true", "message":"Internet data source and description updated!"}'
+                    else:
+                        updatestatus = '{"success":"true", "message":"Internet data source updated!"}'
+                else:
+                    updatestatus = '{"success":false, "message":"An error occured while updating the internet data source!"}'
+
+        else:
+            updatestatus = '{"success":false, "message":"No internet data source passed!"}'
+
+        return updatestatus
+
+
+class CreateInternetSource:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def POST(self):
+        getparams = json.loads(web.data())  # get PUT data
+        if 'internetsources' in getparams:
+
+            startdate = None
+            if getparams['internetsources']['start_date'] != None:
+                try:
+                    startdate = int(getparams['internetsources']['start_date'])
+                except ValueError:
+                    startdate = None
+
+            enddate = None
+            if getparams['internetsources']['end_date'] != None:
+                try:
+                    enddate = int(getparams['internetsources']['end_date'])
+                except ValueError:
+                    enddate = None
+
+            prod_id_position = None
+            if getparams['internetsources']['prod_id_position'] != None:
+                try:
+                    prod_id_position = int(getparams['internetsources']['prod_id_position'])
+                except ValueError:
+                    prod_id_position = None
+
+            prod_id_length = None
+            if getparams['internetsources']['prod_id_length'] != None:
+                try:
+                    prod_id_length = int(getparams['internetsources']['prod_id_length'])
+                except ValueError:
+                    prod_id_length = None
+
+            area_length = None
+            if getparams['internetsources']['area_length'] != None:
+                try:
+                    area_length = int(getparams['internetsources']['area_length'])
+                except ValueError:
+                    area_length = None
+
+            release_length = None
+            if getparams['internetsources']['release_length'] != None:
+                try:
+                    release_length = int(getparams['internetsources']['release_length'])
+                except ValueError:
+                    release_length = None
+
+            internetsourceinfo = {'internet_id': getparams['internetsources']['internet_id'],
+                                  'defined_by': getparams['internetsources']['defined_by'],
+                                  'descriptive_name': getparams['internetsources']['descriptive_name'],
+                                  'description': getparams['internetsources']['description'],
+                                  'modified_by': getparams['internetsources']['modified_by'],
                                   # 'update_datetime': getparams['internetsources']['update_datetime'],
                                   'url': getparams['internetsources']['url'],
                                   'user_name': getparams['internetsources']['user_name'],
@@ -1637,18 +2273,45 @@ class UpdateInternetSource:
                                   'release_length': release_length,
                                   'native_mapset': getparams['internetsources']['native_mapset']}
 
-            if self.crud_db.update('internet_source', internetsourceinfo):
-                if self.crud_db.update('datasource_description', datasourcedescrinfo):
-                    updatestatus = '{"success":"true", "message":"Internet data source and description updated!"}'
+            if self.crud_db.create('internet_source', internetsourceinfo):
+                if self.crud_db.create('datasource_description', datasourcedescrinfo):
+                    createstatus = '{"success":"true", "message":"Internet data source and description created!"}'
                 else:
-                    updatestatus = '{"success":"true", "message":"Internet data source updated!"}'
+                    createstatus = '{"success":"true", "message":"Internet data source created!"}'
             else:
-                updatestatus = '{"success":false, "message":"An error occured while updating the internet data source!"}'
+                createstatus = '{"success":false, "message":"An error occured while creating the internet data source!"}'
 
         else:
-            updatestatus = '{"success":false, "message":"No internet data source passed!"}'
+            createstatus = '{"success":false, "message":"No internet data source passed!"}'
 
-        return updatestatus
+        return createstatus
+
+
+class DeleteInternetSource:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def DELETE(self):
+        getparams = json.loads(web.data())  # get PUT data
+        # getparams = web.input() # get POST data
+        if 'internetsources' in getparams:
+
+            internetsourceinfo = {'internet_id': getparams['internetsources']['internet_id']}
+            datasourcedescrinfo = {'datasource_descr_id': getparams['internetsources']['internet_id']}
+
+            if self.crud_db.delete('internet_source', **internetsourceinfo):
+                if self.crud_db.delete('datasource_description', **datasourcedescrinfo):
+                    deletetatus = '{"success":"true", "message":"Internet data source and description deleted!"}'
+                else:
+                    deletetatus = '{"success":"true", "message":"Internet data source deleted!"}'
+            else:
+                deletetatus = '{"success":false, "message":"An error occured while deleting the internet data source!"}'
+
+        else:
+            deletetatus = '{"success":false, "message":"No internet data source passed!"}'
+
+        return deletetatus
 
 
 class GetSystemStatus:
@@ -2176,6 +2839,174 @@ class GetMapsets:
         return mapsets_json
 
 
+class CreateMapset:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def POST(self):
+        getparams = json.loads(web.data())  # get PUT data
+        if 'mapsets' in getparams:
+
+            bboxcode = getparams['mapsets']['bboxcode']
+            if bboxcode ==  None:
+                bboxcode = getparams['mapsets']['mapsetcode']
+
+            bboxinfo = { 'bboxcode': bboxcode,
+                         'descriptive_name': bboxcode,
+                         'defined_by': getparams['mapsets']['defined_by'],
+                         'upper_left_long': getparams['mapsets']['upper_left_long'],
+                         'upper_left_lat': getparams['mapsets']['upper_left_lat'],
+                         'lower_right_long': getparams['mapsets']['lower_right_long'],
+                         'lower_right_lat': getparams['mapsets']['lower_right_lat'],
+                         'predefined': getparams['mapsets']['predefined']
+                       }
+
+            bbox_pk = {
+                'bboxcode': bboxcode
+            }
+
+            bboxexists = False
+            if self.crud_db.read('bbox', **bbox_pk):
+                bbox_pk = {
+                    'bboxcode': bboxcode,
+                    'predefined': False,
+                }
+                bboxexists = True
+                bboxstatus = ''
+                if self.crud_db.read('bbox', **bbox_pk):
+                    if self.crud_db.update('bbox', bboxinfo):
+                        bboxstatus = 'and BBOX updated!'
+                    else:
+                        createstatus = '{"success":false, "message":"An error occured while updating the custom BBOX!"}'
+            else:
+                if self.crud_db.create('bbox', bboxinfo):
+                    bboxexists = True
+                    bboxstatus = 'and BBOX created!'
+                else:
+                    createstatus = '{"success":false, "message":"An error occured while creating the custom BBOX!"}'
+
+            mapsetinfo = { 'mapsetcode': getparams['mapsets']['mapsetcode'],
+                           'descriptive_name': getparams['mapsets']['descriptive_name'],
+                           'description': getparams['mapsets']['description'],
+                           'defined_by': getparams['mapsets']['defined_by'],
+                           'proj_code': getparams['mapsets']['proj_code'],
+                           'resolutioncode': getparams['mapsets']['resolutioncode'],
+                           'bboxcode': bboxcode,
+                           'pixel_size_x': getparams['mapsets']['pixel_size_x'],
+                           'pixel_size_y': getparams['mapsets']['pixel_size_y'],
+                           'footprint_image': getparams['mapsets']['footprint_image'],
+                           'center_of_pixel': getparams['mapsets']['center_of_pixel'],
+                           }
+
+            if bboxexists:
+                if self.crud_db.create('mapset_new', mapsetinfo):
+                    message = 'Mapset created ' + bboxstatus
+                    createstatus = '{"success":true, "message":"' + message + '"}'
+                else:
+                    createstatus = '{"success":false, "message":"An error occured while creating the Mapset!"}'
+        else:
+            createstatus = '{"success":false, "message":"No mapset information passed!"}'
+
+        return createstatus
+
+
+class UpdateMapset:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def PUT(self):
+        getparams = json.loads(web.data())  # get PUT data
+        if 'mapsets' in getparams:
+
+            bboxcode = getparams['mapsets']['bboxcode']
+            if bboxcode ==  None:
+                bboxcode = getparams['mapsets']['mapsetcode']
+
+            bboxinfo = { 'bboxcode': bboxcode,
+                         'descriptive_name': bboxcode,
+                         'defined_by': getparams['mapsets']['defined_by'],
+                         'upper_left_long': getparams['mapsets']['upper_left_long'],
+                         'upper_left_lat': getparams['mapsets']['upper_left_lat'],
+                         'lower_right_long': getparams['mapsets']['lower_right_long'],
+                         'lower_right_lat': getparams['mapsets']['lower_right_lat'],
+                         'predefined': getparams['mapsets']['predefined']
+                       }
+
+            bbox_pk = {
+                'bboxcode': bboxcode
+            }
+
+            bboxexists = False
+            bboxstatus = ''
+            if self.crud_db.read('bbox', **bbox_pk):
+                bbox_pk = {
+                    'bboxcode': bboxcode,
+                    'predefined': False,
+                }
+                bboxexists = True
+                if self.crud_db.read('bbox', **bbox_pk):
+                    if self.crud_db.update('bbox', bboxinfo):
+                        bboxstatus = 'and BBOX updated!'
+                    else:
+                        createstatus = '{"success":false, "message":"An error occured while updating the custom BBOX!"}'
+            else:
+                if self.crud_db.create('bbox', bboxinfo):
+                    bboxexists = True
+                    bboxstatus = 'and BBOX created!'
+                else:
+                    createstatus = '{"success":false, "message":"An error occured while creating the custom BBOX!"}'
+
+            mapsetinfo = { 'mapsetcode': getparams['mapsets']['mapsetcode'],
+                           'descriptive_name': getparams['mapsets']['descriptive_name'],
+                           'description': getparams['mapsets']['description'],
+                           'defined_by': getparams['mapsets']['defined_by'],
+                           'proj_code': getparams['mapsets']['proj_code'],
+                           'resolutioncode': getparams['mapsets']['resolutioncode'],
+                           'bboxcode': bboxcode,
+                           'pixel_size_x': getparams['mapsets']['pixel_size_x'],
+                           'pixel_size_y': getparams['mapsets']['pixel_size_y'],
+                           'footprint_image': getparams['mapsets']['footprint_image'],
+                           'center_of_pixel': getparams['mapsets']['center_of_pixel'],
+                           }
+
+            if bboxexists:
+                if self.crud_db.update('mapset_new', mapsetinfo):
+                    message = 'Mapset updated ' + bboxstatus
+                    createstatus = '{"success":true, "message":"' + message + '"}'
+                else:
+                    createstatus = '{"success":false, "message":"An error occured while updating the Mapset!"}'
+
+        else:
+            createstatus = '{"success":false, "message":"No mapset information passed!"}'
+
+        return createstatus
+
+
+class DeleteMapset:
+    def __init__(self):
+        self.lang = "eng"
+        self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
+
+    def DELETE(self):
+        getparams = json.loads(web.data())  # get PUT data
+        # getparams = web.input() # get POST data
+        if 'mapsets' in getparams:
+
+            mapsetinfo = {'mapsetcode': getparams['mapsets']['mapsetcode']}
+
+            if self.crud_db.delete('mapset_new', **mapsetinfo):
+                deletetatus = '{"success":true, "message":"Mapset deleted!"}'
+            else:
+                deletetatus = '{"success":false, "message":"An error occured while deleting the Mapset!"}'
+
+        else:
+            deletetatus = '{"success":false, "message":"No Mapset passed!"}'
+
+        return deletetatus
+
+
 class GetLanguages:
     def __init__(self):
         self.lang = "eng"
@@ -2229,29 +3060,31 @@ class GetTimeLine:
         dataset.get_filenames()
         all_present_product_dates = dataset.get_dates()
         # completeness = dataset.get_dataset_normalized_info()
-        firstdate = dataset.get_first_date()
-        lastdate = all_present_product_dates[-1]
-
-        kwargs = {'productcode': getparams['productcode'],
-                  'version': getparams['productversion'],
-                  'subproductcode': getparams['subproductcode'].lower() if getparams['subproductcode'] else None}
-        db_product = querydb.get_product_out_info(**kwargs)
-        if isinstance(db_product, list):
-            db_product = db_product[0]
-
-        frequency = Dataset.get_frequency(db_product.frequency_id, db_product.date_format)
-        # frequency = dataset._frequency # se questo property non era protetto, la query sopra non serve
-        alldates = frequency.get_dates(firstdate, lastdate)
-
         timeline = []
-        for productdate in alldates:
-            if productdate in all_present_product_dates:
-                present = "true"
-            else:
-                present = "false"
-            dateinmilisecond = functions.unix_time_millis(productdate)
-            date_dict = {'datetime': dateinmilisecond, 'date': productdate.strftime("%Y%m%d"), 'present': present}
-            timeline.append(date_dict)
+        if len(all_present_product_dates) > 0:
+            firstdate = dataset.get_first_date()
+            lastdate = all_present_product_dates[-1]
+
+            kwargs = {'productcode': getparams['productcode'],
+                      'version': getparams['productversion'],
+                      'subproductcode': getparams['subproductcode'].lower() if getparams['subproductcode'] else None}
+            db_product = querydb.get_product_out_info(**kwargs)
+            if isinstance(db_product, list):
+                db_product = db_product[0]
+
+            frequency = Dataset.get_frequency(db_product.frequency_id, db_product.date_format)
+            # frequency = dataset._frequency # se questo property non era protetto, la query sopra non serve
+            alldates = frequency.get_dates(firstdate, lastdate)
+
+            timeline = []
+            for productdate in alldates:
+                if productdate in all_present_product_dates:
+                    present = "true"
+                else:
+                    present = "false"
+                dateinmilisecond = functions.unix_time_millis(productdate)
+                date_dict = {'datetime': dateinmilisecond, 'date': productdate.strftime("%Y%m%d"), 'present': present}
+                timeline.append(date_dict)
 
         # missingdate = datetime.date(2003, 2, 1)
         # dateinmilisecond = functions.unix_time_millis(missingdate)
@@ -2952,7 +3785,7 @@ class SaveDrawnVectorLayer:
                                 'deletable': True,
                                 'background_legend_image_filename': '',
                                 # 'projection': '',
-                                'submenu': '',
+                                'submenu': 'User defined',
                                 'menu': 'other',
                                 'defined_by': 'USER',
                                 # 'open_in_mapview': '',
@@ -3197,7 +4030,6 @@ class GetVectorLayer:
     def GET(self):
         getparams = web.input()
         filename = getparams['file']
-        # layerfilepath = '/srv/www/eStation2_Layers/'+filename
         layerfilepath = es_constants.estation2_layers_dir + os.path.sep + filename.encode('utf-8')
         # if isFile(layerfilepath):
         layerfile = open(layerfilepath, 'r')
@@ -3668,7 +4500,10 @@ class UpdateProductInfo:
             'provider': getparams['provider'],
             'descriptive_name': getparams['prod_descriptive_name'],
             'description': getparams['description'],
-            'category_id': getparams['category_id']}
+            'category_id': getparams['category_id'],
+            'defined_by': getparams['defined_by'],
+            'activated': getparams['activated']
+        }
 
         productupdated = querydb.update_product_info(productinfo)
 
@@ -3696,8 +4531,8 @@ class CreateProduct:
                        'subproductcode': getparams['productcode']+'_native',
                        'version': version,
                        'product_type': 'Native',
-                       'defined_by': 'USER',
-                       'activated': 'f',
+                       'defined_by': getparams['defined_by'],
+                       'activated': getparams['activated'],
                        'provider': getparams['provider'],
                        'descriptive_name': getparams['prod_descriptive_name'],
                        'description': getparams['description'],
@@ -3734,6 +4569,18 @@ class UpdateProduct:
         updatestatus = webpy_esapp_helpers.UpdateProduct(productcode=getparams['products']['productcode'], version=getparams['products']['version'], activate=getparams['products']['activated'])
 
         return updatestatus
+
+
+class DeleteProduct:
+    def __init__(self):
+        self.lang = "eng"
+
+    def DELETE(self):
+        getparams = json.loads(web.data())
+
+        deletestatus = webpy_esapp_helpers.DeleteProduct(productcode=getparams['products']['productcode'], version=getparams['products']['version'])
+
+        return deletestatus
 
 
 class UpdateDataAcquisition:
@@ -3817,6 +4664,90 @@ class Ingestion:
         return webpy_esapp_helpers.getIngestion(force)
 
 
+class getIngestSubProducts:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        getparams = web.input()
+
+        return webpy_esapp_helpers.getIngestSubProducts()
+
+
+class CreateIngestSubProduct:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+        createstatus = webpy_esapp_helpers.CreateIngestSubProduct(params)
+
+        return createstatus
+
+
+class UpdateIngestSubProduct:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        # params = json.loads(web.data())
+        params = web.input()
+        updatestatus = webpy_esapp_helpers.UpdateIngestSubProduct(params)
+
+        return updatestatus
+
+
+class DeleteIngestSubProduct:
+    def __init__(self):
+        self.lang = "eng"
+
+    def DELETE(self):
+        params = json.loads(web.data())
+
+        deletestatus = webpy_esapp_helpers.DeleteIngestSubProduct(params)
+
+        return deletestatus
+
+
+class getSubDatasourceDescriptions:
+    def __init__(self):
+        self.lang = "eng"
+
+    def GET(self):
+        # getparams = web.input()
+        return webpy_esapp_helpers.getSubDatasourceDescriptions()
+
+
+class CreateSubDatasourceDescription:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+
+        return webpy_esapp_helpers.CreateSubDatasourceDescription(params)
+
+
+class UpdateSubDatasourceDescription:
+    def __init__(self):
+        self.lang = "eng"
+
+    def POST(self):
+        params = web.input()
+
+        return webpy_esapp_helpers.UpdateSubDatasourceDescription(params)
+
+
+class DeleteSubDatasourceDescription:
+    def __init__(self):
+        self.lang = "eng"
+
+    def DELETE(self):
+        params = json.loads(web.data())
+
+        return webpy_esapp_helpers.DeleteSubDatasourceDescription(params)
+
+
 class DataAcquisition:
     def __init__(self):
         self.lang = "eng"
@@ -3870,7 +4801,12 @@ class ProductAcquisition:
     def GET(self, params):
         # return web.ctx
         getparams = web.input()
+
         products = querydb.get_products_acquisition(activated=getparams.activated)
+        # if getparams.activated or not getparams.activated:
+        #     products = querydb.get_products_acquisition(activated=getparams.activated)
+        # else:
+        #     products = querydb.get_products_acquisition()
         # products = querydb.get_products(activated=getparams.activated)
         products_json = functions.tojson(products)
         products_json = '{"success":"true", "total":'+str(products.__len__())+',"products":['+products_json+']}'

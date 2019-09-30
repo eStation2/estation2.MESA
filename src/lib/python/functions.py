@@ -49,6 +49,22 @@ dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'der
 #         return o.__dict__
 
 
+def is_float(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
+def is_int(n):
+    try:
+        int(n)
+        return True
+    except ValueError:
+        return False
+
+
 def setThemaOtherPC(server_address, thema):
     from urllib2 import Request, urlopen, URLError
     thema_is_changed = False

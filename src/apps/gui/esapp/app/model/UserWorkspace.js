@@ -9,6 +9,8 @@ Ext.define('esapp.model.UserWorkspace', {
         {name: 'shownewgraph', type: 'boolean', mapping: 'shownewgraph'},
         {name: 'showbackgroundlayer', type: 'boolean', mapping: 'showbackgroundlayer'},
         {name: 'maps', mapping: 'maps'},
-        {name: 'graphs', mapping: 'graphs'}
+        {name: 'graphs', mapping: 'graphs'},
+        {name: 'showindefault', type: 'boolean', mapping: 'showindefault'},
+        {name: 'isrefworkspace', type: 'boolean', mapping: 'isrefworkspace'}
     ]
 });

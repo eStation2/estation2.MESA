@@ -47,7 +47,7 @@ Ext.define("esapp.view.analysis.mapScaleLineObject",{
     config: {
         mapView: null,
         scaleline_ImageObj: new Image(),
-        scalelinePosition: [7,543]
+        scalelinePosition: [5,520]
     },
 
     //html: '<div id="scale-line_' + me.id + '">Hallooooooooooooooo</div>',

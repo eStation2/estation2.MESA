@@ -23,7 +23,7 @@ Ext.define('esapp.view.analysis.mapTemplateAdminController', {
                 subproductcode: selectedMapTemplates[i].data.subproductcode,
                 productversion: selectedMapTemplates[i].data.productversion,
                 mapsetcode: selectedMapTemplates[i].data.mapsetcode,
-                // productdate: selectedMapTemplates[i].data.productdate,
+                productdate: selectedMapTemplates[i].data.productdate,
                 legendid: selectedMapTemplates[i].data.legendid,
                 legendlayout: selectedMapTemplates[i].data.legendlayout,
                 legendObjPosition: selectedMapTemplates[i].data.legendobjposition.split(",").map(function(x){return parseInt(x)}),

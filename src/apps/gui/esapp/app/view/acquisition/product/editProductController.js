@@ -4,45 +4,67 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
 
     setup: function() {
         var me = this.getView();
+        var user = esapp.getUser();
 
         var productDatasourcesStore = me.getViewModel().get('productdatasources');
-        var productIngestionsStore = me.getViewModel().get('productingestions');
-        if (me.params.product){
+        var ingestsubproductsStore = me.getViewModel().get('ingestsubproducts');
+        if (me.params.edit){
             Ext.getCmp('category').setValue(me.params.product.get('category_id'));
             Ext.getCmp('productcode').setValue(me.params.product.get('productcode'));
             Ext.getCmp('version').setValue(me.params.product.get('version'));
             Ext.getCmp('provider').setValue(me.params.product.get('provider'));
             Ext.getCmp('product_name').setValue(me.params.product.get('prod_descriptive_name'));
             Ext.getCmp('productdescription').setValue(me.params.product.get('description'));
+            Ext.getCmp('defined_by_field').setValue(me.params.product.get('defined_by'));
+            Ext.getCmp('activate_product_field').setValue(me.params.product.get('activated'));
 
             productDatasourcesStore.setFilters({
                  property:'productid'
                 ,value:me.params.product.get('productid')
-                ,anyMatch:true
+                ,anyMatch: true
             });
 
-            productIngestionsStore.setFilters({
-                 property:'productid'
-                ,value:me.params.product.get('productid')
-                ,anyMatch:true
+            ingestsubproductsStore.setFilters({
+                 property: 'productid'
+                ,value: me.params.product.get('productid')
+                ,anyMatch: true
+
+            //     property: 'productcode'
+            //     ,value: me.params.product.get('productcode')
+            //     ,anyMatch: true
+            // },{
+            //     property: 'version'
+            //     ,value: me.params.product.get('version')
+            //     ,anyMatch: true
             });
 
             Ext.getCmp('datasourcesfieldset').show();
             Ext.getCmp('ingestionsfieldset').show();
+
+            // console.info(ingestsubproductsStore);
+            // console.info(me.params.product.get('productid'));
         }
         else {
+            if (esapp.Utils.objectExists(user) && user.userlevel == 1){
+                Ext.getCmp('defined_by_field').setValue('JRC');
+            }
+            else {
+                Ext.getCmp('defined_by_field').setValue('USER');
+            }
+
             productDatasourcesStore.setFilters({
                  property:'productid'
                 ,value:' '
                 //,anyMatch:true
             });
 
-            productIngestionsStore.setFilters({
+            ingestsubproductsStore.setFilters({
                  property:'productid'
                 ,value:' '
                 //,anyMatch:true
             });
         }
+
     },
 
     addDataSource: function(widget, event) {
@@ -145,12 +167,13 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
         //me.lookupReference('choosedatasourcetype').show();
     },
 
-    deleteDataSource: function(widget, event) {
+    unassignDataSource: function(grid, rowIndex, colIndex) {
         var me = this.getView(),
-            grid = me.lookupReference('productDataSourcesGrid'),
-            rec = grid.getSelectionModel().getSelection()[0];
+            rec = grid.getStore().getAt(rowIndex);
+            // grid = me.lookupReference('productDataSourcesGrid'),
+            // rec = grid.getSelectionModel().getSelection()[0];
 
-        if (rec) {
+        if (esapp.Utils.objectExists(rec)) {
             //rec.remove();
 
             var params = {
@@ -158,7 +181,7 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
                 subproductcode: rec.get('subproductcode'),
                 version: rec.get('version'),
                 data_source_id: rec.get('data_source_id')
-            }
+            };
 
             Ext.Ajax.request({
                 method: 'POST',
@@ -182,25 +205,41 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
 
     editDataSource: function(grid, rowIndex, colIndex){
         var record = grid.getStore().getAt(rowIndex);
+        var data_source_id = record.get('data_source_id');
+        var user = esapp.getUser();
+
+        // console.info(record.get('defined_by'));
+        // console.info(record);
+        // console.info(data_source_id);
+
+        var edit = false;
+        var view = true;
+        if (!record.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)){
+            edit = true;
+            view = false;
+        }
 
         if (record.get('type') == 'INTERNET') {
-            var editInternetDataSourceWin = new esapp.view.acquisition.product.editInternetSource({
+            // data_source_id = record.get('internet_id');
+            var editInternetDataSourceWin = new esapp.view.acquisition.editInternetSource({
                 params: {
-                    edit: true,
-                    product: record,
-                    orig_productcode: record.get('productcode'),
-                    orig_version: record.get('version')
+                    create: false,
+                    edit: edit,
+                    view: view,
+                    internetsourcerecord: record,
+                    data_source_id: data_source_id
                 }
             });
             editInternetDataSourceWin.show();
         }
         else {
-            var editEumetcastDataSourceWin = new esapp.view.acquisition.product.editEumetcastSource({
+            var editEumetcastDataSourceWin = new esapp.view.acquisition.editEumetcastSource({
                 params: {
-                    edit: true,
-                    product: record,
-                    orig_productcode: record.get('productcode'),
-                    orig_version: record.get('version')
+                    create: false,
+                    edit: edit,
+                    view: view,
+                    eumetcastsourcerecord: record,
+                    data_source_id: data_source_id
                 }
             });
             editEumetcastDataSourceWin.show();
@@ -209,6 +248,8 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
 
     saveProductInfo: function(widget, event){
         var me = this.getView();
+        var productDatasourcesStore = me.getViewModel().get('productdatasources');
+        var ingestsubproductsStore = me.getViewModel().get('ingestsubproducts');
 
         var url = 'product/createproduct';
             //orig_productcode = '',
@@ -226,8 +267,11 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
             version: Ext.getCmp('version').getValue(),
             provider: Ext.getCmp('provider').getValue(),
             prod_descriptive_name: Ext.getCmp('product_name').getValue(),
-            description: Ext.getCmp('productdescription').getValue()
-        }
+            description: Ext.getCmp('productdescription').getValue(),
+            defined_by: Ext.getCmp('defined_by_field').getValue(),
+            activated: Ext.getCmp('activate_product_field').getValue()
+        };
+        // params = Ext.util.JSON.encode(params);
 
         Ext.Ajax.request({
             method: 'POST',
@@ -240,24 +284,32 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
                 }
                 if (!me.params.edit){
                     me.params.edit = true;
+                    me.height = 830;
+
                     Ext.getCmp('datasourcesfieldset').show();
+                    Ext.getCmp('ingestionsfieldset').show();
+                    me.center();
+
+                    me.params.orig_productcode = Ext.getCmp('productcode').getValue();
+                    me.params.orig_version = Ext.getCmp('version').getValue();
+                    //
+                    // var daStore = Ext.data.StoreManager.lookup('DataAcquisitionsStore');
+                    // Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
+
+                    productDatasourcesStore.setFilters({
+                         property:'productid'
+                        ,value:me.params.orig_productcode + '_' + me.params.orig_version
+                        ,exactMatch:true
+                    });
+
+                    ingestsubproductsStore.setFilters({
+                         property:'productid'
+                        ,value:me.params.orig_productcode + '_' + me.params.orig_version
+                        ,exactMatch:true
+                    });
+
+                    me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('editproduct') + '</span>');
                 }
-                me.params.orig_productcode = Ext.getCmp('productcode').getValue();
-                me.params.orig_version = Ext.getCmp('version').getValue();
-
-                // Ext.data.StoreManager.lookup('ProductsInactiveStore').load();
-                var daStore = Ext.data.StoreManager.lookup('DataAcquisitionsStore');
-                Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
-
-                // var daStore = me.getViewModel().get('productdatasources');
-                // console.info(daStore);
-
-                daStore.setFilters({
-                     property:'productid'
-                    ,value:me.params.orig_productcode + '_' + me.params.orig_version
-                    ,anyMatch:true
-                });
-
             },
             failure: function(response, opts) {
                 console.info(response.status);
@@ -265,27 +317,119 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
         });
     },
 
-    addIngestion: function(grid){
+    addIngestSubProduct: function(grid){
+        var me = this.getView();
+        var ingestsubproductstore  = Ext.data.StoreManager.lookup('IngestSubProductsStore');
+        var user = esapp.getUser();
 
-        var newIngestionWin = new esapp.view.acquisition.product.editIngestion({
+        var newIngestSubProductRecord = new esapp.model.IngestSubProduct({
+            'productid': 'new-ingest-subproduct',
+            'productcode': Ext.getCmp('productcode').getValue(),    // me.params.product.get('productcode'),
+            'orig_subproductcode': '',
+            'subproductcode': '',
+            'version':  Ext.getCmp('version').getValue(),   // me.params.product.get('version'),
+            'defined_by': (esapp.Utils.objectExists(user) && user.userlevel == 1) ? 'JRC' : 'USER',
+            'activated': false,
+            'category_id': Ext.getCmp('category').getValue(),   // me.params.product.get('category_id'),
+            'product_type': 'Ingest',
+            'descriptive_name': '',
+            'description': '',
+            'provider': Ext.getCmp('provider').getValue(),  // me.params.product.get('provider'),
+            'frequency_id': '',
+            'date_format': '',
+            'scale_factor': null,
+            'scale_offset': null,
+            'nodata': null,
+            'mask_min': null,
+            'mask_max': null,
+            'unit': '',
+            'data_type_id': '',
+            'masked': true,
+            'enable_in_timeseries': false,
+            'timeseries_role': null,
+            'display_index': null
+        });
+
+        ingestsubproductstore.add(newIngestSubProductRecord);
+
+        var newIngestionWin = new esapp.view.acquisition.product.editIngestSubProduct({
             params: {
-                edit: false
+                create: true,
+                edit: false,
+                view: false,
+                ingestsubproductrecord: newIngestSubProductRecord,
+                productid: 'new-ingest-subproduct'
             }
         });
         newIngestionWin.show();
     },
 
-    editIngestion: function(grid, rowIndex, row){
+    editIngestSubProduct: function(grid, rowIndex, row){
+        var me = this.getView();
         var record = grid.getStore().getAt(rowIndex);
-//        console.info(record);
-        var editIngestionWin = new esapp.view.acquisition.product.editIngestion({
+        var user = esapp.getUser();
+
+        var edit = false;
+        var view = true;
+        if (!record.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)){
+            edit = true;
+            view = false;
+        }
+
+        var editIngestionWin = new esapp.view.acquisition.product.editIngestSubProduct({
             params: {
-                edit: true,
-                product: record,
-                orig_productcode: record.get('productcode'),
-                orig_version : record.get('version')
+                create: false,
+                edit: edit,
+                view: view,
+                ingestsubproductrecord: record,
+                productid: me.params.orig_productcode + '_' + me.params.orig_version
             }
         });
         editIngestionWin.show();
+    },
+
+    deleteIngestSubProduct: function(grid, rowIndex, row){
+        var record = grid.getStore().getAt(rowIndex);
+
+        var messageText = esapp.Utils.getTranslation('deleteingestsubproductquestion2') + ': <BR>' +
+                 '<b>'+ record.get('descriptive_name')+'</b>';
+
+        messageText += '<span class="smalltext">' +
+                  '<b style="color:darkgrey;"> - '+record.get('subproductcode')+'</b></span>';
+
+        Ext.Msg.show({
+            title: esapp.Utils.getTranslation('deleteingestsubproductquestion'),     // 'Delete Internet source definition?',
+            message: messageText,
+            buttons: Ext.Msg.OKCANCEL,
+            icon: Ext.Msg.QUESTION,
+            fn: function(btn) {
+                if (btn === 'ok') {
+                    var ingestsubproductStore = Ext.data.StoreManager.lookup('IngestSubProductsStore');
+                    grid.getStore().remove(record);
+
+                    ingestsubproductStore.sync({
+                        success: function (proxy, operations) {
+                            // pop success message
+                            Ext.toast({ html: esapp.Utils.getTranslation('ingestsubproductdeleted'), title: esapp.Utils.getTranslation('ingestsubproductdeleted'), width: 200, align: 't' });
+                        },
+                        failure: function (proxy, operations) {
+                            // console.info(proxy);
+                            // console.info(operations);
+                            Ext.Msg.show({
+                               title: esapp.Utils.getTranslation('errordeleting_ingestsubproduct'),         // 'REMOTE EXCEPTION - Error deleting Ingest Sub Product',
+                               msg: proxy.operations[0].getError().response.responseText,
+                               icon: Ext.Msg.ERROR,
+                               buttons: Ext.Msg.OK
+                            });
+
+                            // gridStore.add(gridStore.getRemovedRecords());
+                            // resume records
+                            ingestsubproductStore.rejectChanges();
+                        }
+                    });
+                    // grid.getStore().sync(); // Chained store does not have sync() method!
+                }
+            }
+        });
     }
 });

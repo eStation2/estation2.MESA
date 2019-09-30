@@ -13,7 +13,12 @@ Ext.define('esapp.view.acquisition.editInternetSourceModel', {
     ,formulas: {
         theInternetSource: {
             get: function(get) {
-                return get('internetsources').findRecord('internet_id', this.getView().data_source_id, 0, true, false, false)
+                if (this.getView().params.create){
+                    return this.getView().params.internetsourcerecord;
+                }
+                else {
+                    return get('internetsources').findRecord('internet_id', this.getView().params.data_source_id, 0, true, false, false);
+                }
             }
         }
     }

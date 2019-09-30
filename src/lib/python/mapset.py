@@ -34,12 +34,12 @@ class MapSet:
     def assigndb(self, mapsetcode):
         mapset = querydb.get_mapset(mapsetcode)
         spatial_ref_wkt = mapset.srs_wkt
-        geo_transform = [mapset.upper_left_long,
-                         mapset.pixel_shift_long,
-                         mapset.rotation_factor_long,
-                         mapset.upper_left_lat,
-                         mapset.rotation_factor_lat,
-                         mapset.pixel_shift_lat]
+        geo_transform = [float(mapset.upper_left_long),
+                         float(mapset.pixel_shift_long),
+                         float(mapset.rotation_factor_long),
+                         float(mapset.upper_left_lat),
+                         float(mapset.rotation_factor_lat),
+                         float(mapset.pixel_shift_lat)]
 
         self.spatial_ref.ImportFromWkt(spatial_ref_wkt)
         self.geo_transform = geo_transform

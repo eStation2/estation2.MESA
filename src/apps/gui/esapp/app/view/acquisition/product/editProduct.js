@@ -12,14 +12,14 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
         'esapp.view.acquisition.product.editProductController',
         'esapp.view.acquisition.product.InternetSourceAdmin',
         'esapp.view.acquisition.product.EumetcastSourceAdmin',
-        'esapp.view.acquisition.product.editIngestion',
+        'esapp.view.acquisition.product.editIngestSubProduct',
 
         'Ext.form.FieldSet',
         'Ext.form.field.Number',
         'Ext.Action'
     ],
 
-    session:true,
+    // session:true,
 
     title: '',
     header: {
@@ -35,8 +35,8 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
     resizable: true,
     autoScroll: true,
     maximizable: false,
-    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-10 : 800,  // 600,
-    maxHeight: 800,
+    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-10 : 830,  // 600,
+    maxHeight: 830,
 
     border: true,
     frame: true,
@@ -48,96 +48,120 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
     viewConfig: {forceFit:true},
     layout: 'vbox',
 
-    params: {},
+    params: {
+        new: false,
+        view: true,
+        edit: false,
+        product: null,
+        orig_productcode: '',
+        orig_version: ''
+    },
 
 
     initComponent: function () {
         var me = this;
+        var user = esapp.getUser();
+        var width_fieldsets = 685;
 
         if (me.params.edit){
             me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('editproduct') + '</span>');
         }
+        else if (me.params.view){
+            me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('viewproduct') + '</span>');
+        }
         else {
             me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('newproduct') + '</span>');
+            me.height = 400;
         }
 
-        var deleteDataSourceAction = Ext.create('Ext.Action', {
-            text: esapp.Utils.getTranslation('unassign'),    // 'Unassign',
-            iconCls: 'fa fa-chain-broken fa-2x',
-            style: { color: 'red' },
-            scale: 'medium',
-            disabled: true,
-            handler: 'deleteDataSource'
-        });
-
-        var addDataSourceAction = Ext.create('Ext.Action', {
-            text: esapp.Utils.getTranslation('add'),    // 'Add',
-            iconCls: 'fa fa-plus-circle fa-2x',
-            style: { color: 'green' },
-            scale: 'medium',
-            disabled: false,
-            handler: 'addDataSource'
-        });
-
-
-        var deleteIngestionAction = Ext.create('Ext.Action', {
-            text: esapp.Utils.getTranslation('delete'),    // 'Delete',
-            iconCls: 'fa fa-trash-o fa-2x',
-            style: { color: 'red' },
-            scale: 'medium',
-            disabled: true,
-            handler: 'deleteIngestion'
-        });
-
-        var addIngestionAction = Ext.create('Ext.Action', {
-            text: esapp.Utils.getTranslation('add'),    // 'Add',
-            iconCls: 'fa fa-plus-circle fa-2x',
-            style: { color: 'green' },
-            scale: 'medium',
-            disabled: false,
-            handler: 'addIngestion'
-        });
+        me.listeners = {
+            close: me.onClose
+        };
 
 
         me.items = [{
-            //margin:'0 15 5 0',
             items: [{
                 xtype: 'fieldset',
                 title: '<div class="grid-header-style">'+esapp.Utils.getTranslation('productinfo')+'</div>',   // '<b>Product info</b>',
-                collapsible:false,
-                width:630,
-                //height:500,
-                padding:'10 5 10 10',
-                //layout: 'fit',
+                collapsible: false,
+                width: width_fieldsets,
+                padding: '10 5 10 10',
                 defaults: {
-                    //autoWidth: true,
+                    disabled: me.params.view ? true : false,
                     labelWidth: 120
                 },
                 items:[{
-                    id: 'category',
-                    name: 'category',
-                    //bind: '{product.category_id}',
-                    xtype: 'combobox',
-                    fieldLabel: esapp.Utils.getTranslation('category'),    // 'Category',
-                    width:150+120,
-                    allowBlank: false,
-                    //store: 'categories',
-                    store: {
-                        type: 'categories'
+                    xtype: 'container',
+                    disabled: false,
+                    width: width_fieldsets,
+                    layout: 'hbox',
+                    defaults: {
+                        disabled: me.params.view ? true : false,
+                        labelWidth: 120
                     },
-                    valueField: 'category_id',
-                    displayField: 'descriptive_name',
-                    typeAhead: false,
-                    queryMode: 'local',
-                    emptyText: esapp.Utils.getTranslation('selectacategory')    // 'Select a category...'
+                    items: [{
+                        id: 'category',
+                        name: 'category',
+                        //bind: '{product.category_id}',
+                        xtype: 'combobox',
+                        fieldLabel: esapp.Utils.getTranslation('category'),    // 'Category',
+                        width: 150 + 100,
+                        allowBlank: false,
+                        //store: 'categories',
+                        store: {
+                            type: 'categories'
+                        },
+                        valueField: 'category_id',
+                        displayField: 'descriptive_name',
+                        typeAhead: false,
+                        queryMode: 'local',
+                        emptyText: esapp.Utils.getTranslation('selectacategory')    // 'Select a category...'
+                    },{
+                        id: 'activate_product_field',
+                        name: 'activate_product_field',
+                        xtype: 'checkboxfield',
+                        boxLabel : esapp.Utils.getTranslation('activate'),
+                        labelWidth: 100,
+                        inputValue: '0',
+                        margin: '0 0 5 80',
+                        hidden: (esapp.Utils.objectExists(user) && user.userlevel == 1) ? false : true
+                    }]
                 },{
-                    id: 'productcode',
-                    name: 'productcode',
-                    //bind: '{product.productcode}',
-                    xtype: 'textfield',
-                    fieldLabel: esapp.Utils.getTranslation('productcode'),    // 'Product code',
-                    width:150+120,
-                    allowBlank: false
+                    xtype: 'container',
+                    disabled: false,
+                    width: 600,
+                    layout: 'hbox',
+                    defaults: {
+                        disabled: me.params.view ? true : false,
+                        labelWidth: 120
+                    },
+                    items: [{
+                        id: 'productcode',
+                        name: 'productcode',
+                        //bind: '{product.productcode}',
+                        xtype: 'textfield',
+                        fieldLabel: esapp.Utils.getTranslation('productcode'),    // 'Product code',
+                        width: 150 + 100,
+                        allowBlank: false
+                    },{
+                        id: 'defined_by_field',
+                        name: 'defined_by_field',
+                        xtype: 'combobox',
+                        fieldLabel: esapp.Utils.getTranslation('definedby'),
+                        labelWidth: 100,
+                        width: 150 + 100,
+                        margin: '0 0 5 80',
+                        allowBlank: false,
+                        store: {
+                            type: 'definedby'
+                        },
+                        valueField: 'defined_by',
+                        displayField: 'defined_by_descr',
+                        typeAhead: false,
+                        queryMode: 'local',
+                        emptyText: esapp.Utils.getTranslation('select'),    // 'Select...'
+                        hidden: (esapp.Utils.objectExists(user) && user.userlevel == 1) ? false : true
+                    }]
                 },{
                     id: 'version',
                     name: 'version',
@@ -166,12 +190,31 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     id: 'productdescription',
                     name: 'productdescription',
                     //bind: '{product.description}',
-                    xtype: 'textareafield',
+                    // xtype: 'textareafield',
+                    xtype: 'htmleditor',
                     fieldLabel: esapp.Utils.getTranslation('productdescription'),    // 'Product description',
                     labelAlign: 'top',
-                    width: 590,
+                    width: 650,
+                    height: 130,
+                    minHeight: 130,
+                    scrollable: true,
                     allowBlank: true,
-                    grow: true
+                    grow: true,
+                    growMax: 130,
+
+                    layout: 'fit',
+                    resizable: true,
+                    resizeHandles: 's',
+                    style: 'background: white;',
+                    hidden: false,
+                    enableAlignments: false,
+                    enableColors: true,
+                    enableFont: true,
+                    enableFontSize: true,
+                    enableFormat: true,
+                    enableLinks: false,
+                    enableLists: false,
+                    enableSourceEdit: true
                 },{
                     xtype: 'button',
                     text: esapp.Utils.getTranslation('save'),    // 'Save',
@@ -179,7 +222,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     iconCls: 'fa fa-save fa-2x',    // 'icon-disk',
                     style: { color: 'lightblue' },
                     scale: 'medium',
-                    disabled: false,
+                    hidden: me.params.view ? true : false,
                     handler: 'saveProductInfo'
                 }]
             }]
@@ -191,7 +234,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                 hidden: true,
                 collapsible: false,
                 padding: '10 10 10 10',
-                width: 630,
+                width: width_fieldsets,
 
                 items:[{
                     xtype: 'grid',
@@ -200,14 +243,33 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     bind:{
                         store:'{productdatasources}'
                     },
-                    //session: true,
-                    stateful: false,
+                    // session: true,
+                    // stateful: false,
 
                     dockedItems: [{
                         xtype: 'toolbar',
                         dock: 'bottom',
+                        // disabled: me.params.view ? true : false,
                         items: [
-                            '->', addDataSourceAction, deleteDataSourceAction
+                            '->',
+                            {
+                                reference: 'addDataSource-btn',
+                                text: esapp.Utils.getTranslation('add'),    // 'Add',
+                                iconCls: 'fa fa-plus-circle fa-2x',
+                                style: { color: 'green' },
+                                scale: 'medium',
+                                disabled: false,
+                                handler: 'addDataSource'
+                            // },{
+                            //     reference: 'unassignDataSource-btn',
+                            //     text: esapp.Utils.getTranslation('unassign'),    // 'Unassign',
+                            //     iconCls: 'fa fa-chain-broken fa-2x',
+                            //     style: { color: 'red' },
+                            //     scale: 'medium',
+                            //     disabled: true,
+                            //     handler: 'unassignDataSource'
+                            }
+                            // addDataSourceAction, unassignDataSourceAction
                         ]
                     }],
 
@@ -216,32 +278,41 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                         enableTextSelection: true,
                         draggable: false,
                         markDirty: false,
-                        resizable: true,
+                        resizable: false,
                         disableSelection: false,
                         trackOver: true
                     },
 
-                    selModel: {
-                        allowDeselect: true
-                        ,listeners: {
-                            selectionchange: function (sm, selections) {
-                                if (selections.length) {
-                                    deleteDataSourceAction.enable();
-                                } else {
-                                    deleteDataSourceAction.disable();
-                                }
-                            }
-                        }
-                    },
+                    // selModel: {
+                    //     allowDeselect: true
+                    //     ,listeners: {
+                    //         selectionchange: function (sm, selections) {
+                    //             // if (selections.length) {
+                    //             //     me.lookupReference('unassignDataSource-btn').enable();
+                    //             //     // unassignDataSourceAction.enable();
+                    //             // } else {
+                    //             //     me.lookupReference('unassignDataSource-btn').disable();
+                    //             //     // unassignDataSourceAction.disable();
+                    //             // }
+                    //         }
+                    //     }
+                    // },
 
+                    layout: 'fit',
+                    autoHeight: true,
+                    minHeight: 105,
                     collapsible: false,
                     enableColumnMove: false,
                     enableColumnResize: false,
                     multiColumnSort: false,
                     columnLines: false,
                     rowLines: true,
-                    frame: true,
-                    border: false,
+                    frame: false,
+                    border: true,
+
+                    // defaults: {
+                    //     disabled: me.params.view ? true : false
+                    // },
 
                     columns: [{
                         xtype: 'actioncolumn',
@@ -251,8 +322,21 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                         sortable: false,
                         menuDisabled: true,
                         items: [{
-                            icon: 'resources/img/icons/edit.png',
-                            tooltip: esapp.Utils.getTranslation('editdatasource'),    // 'Edit Data Source',
+                            getClass: function (v, meta, rec) {
+                                // console.info(rec.get('defined_by'));
+                               if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)) {
+                                   return 'edit';
+                               }
+                               else {
+                                   // return 'x-hide-display';
+                                   return 'vieweye';
+                               }
+                            },
+                            getTip: function (v, meta, rec) {
+                               if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)) {
+                                   return esapp.Utils.getTranslation('editdatasource')    // 'Edit Data Source',
+                               }
+                            },
                             handler: 'editDataSource'
                         }]
                     }, {
@@ -279,7 +363,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                         hideable: false,
                         hidden: false,
                         menuDisabled: true,
-                        width: 100,
+                        width: 120,
                         align: 'center',
                         shrinkWrap: 0,
                         items: [{
@@ -313,7 +397,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                         hideable: false,
                         hidden: false,
                         menuDisabled: true,
-                        width: 65,
+                        width: 70,
                         align: 'center',
                         shrinkWrap: 0,
                         items: [{
@@ -343,6 +427,43 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                                 grid.up().up().changesmade = true;
                             }
                         }]
+                    },{
+                       xtype: 'actioncolumn',
+                       hidden: false,
+                       width: 35,
+                       align: 'center',
+                       sortable: false,
+                       menuDisabled: true,
+                       shrinkWrap: 0,
+                       items: [{
+                           width:'35',
+                           disabled: false,
+                           getClass: function(v, meta, rec) {
+                               // return 'delete';
+                               if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
+                                   return 'delete';
+                               }
+                               else {
+                                   return 'x-hide-display';
+                               }
+                           },
+                           getTip: function(v, meta, rec) {
+                               if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
+                                   var tipText = esapp.Utils.getTranslation('unassignproductdatasource') + ': <BR>' +
+                                       '<b>' + Ext.getCmp('product_name').getValue() + '</b>';
+
+                                   if (Ext.getCmp('version').getValue() != ''){
+                                       tipText += '<b> - ' + Ext.getCmp('version').getValue() + '</b>' ;
+                                       // tipText += '<span class="smalltext">' + '<b> - ' + Ext.getCmp('version').getValue() + '</b></span>' ;
+                                   }
+
+                                   tipText += '<b style="color:darkgrey;"> - ' + Ext.getCmp('productcode').getValue() + '</b>';
+                                   // tipText += '<span class="smalltext">' + '<b style="color:darkgrey"> - ' + Ext.getCmp('productcode').getValue() + '</b></span>';
+                                   return tipText;
+                               }
+                           },
+                           handler: 'unassignDataSource'
+                       }]
                     }]
                 }]
 
@@ -350,28 +471,46 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
         },{
             items: [{
                 xtype: 'fieldset',
-                title: '<div class="grid-header-style">'+esapp.Utils.getTranslation('ingestions')+'</div>',   // '<b>Ingestions</b>',
+                title: '<div class="grid-header-style">'+esapp.Utils.getTranslation('ingestedproducts')+'</div>',   // 'Ingested SubProducts',
                 id: 'ingestionsfieldset',
                 hidden: true,
                 collapsible:false,
                 padding:'10 10 10 10',
-                width: 630,
+                width: width_fieldsets,
 
                 items:[{
                     xtype: 'grid',
                     reference: 'productIngestionsGrid',
-                    //store: 'productingestions',
+                    //store: 'ingestsubproducts',
                     bind:{
-                        store:'{productingestions}'
+                        store:'{ingestsubproducts}'
                     },
-                    //session: true,
-                    stateful: false,
+                    // session: true,
+                    // stateful: false,
 
                     dockedItems: [{
                         xtype: 'toolbar',
                         dock: 'bottom',
+                        disabled: me.params.view ? true : false,
                         items: [
-                            '->', addIngestionAction, deleteIngestionAction
+                            '->',
+                            {
+                                reference: 'addIngestion-btn',
+                                text: esapp.Utils.getTranslation('add'),    // 'Add',
+                                iconCls: 'fa fa-plus-circle fa-2x',
+                                style: { color: 'green' },
+                                scale: 'medium',
+                                disabled: false,
+                                handler: 'addIngestSubProduct'
+                            // },{
+                            //     reference: 'deleteIngestion-btn',
+                            //     text: esapp.Utils.getTranslation('delete'),    // 'Delete',
+                            //     iconCls: 'fa fa-trash-o fa-2x',
+                            //     style: { color: 'red' },
+                            //     scale: 'medium',
+                            //     disabled: true,
+                            //     handler: 'deleteIngestion'
+                            }
                         ]
                     }],
 
@@ -380,32 +519,41 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                         enableTextSelection: true,
                         draggable: false,
                         markDirty: false,
-                        resizable: true,
+                        resizable: false,
                         disableSelection: false,
                         trackOver: true
                     },
 
-                    selModel: {
-                        allowDeselect: true
-                        ,listeners: {
-                            selectionchange: function (sm, selections) {
-                                if (selections.length) {
-                                    deleteIngestionAction.enable();
-                                } else {
-                                    deleteIngestionAction.disable();
-                                }
-                            }
-                        }
-                    },
+                    // selModel: {
+                    //     allowDeselect: true
+                    //     ,listeners: {
+                    //         selectionchange: function (sm, selections) {
+                    //             // if (selections.length) {
+                    //             //     me.lookupReference('deleteIngestion-btn').enable();
+                    //             //     // deleteIngestionAction.enable();
+                    //             // } else {
+                    //             //     me.lookupReference('deleteIngestion-btn').disable();
+                    //             //     // deleteIngestionAction.disable();
+                    //             // }
+                    //         }
+                    //     }
+                    // },
 
+                    layout: 'fit',
+                    autoHeight: true,
+                    minHeight: 105,
                     collapsible: false,
                     enableColumnMove: false,
                     enableColumnResize: false,
                     multiColumnSort: false,
                     columnLines: false,
                     rowLines: true,
-                    frame: true,
-                    border: false,
+                    frame: false,
+                    border: true,
+
+                    // defaults: {
+                    //     disabled: me.params.view ? true : false
+                    // },
 
                     columns: [{
                         xtype: 'actioncolumn',
@@ -415,59 +563,109 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                         sortable: false,
                         menuDisabled: true,
                         items: [{
-                            icon: 'resources/img/icons/edit.png',
-                            tooltip: esapp.Utils.getTranslation('editingestion'),    // 'Edit Ingestion',
-                            handler: 'editIngestion'
+                            // icon: 'resources/img/icons/edit.png',
+                            // tooltip: esapp.Utils.getTranslation('editingestion'),    // 'Edit Ingestion',
+                            getClass: function (v, meta, rec) {
+                                // console.info(rec.get('defined_by'));
+                               if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)) {
+                                   return 'edit';
+                               }
+                               else {
+                                   // return 'x-hide-display';
+                                   return 'vieweye';
+                               }
+                            },
+                            getTip: function (v, meta, rec) {
+                               if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)) {
+                                   return esapp.Utils.getTranslation('editingestsubproduct')    // 'Edit Ingest Sub Product',
+                               }
+                            },
+                            handler: 'editIngestSubProduct'
                         }]
                     }, {
-                        header: esapp.Utils.getTranslation('mapset'),
-                        dataIndex: 'mapsetcode',
-                        width: 250,
-                        sortable: false,
-                        hideable: false,
-                        variableRowHeight: true,
-                        menuDisabled: true
-                    }, {
+                        xtype:'templatecolumn',
                         header: esapp.Utils.getTranslation('subproduct'),
-                        dataIndex: 'subproductcode',
-                        width: 230,
+                        tpl: new Ext.XTemplate(
+                                '<b>{descriptive_name}</b>' +
+                                // '<tpl if="version != \'undefined\'">',
+                                //     '<b class="smalltext"> - {version}</b>',
+                                // '</tpl>',
+                                '<BR><span class="smalltext"><b style="color:darkgrey;">' +
+                                '{productcode}' +
+                                '<tpl if="version != \'undefined\'">',
+                                    ' - {version}',
+                                '</tpl>',
+                                ' - {subproductcode}' +
+                                '</span></b>'
+                            ),
+                        minWidth: 270,
+                        cellWrap:true,
+                        sortable: false,
+                        hideable: false,
+                        variableRowHeight : true,
+                        menuDisabled:true
+                    }, {
+                        header: esapp.Utils.getTranslation('scale_factor'),
+                        dataIndex: 'scale_factor',
+                        width: 95,
                         sortable: false,
                         hideable: false,
                         variableRowHeight: true,
                         menuDisabled: true
                     }, {
-                        xtype: 'actioncolumn',
-                        header: esapp.Utils.getTranslation('active'),    // 'Active',
+                        header: esapp.Utils.getTranslation('scale_offset'),
+                        dataIndex: 'scale_offset',
+                        width: 95,
+                        sortable: false,
                         hideable: false,
-                        hidden: false,
-                        menuDisabled: true,
-                        width: 65,
-                        align: 'center',
-                        shrinkWrap: 0,
-                        items: [{
-                            disabled: false,
-                            getClass: function(v, meta, rec) {
-                                if (rec.get('activated')) {
-                                    return 'activated';
-                                } else {
-                                    return 'deactivated';
-                                }
-                            },
-                            getTip: function(v, meta, rec) {
-                                if (rec.get('activated')) {
-                                    return esapp.Utils.getTranslation('deactivateingestion');   // 'Deactivate Ingestion';
-                                } else {
-                                    return esapp.Utils.getTranslation('activateingestion');   // 'Activate Ingestion';
-                                }
-                            },
-                            handler: function(grid, rowIndex, colIndex) {
-                                var rec = grid.getStore().getAt(rowIndex),
-                                    action = (rec.get('activated') ? 'deactivated' : 'activated');
-                                //Ext.toast({ html: action + ' ' + rec.get('productcode') + ' ' + rec.get('mapsetcode') + ' ' + rec.get('subproductcode'), title: 'Action', width: 300, align: 't' });
-                                rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
-                                grid.up().up().changesmade = true;
-                            }
-                        }]
+                        variableRowHeight: true,
+                        menuDisabled: true
+                    }, {
+                        header: esapp.Utils.getTranslation('nodata'),
+                        dataIndex: 'nodata',
+                        width: 110,
+                        sortable: false,
+                        hideable: false,
+                        variableRowHeight: true,
+                        menuDisabled: true
+                    },{
+                       xtype: 'actioncolumn',
+                       hidden: false,
+                       width: 35,
+                       align: 'center',
+                       sortable: false,
+                       menuDisabled: true,
+                       shrinkWrap: 0,
+                       items: [{
+                           width:'35',
+                           disabled: false,
+                           getClass: function(v, meta, rec) {
+                               // return 'delete';
+                               if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
+                                   return 'delete';
+                               }
+                               else {
+                                   return 'x-hide-display';
+                               }
+                           },
+                           getTip: function(v, meta, rec) {
+                               if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
+                                   var tipText = esapp.Utils.getTranslation('delete_ingest_product') + ': <BR>' +
+                                       '<b>' + rec.get('descriptive_name') + '</b>';
+
+                                   if (rec.get('version') != ''){
+                                       tipText += '<b> - ' + rec.get('version') + '</b>' ;
+                                       // tipText += '<span class="smalltext">' + '<b> - ' + Ext.getCmp('version').getValue() + '</b></span>' ;
+                                   }
+
+                                   tipText += '<b> - ' + rec.get('productcode') + '</b>';
+                                   tipText += '<b> - ' + rec.get('subproductcode') + '</b>';
+                                   // tipText += '<span class="smalltext">' + '<b style="color:darkgrey"> - ' + Ext.getCmp('productcode').getValue() + '</b></span>';
+                                   return tipText;
+                               }
+                           },
+                           handler: 'deleteIngestSubProduct'
+                       }]
                     }]
                 }]
 
@@ -478,5 +676,8 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
 
         me.controller.setup();
 
+    }
+    ,onClose: function(win, ev) {
+        Ext.data.StoreManager.lookup('ProductsStore').load();
     }
 });

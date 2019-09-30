@@ -44,10 +44,10 @@ class TestCreateRequests(unittest.TestCase):
         # # mapsetcode = 'SPOTV-IGAD-1km'
         # # subproductcode = 'ndvi-linearx2'
 
-        productcode = 'arc2-rain'
-        version = '2.0'
-        mapsetcode = 'ARC2-Africa-11km'
-        subproductcode = '1day'
+        productcode = 'olci-wrr'
+        version = 'V02.0'
+        mapsetcode = 'SPOTV-Africa-1km'
+        subproductcode = None
 
         request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
         request_json = json.dumps(request,

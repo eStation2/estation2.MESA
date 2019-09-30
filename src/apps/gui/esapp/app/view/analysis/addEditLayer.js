@@ -50,6 +50,8 @@ Ext.define("esapp.view.analysis.addEditLayer",{
     layout: 'hbox',
 
     params: {
+        new: false,
+        view: true,
         edit: false,
         layerrecord: null
     },
@@ -71,6 +73,9 @@ Ext.define("esapp.view.analysis.addEditLayer",{
 
         if (me.params.edit){
             me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('editlayer') + '</span>');
+        }
+        else if (me.params.view){
+            me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('viewlayer') + '</span>');
         }
         else {
             me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('newlayer') + '</span>');
@@ -103,6 +108,7 @@ Ext.define("esapp.view.analysis.addEditLayer",{
             style: {color: 'orange'},
             scale: 'medium',
             disabled: false,
+            hidden: me.params.view ? true : false,
             handler: 'importLayer'
         },{
             xtype: 'button',
@@ -112,6 +118,7 @@ Ext.define("esapp.view.analysis.addEditLayer",{
             style: {color: 'lightblue'},
             scale: 'medium',
             disabled: false,
+            hidden: me.params.view ? true : false,
             handler: 'saveLayerInfo'
         }];
 
@@ -128,6 +135,7 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                 preventMark: false
             },
             layout: 'hbox',
+
 
             items : [{
                 margin:'0 15 5 0',
@@ -149,7 +157,8 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                     xtype: 'textfield',
                     fieldLabel: esapp.Utils.getTranslation('layername'),
                     width: 120+430,
-                    allowBlank: false
+                    allowBlank: false,
+                    disabled: me.params.view ? true : false
                 }, {
                     id: 'layerdescription',
                     name: 'layerdescription',
@@ -159,7 +168,8 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                     labelAlign: 'top',
                     width: 120+430,
                     allowBlank: true,
-                    grow: true
+                    grow: true,
+                    disabled: me.params.view ? true : false
                 }, {
                     xtype: 'container',
                     layout: 'hbox',
@@ -172,7 +182,7 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                         labelWidth: 120,
                         width: 120+345,
                         allowBlank: false,
-                        disabled: false,
+                        disabled: me.params.view ? true : false,
                         editable: false,
                         flex: 2.2
                     },{
@@ -183,6 +193,7 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                         flex: 0.8,
                         //iconCls: 'fa fa-pencil-square-o',
                         style: { color: 'white' },
+                        hidden: me.params.view ? true : false,
                         //scale: 'medium',
                         //scope:me,
                         handler: 'selectLayer'
@@ -194,7 +205,8 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                     xtype: 'textfield',
                     fieldLabel: esapp.Utils.getTranslation('feature_display_attributes'),
                     width: 120+430,
-                    allowBlank: true
+                    allowBlank: true,
+                    disabled: me.params.view ? true : false
                 }, {
                     id: 'provider',
                     name: 'provider',
@@ -202,7 +214,8 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                     xtype: 'textfield',
                     fieldLabel: esapp.Utils.getTranslation('provider'),
                     width: 120+430,
-                    allowBlank: true
+                    allowBlank: true,
+                    disabled: me.params.view ? true : false
                 }, {
                     id: 'layertype',
                     name: 'layertype',
@@ -211,6 +224,7 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                     fieldLabel: esapp.Utils.getTranslation('layertype'),
                     width: 120+120,
                     allowBlank: true,
+                    disabled: me.params.view ? true : false,
                     bind: {
                         store: '{layertypes}'
                     },
@@ -229,7 +243,8 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                     xtype: 'numberfield',
                     fieldLabel: esapp.Utils.getTranslation('layerorderindex'),
                     width: 120+50,
-                    allowBlank: false
+                    allowBlank: false,
+                    disabled: me.params.view ? true : false
                 }, {
                     id: 'layermenu',
                     name: 'layermenu',
@@ -238,6 +253,7 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                     fieldLabel: esapp.Utils.getTranslation('layermenu'),
                     width: 120+185,
                     allowBlank: false,
+                    disabled: me.params.view ? true : false,
                     bind: {
                         store: '{layermenu}'
                     },
@@ -257,7 +273,8 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                     xtype: 'textfield',
                     fieldLabel: esapp.Utils.getTranslation('layersubmenu'),
                     width: 120+430,
-                    allowBlank: true
+                    allowBlank: true,
+                    disabled: me.params.view ? true : false
                 }, {
                     id: 'layerenabled',
                     name: 'layerenabled',
@@ -265,7 +282,8 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                     xtype: 'checkbox',
                     fieldLabel: esapp.Utils.getTranslation('layeractive'),
                     width: 120+50,
-                    allowBlank: false
+                    allowBlank: false,
+                    disabled: me.params.view ? true : false
                 }, {
                     id: 'open_in_mapview',
                     name: 'open_in_mapview',
@@ -273,7 +291,8 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                     xtype: 'checkbox',
                     fieldLabel: esapp.Utils.getTranslation('by_default_open_layer_in_mapviews'),
                     width: 120+50,
-                    allowBlank: false
+                    allowBlank: false,
+                    disabled: me.params.view ? true : false
                     //labelAlign: 'top'
                 }]
             },{
@@ -288,6 +307,8 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                     //autoWidth: true,
                     labelWidth: 120
                 },
+                disabled: me.params.view ? true : false,
+
                 items: [{
                     xtype: 'propertygrid',
                     //nameField: 'Property',

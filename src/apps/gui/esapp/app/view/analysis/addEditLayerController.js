@@ -154,82 +154,6 @@ Ext.define('esapp.view.analysis.addEditLayerController', {
 
     ,importLayer:function() {
 
-        var fp = new Ext.form.Panel({
-            fileUpload: true,
-            width: 400,
-            frame: false,
-            title: '',
-            autoHeight: true,
-            bodyStyle: 'padding: 10px 0px 0px 10px;',
-            defaults: {
-                anchor: '90%',
-                allowBlank: false,
-                msgTarget: 'side'
-            },
-            columnCount:1,
-            labelAlign :'top',
-            items: [{
-                 xtype: 'hidden'
-                ,name:'layerfilename'
-                ,id:'layerfilename'
-                ,value: ''
-            },{
-                xtype: 'filefield'
-                ,id: 'layerfile'
-                ,name: 'layerfile'
-                ,emptyText: esapp.Utils.getTranslation('select_geojson file') // 'Select a .geojson file'
-                //,fieldLabel: esapp.Utils.getTranslation('import_layer_geojson_file') // 'Layer .geojson file'
-                ,width: 200
-                ,vtype:'GeoJSON'
-                //,labelWidth: 150
-                ,msgTarget: 'side'
-                ,allowBlank: false
-                ,anchor: '100%'
-                ,buttonText: '...'
-                ,buttonCfg: {
-                    iconCls: 'fa fa-folder-open-o'
-                }
-            }],
-            buttons: [{
-                text: esapp.Utils.getTranslation('btn_import'), // 'Import',
-                handler: function(){
-                    if(fp.getForm().isValid()){
-                        Ext.getCmp('layerfilename').setValue(Ext.getCmp('layerfile').lastValue);
-                        fp.getForm().submit({
-                            url:'layers/import',
-                            //scope:this,
-                            waitMsg: esapp.Utils.getTranslation('msg_wait_importing_layer'), // 'Importing layer...',
-                            success: function(fp, o, x){
-                                var tpl = new Ext.XTemplate(
-                                    esapp.Utils.getTranslation('layer_file_saved_on_the_server')+'<br />',
-                                    esapp.Utils.getTranslation('name') + ': {filename}<br />'
-                                );
-                                Ext.Msg.alert('Success', tpl.apply(o.result));
-
-                                Ext.getCmp('layer_filename').setValue(o.result.filename);
-
-                                fileUploadWin.close();
-                            }
-                        });
-                    }
-                    else {
-                        Ext.Msg.alert(esapp.Utils.getTranslation('warning'), esapp.Utils.getTranslation('vtype_geojson'));
-                    }
-                }
-            },{
-                text: esapp.Utils.getTranslation('btn_txt_reset'), // 'Reset',
-                handler: function(){
-                    fp.getForm().reset();
-                }
-            },{
-                text: esapp.Utils.getTranslation('close'), // 'Close',
-                handler: function(){
-                    fileUploadWin.close();
-                }
-            }
-            ]
-        });
-
         var fileUploadWin = new Ext.Window({
              id:'fileupload-win'
             ,layout:'fit'
@@ -240,7 +164,82 @@ Ext.define('esapp.view.analysis.addEditLayerController', {
             ,closable:true
             ,loadMask:true
             ,title:esapp.Utils.getTranslation('importlayer') // 'Import layer'
-            ,items:fp
+            ,items:[{
+                xtype: 'form',
+                fileUpload: true,
+                width: 400,
+                frame: false,
+                title: '',
+                autoHeight: true,
+                bodyStyle: 'padding: 10px 10px 10px 10px;',
+                defaults: {
+                    anchor: '90%',
+                    allowBlank: false,
+                    msgTarget: 'side'
+                },
+                columnCount:1,
+                labelAlign :'top',
+                items: [{
+                     xtype: 'hidden'
+                    ,name:'layerfilename'
+                    ,id:'layerfilename'
+                    ,value: ''
+                },{
+                    xtype: 'filefield'
+                    ,id: 'layerfile'
+                    ,name: 'layerfile'
+                    ,emptyText: esapp.Utils.getTranslation('select_geojson file') // 'Select a .geojson file'
+                    //,fieldLabel: esapp.Utils.getTranslation('import_layer_geojson_file') // 'Layer .geojson file'
+                    ,width: 200
+                    ,vtype:'GeoJSON'
+                    //,labelWidth: 150
+                    ,msgTarget: 'side'
+                    ,allowBlank: false
+                    ,anchor: '100%'
+                    ,buttonText: ''
+                    ,buttonConfig: {
+                        iconCls: 'fa fa-folder-open-o'
+                    }
+                }],
+                buttons: [{
+                    text: esapp.Utils.getTranslation('btn_import'), // 'Import',
+                    handler: function(){
+                        if(this.up().up().getForm().isValid()){
+                            Ext.getCmp('layerfilename').setValue(Ext.getCmp('layerfile').lastValue);
+                            this.up().up().getForm().submit({
+                                url:'layers/import',
+                                //scope:this,
+                                waitMsg: esapp.Utils.getTranslation('msg_wait_importing_layer'), // 'Importing layer...',
+                                success: function(fp, o, x){
+                                    var tpl = new Ext.XTemplate(
+                                        esapp.Utils.getTranslation('layer_file_saved_on_the_server')+'<br />',
+                                        esapp.Utils.getTranslation('name') + ': {filename}<br />'
+                                    );
+                                    Ext.Msg.alert('Success', tpl.apply(o.result));
+
+                                    Ext.getCmp('layer_filename').setValue(o.result.filename);
+
+                                    fileUploadWin.close();
+                                }
+                            });
+                        }
+                        else {
+                            Ext.Msg.alert(esapp.Utils.getTranslation('warning'), esapp.Utils.getTranslation('vtype_geojson'));
+                        }
+                    }
+                },{
+                    text: esapp.Utils.getTranslation('btn_txt_reset'), // 'Reset',
+                    handler: function(){
+                        this.up().up().getForm().reset();
+                    }
+                },{
+                    text: esapp.Utils.getTranslation('close'), // 'Close',
+                    handler: function(){
+                        fileUploadWin.close();
+                    }
+                }
+                ]
+            }]
         });
 
         fileUploadWin.show();

@@ -5,12 +5,218 @@ SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 
+/**********************************************************
+  For version 2.2.0
+ *********************************************************/
+
+-- ALTER TABLE analysis.user_workspaces ADD COLUMN IF NOT EXISTS showindefault boolean DEFAULT FALSE;
+-- ADD COLUMN IF NOT EXISTS does not work with the Postgresql version of MESA stations!
+ALTER TABLE analysis.user_workspaces
+ADD COLUMN  showindefault boolean DEFAULT FALSE;
+
+
+-- DROP TABLE products.resolution CASCADE;
+CREATE TABLE products.resolution
+(
+  resolutioncode character varying NOT NULL,
+  descriptive_name character varying,
+  description character varying,
+  pixel_shift_long double precision,
+  pixel_shift_lat double precision,
+  CONSTRAINT resolution_pk PRIMARY KEY (resolutioncode)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE products.resolution
+  OWNER TO estation;
+
+
+-- DROP TABLE products.projection CASCADE;
+CREATE TABLE products.projection
+(
+  proj_code character varying NOT NULL,
+  descriptive_name character varying,
+  description character varying,
+  srs_wkt character varying,
+  CONSTRAINT projection_pk PRIMARY KEY (proj_code)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE products.projection
+  OWNER TO estation;
+
+-- DROP TABLE products.bbox CASCADE;
+CREATE TABLE products.bbox
+(
+  bboxcode character varying NOT NULL,
+  descriptive_name character varying,
+  defined_by character varying NOT NULL,
+  upper_left_long double precision,
+  upper_left_lat double precision,
+  lower_right_long double precision,
+  lower_right_lat double precision,
+  predefined boolean NOT NULL DEFAULT false,
+  CONSTRAINT bbox_pk PRIMARY KEY (bboxcode)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE products.bbox
+  OWNER TO estation;
+
+-- DROP TABLE products.mapset_new;
+CREATE TABLE products.mapset_new
+(
+  mapsetcode character varying NOT NULL,
+  descriptive_name character varying NOT NULL,
+  description character varying,
+  defined_by character varying NOT NULL, -- values: JRC or USER
+  proj_code character varying,
+  resolutioncode character varying,
+  bboxcode character varying,
+  pixel_size_x integer,
+  pixel_size_y integer,
+  footprint_image text,
+  center_of_pixel boolean DEFAULT false,
+  CONSTRAINT mapset_new_pk PRIMARY KEY (mapsetcode),
+  CONSTRAINT mapset_new_bbox_fk FOREIGN KEY (bboxcode)
+      REFERENCES products.bbox (bboxcode) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE SET NULL,
+  CONSTRAINT mapset_new_projection_fk FOREIGN KEY (proj_code)
+      REFERENCES products.projection (proj_code) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE SET NULL,
+  CONSTRAINT mapset_new_resolution_fk FOREIGN KEY (resolutioncode)
+      REFERENCES products.resolution (resolutioncode) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE SET NULL
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE products.mapset_new
+  OWNER TO estation;
+COMMENT ON COLUMN products.mapset_new.defined_by IS 'values: JRC or USER';
+
+
+ALTER TABLE products.datasource_description
+DROP CONSTRAINT mapset_datasource_description_fk,
+ADD CONSTRAINT mapset_new_datasource_description_fk FOREIGN KEY (native_mapset)
+      REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+ALTER TABLE products.ingestion
+DROP CONSTRAINT mapset_ingestion_fk,
+ADD CONSTRAINT mapset_new_ingestion_fk FOREIGN KEY (mapsetcode)
+REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+ALTER TABLE products.process_product
+DROP CONSTRAINT mapset_process_input_product_fk,
+ADD CONSTRAINT mapset_new_process_input_product_fk FOREIGN KEY (mapsetcode)
+REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+ALTER TABLE products.thema_product
+DROP CONSTRAINT mapset_thema_product_fk,
+ADD CONSTRAINT mapset_new_thema_product_fk FOREIGN KEY (mapsetcode)
+REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+
+-- DROP INDEX products.ingestion_mapsetcode_idx;
+
+CREATE INDEX ingestion_mapsetcode_idx
+  ON products.ingestion
+  USING btree
+  (mapsetcode COLLATE pg_catalog."default");
+
+-- DROP INDEX products.mapsetcode_idx;
+
+CREATE INDEX mapsetcode_idx
+  ON products.mapset
+  USING btree
+  (mapsetcode COLLATE pg_catalog."default");
+
+
+ALTER TABLE products.eumetcast_source
+  ADD COLUMN  defined_by character varying;
+
+
+CREATE OR REPLACE FUNCTION products.check_update_internet_source()
+  RETURNS trigger AS
+$BODY$
+BEGIN
+	NEW.update_datetime = now();
+
+	RETURN NEW;
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE STRICT
+  COST 100;
+ALTER FUNCTION products.check_update_internet_source()
+  OWNER TO estation;
+
+
+CREATE TRIGGER update_internet_source
+  BEFORE UPDATE
+  ON products.internet_source
+  FOR EACH ROW
+  EXECUTE PROCEDURE products.check_update_internet_source();
+
+
+ALTER TABLE products.process_product
+DROP CONSTRAINT product_dependencies_fk,
+ADD CONSTRAINT product_dependencies_fk
+	FOREIGN KEY (productcode, subproductcode, version)
+	REFERENCES products.product (productcode, subproductcode, version) MATCH SIMPLE
+	ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+
+CREATE TABLE analysis.user_role
+(
+  role_id integer NOT NULL,
+  role_name character varying(50) NOT NULL,
+  defined_by character varying DEFAULT 'USER'::character varying,
+  CONSTRAINT user_role_pkey PRIMARY KEY (role_id)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE analysis.user_role
+  OWNER TO estation;
+
+
+CREATE TABLE analysis.logos
+(
+  logo_id bigserial NOT NULL,
+  logo_filename character varying(80),
+  logo_description character varying(255),
+  active boolean DEFAULT true,
+  deletable boolean DEFAULT true,
+  defined_by character varying DEFAULT 'USER'::character varying,
+  isdefault boolean NOT NULL DEFAULT false,
+  orderindex_defaults integer,
+  CONSTRAINT logos_pkey PRIMARY KEY (logo_id)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE analysis.logos
+  OWNER TO estation;
+
+
 
 /**********************************************************
   For version 2.1.2
  *********************************************************/
 
-ALTER TABLE products.internet_source ADD COLUMN https_params character varying;
+ALTER TABLE products.internet_source ADD COLUMN  https_params character varying;
 
 ALTER TABLE products.spirits ADD COLUMN out_data_type character varying;
 ALTER TABLE products.spirits ADD COLUMN out_scale_factor double precision;
@@ -956,7 +1162,7 @@ DROP TRIGGER IF EXISTS update_product ON products.product;
 -- 	EXECUTE PROCEDURE products.activate_deactivate_ingestion_pads_processing();
 
 
-DROP FUNCTION products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean);
+DROP FUNCTION IF EXISTS products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean);
 
 CREATE OR REPLACE FUNCTION products.activate_deactivate_product_ingestion_pads_processing(
     productcode character varying,

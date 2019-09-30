@@ -4,18 +4,15 @@ Ext.define('esapp.view.acquisition.editEumetcastSourceController', {
 
     ,onSaveClick: function () {
         // Save the changes pending in the dialog's child session back to the parent session.
-        var dialog = this.getView(),
+        var me = this.getView(),
             form = this.lookupReference('eumetcastsourceform');
 
-        //console.info(this.getStore('eumetcastsources'));
-        //console.info(Ext.data.StoreManager.lookup('EumetcastSourceStore').getUpdatedRecords());
         if (form.isValid()) {
 
-            if (Ext.data.StoreManager.lookup('EumetcastSourceStore').getUpdatedRecords() != []){
+            if (Ext.data.StoreManager.lookup('EumetcastSourceStore').getUpdatedRecords() !== []){
                 Ext.data.StoreManager.lookup('EumetcastSourceStore').sync();
                 //Ext.toast({html: esapp.Utils.getTranslation('saved'), title: esapp.Utils.getTranslation('saved'), width: 200, align: 't'});
-                Ext.destroy(this.getView());
-                //this.onCancelClick();
+
             }
             //if (dialog.getSession().getChanges() != null) {
             //    dialog.getSession().getSaveBatch().start();
@@ -25,10 +22,11 @@ Ext.define('esapp.view.acquisition.editEumetcastSourceController', {
         }
     }
 
-    ,onCancelClick: function () {
-        Ext.data.StoreManager.lookup('EumetcastSourceStore').rejectChanges();
-        Ext.destroy(this.getView());
-    }
+
+    // ,onCancelClick: function () {
+    //     Ext.data.StoreManager.lookup('EumetcastSourceStore').rejectChanges();
+    //     Ext.destroy(this.getView());
+    // }
 
     //,getEumetcastSource: function(win) {
     //    var me = this.getView();

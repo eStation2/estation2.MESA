@@ -5,10 +5,7 @@ Ext.define('esapp.view.acquisition.editEumetcastSourceModel', {
         // Define a store of EumetcastSource records that links to the Session.
         eumetcastsources: {
             source: 'EumetcastSourceStore'
-            ,session: true
-            //model: 'EumetcastSource'
-            //autoLoad: false,
-            //autoSync: false
+            // ,session: true
         },
         mapsets: {
             source: 'MapsetsStore'
@@ -26,19 +23,13 @@ Ext.define('esapp.view.acquisition.editEumetcastSourceModel', {
     ,formulas: {
         theEumetcastSource: {
             get: function(get) {
-                //console.info(this.getView());
-                //console.info(get('eumetcastsources'));
-                //console.info(get('eumetcastsources').findRecord('eumetcast_id', this.getView().data_source_id, 0, true, false, false));
-                return get('eumetcastsources').findRecord('eumetcast_id', this.getView().data_source_id, 0, true, false, false)
-                //return get('eumetcastsources').first();
+                if (this.getView().params.create){
+                    return this.getView().params.eumetcastsourcerecord;
+                }
+                else {
+                    return get('eumetcastsources').findRecord('eumetcast_id', this.getView().params.data_source_id, 0, true, false, false);
+                }
             }
         }
     }
-
-    //,links: {
-    //    theEumetcastSource: {
-    //        reference: 'esapp.model.EumetcastSource',
-    //        id: 0
-    //    }
-    //}
 });

@@ -26,8 +26,9 @@ class Mapset(object):
             raise NoMapsetFound(kwargs)
 
     def to_dict(self):
-        return dict((fieldname, getattr(self._mapset, fieldname))
-            for fieldname in ('mapsetcode', 'defined_by', 'description', 'srs_wkt',
-                'upper_left_long', 'pixel_shift_long', 'rotation_factor_long',
-                'upper_left_lat', 'pixel_shift_lat', 'rotation_factor_lat',
-                'pixel_size_x', 'pixel_size_y'))
+        return self._mapset
+        # return dict((fieldname, getattr(self._mapset, fieldname))
+        #     for fieldname in ('mapsetcode', 'defined_by', 'description', 'srs_wkt',
+        #         'upper_left_long', 'pixel_shift_long', 'rotation_factor_long',
+        #         'upper_left_lat', 'pixel_shift_lat', 'rotation_factor_lat',
+        #         'pixel_size_x', 'pixel_size_y'))

@@ -3,6 +3,7 @@ Ext.define('esapp.model.InternetSource', {
 
     fields: [
         {name: 'internet_id'},
+        {name: 'orig_internet_id'},
         {name: 'defined_by'},
         {name: 'descriptive_name'},
         {name: 'description'},
@@ -14,11 +15,11 @@ Ext.define('esapp.model.InternetSource', {
         {name: 'type'},
         {name: 'include_files_expression'},
         {name: 'files_filter_expression'},
-        {name: 'status'},
-        {name: 'pull_frequency'},
+        {name: 'status', type: 'boolean'},
+        {name: 'pull_frequency', type: 'number'},
         {name: 'frequency_id'},
-        {name: 'start_date'},   // , type: 'number', useNull : true, defaultValue: null
-        {name: 'end_date'},
+        {name: 'start_date', type: 'number'},   // , type: 'number', useNull : true, defaultValue: null
+        {name: 'end_date', type: 'number'},
         {name: 'https_params'},
         {name: 'datasource_descr_id'},
         {name: 'format_type'},
@@ -27,15 +28,15 @@ Ext.define('esapp.model.InternetSource', {
         {name: 'date_format'},
         {name: 'date_position'},
         {name: 'product_identifier'},
-        {name: 'prod_id_position'},
-        {name: 'prod_id_length'},
+        {name: 'prod_id_position', type: 'number'},
+        {name: 'prod_id_length', type: 'number'},
         {name: 'area_type'},
         {name: 'area_position'},
-        {name: 'area_length'},
+        {name: 'area_length', type: 'number'},
         {name: 'preproc_type'},
         {name: 'product_release'},
         {name: 'release_position'},
-        {name: 'release_length'},
+        {name: 'release_length', type: 'number'},
         {name: 'native_mapset'}
     ]
 

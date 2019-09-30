@@ -6,34 +6,42 @@ Ext.define('esapp.model.MapSet', {
         {name: 'defined_by'},
         {name: 'descriptive_name'},
         {name: 'description'},
-        {name: 'srs_wkt'},
-        {name: 'upper_left_long'},
-        {name: 'pixel_shift_long'},
-        {name: 'rotation_factor_long'},
-        {name: 'upper_left_lat'},
-        {name: 'pixel_shift_lat'},
-        {name: 'rotation_factor_lat'},
+        {name: 'resolutioncode'},
+        {name: 'center_of_pixel', type: 'boolean'},
         {name: 'pixel_size_x'},
         {name: 'pixel_size_y'},
-        {name: 'footprint_image'}
+        {name: 'proj_code'},
+        // {name: 'projection_descriptive_name'},
+        // {name: 'srs_wkt'},
+        {name: 'bboxcode'},
+        // {name: 'bbox_descriptive_name'},
+        {name: 'predefined', type: 'boolean'},
+        {name: 'upper_left_long'},
+        {name: 'upper_left_lat'},
+        {name: 'lower_right_long'},
+        {name: 'lower_right_lat'},
+        {name: 'footprint_image'},
+        // {name: 'resolution_descriptive_name'},
+        // {name: 'pixel_shift_long', type: 'number'},
+        // {name: 'pixel_shift_lat', type: 'number'},
+        {name: 'ingestions_assigned'}
     ]
 
-    // ,autoLoad: true
-    //
-    // ,proxy: {
-    //     type: 'ajax',
-    //     url: 'getmapsetsall',
-    //     reader: {
-    //         type: 'json'
-    //         , successProperty: 'success'
-    //         , rootProperty: 'mapsets'
-    //         , messageProperty: 'message'
-    //     },
-    //     listeners: {
-    //         exception: function (proxy, response, operation) {
-    //             // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-    //             console.info('MAPSET MODEL- REMOTE EXCEPTION');
-    //         }
-    //     }
-    // }
+    // fields: [
+    //     {name: 'mapsetcode'},
+    //     {name: 'defined_by'},
+    //     {name: 'descriptive_name'},
+    //     {name: 'description'},
+    //     {name: 'srs_wkt'},
+    //     {name: 'upper_left_long'},
+    //     {name: 'pixel_shift_long'},
+    //     {name: 'rotation_factor_long'},
+    //     {name: 'upper_left_lat'},
+    //     {name: 'pixel_shift_lat'},
+    //     {name: 'rotation_factor_lat'},
+    //     {name: 'pixel_size_x'},
+    //     {name: 'pixel_size_y'},
+    //     {name: 'footprint_image'},
+    //     {name: 'ingestions_assigned'}
+    // ]
 });

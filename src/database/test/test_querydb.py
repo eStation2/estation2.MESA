@@ -11,7 +11,34 @@ logger = log.my_logger(__name__)
 from database import querydb
 from lib.python import functions
 
+
 class TestQuerydb(TestCase):
+
+    def test_checkUser(self):
+        user_info = {
+            'userid': 'n002rty4',
+            'username': 'MESA CWG',
+            'password': 'eStation2020',
+            'userlevel': 2,
+            'email': 'mesa.cwg@gmail.com',
+            'prefered_language': 'eng'
+        }
+
+        userFromDB = querydb.checkUser(user_info)
+        print userFromDB.get('userlevel')
+        print userFromDB
+        self.assertEqual(1, 1)
+
+
+    def test_getProductNative(self):
+        productcode = 'vgt-lai'
+        version = 'V2.0'
+
+        product_native = querydb.get_product_native(productcode, version)
+        # print product_native
+        print product_native[0]['category_id']
+        self.assertEqual(1, 1)
+
 
     def test_update_yaxe(self):
         params = {
@@ -342,6 +369,8 @@ class TestQuerydb(TestCase):
     def test_get_products_acquisition(self):
 
         product = querydb.get_products_acquisition(activated=True)
+
+        product = querydb.get_products_acquisition(activated=None)
         logger.info("Active products: %s", product)
         for row in product:
             print row

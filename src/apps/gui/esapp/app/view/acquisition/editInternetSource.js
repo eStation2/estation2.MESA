@@ -12,6 +12,7 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
 
         'Ext.layout.container.Center'
     ],
+    xtype: 'editinternetsource',
 
     //bind: {
     //    title: '{title}'
@@ -45,23 +46,52 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
 
     session:true,
 
+    params: {
+        create: false,
+        view: true,
+        edit: false,
+        internetsourcerecord: null,
+        data_source_id: null,
+        orig_internet_id: ''
+    },
+
     initComponent: function () {
         var me = this;
 
-        me.title = esapp.Utils.getTranslation('editinternetdatasource');
+        // me.title = esapp.Utils.getTranslation('editinternetdatasource');
+
+        if (me.params.edit){
+            me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('editinternetdatasource') + '</span>');
+        }
+        else if (me.params.view){
+            me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('viewinternetdatasource') + '</span>');
+        }
+        else {
+            me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('newinternetdatasource') + '</span>');
+        }
 
         me.buttons = [{
+            text: 'TEST',
+            // iconCls: 'fa fa-save fa-2x',
+            style: {color: 'lightblue'},
+            scale: 'medium',
+            disabled: false,
+            formBind: true,
+            hidden: me.params.view ? true : false,
+            handler: 'onTestClick'
+        },'->',{
             text: 'Save',
             iconCls: 'fa fa-save fa-2x',
             style: { color: 'lightblue' },
             scale: 'medium',
             disabled: false,
             formBind: true,
+            hidden: me.params.view ? true : false,
             handler: 'onSaveClick'
-        }, {
-            text: 'Cancel',
-            scale: 'medium',
-            handler: 'onCancelClick'
+        // }, {
+        //     text: 'Cancel',
+        //     scale: 'medium',
+        //     handler: 'onCancelClick'
         }];
 
         var internettype = new Ext.data.Store({
@@ -120,12 +150,30 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
             ]
         });
 
+        me.listeners = {
+            afterrender: function(){
+                // console.info(me);
+                // console.info(me.params.create);
+                if (me.params.create){
+                    me.lookupReference('internet_id').setValue('');
+                }
+            },
+            beforeclose: function(){
+                // console.info('beforeclose');
+                // console.info(Ext.data.StoreManager.lookup('InternetSourceStore').getUpdatedRecords());
+                if (Ext.data.StoreManager.lookup('InternetSourceStore').getUpdatedRecords() !== []){
+                    Ext.data.StoreManager.lookup('InternetSourceStore').rejectChanges();
+                }
+                Ext.data.StoreManager.lookup('InternetSourceStore').load();
+            }
+        };
+
         me.items = [{
             xtype: 'form',
             reference: 'internetsourceform',
             border: false,
             // use the Model's validations for displaying form errors
-            //modelValidation: true,
+            // modelValidation: true,
             fieldDefaults: {
                 labelAlign: 'left',
                 labelStyle: 'font-weight: bold;',
@@ -147,23 +195,18 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                     defaults: {
                         width: 475,
                         labelWidth: 120,
-                        labelAlign: 'left'
+                        labelAlign: 'left',
+                        disabled: me.params.view ? true : false
                     },
                     items: [{
-                        xtype: 'displayfield',
+                        xtype: 'textfield',      // (me.params.create || me.params.edit) ? 'textfield' : 'displayfield',
                         fieldLabel: esapp.Utils.getTranslation('id'),    // 'ID',
                         labelWidth: 60,
                         reference: 'internet_id',
                         msgTarget: 'side',
                         bind: '{theInternetSource.internet_id}',
                         allowBlank: false
-                    //}, {
-                    //    xtype: 'textfield',
-                    //    fieldLabel: esapp.Utils.getTranslation('defined_by'),    // 'Defined by',
-                    //    reference: 'defined_by',
-                    //    msgTarget: 'side',
-                    //    bind: '{theInternetSource.defined_by}'
-                    }, {
+                    },{
                         xtype: 'textfield',
                         fieldLabel: esapp.Utils.getTranslation('name'),    // 'Name',
                         labelWidth: 60,
@@ -252,6 +295,13 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                     //    reference: 'status',
                     //    msgTarget: 'side',
                     //    bind: '{theInternetSource.status}'
+                    //}, {
+                    //    xtype: 'textfield',
+                    //    fieldLabel: esapp.Utils.getTranslation('defined_by'),    // 'Defined by',
+                    //    reference: 'defined_by',
+                    //    msgTarget: 'side',
+                    //    bind: '{theInternetSource.defined_by}'
+                    // },
                     }, {
                         xtype: 'numberfield',
                         fieldLabel: esapp.Utils.getTranslation('pull_frequency'),    // 'Pull frequency',
@@ -316,8 +366,9 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                     margin: '10 10 10 5',
                     padding: '10 10 10 10',
                     defaults: {
-                        width: 275,
-                        labelWidth: 130
+                        width: 290,
+                        labelWidth: 130,
+                        disabled: me.params.view ? true : false
                     },
                     items: [{
                         xtype: 'combobox',

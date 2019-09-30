@@ -55,9 +55,9 @@ Ext.define('esapp.store.DataAcquisitionsStore', {
 
     ,listeners: {
         write: function(store, operation){
-            Ext.toast({ html: operation.getResultSet().message,
-                        title: esapp.Utils.getTranslation('getupdated'),  // "Get updated",
-                        width: 300, align: 't' });
+            // Ext.toast({ html: operation.getResultSet().message,
+            //             title: esapp.Utils.getTranslation('getupdated'),  // "Get updated",
+            //             width: 300, align: 't' });
         }
     }
 });

@@ -25,8 +25,7 @@ Ext.define('esapp.Application', {
     //],
 
     stores: [
-         'LogoImages'
-        ,'ProcessingStore'          // no autoload
+         'HeaderLogoImages'
         ,'i18nStore'
         ,'LanguagesStore'
         ,'SystemSettingsStore'
@@ -34,21 +33,32 @@ Ext.define('esapp.Application', {
         ,'FrequenciesStore'
         ,'DateFormatsStore'
         ,'DataTypesStore'
-        ,'LogosMapView'
+        ,'DefinedByStore'
+        ,'ProjectionsStore'
+        ,'ResolutionsStore'
+        ,'BboxStore'
+        ,'RefWorkspacesStore'
+        // ,'LogosMapView'
+        ,'LogosStore'
         ,'LayersStore'
         ,'LegendsStore'
         ,'EumetcastSourceStore'
         ,'InternetSourceStore'
-        ,'MapsetsStore'
+        ,'MapsetsStore'             // no autoload
+        ,'ProductsStore'
         // ,'ProductsInactiveStore' // Not used anymore, instead esapp.model.Product is used.
         ,'ProductsActiveStore'      // no autoload
         ,'DataAcquisitionsStore'    // no autoload
         ,'IngestionsStore'          // no autoload
+        ,'ProcessingStore'          // no autoload
         ,'TimeseriesProductsStore'  // no autoload
         // ,'TSDrawPropertiesStore'
         ,"ColorSchemesStore"
         ,'DataSetsStore'            // no autoload
         ,'UserWorkspacesStore'      // no autoload
+        ,'IngestSubProductsStore'   // no autoload
+        ,'SubDatasourceDescriptionStore'
+        ,'ProductNavigatorStore'
     ],
 
     // create a reference in Ext.application so we can access it from multiple functions
@@ -83,9 +93,22 @@ Ext.define('esapp.Application', {
         Ext.override(Ext.data.proxy.Ajax, { timeout: Ext.Ajax.timeout });
         Ext.override(Ext.data.Connection, { timeout: Ext.Ajax.timeout });
 
+
+        if (Ext.util.Cookies.get('estation2_userid') != null){
+            var userinfo = {
+                userid: Ext.util.Cookies.get('estation2_userid'),
+                username: Ext.util.Cookies.get('estation2_username'),
+                email: Ext.util.Cookies.get('estation2_useremail'),
+                userlevel: Ext.util.Cookies.get('estation2_userlevel'),
+                prefered_language: Ext.util.Cookies.get('estation2_userlanguage')
+            };
+
+            esapp.setUser(userinfo);
+        }
+
         esapp.globals = [];
 
-        // esapp.globals['typeinstallation'] = 'full';
+        esapp.globals['typeinstallation'] = 'Full';       // 'jrc_online'
         // esapp.globals['role'] = 'pc2';
         // esapp.globals['mode'] = 'nominal';
         Ext.Ajax.request({
@@ -145,6 +168,7 @@ Ext.define('esapp.Application', {
                             duration: 1000,
                             remove: true
                         });
+                        // console.info(splashscreen);
 
                         Ext.Loader.loadScript({
                             url: 'app/CustomVTypes.js',
@@ -153,23 +177,10 @@ Ext.define('esapp.Application', {
                             }
                         });
 
-                        //Ext.apply(Ext.form.VTypes, {
-                        //    GeoJSON:  function(v) {
-                        //        v = v.replace(/^\s|\s$/g, ""); //trims string
-                        //        if (v.match(/([^\/\\]+)\.(geojson)$/i) )
-                        //            return true;
-                        //        else
-                        //            return false;
-                        //    },
-                        //    GeoJSONText: esapp.Utils.getTranslation('vtype_geojson')    // 'Must be a .geojson file.'
-                        //});
-                        //
-                        //Ext.create('esapp.view.main.Main');
-
                         var taskLaunch = new Ext.util.DelayedTask(function() {
                             me.launch();
                         });
-                        taskLaunch.delay(50);
+                        taskLaunch.delay(200);
 
                     }
                 });
@@ -252,11 +263,13 @@ Ext.define('esapp.Application', {
         }
         else {
             if (esapp.globals['role'] == 'pc2') {
+                Ext.data.StoreManager.lookup('ProductsStore').load();
                 Ext.data.StoreManager.lookup('ProductsActiveStore').load();
                 Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
                 Ext.data.StoreManager.lookup('IngestionsStore').load();
             }
             if (esapp.globals['role'] == 'pc3' && esapp.globals['mode'] == 'recovery'){
+                Ext.data.StoreManager.lookup('ProductsStore').load();
                 Ext.data.StoreManager.lookup('ProductsActiveStore').load();
                 Ext.data.StoreManager.lookup('DataAcquisitionsStore').load();
                 Ext.data.StoreManager.lookup('IngestionsStore').load();

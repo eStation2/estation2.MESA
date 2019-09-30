@@ -624,14 +624,16 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
 							);
 					}).items;
 					var newrecord = Ext.clone(prodrec[0]);
-					newrecord.set('cumulative', product.cumulative);
-					newrecord.set('difference', product.difference);
-					newrecord.set('reference', product.reference);
-					newrecord.set('colorramp', product.colorramp);
-					newrecord.set('legend_id', product.legend_id);
-					newrecord.set('zscore', product.zscore);
+					if (esapp.Utils.objectExists(newrecord)) {
+                        newrecord.set('cumulative', product.cumulative);
+                        newrecord.set('difference', product.difference);
+                        newrecord.set('reference', product.reference);
+                        newrecord.set('colorramp', product.colorramp);
+                        newrecord.set('legend_id', product.legend_id);
+                        newrecord.set('zscore', product.zscore);
 
-					me.getController().TimeseriesProductsGridRowClick(null, newrecord);
+                        me.getController().TimeseriesProductsGridRowClick(null, newrecord);
+                    }
 				});
 
 				if (me.tplChartView.yearTS != ''){

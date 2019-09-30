@@ -78,51 +78,39 @@ Ext.define('esapp.view.analysis.legendAdminController', {
 
     }
 
-    ,exportLegend: function(){
-//         var selrec = this.getSelectionModel().getSelected();
-//         if (!objectExists(selrec)){
-//             Ext.ux.Toast.msg(EMMA.getTranslation('toast_title_export_legend'), EMMA.getTranslation('toast_text_nolegend_selected') );   // 'Export legend'  'No legend selected!'
-//         }
-//         else {
-//             if (!Ext.fly('frmExportDummy')) {
-//                 var frm = document.createElement('form');
-//                 frm.id = 'frmExportDummy';
-//                 frm.name = id;
-//                 frm.className = 'x-hidden';
-//                 document.body.appendChild(frm);
-//             }
-//             Ext.Ajax.request({
-//                url:this.url,
-//                params:{
-//                    task:'exportLegend',
-//                    legendid:selrec.data.legend_id,
-//                    legendname:selrec.data.legend_name
-//                },
-//                method: 'POST',
-//                form: Ext.fly('frmExportDummy'),
-//                waitMsg:EMMA.getTranslation('Msg_wait_exporting_legend'), // 'Exporting legend...',
-//                scope:this,
-//                success: function(result, request) {
-//                    // The success handler is called if the XHR request actually
-//                    // made it to the server and a response of some kind occurs.
-// //                               var returnData = Ext.util.JSON.decode(result.responseText);
-// //                               if (returnData.success){
-// //                                   Ext.ux.Toast.msg('Legend exported', 'Legend Exported'+': <b>{0}</b>', returnData.legendname);
-// //
-// //                               } else if(!returnData.success){
-// //                                   this.showError(returnData.error || result.responseText);
-// //                               }
-//                }, // eo function onSuccess
-//                failure: function(result, request) {
-//                    // The failure handler is called if there's some sort of network error,
-//                    // like you've unplugged your ethernet cable, the server is down, etc.
-//                }, // eo function onFailure
-//                callback:function(callinfo,responseOK,response ){
-//                    //refresh legend list
-//                }
-//                ,isUpload: true
-//             });
-//         }
+    ,exportLegend: function(grid, rowIndex){
+        // var selrec = this.getSelectionModel().getSelected();
+        var selrec = grid.getStore().getAt(rowIndex);
+        console.info(selrec);
+
+        if (!Ext.fly('frmExportDummy')) {
+            var frm = document.createElement('form');
+            frm.id = 'frmExportDummy';
+            frm.name = frm.id;
+            frm.className = 'x-hidden';
+            document.body.appendChild(frm);
+        }
+        Ext.Ajax.request({
+           url:'legends/exportlegend',
+           params:{
+               task:'exportLegend',
+               legendid:selrec.data.legendid,
+               legendname:selrec.data.legend_descriptive_name
+           },
+           method: 'POST',
+           isUpload: true,
+           form: Ext.fly('frmExportDummy'),
+           scope:this,
+           success: function(result, request) {
+               // var result = Ext.JSON.decode(response.responseText);
+               // if (!result.success){
+               //     console.info(response.status);
+               // }
+           }, // eo function onSuccess
+           failure: function(result, request) {
+               // console.info(response.status);
+           } // eo function onFailure
+        });
     }
 
     ,newLegend: function(){
@@ -150,14 +138,17 @@ Ext.define('esapp.view.analysis.legendAdminController', {
         newLegendWin.show();
     }
 
-    ,editLegend: function(grid, record, element, rowIndex, e, eOpts){
-        if(!isNaN(record)) {    // record is the rowIndex so get the record from the store through the rowIndex
-            record = grid.getStore().getAt(record);
-        }
+    ,editLegend: function(grid, rowIndex){
+        var user = esapp.getUser();
+        var record = grid.getStore().getAt(rowIndex);
+
+        // if(!isNaN(record)) {    // record is the rowIndex so get the record from the store through the rowIndex
+        //     record = grid.getStore().getAt(rowIndex);
+        // }
 
         var edit = false;
         var view = true;
-        if (record.get('defined_by') != 'JRC'){
+        if (record.get('defined_by') != 'JRC' || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
             edit = true;
             view = false;
         }

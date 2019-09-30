@@ -38,10 +38,10 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
     autoWidth:  true,
     minWidth: 340,
     width: 340,
-    height: 610,
+    height: 590,    // 610,
     // height: Ext.getBody().getViewSize().height < 750 ? Ext.getBody().getViewSize().height-10 : 750,  // 600,
     // autoHeight:  true,
-    // minHeight: 550,
+    minHeight: 300,
     // maxHeight: 750,
 
     bodyBorder: false,
@@ -197,7 +197,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         '<b class="smalltext"> - {version}</b>',
                     '</tpl>',
                     '</br>' +
-                    '<b class="smalltext" style="color:darkgrey">{productcode}</b>'
+                    '<b class="smalltext" style="color:darkgrey;">{productcode}</b>'
                 )
             },{
                 xtype: 'actioncolumn',
@@ -248,8 +248,8 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
             },
             listeners: {
                 expand: function(){
-                    this.setWidth(400);
-                    this.up().setWidth(400+312);
+                    this.setWidth(335); // 400
+                    this.up().setWidth(335+312);
                 },
                 collapse: function(){
                     this.setWidth(0);
@@ -301,7 +301,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 reference: 'product-mapsets-dataview',
                 border: true,
                 autoWidth: true,
-                maxHeight: 190,
+                maxHeight: 150,
                 collapsible: false,
                 focusable: false,
                 layout: 'fit',
@@ -313,15 +313,15 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     tpl: Ext.create('Ext.XTemplate',
                         '<tpl for=".">',
                             '<div class="mapset" id="{mapsetcode:stripTags}">',
-                                '<img src="{footprint_image}" title="{descriptive_name:htmlEncode}">',
+                                '<img width="100px" height="80px" src="{footprint_image}" title="{descriptive_name:htmlEncode}">',
                                 '<span><strong>{descriptive_name:htmlEncode}</strong></span>',
                             '</div>',
                         '</tpl>',
                         '<div class="x-clear"></div>'
                     ),
                     multiSelect: false,
-                    height: 170,
-                    width: 140,
+                    // height: 170,
+                    // width: 140,
                     trackOver: true,
                     cls:'mapsets',
                     overItemCls: 'mapset-hover',
@@ -390,11 +390,11 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     xtype: 'templatecolumn',
                     tpl: new Ext.XTemplate(
                         '<b>{descriptive_name}</b>' +
-                        '<tpl if="version != \'undefined\'">',
-                        '<b class="smalltext"> - {version} </b>',
-                        '</tpl>',
+                        // '<tpl if="version != \'undefined\'">',
+                        // '<b class="smalltext"> - {version} </b>',
+                        // '</tpl>',
                         // '</br>' +
-                        '<span class="smalltext"><b style="color:darkgrey"> - {subproductcode}</b>' +
+                        '<span class="smalltext"><b style="color:darkgrey;"> - {subproductcode}</b>' +
                         // '</span>' +
                         // '<span>&nbsp;&nbsp;(display_index: <b style="color:black">{display_index}</b>)' +
                         '</span>'
@@ -427,8 +427,9 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 xtype: 'grid',
                 reference: 'colorschemesGrid',
                 autoWidth: true,
-                autoHeight: true,
-                maxHeight: 190,
+                // autoHeight: true,
+                // maxHeight: 190,
+                height: 165,
                 layout: 'fit',
                 scrollable: 'vertical',
                 reserveScrollbar: true,
@@ -487,12 +488,17 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         scale: 'small',
                         hidden: false
                     },
-                    items: ['->',{
+                    items: [{
+                        xtype: 'container',
+                        html: '<div class="grid-header-style">' + esapp.Utils.getTranslation('colorschemes') + '</div>'
+                    },
+                    '->',{
                         xtype: 'button',
                         text: esapp.Utils.getTranslation('assign_legend'),    // 'Assign legend to product',
                         name: 'assign_legend',
                         iconCls: 'fa fa-plus-circle fa-1x',
                         style: {color: 'green'},
+                        hidden: esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online',
                         handler: 'assignLegend'
                     }]
                 },
@@ -509,6 +515,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                 columns: [{
                     xtype: 'actioncolumn',
                     width: 30,
+                    // minWidth: 30,
                     align: 'center',
                     menuDisabled:true,
                     // shrinkWrap: 0,
@@ -521,8 +528,10 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     }]
                 },{
                     xtype: 'templatecolumn',
-                    text: '<div class="grid-header-style">' + esapp.Utils.getTranslation('colorschemes') + '</div>',
-                    width: 300,
+                    // text: '<div class="grid-header-style">' + esapp.Utils.getTranslation('colorschemes') + '</div>',
+                    text: '<div>' + esapp.Utils.getTranslation('colorschemes') + '</div>',
+                    cls: 'column-header-small-style',
+                    width: 240,
                     shrinkWrap: 0,
                     menuDisabled:true,
                     tpl: new Ext.XTemplate(
@@ -533,6 +542,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     xtype: 'actioncolumn',
                     // header: esapp.Utils.getTranslation('actions'),   // 'Actions',
                     width: 35,
+                    // minWidth: 35,
                     align: 'center',
                     menuDisabled:true,
                     items: [{
