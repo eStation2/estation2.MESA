@@ -828,6 +828,43 @@ class TestIngestion(unittest.TestCase):
 
         self.assertEqual(1, 1)
 
+    def test_ingest_mars_wsi(self):
+
+        date_fileslist = ['/data/ingest/wsi_hp_pasture_20190501.img','/data/ingest/wsi_hp_pasture_20190501.hdr']
+        in_date = '20190501'
+        productcode = 'wsi-hp'
+        productversion = 'V1.0'
+        subproductcode = 'pasture'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID='JRC:MARS:WSI:PASTURE'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
+        self.assertEqual(1, 1)
+
+
     def test_ingest_ecmwf_rain(self):
 
         date_fileslist = ['/data/ingest/test/ope_africa_rain_20160221.zip']
@@ -1443,6 +1480,44 @@ class TestIngestion(unittest.TestCase):
                                                             source_id=datasource_descrID)
             ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
+
+    def test_ingest_g_cls_ba_300m_global(self):
+        # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
+        # Products released from VITO in March 2017
+        date_fileslist = glob.glob('/data/ingest/c_gls_BA300_201908100000_GLOBE_PROBAV_V1.1.1.nc')
+
+        for one_file in date_fileslist:
+
+            one_filename = os.path.basename(one_file)
+            in_date = '20190510'
+            productcode = 'vgt-ba'
+            productversion = 'V1.1'
+            subproductcode = 'ba'
+            mapsetcode = 'SENTINEL-Africa-300m'
+            datasource_descrID='PDF:GLS:PROBA-V1.1:BA300'
+
+            product = {"productcode": productcode,
+                       "version": productversion}
+            args = {"productcode": productcode,
+                    "subproductcode": subproductcode,
+                    "datasource_descr_id": datasource_descrID,
+                    "version": productversion}
+
+            product_in_info = querydb.get_product_in_info(**args)
+
+            re_process = product_in_info.re_process
+            re_extract = product_in_info.re_extract
+            sprod = {'subproduct': subproductcode,
+                                 'mapsetcode': mapsetcode,
+                                 're_extract': re_extract,
+                                 're_process': re_process,
+                                 'nodata': product_in_info.no_data }
+
+            subproducts=[]
+            subproducts.append(sprod)
+            datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                            source_id=datasource_descrID)
+            ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
 
     def test_ingest_g_cls_fapar_2_0_1(self):
