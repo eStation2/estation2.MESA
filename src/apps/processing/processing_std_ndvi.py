@@ -1255,7 +1255,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
         shutil.rmtree(tmpdir)
 
     #   ---------------------------------------------------------------------
-    #   Standardized NDVI linearx2
+    #   Standardized NDVI linearx2 (aka Z-score)
 
     output_sprod = proc_lists.proc_add_subprod("10dsndvi-linearx2", "filtered_anomalies", final=False,
                                                descriptive_name='10d Standardized NDVI',
@@ -1783,7 +1783,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
 
     #   ---------------------------------------------------------------------
-    #   Standardized NDVI
+    #   Standardized NDVI (aka Z-score)
     output_sprod=proc_lists.proc_add_subprod("1monsndvi", "filtered_anomalies", final=False,
                                              descriptive_name='Monthly Standardized NDVI',
                                              description='Monthly Standardized NDVI',
