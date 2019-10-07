@@ -1165,6 +1165,23 @@ def conv_list_2_string(inlist):
         pass
     return file_string
 
+######################################################################################
+#   conv_list_2_unique_value
+#   Purpose: convert a list of strings to unique value strings
+#   Author: Vijay Charan Venkatachalam
+#   Date: 2019/10/04
+#   Input: list of strings
+#   Output: list
+#
+def conv_list_2_unique_value(inlist):
+    outlist = []
+    try:
+        x = N.array(inlist)
+        outlist = list(N.unique(x))
+    except:
+        pass
+    return outlist
+
 
 ######################################################################################
 #   extract_from_date
