@@ -98,22 +98,10 @@ def get_one_source(internet_source, target_dir=None):
                 # Create the full filename from a 'template' which contains
                 try:
                     current_list = build_list_matching_files_tmpl(str(internet_source['url']),
-                                                                  str(internet_source['include_files_expression']),
-                                                                  internet_source['start_date'],
-                                                                  internet_source['end_date'],
-                                                                  str(internet_source['frequency_id']))
-                except:
-                    logger.error("Error in creating date lists. Continue")
-
-            elif internet_type == 'http_multi_tmpl':
-                # Create the full filename from a 'template' which contains
-                try:
-                    current_list = build_list_matching_files_tmpl(str(internet_source['url']),
-                                                                  str(internet_source['include_files_expression']),
-                                                                  internet_source['start_date'],
-                                                                  internet_source['end_date'],
-                                                                  str(internet_source['frequency_id']),
-                                                                  multi_template=True)
+                                                                str(internet_source['include_files_expression']),
+                                                                internet_source['start_date'],
+                                                                internet_source['end_date'],
+                                                                str(internet_source['frequency_id']))
                 except:
                     logger.error("Error in creating date lists. Continue")
 
@@ -141,105 +129,6 @@ def get_one_source(internet_source, target_dir=None):
                 except:
                     logger.error("Error in creating date lists. Continue")
 
-            elif internet_type == 'jeodpp':
-                # Create the full filename from a 'template' which contains
-                # To be moved to the top
-                from apps.tools import jeodpp_api
-
-                ongoing_list = []
-                ongoing_list_filename = es_constants.get_internet_processed_list_prefix + str(
-                    internet_source['internet_id']) + '_Ongoing' + '.list'
-                ongoing_list = functions.restore_obj_from_pickle(ongoing_list, ongoing_list_filename)
-                try:
-                    current_list=[] #['S2A_MSIL2A_20160901T092032_N0204_R093_T34SFF_20160901T092028']
-                    current_list = build_list_matching_files_jeodpp(str(internet_source['url']),
-                                                                str(internet_source['include_files_expression']),
-                                                                internet_source['start_date'],
-                                                                internet_source['end_date'],
-                                                                str(internet_source['frequency_id']),
-                                                                str(usr_pwd))
-
-                    ongoing_product_list = jeodpp_api.get_product_id_from_list(ongoing_list)
-                    product_product_list = jeodpp_api.get_product_id_from_list(processed_list)
-
-                    ongoing_product_band_list = jeodpp_api.get_product_id_band_from_list(ongoing_list)
-                    product_product_band_list = jeodpp_api.get_product_id_band_from_list(processed_list)
-                    if len(current_list) > 0:
-                        listtoprocessrequest = []
-                        for current_file in current_list:
-                            # Check if current list is not in processed list
-                            if len(processed_list) == 0 and len(ongoing_list) == 0:
-                                listtoprocessrequest.append(current_file)
-                            else:
-                                if current_file not in product_product_band_list and current_file not in ongoing_product_band_list:   # This case doesnt work if the one band job goes in error
-                                # if current_file not in processed_list and current_file not in ongoing_list:
-                                    listtoprocessrequest.append(current_file)
-                        # listtoprocessrequest.append('S2A_MSIL2A_20160901T092032_N0204_R093_T34SFF_20160901T092028')  #line for test vto be commented
-                        if listtoprocessrequest != set([]):
-                            logger_spec.debug("Loop on the List to Process Request files.")
-                            for filename in list(listtoprocessrequest):
-                                logger_spec.debug("Processing file: " + str(internet_source['url']) + os.path.sep + filename)
-                                try:
-                                    #Give request to JEODPP to process
-                                    # HTTP request to JEODPP follow here once the request is success add the oid to ongoing list
-                                    current_product_id = filename.split(':')[0]
-                                    current_product_band = filename.split(':')[1]
-                                    created_ongoing_link = jeodpp_api.create_jeodpp_job(base_url=str(internet_source['url']), product_id=current_product_id, band=current_product_band,usr_pwd=usr_pwd, https_params=str(internet_source['https_params']))
-                                    if created_ongoing_link is not None:
-                                        ongoing_list.append(created_ongoing_link)
-
-                                except:
-                                    logger_spec.warning("Problem while creating Job request to JEODPP: %s.", filename)
-                    # ongoing_list= ['product_id:4:download_url']
-                    if len(ongoing_list) > 0:
-
-                        ongoing_product_list = jeodpp_api.get_product_id_from_list(ongoing_list)
-                        ongoing_product_list = functions.conv_list_2_unique_value(ongoing_product_list)
-                        for each_product_id in ongoing_product_list:
-                            listtodownload = []
-                            for ongoing in ongoing_list:
-                                ongoing_product_id = ongoing.split(':')[0]
-
-                                if each_product_id == ongoing_product_id:
-                                    ongoing_job_id = ongoing.split(':')[2]
-                                    job_status = jeodpp_api.get_jeodpp_job_status(base_url=str(internet_source['url']),
-                                                                                            job_id=ongoing_job_id, usr_pwd=usr_pwd, https_params=str(internet_source['https_params']))
-                                    if job_status:
-                                        listtodownload.append(ongoing)
-
-                            if listtodownload != set([]):
-                                logger_spec.debug("Loop on the downloadable_list files.")
-                                download_urls = []
-                                for ongoing in list(listtodownload):
-                                    # logger_spec.debug("Processing file: " + str(internet_source['url']) + os.path.sep + filename)
-                                    # ongoing_job_id = ongoing.split(':')[1]
-                                    download_urls.append(ongoing.split(':')[3])
-
-                                if len(download_urls) > 0:
-                                    logger_spec.debug("Downloading Product: " + str(each_product_id) )
-                                    try:
-                                        download_result = jeodpp_api.download_file(str(internet_source['url']), target_dir=target_dir, product_id=each_product_id, userpwd=usr_pwd, https_params=str(internet_source['https_params']), download_urls=download_urls)
-                                        if download_result:
-                                            for ongoing in list(listtodownload):
-                                                processed_list.append(ongoing)
-                                                ongoing_list.remove(ongoing)
-                                                ongoing_job_id = ongoing.split(':')[2]
-                                                deleted = jeodpp_api.delete_results_jeodpp_job(base_url=str(internet_source['url']),job_id=ongoing_job_id, usr_pwd=usr_pwd,https_params=str(internet_source['https_params']))
-                                    except:
-                                        logger_spec.warning("Problem while Downloading Product: %s.", str(each_product_id))
-                    functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
-                    # functions.dump_obj_to_pickle(ongoing_info, ongoing_info_filename)
-                    #  Processed list will be added atlast
-                    functions.dump_obj_to_pickle(processed_list, processed_list_filename)
-                    # functions.dump_obj_to_pickle(processed_info, processed_info_filename)
-
-
-                except:
-                    logger.error("Error in JEODPP Internet service. Continue")
-
-                finally:
-                    current_list = []
-                    return current_list
 
             elif internet_type == 'ftp_tmpl':
                 # Create the full filename from a 'template' which contains
@@ -354,8 +243,6 @@ def get_one_source(internet_source, target_dir=None):
                                                            target_dir=es_constants.ingest_dir,
                                                            target_file=os.path.basename(os.path.split(filename)[1]), userpwd=str(usr_pwd), https_params='')
 
-                            # elif internet_type == 'jeodpp':
-                            #     result = get_json_from_url(str(internet_source['url'] + os.path.sep + filename), userpwd=str(usr_pwd), https_params='')
 
                             elif internet_type == 'http_coda_eum':
                                 download_link = 'https://coda.eumetsat.int/odata/v1/Products(\'{0}\')/$value'.format(os.path.split(filename)[0])#os.path.split('asdasdad/dasdasds')[0]
@@ -741,7 +628,7 @@ class TestGetInternet(unittest.TestCase):
         template='%Y/A%Y%j.L3m_DAY_KD490_Kd_490_4km.bz2'       # introduce non-standard placeholder
         usr_pwd='anonymous:anonymous'
         frequency = 'e1dekad'
-    
+
         files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         print files_list
         file_to_check='2014/A2014001.L3m_DAY_KD490_Kd_490_4km.bz2'
@@ -1172,37 +1059,6 @@ class TestGetInternet(unittest.TestCase):
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
 
-    def TestRemoteHttps_FAPAR(self):
-
-        internet_id='PDF:GLS:VGT-V2.0:FCOVER'
-
-        # Direct test !
-        if False:
-            filename='c_gls_DMP-RT6_201801100000_GLOBE_PROBAV_V2.0.1.nc'
-            remote_url = 'https://land.copernicus.vgt.vito.be/PDF/datapool/Vegetation/Dry_Matter_Productivity/DMP_1km_V2/2018/1/10/DMP-RT6_201801100000_GLOBE_PROBAV_V2.0/'+filename
-            status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd='estation:estation2018')
-            return
-
-        internet_sources = querydb.get_active_internet_sources()
-        for s in internet_sources:
-            if s.internet_id == internet_id:
-                internet_source = s
-
-        # Copy for modifs
-        my_source =     {'internet_id': internet_id,
-                         'url': internet_source.url,
-                         'include_files_expression':internet_source.include_files_expression,
-                         'pull_frequency': internet_source.pull_frequency,
-                         'user_name':internet_source.user_name,
-                         'password':internet_source.password,
-                         'https_params': internet_source.https_params,
-                         'start_date':20041010,
-                         'end_date': 20050120,
-                         'frequency_id': internet_source.frequency_id,
-                         'type':internet_source.type}
-
-        # Check last 90 days (check list length = 9)
-        result = get_one_source(my_source)
 
     def TestRemoteHttps_NDVI100(self):
 
@@ -1268,40 +1124,6 @@ class TestGetInternet(unittest.TestCase):
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
 
-
-    def TestRemoteHttps_BA300(self):
-
-        internet_id='PDF:GLS:PROBA-V1.1:BA300'
-
-        # Direct test !
-        if False:
-            filename='c_gls_DMP-RT6_201801100000_GLOBE_PROBAV_V2.0.1.nc'
-            remote_url = 'https://land.copernicus.vgt.vito.be/PDF/datapool/Vegetation/Dry_Matter_Productivity/DMP_1km_V2/2018/1/10/DMP-RT6_201801100000_GLOBE_PROBAV_V2.0/'+filename
-            status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd='estation:estation2018')
-            return
-
-        internet_sources = querydb.get_active_internet_sources()
-        for s in internet_sources:
-            if s.internet_id == internet_id:
-                internet_source = s
-
-        # Copy for modifs
-        my_source =     {'internet_id': internet_id,
-                         'url': internet_source.url,
-                         'include_files_expression':internet_source.include_files_expression,
-                         'pull_frequency': internet_source.pull_frequency,
-                         'user_name':internet_source.user_name,
-                         'password':internet_source.password,
-                         'start_date':20190510,
-                         'end_date': -30,
-                         'frequency_id': internet_source.frequency_id,
-                         'type':internet_source.type,
-                         'https_params': internet_source.https_params}
-
-        # Check last 90 days (check list length = 9)
-        result = get_one_source(my_source)
-
-
     def TestRemoteHttps_WATERLEVEL(self):
 
         internet_id='THEIA:HYDRO:LEGOS:WATERLEVEL'
@@ -1327,38 +1149,6 @@ class TestGetInternet(unittest.TestCase):
                          'password':internet_source.password,
                          'start_date':20150501,
                          'end_date': 20150701,
-                         'frequency_id': internet_source.frequency_id,
-                         'type':internet_source.type,
-                         'https_params': internet_source.https_params}
-
-        # Check last 90 days (check list length = 9)
-        result = get_one_source(my_source)
-
-    def TestRemoteHttps_WSI(self):
-
-        internet_id='ECMWF:MARS:RAIN:WSI'
-
-        # Direct test !
-        if False:
-            filename='c_gls_DMP-RT6_201801100000_GLOBE_PROBAV_V2.0.1.nc'
-            remote_url = 'https://land.copernicus.vgt.vito.be/PDF/datapool/Vegetation/Dry_Matter_Productivity/DMP_1km_V2/2018/1/10/DMP-RT6_201801100000_GLOBE_PROBAV_V2.0/'+filename
-            status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd='estation:estation2018')
-            return
-
-        internet_sources = querydb.get_active_internet_sources()
-        for s in internet_sources:
-            if s.internet_id == internet_id:
-                internet_source = s
-
-        # Copy for modifs
-        my_source =     {'internet_id': internet_id,
-                         'url': internet_source.url,
-                         'include_files_expression':internet_source.include_files_expression,
-                         'pull_frequency': internet_source.pull_frequency,
-                         'user_name':internet_source.user_name,
-                         'password':internet_source.password,
-                         'start_date':20190501,
-                         'end_date': -20,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type,
                          'https_params': internet_source.https_params}
@@ -1544,42 +1334,6 @@ class TestGetInternet(unittest.TestCase):
         #list = get_list_matching_files(remote_url, usr_pwd, full_regex,internet_type)
         list =  build_list_matching_files_ftp_tmpl(remote_url, template, from_date, to_date, frequency, usr_pwd, file_exp)
         self.assertTrue(file_to_check in list)
-
-    def TestRemoteFTP_JEODPP(self):
-
-        internet_id='JRC:JEODPP:S2:L1C'
-
-        # Direct test !
-        if False:
-            current_list = get_list_matching_files('https://jeodpp.jrc.ec.europa.eu/ftp/private/rUGipFH2r/', 'anonymous:anonymous','', 'ftp_tmpl', end_date=None)
-            filename='sample.txt'
-            remote_url = 'https://jeodpp.jrc.ec.europa.eu/ftp/private/rUGipFH2r/SAj9UPmYPA6KkzUd/'+filename
-            status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd='anonymous:anonymous')
-            return
-
-        internet_sources = querydb.get_active_internet_sources()
-        for s in internet_sources:
-            if s.internet_id == internet_id:
-                internet_source = s
-
-        # Copy for modifs
-        my_source = {'internet_id': internet_id,
-                     'url': internet_source.url,
-                     'include_files_expression': internet_source.include_files_expression,
-                     'pull_frequency': internet_source.pull_frequency,
-                     'user_name': internet_source.user_name,
-                     'password': internet_source.password,
-                     'start_date': 20190801,
-                     'end_date': 20190830,
-                     'frequency_id': internet_source.frequency_id,
-                     'https_params': internet_source.https_params,
-                     'type': internet_source.type,
-                     'files_filter_expression': internet_source.files_filter_expression,
-
-                     }
-
-        # Check last 90 days (check list length = 9)
-        result = get_one_source(my_source, target_dir='/data/ingest')
 
     def TestFTP_TEMP_SMOS_NC(self):
 
