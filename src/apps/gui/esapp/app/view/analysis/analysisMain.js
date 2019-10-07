@@ -126,6 +126,18 @@ Ext.define("esapp.view.analysis.analysisMain",{
                     }]
                 }]);
 
+                tabpanel.insert(1,{
+                    xtype: 'analysisworkspace',
+                    reference: 'defaultworkspace',
+                    workspaceid: 'defaultworkspace',
+                    workspacename: esapp.Utils.getTranslation('default_workspace'),     // 'Default workspace',
+                    title: esapp.Utils.getTranslation('default_workspace'),     // 'Default workspace',
+                    isNewWorkspace: false,
+                    closable: false,
+                    pinable: false,
+                    pinned: false    // no pin icon, so not pinnable because the default workspace will always be opened.
+                });
+
                 // When the browser window is resized
                 Ext.on('resize', function() {
                     // console.log('browser window resized');
@@ -138,6 +150,11 @@ Ext.define("esapp.view.analysis.analysisMain",{
 
                 });
 
+                // if (this.items.length == 1) {
+                //     this.getTabBar().hide();
+                // }
+            }
+            ,afterrender: function(tabpanel){
                 var task = new Ext.util.DelayedTask(function() {
                     var refworkspacestore  = Ext.data.StoreManager.lookup('RefWorkspacesStore');
                     var userworkspacestore  = Ext.data.StoreManager.lookup('UserWorkspacesStore');
@@ -189,7 +206,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
 
                                     Ext.Object.each(analysisWorkspaces, function(id, ws, thisObj) {
                                         if (ws.workspaceid == 'defaultworkspace'){
-                                            ws.setTitle(defaultws.get('workspacename'));
+                                            // ws.setTitle(defaultws.get('workspacename'));
                                             ws.setMaps(defaultws.get('maps'));
                                             ws.setGraphs(defaultws.get('graphs'));
 
@@ -210,25 +227,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                         });
                     }
                 });
-                task.delay(1000);
-
-                // if (this.items.length == 1) {
-                //     this.getTabBar().hide();
-                // }
-            }
-            ,afterrender: function(tabpanel){
-                // var bar = tabpanel.tabBar;
-                tabpanel.insert(1,{
-                    xtype: 'analysisworkspace',
-                    reference: 'defaultworkspace',
-                    workspaceid: 'defaultworkspace',
-                    workspacename: esapp.Utils.getTranslation('default_workspace'),     // 'Default workspace',
-                    title: esapp.Utils.getTranslation('default_workspace'),     // 'Default workspace',
-                    isNewWorkspace: false,
-                    closable: false,
-                    pinable: false,
-                    pinned: false    // no pin icon, so not pinnable because the default workspace will always be opened.
-                });
+                task.delay(4000);
             }
         };
 

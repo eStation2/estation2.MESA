@@ -784,6 +784,356 @@ ALTER TABLE analysis.user_map_templates ADD COLUMN productdate character varying
   BEGIN update insert all functions
  *********************************************************/
 
+CREATE OR REPLACE FUNCTION products.update_insert_mapset_new(
+    mapsetcode character varying,
+    descriptive_name character varying,
+    description character varying,
+    defined_by character varying,
+    proj_code character varying,
+    resolutioncode character varying,
+    bboxcode character varying,
+    pixel_size_x integer,
+    pixel_size_y integer,
+    footprint_image text,
+    center_of_pixel boolean DEFAULT false,
+    full_copy boolean DEFAULT false)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+		_mapsetcode 	  	ALIAS FOR  $1;
+		_descriptive_name 	ALIAS FOR  $2;
+		_description   		ALIAS FOR  $3;
+		_defined_by  		ALIAS FOR  $4;
+		_proj_code 	  	ALIAS FOR  $5;
+		_resolutioncode 	ALIAS FOR  $6;
+		_bboxcode  		ALIAS FOR  $7;
+		_pixel_size_x  		ALIAS FOR  $8;
+		_pixel_size_y 	  	ALIAS FOR  $9;
+		_footprint_image   	ALIAS FOR  $10;
+		_center_of_pixel   	ALIAS FOR  $11;
+		_full_copy   		ALIAS FOR  $12;
+
+	BEGIN
+		IF _footprint_image = 'NULL' THEN
+			_footprint_image = NULL;
+		END IF;
+
+		PERFORM * FROM products.mapset_new m WHERE m.mapsetcode = TRIM(_mapsetcode);
+
+		IF FOUND THEN
+			IF _full_copy THEN
+				UPDATE products.mapset_new m
+				SET defined_by = TRIM(_defined_by),
+				    descriptive_name = TRIM(_descriptive_name),
+				    description = TRIM(_description),
+				    proj_code = TRIM(_proj_code),
+				    resolutioncode = TRIM(_resolutioncode),
+				    bboxcode = TRIM(_bboxcode),
+				    pixel_size_x = _pixel_size_x,
+				    pixel_size_y = _pixel_size_y,
+				    footprint_image = TRIM(_footprint_image),
+				    center_of_pixel = TRIM(_center_of_pixel)
+				WHERE m.mapsetcode = TRIM(_mapsetcode);
+			ELSE
+				RAISE NOTICE 'Of existing JRC mapsets all columns can be updated by the User, do not overwrite!';
+				/*
+				UPDATE products.mapset_new m
+				SET defined_by = TRIM(_defined_by),
+				    descriptive_name = TRIM(_descriptive_name),
+				    description = TRIM(_description),
+				    proj_code = TRIM(_proj_code),
+				    resolutioncode = TRIM(_resolutioncode),
+				    bboxcode = TRIM(_bboxcode),
+				    pixel_size_x = _pixel_size_x,
+				    pixel_size_y = _pixel_size_y,
+				    footprint_image = TRIM(_footprint_image),
+				    center_of_pixel = TRIM(_center_of_pixel)
+				WHERE m.mapsetcode = TRIM(_mapsetcode);
+				*/
+			END IF;
+		ELSE
+			INSERT INTO products.mapset_new (
+				mapsetcode,
+				descriptive_name,
+				description,
+				defined_by,
+				proj_code,
+				resolutioncode,
+				bboxcode,
+				pixel_size_x,
+				pixel_size_y,
+				footprint_image,
+				center_of_pixel
+			)
+			VALUES (
+				TRIM(_mapsetcode),
+				TRIM(_descriptive_name),
+				TRIM(_description),
+				TRIM(_defined_by),
+				TRIM(_proj_code),
+				TRIM(_resolutioncode),
+				TRIM(_bboxcode),
+				_pixel_size_x,
+				_pixel_size_y,
+				_footprint_image,
+				_center_of_pixel
+			);
+		END IF;
+		RETURN TRUE;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION products.update_insert_mapset_new(
+    character varying,
+    character varying,
+    character varying,
+    character varying,
+    character varying,
+    character varying,
+    character varying,
+    integer,
+    integer,
+    text,
+    boolean,
+    boolean
+)
+  OWNER TO estation;
+
+
+CREATE OR REPLACE FUNCTION products.update_insert_projection(
+    proj_code character varying,
+    descriptive_name character varying,
+    description character varying,
+    srs_wkt character varying,
+    full_copy boolean DEFAULT false)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+		_proj_code 	  	ALIAS FOR  $1;
+		_descriptive_name 	ALIAS FOR  $2;
+		_description   		ALIAS FOR  $3;
+		_srs_wkt  		ALIAS FOR  $4;
+		_full_copy   		ALIAS FOR  $5;
+
+	BEGIN
+		IF _srs_wkt = 'NULL' THEN
+			_srs_wkt = NULL;
+		END IF;
+
+		PERFORM * FROM products.projection p WHERE p.proj_code = TRIM(_proj_code);
+
+		IF FOUND THEN
+			IF _full_copy THEN
+				UPDATE products.projection p
+				SET descriptive_name = TRIM(_descriptive_name),
+				    description = TRIM(_description),
+				    srs_wkt = _srs_wkt
+				WHERE p.proj_code = TRIM(_proj_code);
+			ELSE
+				RAISE NOTICE 'Of existing JRC projections all columns can be updated by the User, do not overwrite!';
+				/*
+				UPDATE products.projection p
+				SET descriptive_name = TRIM(_descriptive_name),
+				    description = TRIM(_description),
+				    srs_wkt = _srs_wkt
+				WHERE p.proj_code = TRIM(_proj_code);
+				*/
+			END IF;
+		ELSE
+			INSERT INTO products.projection (
+				proj_code,
+				descriptive_name,
+				description,
+				srs_wkt
+			)
+			VALUES (
+				TRIM(_proj_code),
+				TRIM(_descriptive_name),
+				TRIM(_description),
+				TRIM(_srs_wkt)
+			);
+		END IF;
+		RETURN TRUE;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION products.update_insert_projection(
+    character varying,
+    character varying,
+    character varying,
+    character varying,
+    boolean
+)
+  OWNER TO estation;
+
+
+CREATE OR REPLACE FUNCTION products.update_insert_resolution(
+    resolutioncode character varying,
+    descriptive_name character varying,
+    description character varying,
+    pixel_shift_long double precision,
+    pixel_shift_lat double precision,
+    full_copy boolean DEFAULT false)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+		_resolutioncode	  	ALIAS FOR  $1;
+		_descriptive_name 	ALIAS FOR  $2;
+		_description   		ALIAS FOR  $3;
+		_pixel_shift_long  	ALIAS FOR  $4;
+		_pixel_shift_lat  	ALIAS FOR  $5;
+		_full_copy   		ALIAS FOR  $6;
+
+	BEGIN
+
+		PERFORM * FROM products.resolution p WHERE p.resolutioncode = TRIM(_resolutioncode);
+
+		IF FOUND THEN
+			IF _full_copy THEN
+				UPDATE products.resolution p
+				SET descriptive_name = TRIM(_descriptive_name),
+				    description = TRIM(_description),
+				    pixel_shift_long = _pixel_shift_long,
+				    pixel_shift_lat = _pixel_shift_lat
+				WHERE p.resolutioncode = TRIM(_resolutioncode);
+			ELSE
+				RAISE NOTICE 'Of existing JRC resolutions all columns can be updated by the User, do not overwrite!';
+				/*
+				UPDATE products.resolution p
+				SET descriptive_name = TRIM(_descriptive_name),
+				    description = TRIM(_description),
+				    pixel_shift_long = _pixel_shift_long,
+				    pixel_shift_lat = _pixel_shift_lat
+				WHERE p.resolutioncode = TRIM(_resolutioncode);
+				*/
+			END IF;
+		ELSE
+			INSERT INTO products.resolution (
+				resolutioncode,
+				descriptive_name,
+				description,
+				pixel_shift_long,
+				pixel_shift_lat
+			)
+			VALUES (
+				TRIM(_resolutioncode),
+				TRIM(_descriptive_name),
+				TRIM(_description),
+				_pixel_shift_long,
+				_pixel_shift_lat
+			);
+		END IF;
+		RETURN TRUE;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION products.update_insert_resolution(
+    character varying,
+    character varying,
+    character varying,
+    double precision,
+    double precision,
+    boolean
+)
+  OWNER TO estation;
+
+
+CREATE OR REPLACE FUNCTION products.update_insert_bbox(
+    bboxcode character varying,
+    descriptive_name character varying,
+    defined_by character varying,
+    upper_left_long double precision,
+    upper_left_lat double precision,
+    lower_right_long double precision,
+    lower_right_lat double precision,
+    predefined boolean DEFAULT false,
+    full_copy boolean DEFAULT false)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+		_bboxcode	  	ALIAS FOR  $1;
+		_descriptive_name 	ALIAS FOR  $2;
+		_defined_by   		ALIAS FOR  $3;
+		_upper_left_long  	ALIAS FOR  $4;
+		_upper_left_lat  	ALIAS FOR  $5;
+		_lower_right_long  	ALIAS FOR  $6;
+		_lower_right_lat  	ALIAS FOR  $7;
+		_predefined   		ALIAS FOR  $8;
+		_full_copy   		ALIAS FOR  $9;
+
+	BEGIN
+
+		PERFORM * FROM products.bbox p WHERE p.bboxcode = TRIM(_bboxcode);
+
+		IF FOUND THEN
+			IF _full_copy THEN
+				UPDATE products.bbox bb
+				SET descriptive_name = TRIM(_descriptive_name),
+				    defined_by = TRIM(_defined_by),
+				    upper_left_long = _upper_left_long,
+				    upper_left_lat = _upper_left_lat,
+				    lower_right_long = _lower_right_long,
+				    lower_right_lat = _lower_right_lat,
+				    predefined = _predefined
+				WHERE bb.bboxcode = TRIM(_bboxcode);
+			ELSE
+				RAISE NOTICE 'Of existing JRC bboxes all columns can be updated by the User, do not overwrite!';
+				/*
+				UPDATE products.bbox bb
+				SET descriptive_name = TRIM(_descriptive_name),
+				    defined_by = TRIM(_defined_by),
+				    upper_left_long = _upper_left_long,
+				    upper_left_lat = _upper_left_lat,
+				    lower_right_long = _lower_right_long,
+				    lower_right_lat = _lower_right_lat,
+				    predefined = _predefined
+				WHERE bb.bboxcode = TRIM(_bboxcode);
+				*/
+			END IF;
+		ELSE
+			INSERT INTO products.bbox (
+				bboxcode,
+				descriptive_name,
+				defined_by,
+				upper_left_long,
+				upper_left_lat,
+				lower_right_long,
+				lower_right_lat,
+				predefined
+			)
+			VALUES (
+				TRIM(_bboxcode),
+				TRIM(_descriptive_name),
+				TRIM(_defined_by),
+				_upper_left_long,
+				_upper_left_lat,
+				_lower_right_long,
+				_lower_right_lat,
+				_predefined
+			);
+		END IF;
+		RETURN TRUE;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION products.update_insert_bbox(
+    character varying,
+    character varying,
+    character varying,
+    double precision,
+    double precision,
+    double precision,
+    double precision,
+    boolean ,
+    boolean
+)
+  OWNER TO estation;
+
+
 
 CREATE OR REPLACE FUNCTION products.update_insert_spirits(
     productcode character varying,
@@ -2798,6 +3148,10 @@ ALTER FUNCTION analysis.update_insert_graph_yaxes(character varying, character v
 -- Function: products.export_jrc_data(boolean)
 -- DROP FUNCTION products.export_jrc_data(boolean);
 
+-- Function: products.export_jrc_data(boolean)
+
+-- DROP FUNCTION products.export_jrc_data(boolean);
+
 CREATE OR REPLACE FUNCTION products.export_jrc_data(full_copy boolean DEFAULT false)
   RETURNS SETOF text AS
 $BODY$
@@ -2848,6 +3202,74 @@ BEGIN
 		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
 		|| ' );'  as inserts
 	FROM products.data_type;
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_projection('
+		|| 'proj_code := ''' || proj_code || ''''
+		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', srs_wkt := ' || COALESCE('''' || srs_wkt || '''', 'NULL')
+		|| ', full_copy := ' || _full_copy
+		|| ' );'  as inserts
+	FROM products.projection;
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_resolution('
+		|| 'resolutioncode := ''' || resolutioncode || ''''
+		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', pixel_shift_long := ' || pixel_shift_long
+		|| ', pixel_shift_lat := ' || pixel_shift_lat
+		|| ', full_copy := ' || _full_copy
+		|| ' );'  as inserts
+	FROM products.resolution;
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_bbox('
+		|| 'bboxcode := ''' || bboxcode || ''''
+		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
+		|| ', defined_by := ''' || defined_by || ''''
+		|| ', upper_left_long := ' || upper_left_long
+		|| ', upper_left_lat := ' || upper_left_lat
+		|| ', lower_right_long := ' || lower_right_long
+		|| ', lower_right_lat := ' || lower_right_lat
+		|| ', predefined := ' || predefined
+		|| ', full_copy := ' || _full_copy
+		|| ' );'  as inserts
+	FROM products.bbox;
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_mapset_new('
+		|| 'mapsetcode := ''' || mapsetcode || ''''
+		|| ', defined_by := ''' || defined_by || ''''
+		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', defined_by := ''' || defined_by || ''''
+		|| ', proj_code := ''' || proj_code || ''''
+		|| ', resolutioncode := ''' || resolutioncode || ''''
+		|| ', bboxcode := ''' || bboxcode || ''''
+		|| ', pixel_size_x := ' || pixel_size_x
+		|| ', pixel_size_y:= ' || pixel_size_y
+		|| ', footprint_image := ''' || COALESCE(footprint_image, 'NULL') || ''''
+		|| ', center_of_pixel:= ' || center_of_pixel
+		|| ', full_copy := ' || _full_copy
+		|| ' );'  as inserts
+	FROM products.mapset_new
+	WHERE defined_by = 'JRC';
 
 
 	RETURN QUERY SELECT chr(10);
@@ -3438,6 +3860,7 @@ ALTER FUNCTION products.export_jrc_data(boolean)
 
 
 -- Function: products.export_all_data(boolean)
+
 -- DROP FUNCTION products.export_all_data(boolean);
 
 CREATE OR REPLACE FUNCTION products.export_all_data(full_copy boolean DEFAULT true)
@@ -3490,6 +3913,72 @@ BEGIN
 		|| ' );'  as inserts
 	FROM products.data_type;
 
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_projection('
+		|| 'proj_code := ''' || proj_code || ''''
+		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', srs_wkt := ' || COALESCE('''' || srs_wkt || '''', 'NULL')
+		|| ', full_copy := ' || _full_copy
+		|| ' );'  as inserts
+	FROM products.projection;
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_resolution('
+		|| 'resolutioncode := ''' || resolutioncode || ''''
+		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', pixel_shift_long := ' || pixel_shift_long
+		|| ', pixel_shift_lat := ' || pixel_shift_lat
+		|| ', full_copy := ' || _full_copy
+		|| ' );'  as inserts
+	FROM products.resolution;
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_bbox('
+		|| 'bboxcode := ''' || bboxcode || ''''
+		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
+		|| ', defined_by := ''' || defined_by || ''''
+		|| ', upper_left_long := ' || upper_left_long
+		|| ', upper_left_lat := ' || upper_left_lat
+		|| ', lower_right_long := ' || lower_right_long
+		|| ', lower_right_lat := ' || lower_right_lat
+		|| ', predefined := ' || predefined
+		|| ', full_copy := ' || _full_copy
+		|| ' );'  as inserts
+	FROM products.bbox;
+
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
+	RETURN QUERY SELECT 'SELECT products.update_insert_mapset_new('
+		|| 'mapsetcode := ''' || mapsetcode || ''''
+		|| ', defined_by := ''' || defined_by || ''''
+		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', defined_by := ''' || defined_by || ''''
+		|| ', proj_code := ''' || proj_code || ''''
+		|| ', resolutioncode := ''' || resolutioncode || ''''
+		|| ', bboxcode := ''' || bboxcode || ''''
+		|| ', pixel_size_x := ' || pixel_size_x
+		|| ', pixel_size_y:= ' || pixel_size_y
+		|| ', footprint_image := ''' || COALESCE(footprint_image, 'NULL') || ''''
+		|| ', center_of_pixel:= ' || center_of_pixel
+		|| ', full_copy := ' || _full_copy
+		|| ' );'  as inserts
+	FROM products.mapset_new;
 
 	RETURN QUERY SELECT chr(10);
 	RETURN QUERY SELECT chr(10);
