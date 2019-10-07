@@ -18,14 +18,14 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
     // reference: 'product-legend',
     autoWidth: true,
     autoHeight: true,
-    minWidth: 50,
-    minHeight: 50,
+    minWidth: 65,
+    minHeight: 100,
     layout: 'fit',
     hidden: true,
     floating: true,
     defaultAlign: 'tl',
     closable: false,
-    closeAction: 'hide',
+    closeAction: 'destroy',
     draggable: true,
     constrain: true,
     alwaysOnTop: false,
@@ -50,13 +50,14 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
     //        maplegend_togglebtn.toggle();
     //    }
     //},
-    legendHTML_ImageObj: new Image(),
-    legendLayout: 'vertical',
-    legendPosition: [0, 95],
-    showlegend: true,
+
 
     config: {
-        html: ''
+        html: '',
+        legendHTML_ImageObj: new Image(),
+        legendLayout: 'vertical',
+        legendPosition: [0, 95],
+        showlegend: true
     },
 
     initComponent: function () {
@@ -71,15 +72,18 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
         me.listeners = {
             el: {
                 dblclick: function () {
+                    var htmlimage = '';
+
                     if (me.legendLayout=='horizontal') {
                         me.setHtml(me.legendHTMLVertical);
+                        me.fireEvent('refreshimage');
                         me.legendLayout='vertical';
                     }
                     else {
                         me.setHtml(me.legendHTML);
+                        me.fireEvent('refreshimage');
                         me.legendLayout='horizontal';
                     }
-                    me.fireEvent('refreshimage');
                 }
             },
             afterrender: function () {
@@ -104,22 +108,36 @@ Ext.define("esapp.view.analysis.mapLegendObject",{
                 //     me.fireEvent('refreshimage');
                 // }
             },
+
+            // beforerender: function () {
+            //     me.fireEvent('refreshimage');
+            // },
             refreshimage: function(){
                 if(!me.hidden) {
                     // console.info('refreshimage LEGEND');
+                    var htmlimage = ''
                     var legendObjDom = me.getEl().dom;
+                    // var heightAdjust = me.getHeight();
+                    // if (me.getHeight() > 295){
+                    //     heightAdjust = 295;
+                    // }
                     var task = new Ext.util.DelayedTask(function() {
-                        html2canvas(legendObjDom, {
-                            width: me.getWidth(),
-                            height: me.getHeight(),
-                            // logging: true,
-                            onrendered: function (canvas) {
-                                me.legendHTML_ImageObj.src = canvas.toDataURL("image/png");
-                            }
-                        });
+                        if (legendObjDom != null){
+                            html2canvas(legendObjDom, {
+                                width: me.getWidth(),
+                                height: me.getHeight(),
+                                // logging: true,
+                                onrendered: function (canvas) {
+                                    me.legendHTML_ImageObj.src = canvas.toDataURL("image/png");
+                                    htmlimage = '<img width="' + me.getWidth() + '" height="' +  me.getHeight() + '" src="' + me.legendHTML_ImageObj.src + '" />';
+                                    me.setHtml(htmlimage);
+                                    me.updateLayout();
+                                }
+                            });
+                        }
                     });
                     // console.info('refreshimage legendObj');
-                    task.delay(50);
+                    task.delay(1000);
                 }
             }
             ,show: function(){

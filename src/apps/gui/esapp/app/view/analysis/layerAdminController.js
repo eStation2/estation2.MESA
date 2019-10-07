@@ -73,11 +73,25 @@ Ext.define('esapp.view.analysis.layerAdminController', {
     }
 
     ,editLayer: function(grid, rowIndex, row){
-        var record = grid.getStore().getAt(rowIndex);
+        var user = esapp.getUser();
+        var record = null;
+
+        if(!isNaN(record)) {    // record is the rowIndex so get the record from the store through the rowIndex
+            record = grid.getStore().getAt(rowIndex);
+        }
+
+        var edit = false;
+        var view = true;
+        if (record.get('defined_by') != 'JRC' || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
+            edit = true;
+            view = false;
+        }
         //if (record.get('defined_by') != 'JRC') {
             var editLayerWin = new esapp.view.analysis.addEditLayer({
                 params: {
-                    edit: true,
+                    new: false,
+                    edit: edit,
+                    view: view,
                     layerrecord: record
                 }
             });
@@ -90,7 +104,7 @@ Ext.define('esapp.view.analysis.layerAdminController', {
         if (record.get('deletable')){
             Ext.Msg.show({
                 title: esapp.Utils.getTranslation('deletelayerquestion'),     // 'Delete layer definition?',
-                message: esapp.Utils.getTranslation('deletelayerquestion') + ' "' + record.get('layername') + '"?',
+                message: esapp.Utils.getTranslation('deletelayerquestion2') + ' "' + record.get('layername') + '"?',
                 buttons: Ext.Msg.OKCANCEL,
                 icon: Ext.Msg.QUESTION,
                 fn: function(btn) {

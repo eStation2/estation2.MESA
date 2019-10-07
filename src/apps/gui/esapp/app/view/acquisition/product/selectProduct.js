@@ -173,9 +173,9 @@ Ext.define("esapp.view.acquisition.product.selectProduct",{
                                     '<b class="smalltext"> - {version}</b>',
                                 '</tpl>',
                                 '<span class="smalltext">' +
-                                '<b style="color:darkgrey"> - {productcode}</b>' +
+                                '<b style="color:darkgrey;"> - {productcode}</b>' +
                                 '<tpl if="provider != \'undefined\'">',
-                                    '</br><b style="color:darkgrey">{provider}</b>',
+                                    '</br><b style="color:darkgrey;">{provider}</b>',
                                 '</tpl>',
                                 '<p>{description}</p>' +
                                 '</span>'

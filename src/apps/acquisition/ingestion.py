@@ -43,8 +43,11 @@ from apps.processing import proc_functions
 from apps.productmanagement import products
 from apps.productmanagement import datasets
 
-if sys.platform != 'win32':
+# TODO: On reference machines pygrip works! Not on our development VMs!
+# TODO: Change to  if sys.platform != 'win32':
+if sys.platform == 'win32':
     import pygrib
+
 import fnmatch
 from osgeo import gdal
 from osgeo import osr
@@ -684,7 +687,7 @@ def pre_process_merge_tile(subproducts, tmpdir, input_files, my_logger):
 #
     # Prepare the output file list
     pre_processed_list = []
-
+    inter_processed_list = []
     # Check at least 1 file is reprojected file is there
     if len(input_files) == 0:
         my_logger.debug('No files. Return')
@@ -694,9 +697,32 @@ def pre_process_merge_tile(subproducts, tmpdir, input_files, my_logger):
     nodata = sprod['nodata']
 
     if len(input_files) > 0:
+        #
+        # for file in input_files:
+        #     filename = os.path.basename(file)
+        #     clipped_file = os.path.join(tmpdir,filename)
+        #
+        #     # -------------------------------------------------------------------------
+        #     # STEP 0: Gdalwarp to mask with shape file
+        #     #  -------------------------------------------------------------------------
+        #     try:
+        #         command = 'gdalwarp '
+        #         command += ' -co \"COMPRESS=LZW\"'
+        #         command += ' -srcnodata '+str(nodata)
+        #         command += ' -dstnodata '+str(nodata)+' -crop_to_cutline -cutline /eStation2/layers/AFR_00_g2015_2014.geojson '
+        #         command += file+' ' + clipped_file
+        #         # command += ' -ot BYTE '
+        #         # for file in input_files:
+        #         #     command += ' '+file
+        #         my_logger.debug('Command for masking is: ' + command)
+        #         os.system(command)
+        #         inter_processed_list.append(clipped_file)
+        #     except:
+        #         pass
+        #
         # OUTPUT FILES
         output_file         = tmpdir+os.path.sep + 'merge_output.tif'
-        # output_file_vrt = tmpdir + os.path.sep + 'merge_output_rescaled.vrt'
+        output_file_vrt = tmpdir + os.path.sep + 'merge_output_rescaled.vrt'
         output_file_compressed  = tmpdir+os.path.sep + 'merge_output_compressed.tif'
 
         # -------------------------------------------------------------------------
@@ -718,8 +744,9 @@ def pre_process_merge_tile(subproducts, tmpdir, input_files, my_logger):
             pass
 
         # # Rescale the data using gdal_calc( In this case of 300m and 100m rescale is possible with gdal_calc but due the storage problem we are storing it in BYTE
-        # rescale_func = "\"(A*0.004-0.08)*1000\""
-        # rescale_command = "gdal_calc.py --NoDataValue=-32768 --type Int16 --co \"TILED=YES\" --co \"COMPRESS=LZW\" -A "+ retile_file+" --calc=\"(A*0.004-0.08)*1000\" --outfile=
+        # mask_layer='/data/processing/vgt-ndvi/proba300-v1.0/rasterize_full_afr_300m.tif'
+        # rescale_func = "A*B"#"\"(A*0.004-0.08)*1000\""
+        # rescale_command = "gdal_calc.py --NoDataValue=255 --type BYTE --co \"TILED=YES\" --co \"COMPRESS=LZW\" -A "+output_file+" -B "+mask_layer+" --calc="+rescale_func+" --outfile="+output_file_vrt
         # os.system(rescale_command)
 
         try:
@@ -1702,7 +1729,7 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         pass
 
     #Manually save tar file in the /data/ingest and send it to mesa-proc for the processing
-    command = 'tar -cvzf /data/ingest/MESA_JRC_wd-gee_occurr_20190701_WD-GEE-ECOWAS-AVG_1.0.tgz -C ' + os.path.dirname(output_file_mapset) + ' ' + os.path.basename(output_file_mapset)
+    command = 'tar -cvzf /data/ingest/MESA_JRC_wd-gee_occurr_20190801_WD-GEE-ECOWAS-AVG_1.0.tgz -C ' + os.path.dirname(output_file_mapset) + ' ' + os.path.basename(output_file_mapset)
     my_logger.debug('Command for tar the file is: ' + command)
     os.system(command)
     # Assign output file
@@ -1760,6 +1787,53 @@ def pre_process_ecmwf_mars(subproducts, tmpdir , input_files, my_logger):
     return output_file
 
 
+def pre_process_envi_to_geotiff(subproducts, tmpdir, input_files, my_logger):
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process ENVI files
+#
+    #  input_files containing an .img and and .hdr file
+    if isinstance(input_files, list):
+        if len(input_files) != 2:
+            return None
+            # logger.error('2 files expected. Exit')
+            # raise Exception("2 files expected. Exit")
+        else:
+            if input_files[0].endswith('.img'):
+                input_file_img = input_files[0]
+                input_file_hdr = input_files[1]
+            else:
+                input_file_img = input_files[1]
+                input_file_hdr = input_files[0]
+
+    #  Extract .img and and .hdr file, and store .img name
+    my_logger.debug('File in the .img format is: ' + input_file_img)
+
+    filename_img = os.path.basename(input_file_img)
+    # filename_hdr = filename_img.split('.')[0]+'.hdr'
+    filename_hdr = os.path.basename(input_file_hdr)
+    filename_tif = filename_img.split('.')[0]+'.tif'
+    # input_file_hdr = os.path.join(os.path.dirname(input_file_img), filename_hdr)
+
+    if not os.path.isfile(input_file_hdr):
+        return None
+
+    tmp_img_file_path = os.path.join(tmpdir, filename_img)
+    tmp_hdr_file_path = os.path.join(tmpdir, filename_hdr)
+    shutil.copy(input_file_img, tmp_img_file_path)
+    shutil.copy(input_file_hdr, tmp_hdr_file_path)
+
+    #  Convert from .img to GTIFF
+    if os.path.isfile(tmp_img_file_path):
+        output_file = os.path.join(tmpdir, filename_tif)
+        orig_ds = gdal.Open(tmp_img_file_path)
+        write_ds_to_geotiff(orig_ds,output_file)
+        orig_ds = None
+    else:
+        my_logger.error("No .img file found in zipfile. Exit")
+        raise Exception("No .img file found in zipfile. Exit")
+
+    return output_file
+
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process CPC files TYPE (binary, 720 x 360, global at 0.5 degree resolution)
 #   See: http://www.cpc.ncep.noaa.gov/soilmst/leaky_glb.htm
@@ -1791,7 +1865,6 @@ def pre_process_cpc_binary(subproducts, tmpdir , input_files, my_logger):
         data_180=N.concatenate((data[...,360:720],data[...,0:360]),axis=1)
 
         # Re-arrange from -180 to 180 longitude
-
 
         # Write output
         output_file = os.path.join(tmpdir, os.path.basename(input_file))
@@ -3070,6 +3143,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 #           ECMWF: zipped file containing an .img and .hdr
 #           CPC_BINARY: binary file in big-endian
 #           BINARY: .bil product (e.g. GEOWRSI)
+#           ENVI_2_GTIFF: convert ENVI files(.img,.hdr) to GEOTIF
 #           NETCDF_S3_WRR: S3A OLCI WRR data treatment using SNAP-GPT to do band subset, reproject.
 #           NETCDF_S3_WST: S3A SLSTR WST data treatment using SNAP-GPT to do band subset, reproject.
 #           MERGE_TILE: Merge the tiles from VITO website and convert to nobigtif format
@@ -3144,6 +3218,9 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
         elif preproc_type == 'ECMWF_MARS':
             interm_files = pre_process_ecmwf_mars(subproducts, tmpdir, input_files, my_logger)
+
+        elif preproc_type == 'ENVI_2_GTIFF':
+            interm_files = pre_process_envi_to_geotiff(subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'CPC_BINARY':
             interm_files = pre_process_cpc_binary(subproducts, tmpdir, input_files, my_logger)

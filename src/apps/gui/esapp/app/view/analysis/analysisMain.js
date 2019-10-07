@@ -14,6 +14,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
         'esapp.view.analysis.workspace',
 
         'esapp.TabTitleEditor',
+        'Ext.ux.TabReorderer',
 
         'Ext.layout.container.Card',
         'Ext.form.field.ComboBox'
@@ -22,6 +23,8 @@ Ext.define("esapp.view.analysis.analysisMain",{
     id: 'analysismain',
     name: 'analysismain',
     reference: 'analysismain',
+
+    plugins: ['tabreorderer'],
 
     layout: {
         type: 'card',
@@ -66,16 +69,20 @@ Ext.define("esapp.view.analysis.analysisMain",{
             //         scope: c
             //     });
             // },
-            afterrender: function(tabpanel) {
+            beforerender: function(tabpanel) {
                 // console.info(esapp.getUser());
                 var bar = tabpanel.tabBar;
-                bar.insert(tabpanel.tabBar.items.length, [{
-                    xtype: 'component',
-                    html: '&nbsp'
-                }, {
+
+                // bar.insert(tabpanel.tabBar.items.length, [{
+                bar.insert(0, [{
+                //     xtype: 'component',
+                //     html: '&nbsp'
+                // }, {
                     xtype: 'toolbar',
                     padding: '6px 0px 0px 0px',
-                    margin: 0,
+                    margin:'0px 0px 0px 10px',
+                    enableFocusableContainer: true,
+                    focusable: true,
                     style: {
                         backgroundColor:'transparent'
                     },
@@ -83,7 +90,24 @@ Ext.define("esapp.view.analysis.analysisMain",{
                         pack: 'bottom',
                         type: 'hbox'
                     },
+                    listeners: null,
                     items: [{
+                        xtype: 'button',
+                        reference: 'analysismain_refworkspacesbtn',
+                        text:  esapp.Utils.getTranslation('ref_workspaces'), // 'REF WORKSPACES',
+                        // hidden: (esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
+                        scale: 'small',
+                        tooltip: esapp.Utils.getTranslation('open_ref_workspace'),    // 'Open a reference workspace',
+                        handler: 'showRefWorkspaceAdmin',
+                        listeners: {
+                            afterrender: function (btn) {
+                                btn.refWorkspaceAdminPanel = new esapp.view.analysis.userWorkspaceAdmin({
+                                    owner:btn,
+                                    refworkspaces: true
+                                });
+                            }
+                        }
+                    },{
                         xtype: 'button',
                         reference: 'analysismain_addworkspacebtn',
                         text:  esapp.Utils.getTranslation('my_saved_workspaces'), // 'MY WORKSPACES',
@@ -114,22 +138,111 @@ Ext.define("esapp.view.analysis.analysisMain",{
 
                 });
 
+                var task = new Ext.util.DelayedTask(function() {
+                    var refworkspacestore  = Ext.data.StoreManager.lookup('RefWorkspacesStore');
+                    var userworkspacestore  = Ext.data.StoreManager.lookup('UserWorkspacesStore');
+                    var analysisWorkspaces = Ext.ComponentQuery.query('analysisworkspace');
+                    // console.info(refworkspacestore.getData());
+                    // console.info(userworkspacestore.getData());
+
+                    var defaultws = '';
+                    refworkspacestore.getData().each(function (refworkspace) {
+                        // console.info(refworkspace.get('showindefault'));
+                        if (refworkspace.get('showindefault')){
+                            defaultws = refworkspace;
+                        }
+                    });
+
+                    if (defaultws == ''){
+                        userworkspacestore.getData().each(function (userworkspace) {
+                            // console.info(userworkspace.get('showindefault'));
+                            if (userworkspace.get('showindefault')){
+                                defaultws = userworkspace;
+                            }
+                        });
+                    }
+
+                    // console.info(defaultws);
+                    if (defaultws != ''){
+                        var defaultwsdata = defaultws.getData();
+                        var params = {
+                            'userid': defaultwsdata['userid'],
+                            'workspaceid': defaultwsdata['workspaceid'],
+                            'workspacename': defaultwsdata['workspacename'],
+                            'pinned': defaultwsdata['pinned'],
+                            'showindefault': defaultwsdata['showindefault'],
+                            'shownewgraph': defaultwsdata['shownewgraph'],
+                            'showbackgroundlayer': defaultwsdata['showbackgroundlayer'],
+                            'isrefworkspace': defaultwsdata['isrefworkspace']
+                        }
+
+                        Ext.Ajax.request({
+                            method: 'POST',
+                            url: '/analysis/workspacemapsgraphs',
+                            params: params,
+                            success: function(response, opts){
+                                var result = Ext.JSON.decode(response.responseText);
+                                if (result.success){
+                                    defaultws.set('maps',result.workspace.maps);
+                                    defaultws.set('graphs', result.workspace.graphs);
+                                    defaultws.dirty = false;
+
+                                    Ext.Object.each(analysisWorkspaces, function(id, ws, thisObj) {
+                                        if (ws.workspaceid == 'defaultworkspace'){
+                                            ws.setTitle(defaultws.get('workspacename'));
+                                            ws.setMaps(defaultws.get('maps'));
+                                            ws.setGraphs(defaultws.get('graphs'));
+
+                                            // ws.getController().closeAllMapsGraphs();
+                                            if (ws.maps.length > 0) {
+                                                ws.getController().openWorkspaceMaps(ws.maps);
+                                            }
+                                            if (ws.graphs.length > 0) {
+                                                ws.getController().openWorkspaceGraphs(ws.graphs);
+                                            }
+                                        }
+                                    });
+                                }
+                            },
+                            failure: function(response, opts) {
+                                console.info(response.status);
+                            }
+                        });
+                    }
+                });
+                task.delay(1000);
+
                 // if (this.items.length == 1) {
                 //     this.getTabBar().hide();
                 // }
             }
+            ,afterrender: function(tabpanel){
+                // var bar = tabpanel.tabBar;
+                tabpanel.insert(1,{
+                    xtype: 'analysisworkspace',
+                    reference: 'defaultworkspace',
+                    workspaceid: 'defaultworkspace',
+                    workspacename: esapp.Utils.getTranslation('default_workspace'),     // 'Default workspace',
+                    title: esapp.Utils.getTranslation('default_workspace'),     // 'Default workspace',
+                    isNewWorkspace: false,
+                    closable: false,
+                    pinable: false,
+                    pinned: false    // no pin icon, so not pinnable because the default workspace will always be opened.
+                });
+            }
         };
 
-        me.items = [{
-            xtype: 'analysisworkspace',
-            reference: 'defaultworkspace',
-            workspaceid: 'defaultworkspace',
-            workspacename: esapp.Utils.getTranslation('default_workspace'),     // 'Default workspace',
-            title: esapp.Utils.getTranslation('default_workspace'),     // 'Default workspace',
-            closable: false,
-            pinable: false,
-            pinned: false    // no pin icon, so not pinnable because the default workspace will always be opened.
-        }];
+        // me.items = [{
+        //     xtype: 'analysisworkspace',
+        //     reference: 'defaultworkspace',
+        //     workspaceid: 'defaultworkspace',
+        //     workspacename: esapp.Utils.getTranslation('default_workspace'),     // 'Default workspace',
+        //     title: esapp.Utils.getTranslation('default_workspace'),     // 'Default workspace',
+        //     isNewWorkspace: false,
+        //     closable: false,
+        //     pinable: false,
+        //     pinned: false    // no pin icon, so not pinnable because the default workspace will always be opened.
+        // }];
 
         me.callParent();
     }

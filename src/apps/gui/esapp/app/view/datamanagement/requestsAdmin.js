@@ -249,7 +249,7 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
                 '</tpl>',
                 '</span></br>' +
                 '<span class="smalltext">' +
-                '<b style="color:darkgrey">' + esapp.Utils.getTranslation("requestid") + ': {requestid}</b>' +
+                '<b style="color:darkgrey;">' + esapp.Utils.getTranslation("requestid") + ': {requestid}</b>' +
                 '</span></br>'
             ),
             width: 365,

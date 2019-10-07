@@ -81,6 +81,7 @@ Ext.define("esapp.view.widgets.LoginViewECAS",{
                         userid: Ext.util.Cookies.get('estation2_userid'),
                         username: Ext.util.Cookies.get('estation2_username'),
                         email: Ext.util.Cookies.get('estation2_useremail'),
+                        userlevel: Ext.util.Cookies.get('estation2_userlevel'),
                         prefered_language: Ext.util.Cookies.get('estation2_userlanguage')
                     };
 
@@ -344,6 +345,12 @@ Ext.define("esapp.view.widgets.LoginViewECAS",{
             Ext.Object.each(analysisWorkspaces, function(id, workspace, thisObj) {
                 workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).show();
                 workspace.lookupReference('graphtemplateadminbtn_'+workspace.id.replace(/-/g,'_')).show();
+                workspace.lookupReference('analysismain_legendsbtn_'+workspace.id.replace(/-/g,'_')).show();
+                workspace.lookupReference('analysismain_layersbtn_'+workspace.id.replace(/-/g,'_')).show();
+                if (esapp.globals['typeinstallation'] != 'jrc_online'){
+                    workspace.lookupReference('analysismain_logosbtn_'+workspace.id.replace(/-/g,'_')).show();
+                }
+
                 if (workspace.workspaceid != 'defaultworkspace'){
                     workspace.lookupReference('saveWorkspaceBtn').show();
                 }
@@ -414,6 +421,11 @@ Ext.define("esapp.view.widgets.LoginViewECAS",{
 
                     workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).hide();
                     workspace.lookupReference('graphtemplateadminbtn_'+workspace.id.replace(/-/g,'_')).hide();
+
+                    workspace.lookupReference('analysismain_legendsbtn_'+workspace.id.replace(/-/g,'_')).hide();
+                    workspace.lookupReference('analysismain_layersbtn_'+workspace.id.replace(/-/g,'_')).hide();
+                    workspace.lookupReference('analysismain_logosbtn_'+workspace.id.replace(/-/g,'_')).hide();
+
                     workspace.lookupReference('saveDefaultWorkspaceAsBtn').hide();
                     if (Ext.isObject(workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).mapTemplateAdminPanel)){
                         workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).mapTemplateAdminPanel.hide();

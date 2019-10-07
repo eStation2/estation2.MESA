@@ -204,8 +204,13 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
                 if (!widget.widgetattached) {
                     // Ext.suspendLayouts();
                     widget.getStore().setData(record.getData().mapsetdatasets);
-                    var sorters = widget.getStore().getSorters();
-                    sorters.add('display_index');
+                    // var sorters = widget.getStore().getSorters();
+                    // sorters.add('display_index');
+                    // sorters.add('prod_descriptive_name');
+                    // sorters.add('version');  , {property: 'prod_descriptive_name', direction: 'ASC'}, {property: 'version', direction: 'ASC'}
+                    // var sorters = [{property: 'order_index', direction: 'ASC'}];
+                    // widget.getStore().setSorters(sorters);
+                    // widget.getStore().sort(sorters);
 
                     widget.widgetattached = true;
                     // Ext.resumeLayouts(true);

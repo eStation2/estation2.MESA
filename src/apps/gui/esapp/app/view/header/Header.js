@@ -13,7 +13,7 @@ Ext.define("esapp.view.header.Header",{
         'esapp.view.header.HeaderModel'
     ],
 
-    store: "LogoImages", // Ext.data.StoreManager.lookup('imagesStore'),
+    store: "HeaderLogoImages",
     //tpl: imageTpl,
     itemSelector: 'img',
     emptyText: esapp.Utils.getTranslation('noimagesavailable'),  // 'No images available'
@@ -22,7 +22,7 @@ Ext.define("esapp.view.header.Header",{
         var me = this;
         var imageTpl = '';
         //me.emptyText = esapp.Utils.getTranslation('noimagesavailable');  // 'No images available'
-        var logoImagesStore = Ext.data.StoreManager.lookup('LogoImages');
+        var logoImagesStore = Ext.data.StoreManager.lookup('HeaderLogoImages');
         var data = [];
 
         if (esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online'){

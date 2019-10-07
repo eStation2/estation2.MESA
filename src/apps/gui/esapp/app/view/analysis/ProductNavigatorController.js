@@ -259,7 +259,7 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         });
         myLoadMask.show();
 
-        this.getStore('products').load({
+        Ext.data.StoreManager.lookup('ProductNavigatorStore').load({
             params: {
                 force: true
             },
@@ -267,7 +267,14 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
                 myLoadMask.hide();
             }
         });
-
+        // this.getStore('products').load({
+        //     params: {
+        //         force: true
+        //     },
+        //     callback:function(){
+        //         myLoadMask.hide();
+        //     }
+        // });
     },
 
     productsGridRowClick: function(gridview, record){
@@ -336,9 +343,12 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
             productsensor: me.productsensor
         };
 
-        colorschemesgrid.columns[1].setText('<div class="grid-header-style">' + esapp.Utils.getTranslation('colorschemes') +
+        // colorschemesgrid.columns[1].setText('<div class="grid-header-style">' + esapp.Utils.getTranslation('colorschemes') +
+        //     ' <b class="smalltext">' + esapp.Utils.getTranslation('for') + ' ' + record.get('descriptive_name') +
+        //     ' ' + record.get('version') + ' - ' + record.get('subproductcode') + '</b></div>');
+        colorschemesgrid.columns[1].setText('<div>' +
             ' <b class="smalltext">' + esapp.Utils.getTranslation('for') + ' ' + record.get('descriptive_name') +
-            ' ' + record.get('version') + ' - ' + record.get('subproductcode') + '</b></div>');
+            ' ' + record.get('version') + ' <BR> ' + record.get('subproductcode') + '</b></div>');
 
         if (colorschemesgrid.hidden) {
             // console.info('colorschemesgrid hidden, so show');

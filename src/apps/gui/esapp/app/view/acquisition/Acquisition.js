@@ -107,6 +107,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
 
     initComponent: function () {
         var me = this;
+        var user = esapp.getUser();
 
         // Ext.util.Observable.capture(this, function(e){console.log('Acquisition - ' + this.id + ': ' + e);});
 
@@ -197,7 +198,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                 xtype: 'button',
                 id: 'lockunlock',
                 name: 'lockunlock',
-                // hidden: ((esapp.getUser() != 'undefined' || esapp.getUser() != null) ? false : true),   // && esapp.getUser().userlevel == 0
+                hidden: ((esapp.Utils.objectExists(user) && user.userlevel < 2) ? false : true),
                 iconCls: 'fa fa-lock fa-2x',  // 'fa-unlock' = xf09c  'fa-lock' = xf023
                 enableToggle: true,
                 scale: 'medium',
@@ -213,11 +214,11 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                     if (btn.pressed){
 
                         btn.setIconCls('fa fa-unlock fa-2x');
-                        Ext.getCmp('addproduct').show();
-                        //addproductbtn[0].show();
+                        // Ext.getCmp('addproduct').show();
+                        Ext.getCmp('productadmin-acquisition-btn').show();
+
                         //me.getColumns()[0].show();  // Edit product action column
                         me.getColumns()[1].show();    // Activate Product column
-
                         me.getColumns()[2].setWidth(500);   // GET
                         me.getColumns()[2].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 265px; left: 0px; tabindex="-1">' +
                         '           <div data-ref="titleEl" class="x-column-header-inner">' +
@@ -281,8 +282,9 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                     }
                     else {
                         btn.setIconCls('fa fa-lock fa-2x');
-                        Ext.getCmp('addproduct').hide();
-                        //addproductbtn[0].hide();
+                        // Ext.getCmp('addproduct').hide();
+                        Ext.getCmp('productadmin-acquisition-btn').hide();
+
                         //me.getColumns()[0].hide();
                         me.getColumns()[1].hide();
 
@@ -345,7 +347,6 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                         //});
                     }
 
-
                     //me.getController().renderHiddenColumnsWhenUnlocked();
                     //
                     //Ext.resumeLayouts(true);
@@ -356,17 +357,17 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                     //});
                 }
             }, ' ', ' ', {
-                xtype: 'button',
-                text: esapp.Utils.getTranslation('addproduct'),    // 'Add Product',
-                id: 'addproduct',
-                name: 'addproduct',
-                iconCls: 'fa fa-plus-circle fa-2x',
-                style: { color: 'green' },
-                hidden: true,
-                // glyph: 'xf055@FontAwesome',
-                scale: 'medium',
-                handler: 'selectProduct'
-            },{
+            //     xtype: 'button',
+            //     text: esapp.Utils.getTranslation('addproduct'),    // 'Add Product',
+            //     id: 'addproduct',
+            //     name: 'addproduct',
+            //     iconCls: 'fa fa-plus-circle fa-2x',
+            //     style: {color: 'green'},
+            //     hidden: true,
+            //     // glyph: 'xf055@FontAwesome',
+            //     scale: 'medium',
+            //     handler: 'selectProduct'
+            // },{
                 tooltip:  esapp.Utils.getTranslation('expandall'),    // 'Expand All',
                 iconCls: 'expand',
                 scale: 'medium',
@@ -387,6 +388,18 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                     var view = btn.up().up().getView();
                     view.getFeature('productcategories').collapseAll();
                 }
+            }, {
+                xtype: 'tbfill'
+            }, {
+                xtype: 'button',
+                text: esapp.Utils.getTranslation('PRODUCTS'),    // 'PRODUCTS',
+                id: 'productadmin-acquisition-btn',
+                name: 'productadmin-acquisition-btn',
+                iconCls: 'fa fa-cog fa-2x',
+                style: { color: 'gray' },
+                hidden: true,
+                scale: 'medium',
+                handler: 'openProductAdmin'
             }, '->',
             {
                 xtype: 'servicemenubutton',
@@ -546,9 +559,9 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                             '<b class="smalltext"> - {version}</b>',
                         '</tpl>',
                         '</br>' +
-                        '<b class="smalltext" style="color:darkgrey">'+esapp.Utils.getTranslation('productcode')+': {productcode}</b>' +
+                        '<b class="smalltext" style="color:darkgrey;">'+esapp.Utils.getTranslation('productcode')+': {productcode}</b>' +
                         '</br>' +
-                        '<b class="smalltext" style="color:darkgrey">'+esapp.Utils.getTranslation('provider')+': {provider}</b>' +
+                        '<b class="smalltext" style="color:darkgrey;">'+esapp.Utils.getTranslation('provider')+': {provider}</b>' +
                         '</br>'
                     ),
                 width: 330,

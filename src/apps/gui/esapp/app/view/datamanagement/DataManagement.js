@@ -40,7 +40,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
     // selType: 'cellmodel',
     // selModel: {listeners:{}},
     // selModel: null,
-    // bufferedRenderer: true,
+    bufferedRenderer: false,
 
     collapsible: false,
     enableColumnMove: false,
@@ -247,15 +247,26 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
             columns: [{
                 xtype:'templatecolumn',
                 header: esapp.Utils.getTranslation('product'),    // 'Product',
+                // tpl: new Ext.XTemplate(
+                //         '<b>{prod_descriptive_name}</b>' +
+                //         '<tpl if="version != \'undefined\'">',
+                //             '<b class="smalltext"> - {version}</b>',
+                //         '</tpl>',
+                //         '</br><span class="smalltext">' +
+                //         '<b style="color:darkgrey;">{productcode}</b>' +
+                //         '<p>{description}</p>' +
+                //         '</span></br>'
+                //     ),
                 tpl: new Ext.XTemplate(
                         '<b>{prod_descriptive_name}</b>' +
                         '<tpl if="version != \'undefined\'">',
                             '<b class="smalltext"> - {version}</b>',
                         '</tpl>',
-                        '</br><span class="smalltext">' +
-                        '<b style="color:darkgrey">{productcode}</b>' +
-                        '<p>{description}</p>' +
-                        '</span></br>'
+                        '</br>' +
+                        '<b class="smalltext" style="color:darkgrey;">'+esapp.Utils.getTranslation('productcode')+': {productcode}</b>' +
+                        '</br>' +
+                        '<b class="smalltext" style="color:darkgrey;">'+esapp.Utils.getTranslation('provider')+': {provider}</b>' +
+                        '</br>'
                     ),
                 width: 450,
                 cellWrap:true

@@ -48,7 +48,7 @@ Ext.define("esapp.view.analysis.mapDisclaimerObject",{
     config: {
         content: '',
         disclaimer_ImageObj: new Image(),
-        disclaimerPosition: [137,540],
+        disclaimerPosition: [2,548],
         changesmade: false
     },
 

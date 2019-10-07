@@ -17,52 +17,52 @@ Ext.define('esapp.model.ProductNavigator', {
        {name: 'order_index', mapping: 'order_index'}
     ]
 
-    // ,autoLoad: true
-    ,autoSync: false
-    ,remoteSort: false
-    ,remoteGroup: false
-    ,loadMask: false
-
-    ,proxy: {
-        type: 'rest',
-        // url: '',
-        appendId: false,
-        actionMethods: {
-            create: 'POST',
-            read: 'GET',
-            update: 'POST',
-            destroy: 'POST'
-        },
-        api: {
-            read: 'analysis/productnavigator',
-            create: 'analysis/productnavigator/create',
-            update: 'analysis/productnavigator/update',
-            destroy: 'analysis/productnavigator/delete'
-        },
-        reader: {
-             type: 'json'
-            ,successProperty: 'success'
-            ,rootProperty: 'products'
-            ,messageProperty: 'message'
-        },
-        writer: {
-            type: 'json',
-            writeAllFields: true,
-            rootProperty: 'products'
-        },
-        listeners: {
-            exception: function(proxy, response, operation){
-                // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
-                console.info('PRODUCT NAVIGATOR STORE - REMOTE EXCEPTION - Reload Product Navigator!');
-                //Ext.Msg.show({
-                //    title: 'PRODUCT NAVIGATOR STORE - REMOTE EXCEPTION',
-                //    msg: operation.getError(),
-                //    icon: Ext.Msg.ERROR,
-                //    buttons: Ext.Msg.OK
-                //});
-            }
-        }
-    }
+    // // ,autoLoad: true
+    // ,autoSync: false
+    // ,remoteSort: false
+    // ,remoteGroup: false
+    // ,loadMask: true
+    //
+    // ,proxy: {
+    //     type: 'rest',
+    //     // url: '',
+    //     appendId: false,
+    //     actionMethods: {
+    //         create: 'POST',
+    //         read: 'GET',
+    //         update: 'POST',
+    //         destroy: 'POST'
+    //     },
+    //     api: {
+    //         read: 'analysis/productnavigator',
+    //         create: 'analysis/productnavigator/create',
+    //         update: 'analysis/productnavigator/update',
+    //         destroy: 'analysis/productnavigator/delete'
+    //     },
+    //     reader: {
+    //          type: 'json'
+    //         ,successProperty: 'success'
+    //         ,rootProperty: 'products'
+    //         ,messageProperty: 'message'
+    //     },
+    //     writer: {
+    //         type: 'json',
+    //         writeAllFields: true,
+    //         rootProperty: 'products'
+    //     },
+    //     listeners: {
+    //         exception: function(proxy, response, operation){
+    //             // ToDo: Translate message title or remove message, log error server side and reload proxy (could create and infinite loop?)!
+    //             console.info('PRODUCT NAVIGATOR STORE - REMOTE EXCEPTION - Reload Product Navigator!');
+    //             //Ext.Msg.show({
+    //             //    title: 'PRODUCT NAVIGATOR STORE - REMOTE EXCEPTION',
+    //             //    msg: operation.getError(),
+    //             //    icon: Ext.Msg.ERROR,
+    //             //    buttons: Ext.Msg.OK
+    //             //});
+    //         }
+    //     }
+    // }
 
 });
 

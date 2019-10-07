@@ -155,8 +155,9 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
         // Ext.util.Observable.capture(me, function(e){console.log('grapview - ' + me.id + ': ' + e);});
 
         // me.title = '<span class="panel-title-style">'+esapp.Utils.getTranslation('timeseries')+'</span>';
-        me.title = '<span id="graphview_title_templatename_' + me.id + '" class="graph-templatename"></span>' +
-                   '<span id="graphview_title_' + me.id + '">'+esapp.Utils.getTranslation('timeseries')+'</span>';
+        me.title = '<span id="graphview_title_' + me.id + '">'+esapp.Utils.getTranslation('timeseries')+'</span>' +
+                   '<span id="graphview_title_templatename_' + me.id + '" class="graph-templatename"></span>';
+
         //me.height = Ext.getBody().getViewSize().height-80;
         me.frame = false;
         me.border= false;
@@ -332,6 +333,7 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
                 xtype: 'button',
                 tooltip: esapp.Utils.getTranslation('graph_refresh'),   //  'Refresh graph',
                 iconCls: 'fa fa-refresh fa-2x',
+                hidden: false,
                 style: { color: 'gray' },
                 enableToggle: false,
                 scale: 'medium',

@@ -34,6 +34,7 @@ Ext.define('esapp.view.main.Main', {
         type: 'app-main'
     },
     autoRender : true,
+    // autoScroll : true,
 
     layout: {
         type: 'border'

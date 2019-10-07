@@ -32,6 +32,7 @@ from socket import socket
 import urllib2
 import ast
 import sys
+import numpy as N
 from osgeo import gdal, osr
 from xml.dom import minidom
 # Import eStation2 modules
@@ -46,6 +47,22 @@ dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'der
 # class ObjectEncoder(JSONEncoder):
 #     def default(self, o):
 #         return o.__dict__
+
+
+def is_float(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
+def is_int(n):
+    try:
+        int(n)
+        return True
+    except ValueError:
+        return False
 
 
 def setThemaOtherPC(server_address, thema):
@@ -453,6 +470,13 @@ def __row2dict(row):
     return d
 
 
+class dotdict(dict):
+    """dot.notation access to dictionary attributes"""
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+
 def row2dict(row):
     d = {}
     if hasattr(row, "c"):
@@ -470,7 +494,8 @@ def row2dict(row):
             d[column] = value
     else:
         d = row
-    return d
+
+    return dotdict(d)
 
 
 def tojson(queryresult):
@@ -2790,6 +2815,7 @@ class ProcLists:
                          masked = '',
                          timeseries_role = '10d',
                          final=False,
+                         # display_index=None,
                          active_default=True):
 
         self.list_subprods.append(ProcSubprod(sprod,
@@ -2806,6 +2832,7 @@ class ProcLists:
                                               data_type_id=data_type_id,
                                               masked = masked,
                                               timeseries_role = timeseries_role,
+                                              # display_index = display_index,
                                               active_default=True))
         return sprod
 
@@ -2844,6 +2871,7 @@ class ProcSubprod:
                  data_type_id=None,
                  masked = '',
                  timeseries_role = '',
+                 # display_index=None,
                  active_default=True,
                  active_depend=False):
 
@@ -2860,6 +2888,7 @@ class ProcSubprod:
         self.data_type_id = data_type_id
         self.masked = masked
         self.timeseries_role = timeseries_role
+        # self.display_index = display_index
         self.final = final
         self.active_default=active_default
         self.active_user = False                            # In the product table, it applies only to Native prods
@@ -2878,6 +2907,7 @@ class ProcSubprod:
         print('Data Type   : {}'.format(self.data_type_id))
         print('Masked      : {}'.format(self.masked))
         print('TS role     : {}'.format(self.timeseries_role))
+        # print('DisplayIndex: {}'.format(self.display_index))
         print('Final       : {}'.format(self.final))
         # print('active_default: {}'.format(self.active_default))
         print('Active_user : {}'.format(self.active_user))

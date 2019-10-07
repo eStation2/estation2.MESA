@@ -201,6 +201,7 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
 
     initComponent: function () {
         var me = this;
+        var user = esapp.getUser();
 
         me.defaults = {
             menuDisabled: true,
@@ -217,14 +218,14 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
             tpl: new Ext.XTemplate(
                     '<b>{type}</b>   ' +
                     '</br>' +
-                    '<b class="smalltext" style="color:darkgrey">{data_source_id}</b>' +
+                    '<b class="smalltext" style="color:darkgrey;">{data_source_id}</b>' +
                     '</br>' +
                     '<tpl if="time_latest_copy != \'\'">',
-                        '<b class="smalltext" style="color:lightgrey">'+esapp.Utils.getTranslation('lastcopied')+': {time_latest_copy}</b>' +
+                        '<b class="smalltext" style="color:lightgrey;">'+esapp.Utils.getTranslation('lastcopied')+': {time_latest_copy}</b>' +
                         '</br>' +
                     '</tpl>',
                     '<tpl if="time_latest_exec != \'\'">',
-                        '<b class="smalltext" style="color:lightgrey">'+esapp.Utils.getTranslation('lastexecuted')+': {time_latest_exec}</b>' +
+                        '<b class="smalltext" style="color:lightgrey;">'+esapp.Utils.getTranslation('lastexecuted')+': {time_latest_exec}</b>' +
                     '</tpl>',
                     '</br>'
                 ),
@@ -242,26 +243,60 @@ Ext.define("esapp.view.acquisition.DataAcquisition",{
                 // scope: me,
                 disabled: false,
                 getClass: function(v, meta, rec) {
-                    return 'edit16';
+                    if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)){
+                        return 'edit16';
+                    }
+                    else {
+                        return 'vieweye18';
+                    }
                 },
                 getTip: function(v, meta, rec) {
-                    return esapp.Utils.getTranslation('editdatasource')+' ' + rec.get('data_source_id');
+                    if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)){
+                        return esapp.Utils.getTranslation('editdatasource')+' ' + rec.get('data_source_id');
+                    }
+                    else {
+                        return esapp.Utils.getTranslation('viewdatasource')+' ' + rec.get('data_source_id');
+                    }
+
                 },
                 handler: function(grid, rowIndex, colIndex) {
-                    var rec = grid.getStore().getAt(rowIndex);
-                    var data_source_id = rec.get('data_source_id');
-                    if (rec.get('type') == 'INTERNET'){
+                    var record = grid.getStore().getAt(rowIndex);
+                    var data_source_id = record.get('data_source_id');
+                    // console.info(record);
+                    // console.info(data_source_id);
+
+                    var edit = false;
+                    var view = true;
+                    if (!record.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)){
+                        edit = true;
+                        view = false;
+                    }
+
+                    if (record.get('type') == 'INTERNET'){
+                        // data_source_id = record.get('internet_id');
                         var editInternetSourceWin = new esapp.view.acquisition.editInternetSource({
-                            data_source_id: data_source_id
+                            params: {
+                                create: false,
+                                edit: edit,
+                                view: view,
+                                internetsourcerecord: record,
+                                data_source_id: data_source_id
+                            }
                         });
                         editInternetSourceWin.show();
                     }
-                    else if (rec.get('type') == 'EUMETCAST'){
+                    else if (record.get('type') == 'EUMETCAST'){
                         //var eumetcaststore = Ext.data.StoreManager.lookup('EumetcastSourceStore');
                         //var eumetcastsource_record = eumetcaststore.findRecord('eumetcast_id', data_source_id, 0, true, false, true);
 
                         var editEumetcastSourceWin = new esapp.view.acquisition.editEumetcastSource({
-                            data_source_id: data_source_id
+                            params: {
+                                create: false,
+                                edit: edit,
+                                view: view,
+                                eumetcastsourcerecord: record,
+                                data_source_id: data_source_id
+                            }
                             //,viewModel: {
                             //        // If we are passed a record, a copy of it will be created in the newly spawned session.
                             //        // Otherwise, create a new phantom record in the child.

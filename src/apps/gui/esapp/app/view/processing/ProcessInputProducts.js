@@ -61,7 +61,7 @@ Ext.define("esapp.view.processing.ProcessInputProducts",{
                         '<b> - {version}</b>',
                     '</tpl>',
                     '</br>' +
-                    '<b class="smalltext" style="color:darkgrey">{prod_descriptive_name}</b>' +
+                    '<b class="smalltext" style="color:darkgrey;">{prod_descriptive_name}</b>' +
                     '</br>'
                 ),
             width: 250,

@@ -2,6 +2,20 @@ Ext.define('esapp.view.analysis.workspaceController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.analysis-workspace'
 
+    ,closeAllMapsGraphs: function(){
+        var me = this.getView();
+        var mapViewWindows = me.query('mapview-window');
+        var tsGraphWindows = me.query('timeserieschart-window');
+
+        Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
+            mapview_window.close();
+        });
+
+        Ext.Object.each(tsGraphWindows, function(id, tsgraph_window, thisObj) {
+            tsgraph_window.close();
+        });
+    }
+
     ,openWorkspaceGraphs: function(graphs){
         var me = this.getView();
         me.allGraphsLoaded = false;
@@ -18,8 +32,8 @@ Ext.define('esapp.view.analysis.workspaceController', {
                 parent_tpl_id: graphs[i].parent_tpl_id,
                 graph_tpl_name: graphs[i].graph_tpl_name,
                 istemplate: graphs[i].istemplate,
-                graphviewposition: graphs[i].graphviewposition.split(",").map(function(x){return parseInt(x)}),      // .filter(Boolean)
-                graphviewsize: graphs[i].graphviewsize.split(",").map(function(x){return parseInt(x)}),
+                graphviewposition: esapp.Utils.objectExists(graphs[i].graphviewposition) ? graphs[i].graphviewposition.split(",").map(function(x){return parseInt(x)}) : [50,5],      // .filter(Boolean)
+                graphviewsize: esapp.Utils.objectExists(graphs[i].graphviewsize) ? graphs[i].graphviewsize.split(",").map(function(x){return parseInt(x)}) : [700,600],
                 graphtype: graphs[i].graph_type,
                 selectedTimeseries: graphs[i].selectedtimeseries,
                 yearTS: graphs[i].yearts,
@@ -304,7 +318,12 @@ Ext.define('esapp.view.analysis.workspaceController', {
         newLayerAdminWin.show();
         // this.getView().lookupReference('analysismain_layersbtn').disable();
     }
-
+    ,logosAdmin: function(){
+        var newLogosAdminWin = new esapp.view.analysis.logoAdmin();
+        this.getView().add(newLogosAdminWin);
+        newLogosAdminWin.show();
+        // this.getView().lookupReference('analysismain_logosbtn').disable();
+    }
     ,legendAdmin: function(){
         var newLegendAdminWin = new esapp.view.analysis.legendAdmin();
         this.getView().add(newLegendAdminWin);

@@ -6,8 +6,11 @@ Ext.define('esapp.view.acquisition.product.editProductModel', {
         productdatasources: {
             source:'DataAcquisitionsStore'
         },
-        productingestions: {
-            source:'IngestionsStore'
+        // productingestions: {
+        //     source:'IngestionsStore'
+        // },
+        ingestsubproducts: {
+            source:'IngestSubProductsStore'
         }
     }
 });
