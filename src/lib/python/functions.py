@@ -1165,6 +1165,23 @@ def conv_list_2_string(inlist):
         pass
     return file_string
 
+######################################################################################
+#   conv_list_2_unique_value
+#   Purpose: convert a list of strings to unique value strings
+#   Author: Vijay Charan Venkatachalam
+#   Date: 2019/10/04
+#   Input: list of strings
+#   Output: list
+#
+def conv_list_2_unique_value(inlist):
+    outlist = []
+    try:
+        x = N.array(inlist)
+        outlist = list(N.unique(x))
+    except:
+        pass
+    return outlist
+
 
 ######################################################################################
 #   extract_from_date
@@ -2815,6 +2832,7 @@ class ProcLists:
                          masked = '',
                          timeseries_role = '10d',
                          final=False,
+                         # display_index=None,
                          active_default=True):
 
         self.list_subprods.append(ProcSubprod(sprod,
@@ -2831,6 +2849,7 @@ class ProcLists:
                                               data_type_id=data_type_id,
                                               masked = masked,
                                               timeseries_role = timeseries_role,
+                                              # display_index = display_index,
                                               active_default=True))
         return sprod
 
@@ -2869,6 +2888,7 @@ class ProcSubprod:
                  data_type_id=None,
                  masked = '',
                  timeseries_role = '',
+                 # display_index=None,
                  active_default=True,
                  active_depend=False):
 
@@ -2885,6 +2905,7 @@ class ProcSubprod:
         self.data_type_id = data_type_id
         self.masked = masked
         self.timeseries_role = timeseries_role
+        # self.display_index = display_index
         self.final = final
         self.active_default=active_default
         self.active_user = False                            # In the product table, it applies only to Native prods
@@ -2903,6 +2924,7 @@ class ProcSubprod:
         print('Data Type   : {}'.format(self.data_type_id))
         print('Masked      : {}'.format(self.masked))
         print('TS role     : {}'.format(self.timeseries_role))
+        # print('DisplayIndex: {}'.format(self.display_index))
         print('Final       : {}'.format(self.final))
         # print('active_default: {}'.format(self.active_default))
         print('Active_user : {}'.format(self.active_user))

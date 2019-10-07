@@ -161,8 +161,22 @@ class TestSystem(unittest.TestCase):
         status = es2system.get_status_PC1()
         print status
 
+
+    def test_push_ftp_aruba(self):
+
+        try:
+            import apps.es2system.Test.aruba_credentials as ac
+        except:
+            return 1
+
+        # Should get here the role of my machine ...
+        # Masked=FALSE means the masked products are pushed.
+        status = es2system.push_data_ftp(url=ac.url, user=ac.user, psw=ac.psw, trg_dir=ac.trg_dir, masked=False)
+
     def test_push_ftp_jrc(self):
 
-        # Execute w.o. arguments: they are read from server_ftp.py
-        # Masked=TRUE means the masked products are not pushed.
+        # Execute w.o. arguments: they are read from config/server_ftp.py
+        # The products/versions considered for sync are: the 'activated' ones - except the ones set as 'EXCLUDE' in server_ftp.py definitions
+        # Masked=TRUE means the masked sub-products are not pushed (which is the default)
+
         status = es2system.push_data_ftp(masked=True)

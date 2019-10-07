@@ -907,14 +907,13 @@ def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None, ma
     logger.debug("Entering routine %s" % 'push_data_ftp')
 
     # Loop over 'not-masked' products
-    products = querydb.get_products(masked=False)
+    products = querydb.get_products(activated=True)
     # produts=products[21:23]               # test a subset
     for row in products:
 
         prod_dict = functions.row2dict(row)
         productcode = prod_dict['productcode']
         version = prod_dict['version']
-        spec_logger.info('Working on product {}/{}'.format(productcode,version))
 
         # TEMP - For testing only
         # if productcode!='vgt-ndvi' or version !='sv2-pv2.2':
@@ -935,6 +934,7 @@ def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None, ma
         # Check there is at least one mapset and one subproduct
         if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0 and not skip:
 
+            spec_logger.info('Working on product {}/{}'.format(productcode, version))
             # In case of several mapsets, check if there is a 'larger' one
             if len(all_prod_mapsets) > 1:
                 mapset_to_use = []

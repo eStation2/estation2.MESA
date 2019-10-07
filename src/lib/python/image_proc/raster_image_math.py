@@ -2239,150 +2239,158 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
 # _____________________________
 def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, parameters=None,
                          output_nodata=None, output_format=None, output_type=None, options=''):
-    # Parameters is expected to be None, or a dictionary
-    if parameters is not None:
 
-        if 'histogramWindowStride' in parameters.keys():
-            histogramWindowStride = parameters['histogramWindowStride']
+    try:
+        # Parameters is expected to be None, or a dictionary
+        if parameters is not None:
+
+            if 'histogramWindowStride' in parameters.keys():
+                histogramWindowStride = parameters['histogramWindowStride']
+            else:
+                histogramWindowStride = None
+
+            if 'minTheta' in parameters.keys():
+                minTheta = parameters['minTheta']
+            else:
+                minTheta = None
+            if 'minPopProp' in parameters.keys():
+                minPopProp = parameters['minPopProp']
+            else:
+                minPopProp = None
+            if 'minPopMeanDifference' in parameters.keys():
+                minPopMeanDifference = parameters['minPopMeanDifference']
+            else:
+                minPopMeanDifference = None
+            if 'minSinglePopCohesion' in parameters.keys():
+                minSinglePopCohesion = parameters['minSinglePopCohesion']
+            else:
+                minSinglePopCohesion = None
+            if 'histogramWindowSize' in parameters.keys():
+                histogramWindowSize = parameters['histogramWindowSize']
+            else:
+                histogramWindowSize = None
+            if 'minImageValue' in parameters.keys():
+                minImageValue = parameters['minImageValue']
+            else:
+                minImageValue = None
+
+            minThreshold = 1
+            if 'minThreshold' in parameters.keys():
+                if parameters['minThreshold'] is not None:
+                    minThreshold = parameters['minThreshold']
+
+        rid = ''
+        debug = 0
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
+
+        # Manage options
+        options_list = [es_constants.ES2_OUTFILE_OPTIONS]
+        options_list.append(options)
+
+        # Open input file
+        inputID = gdal.Open(input_file, GA_ReadOnly)
+
+        # Read info from infile
+        nb = inputID.RasterCount
+        ns = inputID.RasterXSize
+        nl = inputID.RasterYSize
+
+        dataType = inputID.GetRasterBand(1).DataType
+
+        geoTransform = inputID.GetGeoTransform()
+        projection = inputID.GetProjection()
+        driver_type = inputID.GetDriver().ShortName
+
+        # Manage out_type (take the input one as default)
+        if output_type is None:
+            outType = dataType
         else:
-            histogramWindowStride = None
+            outType = ParseType(output_type)
 
-        if 'minTheta' in parameters.keys():
-            minTheta = parameters['minTheta']
+        # Manage out_format (take the input one as default)
+        if output_format is None:
+            outFormat = driver_type
         else:
-            minTheta = None
-        if 'minPopProp' in parameters.keys():
-            minPopProp = parameters['minPopProp']
+            outFormat = output_format
+
+        # Check output directory
+        functions.check_output_dir(os.path.dirname(output_file))
+
+        # Instantiate output
+        outDrv = gdal.GetDriverByName(outFormat)
+        if debug:
+            n_bands = 3
         else:
-            minPopProp = None
-        if 'minPopMeanDifference' in parameters.keys():
-            minPopMeanDifference = parameters['minPopMeanDifference']
+            n_bands = 1
+        outDS = outDrv.Create(output_file, ns, nl, n_bands, outType, options_list)
+        outDS.SetGeoTransform(geoTransform)
+        outDS.SetProjection(projection)
+
+        # Read Input
+        inband = inputID.GetRasterBand(1)
+        inData = inband.ReadAsArray(0, 0, inband.XSize, inband.YSize)
+
+        inDataInt = N.uint16(inData) * 0
+        inData_good = (inData > 0)
+        inDataInt[inData_good] = inData[inData_good]
+
+        # Call FrontDetection Algorithm
+        [uMask, uImage, uCandidateCounts, uFrontCounts, uWindowStatusCodes, uWindowStatusValues] = \
+            DetectEdgesInSingleImage(inDataInt, histogramWindowStride, minTheta, histogramWindowSize, minPopProp,
+                                     minPopMeanDifference, minSinglePopCohesion, minImageValue)
+
+        print ("Debug: Applying now Minimum threshold: %i" % minThreshold)
+
+        # Apply minimum threshold (line by line)
+        dataOut = N.empty([nl, ns], dtype=bool)
+        for il in range(nl):
+            data_in = uFrontCounts[il, :]
+            rowOut = N.empty([ns], dtype=bool) * 0
+            rowOut[data_in >= minThreshold] = 1
+            dataOut[il, :] = rowOut[:]
+
+        # Apply thinning
+        print ("Debug: Applying now thinning")
+        thin_output = pymorph.thin(dataOut)
+        # thin_output = dataOut                              # For TEST only ... make it faster
+
+        # Create and write output band
+        print ("Debug: Writing the output files")
+        if debug:
+            outband = outDS.GetRasterBand(1)
+            outband.WriteArray(uFrontCounts, 0, 0)
+            outband = outDS.GetRasterBand(3)
+            outband.WriteArray(dataOut, 0, 0)
+            outband = outDS.GetRasterBand(2)
+            outband.WriteArray(thin_output, 0, 0)
         else:
-            minPopMeanDifference = None
-        if 'minSinglePopCohesion' in parameters.keys():
-            minSinglePopCohesion = parameters['minSinglePopCohesion']
-        else:
-            minSinglePopCohesion = None
-        if 'histogramWindowSize' in parameters.keys():
-            histogramWindowSize = parameters['histogramWindowSize']
-        else:
-            histogramWindowSize = None
-        if 'minImageValue' in parameters.keys():
-            minImageValue = parameters['minImageValue']
-        else:
-            minImageValue = None
+            outband = outDS.GetRasterBand(1)
+            outband.WriteArray(thin_output, 0, 0)
 
-        minThreshold = 1
-        if 'minThreshold' in parameters.keys():
-            if parameters['minThreshold'] is not None:
-                minThreshold = parameters['minThreshold']
+        # #   ----------------------------------------------------------------------------------------------------
+        # #   Writes metadata to output
+        print ("Debug: Assigning metadata")
+        input_list = []
+        input_list.append(input_file)
 
-    rid = ''
-    debug = 0
+        # #   Close outputs
+        outDrv = None
+        outDS = None
+        assign_metadata_processing(input_list, output_file, parameters=parameters)
 
-    tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
-                              dir=es_constants.base_tmp_dir)
-
-    output_file_final = output_file
-    output_file = tmpdir + os.sep + os.path.basename(output_file)
-
-    # Manage options
-    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
-    options_list.append(options)
-
-    # Open input file
-    inputID = gdal.Open(input_file, GA_ReadOnly)
-
-    # Read info from infile
-    nb = inputID.RasterCount
-    ns = inputID.RasterXSize
-    nl = inputID.RasterYSize
-
-    dataType = inputID.GetRasterBand(1).DataType
-
-    geoTransform = inputID.GetGeoTransform()
-    projection = inputID.GetProjection()
-    driver_type = inputID.GetDriver().ShortName
-
-    # Manage out_type (take the input one as default)
-    if output_type is None:
-        outType = dataType
+    except:
+        logger.warning('Error in detect-sst-fronts. Remove outputs')
+        if os.path.isfile(output_file):
+            os.remove(output_file)
     else:
-        outType = ParseType(output_type)
-
-    # Manage out_format (take the input one as default)
-    if output_format is None:
-        outFormat = driver_type
-    else:
-        outFormat = output_format
-
-    # Check output directory
-    functions.check_output_dir(os.path.dirname(output_file))
-
-    # Instantiate output
-    outDrv = gdal.GetDriverByName(outFormat)
-    if debug:
-        n_bands = 3
-    else:
-        n_bands = 1
-    outDS = outDrv.Create(output_file, ns, nl, n_bands, outType, options_list)
-    outDS.SetGeoTransform(geoTransform)
-    outDS.SetProjection(projection)
-
-    # Read Input
-    inband = inputID.GetRasterBand(1)
-    inData = inband.ReadAsArray(0, 0, inband.XSize, inband.YSize)
-
-    inDataInt = N.uint16(inData) * 0
-    inData_good = (inData > 0)
-    inDataInt[inData_good] = inData[inData_good]
-
-    # Call FrontDetection Algorithm
-    [uMask, uImage, uCandidateCounts, uFrontCounts, uWindowStatusCodes, uWindowStatusValues] = \
-        DetectEdgesInSingleImage(inDataInt, histogramWindowStride, minTheta, histogramWindowSize, minPopProp,
-                                 minPopMeanDifference, minSinglePopCohesion, minImageValue)
-
-    print ("Debug: Applying now Minimum threshold: %i" % minThreshold)
-
-    # Apply minimum threshold (line by line)
-    dataOut = N.empty([nl, ns], dtype=bool)
-    for il in range(nl):
-        data_in = uFrontCounts[il, :]
-        rowOut = N.empty([ns], dtype=bool) * 0
-        rowOut[data_in >= minThreshold] = 1
-        dataOut[il, :] = rowOut[:]
-
-    # Apply thinning
-    print ("Debug: Applying now thinning")
-    thin_output = pymorph.thin(dataOut)
-    # thin_output = dataOut                              # For TEST only ... make it faster
-
-    # Create and write output band
-    print ("Debug: Writing the output files")
-    if debug:
-        outband = outDS.GetRasterBand(1)
-        outband.WriteArray(uFrontCounts, 0, 0)
-        outband = outDS.GetRasterBand(3)
-        outband.WriteArray(dataOut, 0, 0)
-        outband = outDS.GetRasterBand(2)
-        outband.WriteArray(thin_output, 0, 0)
-    else:
-        outband = outDS.GetRasterBand(1)
-        outband.WriteArray(thin_output, 0, 0)
-
-    # #   ----------------------------------------------------------------------------------------------------
-    # #   Writes metadata to output
-    print ("Debug: Assigning metadata")
-    input_list = []
-    input_list.append(input_file)
-
-    # #   Close outputs
-    outDrv = None
-    outDS = None
-    assign_metadata_processing(input_list, output_file, parameters=parameters)
-
-    shutil.move(output_file, output_file_final)
-    shutil.rmtree(tmpdir)
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 # _____________________________
 def do_ts_linear_filter(input_file='', before_file='', after_file='', output_file='', input_nodata=None,
