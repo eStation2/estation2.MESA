@@ -28,7 +28,7 @@ import itertools
 #   General definitions for this processing chain
 ext=es_constants.ES2_OUTFILE_EXTENSION
 
-def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version, starting_dates=None, proc_lists=None):
+def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version, starting_dates=None, proc_lists=None, spec_logger=None):
 
     #   ---------------------------------------------------------------------
     #   Create lists
@@ -54,7 +54,7 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
         for my_date in starting_dates:
             starting_files.append(input_dir+my_date+in_prod_ident)
     else:
-        starting_files=input_dir+"*"+in_prod_ident
+        starting_files=glob.glob(input_dir+"*"+in_prod_ident)
 
     #   ---------------------------------------------------------------------
     #   Dekad average for every 30min (mm/h)
@@ -76,10 +76,10 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
     def generate_parameters_10d30min():
 
         #   Look for all input files in input_dir, and sort them
-        input_files = glob.glob(starting_files)
+        # input_files = starting_files
         dekad_list = []
         # Create unique list of all dekads (as 'Julian' number)
-        for input_file in input_files:
+        for input_file in starting_files:
             basename=os.path.basename(input_file)
             mydate=functions.get_date_from_path_filename(basename)
             mydate_yyyymmdd=str(mydate)[0:8]
@@ -112,13 +112,17 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
                         mydekad_nbr=functions.conv_date_2_dekad(mydate_yyyymmdd[0:8])
                         if mydekad_nbr == dekad:
                             file_list.append(myfile)
-
-                    yield (file_list, output_file)
+                    # See ES2-416
+                    if len(file_list) >= 8:
+                        yield (file_list, output_file)
+                    else:
+                        spec_logger.debug("Less than 8 files for %s" % my_dekad_str)
 
     @active_if(activate_10d30min_comput)
     @files(generate_parameters_10d30min)
     def lsasaf_etp_10d30min(input_file, output_file):
 
+        # PUT a condition on the number of files: AT least 8 (out of 10)
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', \
@@ -152,7 +156,20 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
     input_dir_10dcum = es_constants.processing_dir+ \
                 functions.set_path_sub_directory(prod, in_prod_10dcum, 'Derived', version, native_mapset)
 
-    starting_files_10dcum = input_dir_10dcum+"*"+in_prod_ident_10dcum
+    # Workaround to apply starting dates to 10d30min as well (see ES-416)
+    if starting_dates is not None:
+        all_starting_files_10dcum = glob.glob(input_dir_10dcum+"*"+in_prod_ident_10dcum)
+        min_starting_dates = min(starting_dates)
+        max_starting_dates = max(starting_dates)
+
+        starting_files_10dcum = []
+        for mypath in all_starting_files_10dcum:
+            myfile=os.path.basename(mypath)
+            mydate=myfile[0:12]
+            if (int(min_starting_dates) <= int(mydate)) and (int(max_starting_dates) >= int(mydate)):
+                starting_files_10dcum.append(mypath)
+    else:
+        starting_files_10dcum = glob.glob(input_dir_10dcum + "*" + in_prod_ident_10dcum)
 
     formatter_in="(?P<YYYYMMDD>[0-9]{8})[0-9]{4}"+in_prod_ident_10dcum
     formatter_out=["{subpath[0][5]}"+os.path.sep+output_subdir_10dcum+"{YYYYMMDD[0]}"+out_prod_ident_10dcum]
@@ -181,15 +198,18 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
         args = {"input_file": input_file, "output_file": tmp_output_file, "output_format": 'GTIFF',
                 "options": "compress=lzw", "scale_factor": factor, "input_nodata":-32768}
 
-        raster_image_math.do_cumulate(**args)
+        # See ES2-416: we accept at least 40 files out of the expect 48
+        if len(input_file) >= 40:
 
-        reproject_output(tmp_output_file, native_mapset, target_mapset)
+            raster_image_math.do_cumulate(**args)
 
-        shutil.rmtree(tmpdir)
+            reproject_output(tmp_output_file, native_mapset, target_mapset)
 
-        # Do also the house-keeping, by deleting the files older than 6 months
-        number_months_keep = 6
-        remove_old_files(prod, "10d30min-et", version, native_mapset, 'Derived', number_months_keep)
+            shutil.rmtree(tmpdir)
+
+            # Do also the house-keeping, by deleting the files older than 6 months
+            number_months_keep = 6
+            remove_old_files(prod, "10d30min-et", version, native_mapset, 'Derived', number_months_keep)
 
     # ----------------------------------------------------------------------------------------------------------------
     # 1moncum
@@ -210,7 +230,21 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
     input_dir_1moncum = es_constants.processing_dir+ \
                      functions.set_path_sub_directory(prod, in_prod_1moncum, 'Derived', version, target_mapset)
 
-    starting_files_1moncum = input_dir_1moncum+"*"+in_prod_ident_1moncum
+    # Workaround to apply starting dates to 10d30min as well (see ES-416)
+    if starting_dates is not None:
+        all_starting_files_1moncum = glob.glob(input_dir_1moncum + "*" + in_prod_ident_1moncum)
+        min_starting_dates = min(starting_dates)[0:8]
+        max_starting_dates = max(starting_dates)[0:8]
+
+        starting_files_1moncum = []
+        for mypath in all_starting_files_1moncum:
+            myfile = os.path.basename(mypath)
+            mydate = myfile[0:8]
+            if (int(min_starting_dates) <= int(mydate)) and (int(max_starting_dates) >= int(mydate)):
+                starting_files_1moncum.append(mypath)
+    else:
+        starting_files_1moncum = input_dir_1moncum + "*" + in_prod_ident_1moncum
+
 
     formatter_in_1moncum="(?P<YYYYMM>[0-9]{6})[0-9]{2}"+in_prod_ident_1moncum
     formatter_out_1moncum="{subpath[0][5]}"+os.path.sep+output_subdir_1moncum+"{YYYYMM[0]}"+'01'+out_prod_ident_1moncum
@@ -224,7 +258,10 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF',
                 "options": "compress=lzw", "input_nodata":-32768}
-        raster_image_math.do_cumulate(**args)
+
+        # See ES2-416: we need all 3 files for the monthly cumulate
+        if len(input_file) >= 3:
+            raster_image_math.do_cumulate(**args)
 
     return proc_lists
 
@@ -241,7 +278,7 @@ def processing_std_lsasaf_et(res_queue, pipeline_run_level=0,pipeline_printout_l
 
     proc_lists = None
     proc_lists = create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
-                                 starting_dates=starting_dates, proc_lists=proc_lists)
+                                 starting_dates=starting_dates, proc_lists=proc_lists, spec_logger=spec_logger)
     if write2file is not None:
         fwrite_id=open(write2file,'w')
     else:
@@ -249,7 +286,7 @@ def processing_std_lsasaf_et(res_queue, pipeline_run_level=0,pipeline_printout_l
 
     if pipeline_run_level > 0:
         spec_logger.info("Run the pipeline %s" % 'processing_std_lsasaf_et')
-        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=spec_logger, history_file=os.path.join(es_constants.log_dir,'.ruffus_history_lsasaf_et.sqlite'), checksum_level=0)
+        pipeline_run(verbose=pipeline_run_level, logger=spec_logger, log_exceptions=None, history_file=os.path.join(es_constants.log_dir,'.ruffus_history_lsasaf_et.sqlite'), checksum_level=0)
         tasks = pipeline_get_task_names()
         spec_logger.info("After running the pipeline %s" % 'processing_std_lsasaf_et')
 
