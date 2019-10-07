@@ -741,7 +741,7 @@ class TestGetInternet(unittest.TestCase):
         template='%Y/A%Y%j.L3m_DAY_KD490_Kd_490_4km.bz2'       # introduce non-standard placeholder
         usr_pwd='anonymous:anonymous'
         frequency = 'e1dekad'
-    
+
         files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         print files_list
         file_to_check='2014/A2014001.L3m_DAY_KD490_Kd_490_4km.bz2'

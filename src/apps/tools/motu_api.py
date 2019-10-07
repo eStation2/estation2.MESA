@@ -24,7 +24,7 @@ logger = log.my_logger(__name__)
 # from database import querydb
 from lib.python import functions
 # from apps.productmanagement import datasets
-# motu_path='/usr/local/src/tas/anaconda/lib/python2.7/site-packages/motu-client.py'
+# motu_path='more /var'
 
 
 def motu_4_dates(dates, template, base_url, username, password, files_filter_expression):

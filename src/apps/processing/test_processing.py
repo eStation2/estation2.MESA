@@ -344,7 +344,8 @@ def my_proc_arc2rain_dekad(pipe_run=0, pipe_print=3, start_date=None, end_date=N
 # lsasaf-et
 #   ---------------------------------------------------------------------
 from apps.processing.processing_std_lsasaf_et import *
-def my_proc_std_lsasaf_et(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False):
+def my_proc_std_lsasaf_et(pipe_run=3, pipe_print=0, start_date=None, end_date=None, touch_files_only=False):
+
     # # Create the list of dates -> returns empty if start==end==None
     if (start_date) or (end_date):
         starting_dates = proc_functions.get_list_dates_for_dataset('lsasaf-et', 'et', 'undefined', start_date=start_date, end_date=end_date)
