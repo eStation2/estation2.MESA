@@ -1324,7 +1324,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                     )
                                                     if created_ongoing_link is not None:
                                                         ongoing_list.append(created_ongoing_link) ## TODO have to dump object to pickle
-                                                        # functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+                                                        functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
                                                 except:
                                                     logger_spec.warning(
                                                         "Problem while creating Job request to JEODPP: %s.", filename)
@@ -1370,14 +1370,15 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                                 ongoing_product_id_band = str(ongoing_product_id)+':'+str(ongoing_product_band)
                                                                 processed_list.append(ongoing_product_id_band)   # Add the processed list only with product id and band
                                                                 # processed_list.append(ongoing)
-                                                                #functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+                                                                functions.dump_obj_to_pickle(processed_list, processed_list_filename)
                                                                 ongoing_list.remove(ongoing)
+                                                                functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
                                                                 ongoing_job_id = ongoing.split(':')[2]
                                                                 deleted = jeodpp_api.delete_results_jeodpp_job(
                                                                                     base_url=jeodpp_internet_url,
                                                                                     job_id=ongoing_job_id, usr_pwd=usr_pwd,
                                                                                     https_params=str(internet_source.https_params))
-                                                                if not deleted:
+                                                                if not deleted:   # To manage the delete store the job id in the  delete list and remove the job
                                                                     logger_spec.warning("Problem while deleting Product job id: %s.",str(each_product_id)+str(ongoing_job_id))
                                                     except:
                                                         logger_spec.warning("Problem while Downloading Product: %s.",str(each_product_id))
