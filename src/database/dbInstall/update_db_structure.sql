@@ -99,34 +99,6 @@ ALTER TABLE products.mapset_new
 COMMENT ON COLUMN products.mapset_new.defined_by IS 'values: JRC or USER';
 
 
-ALTER TABLE products.datasource_description
-DROP CONSTRAINT mapset_datasource_description_fk,
-ADD CONSTRAINT mapset_new_datasource_description_fk FOREIGN KEY (native_mapset)
-      REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
-      ON UPDATE CASCADE ON DELETE SET NULL;
-
-
-ALTER TABLE products.ingestion
-DROP CONSTRAINT mapset_ingestion_fk,
-ADD CONSTRAINT mapset_new_ingestion_fk FOREIGN KEY (mapsetcode)
-REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
-ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
-ALTER TABLE products.process_product
-DROP CONSTRAINT mapset_process_input_product_fk,
-ADD CONSTRAINT mapset_new_process_input_product_fk FOREIGN KEY (mapsetcode)
-REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
-ON UPDATE CASCADE ON DELETE SET NULL;
-
-
-ALTER TABLE products.thema_product
-DROP CONSTRAINT mapset_thema_product_fk,
-ADD CONSTRAINT mapset_new_thema_product_fk FOREIGN KEY (mapsetcode)
-REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
-ON UPDATE CASCADE ON DELETE SET NULL;
-
-
 
 -- DROP INDEX products.ingestion_mapsetcode_idx;
 
@@ -3148,9 +3120,6 @@ ALTER FUNCTION analysis.update_insert_graph_yaxes(character varying, character v
 -- Function: products.export_jrc_data(boolean)
 -- DROP FUNCTION products.export_jrc_data(boolean);
 
--- Function: products.export_jrc_data(boolean)
-
--- DROP FUNCTION products.export_jrc_data(boolean);
 
 CREATE OR REPLACE FUNCTION products.export_jrc_data(full_copy boolean DEFAULT false)
   RETURNS SETOF text AS
@@ -3163,7 +3132,7 @@ BEGIN
 	RETURN QUERY SELECT 'SELECT products.update_insert_product_category('
 		|| 'category_id := ''' || category_id || ''''
 		|| ', order_index := ' || order_index
-		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ' );'  as inserts
 	FROM products.product_category;
 
@@ -3177,7 +3146,7 @@ BEGIN
 		|| ', time_unit := ''' || time_unit || ''''
 		|| ', frequency := ' || frequency
 		|| ', frequency_type := ' || COALESCE('''' || frequency_type || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ' );'  as inserts
 	FROM products.frequency;
 
@@ -3199,7 +3168,7 @@ BEGIN
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_data_type('
 		|| 'data_type_id := ''' || data_type_id || ''''
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ' );'  as inserts
 	FROM products.data_type;
 
@@ -3210,8 +3179,8 @@ BEGIN
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_projection('
 		|| 'proj_code := ''' || proj_code || ''''
-		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', srs_wkt := ' || COALESCE('''' || srs_wkt || '''', 'NULL')
 		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
@@ -3223,8 +3192,8 @@ BEGIN
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_resolution('
 		|| 'resolutioncode := ''' || resolutioncode || ''''
-		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', pixel_shift_long := ' || pixel_shift_long
 		|| ', pixel_shift_lat := ' || pixel_shift_lat
 		|| ', full_copy := ' || _full_copy
@@ -3237,7 +3206,7 @@ BEGIN
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_bbox('
 		|| 'bboxcode := ''' || bboxcode || ''''
-		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', defined_by := ''' || defined_by || ''''
 		|| ', upper_left_long := ' || upper_left_long
 		|| ', upper_left_lat := ' || upper_left_lat
@@ -3255,9 +3224,8 @@ BEGIN
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_mapset_new('
 		|| 'mapsetcode := ''' || mapsetcode || ''''
-		|| ', defined_by := ''' || defined_by || ''''
-		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', defined_by := ''' || defined_by || ''''
 		|| ', proj_code := ''' || proj_code || ''''
 		|| ', resolutioncode := ''' || resolutioncode || ''''
@@ -3279,8 +3247,8 @@ BEGIN
 	RETURN QUERY SELECT 'SELECT products.update_insert_mapset('
 		|| 'mapsetcode := ''' || mapsetcode || ''''
 		|| ', defined_by := ''' || defined_by || ''''
-		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', srs_wkt := ' || COALESCE('''' || srs_wkt || '''', 'NULL')
 		|| ', upper_left_long := ' || upper_left_long
 		|| ', pixel_shift_long := ' || pixel_shift_long
@@ -3303,7 +3271,7 @@ BEGIN
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_thema('
 		|| 'thema_id := ''' || thema_id || ''''
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ' );'  as inserts
 	FROM products.thema;
 
@@ -3367,8 +3335,8 @@ BEGIN
 	RETURN QUERY SELECT 'SELECT products.update_insert_internet_source('
 		|| 'internet_id := ''' || internet_id || ''''
 		|| ', defined_by := ''' || defined_by || ''''
-		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', modified_by := ' || COALESCE('''' || modified_by || '''', 'NULL')
 		|| ', update_datetime := ''' || COALESCE(update_datetime, now()) || ''''
 		|| ', url := ' || COALESCE('''' || url || '''', 'NULL')
@@ -3616,7 +3584,7 @@ BEGIN
 
 	RETURN QUERY SELECT 'PERFORM analysis.update_insert_legend('
 		|| ' legend_id := ' || legend_id
-		|| ', legend_name := ' || COALESCE('''' || legend_name || '''', 'NULL')
+		|| ', legend_name := ' || COALESCE('''' || replace(replace(legend_name,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', step_type := ' || COALESCE('''' || step_type || '''', 'NULL')
 		|| ', min_value := ' || COALESCE(TRIM(to_char(min_value, '99999999D999999')), 'NULL')
 		|| ', max_value := ' || COALESCE(TRIM(to_char(max_value, '99999999D999999')), 'NULL')
@@ -3752,7 +3720,7 @@ BEGIN
 		|| ' layerid := ' || layerid
 		|| ', layerlevel := ' || COALESCE('''' || layerlevel || '''', 'NULL')
 		|| ', layername := ' || COALESCE('''' || layername || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', filename := ' || COALESCE('''' || filename || '''', 'NULL')
 		|| ', layerorderidx := ' || layerorderidx
 		|| ', layertype := ' || COALESCE('''' || layertype || '''', 'NULL')
@@ -3863,6 +3831,7 @@ ALTER FUNCTION products.export_jrc_data(boolean)
 
 -- DROP FUNCTION products.export_all_data(boolean);
 
+
 CREATE OR REPLACE FUNCTION products.export_all_data(full_copy boolean DEFAULT true)
   RETURNS SETOF text AS
 $BODY$
@@ -3873,7 +3842,7 @@ BEGIN
 	RETURN QUERY SELECT 'SELECT products.update_insert_product_category('
 		|| 'category_id := ''' || category_id || ''''
 		|| ', order_index := ' || order_index
-		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ' );'  as inserts
 	FROM products.product_category;
 
@@ -3887,7 +3856,7 @@ BEGIN
 		|| ', time_unit := ''' || time_unit || ''''
 		|| ', frequency := ' || frequency
 		|| ', frequency_type := ' || COALESCE('''' || frequency_type || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ' );'  as inserts
 	FROM products.frequency;
 
@@ -3909,7 +3878,7 @@ BEGIN
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_data_type('
 		|| 'data_type_id := ''' || data_type_id || ''''
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ' );'  as inserts
 	FROM products.data_type;
 
@@ -3920,8 +3889,8 @@ BEGIN
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_projection('
 		|| 'proj_code := ''' || proj_code || ''''
-		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', srs_wkt := ' || COALESCE('''' || srs_wkt || '''', 'NULL')
 		|| ', full_copy := ' || _full_copy
 		|| ' );'  as inserts
@@ -3933,8 +3902,8 @@ BEGIN
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_resolution('
 		|| 'resolutioncode := ''' || resolutioncode || ''''
-		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', pixel_shift_long := ' || pixel_shift_long
 		|| ', pixel_shift_lat := ' || pixel_shift_lat
 		|| ', full_copy := ' || _full_copy
@@ -3947,7 +3916,7 @@ BEGIN
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_bbox('
 		|| 'bboxcode := ''' || bboxcode || ''''
-		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', defined_by := ''' || defined_by || ''''
 		|| ', upper_left_long := ' || upper_left_long
 		|| ', upper_left_lat := ' || upper_left_lat
@@ -3966,8 +3935,8 @@ BEGIN
 	RETURN QUERY SELECT 'SELECT products.update_insert_mapset_new('
 		|| 'mapsetcode := ''' || mapsetcode || ''''
 		|| ', defined_by := ''' || defined_by || ''''
-		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', defined_by := ''' || defined_by || ''''
 		|| ', proj_code := ''' || proj_code || ''''
 		|| ', resolutioncode := ''' || resolutioncode || ''''
@@ -3987,8 +3956,8 @@ BEGIN
 	RETURN QUERY SELECT 'SELECT products.update_insert_mapset('
 		|| 'mapsetcode := ''' || mapsetcode || ''''
 		|| ', defined_by := ''' || defined_by || ''''
-		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', srs_wkt := ' || COALESCE('''' || srs_wkt || '''', 'NULL')
 		|| ', upper_left_long := ' || upper_left_long
 		|| ', pixel_shift_long := ' || pixel_shift_long
@@ -4010,7 +3979,7 @@ BEGIN
 
 	RETURN QUERY SELECT 'SELECT products.update_insert_thema('
 		|| 'thema_id := ''' || thema_id || ''''
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ' );'  as inserts
 	FROM products.thema;
 
@@ -4072,8 +4041,8 @@ BEGIN
 	RETURN QUERY SELECT 'SELECT products.update_insert_internet_source('
 		|| 'internet_id := ''' || internet_id || ''''
 		|| ', defined_by := ''' || defined_by || ''''
-		|| ', descriptive_name := ' || COALESCE('''' || descriptive_name || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', modified_by := ' || COALESCE('''' || modified_by || '''', 'NULL')
 		|| ', update_datetime := ''' || COALESCE(update_datetime, now()) || ''''
 		|| ', url := ' || COALESCE('''' || url || '''', 'NULL')
@@ -4317,7 +4286,7 @@ BEGIN
 
 	RETURN QUERY SELECT 'PERFORM analysis.update_insert_legend('
 		|| ' legend_id := ' || legend_id
-		|| ', legend_name := ' || COALESCE('''' || legend_name || '''', 'NULL')
+		|| ', legend_name := ' || COALESCE('''' || replace(replace(legend_name,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', step_type := ' || COALESCE('''' || step_type || '''', 'NULL')
 		|| ', min_value := ' || COALESCE(TRIM(to_char(min_value, '99999999D999999')), 'NULL')
 		|| ', max_value := ' || COALESCE(TRIM(to_char(max_value, '99999999D999999')), 'NULL')
@@ -4452,7 +4421,7 @@ BEGIN
 		|| ' layerid := ' || layerid
 		|| ', layerlevel := ' || COALESCE('''' || layerlevel || '''', 'NULL')
 		|| ', layername := ' || COALESCE('''' || layername || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || description || '''', 'NULL')
+		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
 		|| ', filename := ' || COALESCE('''' || filename || '''', 'NULL')
 		|| ', layerorderidx := ' || layerorderidx
 		|| ', layertype := ' || COALESCE('''' || layertype || '''', 'NULL')
@@ -4555,6 +4524,7 @@ $BODY$
   ROWS 1000;
 ALTER FUNCTION products.export_all_data(boolean)
   OWNER TO estation;
+
 
 
 
