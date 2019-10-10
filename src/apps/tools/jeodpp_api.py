@@ -24,6 +24,12 @@ logger = log.my_logger(__name__)
 
 def generate_list_products(dates, template, frequency, base_url, usr_pwd):
 
+    list_product_id_band = []
+    # To check if the user and password is not defined and throw error
+    if usr_pwd is ':' or usr_pwd is None:
+        logger.warning('User and password is not defined to query the JEODPP server')
+        return list_product_id_band
+
     #Get the parameters from the template
     parameters = json.loads(template)
     bands = parameters.get('band')
@@ -39,7 +45,6 @@ def generate_list_products(dates, template, frequency, base_url, usr_pwd):
     wkt = 'POLYGON(('+upper_left_coord+','+upper_right_coord+','+lower_right_coord+','+lower_left_coord+','+upper_left_coord+'))'   #POLYGON((36.11 -8.92,36.45 -8.92,36.45 -9.15,36.11 -9.15,36.11 -8.92))
     max_clouds = parameters.get('max_clouds')
 
-    list_product_id_band = []
     download_links = get_download_links(dates,wkt,max_clouds,frequency,product_type)
     for download_link in download_links:
         result = get_json_from_url(str(base_url + os.path.sep + download_link), userpwd=str(usr_pwd), https_params='')
@@ -96,6 +101,12 @@ def get_jeodpp_jobs(base_url, usr_pwd, https_params=''):
 def get_jeodpp_job_status(base_url, job_id, usr_pwd, https_params=''):
 
     status = False
+
+    # To check if the user and password is not defined and throw error
+    if usr_pwd is ':' or usr_pwd is None:
+        logger.warning('User and password is not defined to query the JEODPP server')
+        return status
+
     job_url = base_url + '/jobs/'+job_id
     response = http_request_jeodpp(job_url, userpwd=usr_pwd, https_params=https_params)
     # {
@@ -134,6 +145,11 @@ def get_jeodpp_job_status(base_url, job_id, usr_pwd, https_params=''):
 
 def create_jeodpp_job(base_url, product_id, band, usr_pwd, https_params=''):
     created_job_link = None
+
+    # To check if the user and password is not defined and throw error
+    if usr_pwd is ':' or usr_pwd is None:
+        logger.warning('User and password is not defined to query the JEODPP server')
+        return created_job_link
     #"https://jeodpp.jrc.ec.europa.eu/services/gmes-dev/jobs/?product_id=S2A_MSIL2A_20150825T091006_N0204_R050_T34SFF_20150825T091004&band=B01"
     job_url = base_url+'/jobs/?product_id='+product_id+'&band='+band
     response = http_post_request_jeodpp(job_url, userpwd=usr_pwd, https_params=https_params)
@@ -151,6 +167,11 @@ def create_jeodpp_job(base_url, product_id, band, usr_pwd, https_params=''):
 def delete_results_jeodpp_job(base_url, job_id, usr_pwd, https_params=''):
     # url and job
     success = False
+    # To check if the user and password is not defined and throw error
+    if usr_pwd is ':' or usr_pwd is None:
+        logger.warning('User and password is not defined to query the JEODPP server')
+        return success
+
     job_url = base_url + '/jobs/'+str(job_id)
     response = http_delete_request_jeodpp(job_url, userpwd=usr_pwd, https_params=https_params)
     if str(response) == 'data deleted':
@@ -456,7 +477,7 @@ def get_json_from_url(remote_url_file, userpwd='', https_params=''):
 
             return list_dict
     except:
-        logger.warning('Output NOT downloaded: %s - error : %i' %(remote_url_file,c.getinfo(pycurl.HTTP_CODE)))
+        logger.warning('Error in creating list from JEODPP server: %s - error : %i' %(remote_url_file,c.getinfo(pycurl.HTTP_CODE)))
         return 1
     finally:
         c = None
