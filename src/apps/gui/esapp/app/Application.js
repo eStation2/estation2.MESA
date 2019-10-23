@@ -194,7 +194,8 @@ Ext.define('esapp.Application', {
 
                 if (esapp.globals['selectedLanguage'] == 'fra') {
 
-                    var url = '../static/ext/packages/ext-locale/build/ext-locale-fr.js';
+                    // var url = '../static/ext/packages/ext-locale/build/ext-locale-fr.js';
+                    var url = '/resources/ext-locale-fr.js';
                     Ext.Loader.loadScript({
                         url: url,
                         onLoad: function (options) {

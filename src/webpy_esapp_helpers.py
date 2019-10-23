@@ -1538,7 +1538,7 @@ def getUserWorkspaces(params):
 
 def getRefWorkspaces(params):
     workspaces_dict_all = []
-    refuser = 'jrc_ref'   # 'jrc_ref'
+    refuser = es_constants.es2globals['jrc_ref_user']  # 'jrc_ref'
 
     userworkspaces = querydb.get_user_workspaces(refuser)
     if hasattr(userworkspaces, "__len__") and userworkspaces.__len__() > 0:
