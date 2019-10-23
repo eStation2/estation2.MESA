@@ -413,7 +413,7 @@ class SubProcessProdsES2:
             prod_ident_10dsndvi = functions.set_path_filename_no_date(self.prod, output_sprod, self.mapset, self.version, self.ext)
             subdir_10dsndvi = functions.set_path_sub_directory(self.prod, output_sprod, 'Derived', self.version, self.mapset)
 
-            input_subprod_10diff = "10diff"
+            input_subprod_10diff = "10ddiff"
             in_prod_ident_10diff = functions.set_path_filename_no_date(self.prod, input_subprod_10diff, self.mapset, self.version, self.ext)
             input_dir_10diff = self.es2_data_dir + \
                                functions.set_path_sub_directory(self.prod, input_subprod_10diff, 'Derived', self.version, self.mapset)
