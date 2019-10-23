@@ -741,8 +741,8 @@ def my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=Fa
 
 from apps.processing.processing_std_vgt import *
 def test_subprocess_vgt_fapar(pipe_run=4, pipe_print=0, touch_files_only=False):
-    start_date = '19990101'
-    end_date = '20181221'
+    start_date = None
+    end_date = None
 
     if start_date is not None and end_date is not None:
         starting_dates = proc_functions.get_list_dates_for_dataset('vgt-fapar', 'fapar', 'V2.0', start_date=start_date, end_date=end_date)
@@ -757,12 +757,12 @@ def test_subprocess_vgt_fapar(pipe_run=4, pipe_print=0, touch_files_only=False):
             'version':'V2.0',
             'starting_dates': starting_dates,
             'logfile':'vgt-fapar',
-            'upsert_db' : True,
+            'upsert_db' : False,
             'touch_only':touch_files_only
             }
     res_queue = None
 
-    processing_std_vgt_stats_only(res_queue, **args)
+    processing_std_vgt_prods_only(res_queue, **args)
 
 def test_subprocess_vgt_fcover(pipe_run=4, pipe_print=0, touch_files_only=False):
     start_date = '19990101'
@@ -807,7 +807,7 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
             'version':'V2.0',
             'logfile':'vgt-lai',
             'starting_dates':starting_dates,
-            'upsert_db' : True,
+            'upsert_db' : False,
             'touch_only':touch_files_only
             }
     res_queue = None
@@ -847,9 +847,9 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 #   ---------------------------------------------------------------------
 
 # test_subprocess_swi(pipe_run=3, pipe_print=0, touch_files_only=False)
-test_subprocess_vgt_lai(pipe_run=0, pipe_print=4, touch_files_only=False)
+# test_subprocess_vgt_lai(pipe_run=0, pipe_print=4, touch_files_only=False)
 # test_subprocess_vgt_fcover(pipe_run=3, pipe_print=0, touch_files_only=False)
-
+test_subprocess_vgt_fapar(pipe_run=0, pipe_print=4, touch_files_only=False)
 # my_proc_std_ndvi(pipe_run=3, pipe_print=0, touch_files_only=False)
 #my_proc_ndvi_merge(pipe_run=0, pipe_print=3, touch_files_only=False)
 # my_proc_pml_modis_fronts(pipe_run=3, pipe_print=0, touch_files_only=False)
