@@ -57,7 +57,9 @@ class SubProcessProdsES2:
         if self.starting_dates is not None:
             # starting_files = []
             for my_date in self.starting_dates:
-                self.starting_files.append(input_dir+my_date+self.in_prod_ident)
+                #ES2 450 #+++++++ Check file exists before appending  +++++++++++++++
+                if functions.is_file_exists_in_path(input_dir+my_date+self.in_prod_ident):
+                    self.starting_files.append(input_dir+my_date+self.in_prod_ident)
         else:
             self.starting_files=input_dir+"*"+self.in_prod_ident
 
@@ -93,7 +95,9 @@ class SubProcessProdsES2:
         if self.starting_dates is not None:
             # starting_files = []
             for my_date in self.starting_dates:
-                self.starting_files.append(input_dir + my_date + self.in_prod_ident)
+                #ES2 450 #+++++++ Check file exists before appending  +++++++++++++++
+                if functions.is_file_exists_in_path(input_dir+my_date+self.in_prod_ident):
+                    self.starting_files.append(input_dir + my_date + self.in_prod_ident)
         else:
             self.starting_files = input_dir + "*" + self.in_prod_ident
 
