@@ -113,7 +113,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     # subprocess_stats.create_basic_stats_proclist('standard_deviation')
     subprocess_stats.do_standard_deviation()
     @active_if(activate_10dstats_comput, activate_10dstd_comput)
-    @follows(std_vgt_10davg)
+    # @follows(std_vgt_10davg)
     @collate(subprocess_stats.starting_files, formatter(subprocess_stats.formatter_in), add_inputs(subprocess_stats.ancillary_input), subprocess_stats.formatter_out)
     def vgt_ndvi_10dstddev(input_file, output_file):
         subprocess_std_stats.compute_product_std_deviation(input_file, output_file)
@@ -135,7 +135,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   10dperc
     # subprocess_prods.create_basic_anomaly_proclist('10dperc')
     subprocess_prods.do_percent_difference()
-    @follows(std_vgt_10davg)
+    # @follows(std_vgt_10davg)
     @active_if(activate_10danomalies_comput, activate_10dperc_comput)
     @transform(subprocess_prods.starting_files, formatter(subprocess_prods.formatter_in), add_inputs(subprocess_prods.ancillary_input), subprocess_prods.formatter_out)
     def std_vgt_10dperc(input_file, output_file):
@@ -250,7 +250,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #    Absolute Difference x month
     subprocess_prods.do_absolute_difference()
     @active_if(activate_monanomalies_comput, activate_1mondiff_comput)
-    @follows(vgt_1monavg)
+    # @follows(vgt_1monavg)
     @transform(subprocess_prods.starting_files_mon_prod, formatter(subprocess_prods.formatter_in), add_inputs(subprocess_prods.ancillary_input), subprocess_prods.formatter_out)
     def vgt_1mondiff(input_file, output_file):
         subprocess_std_prods.compute_absolute_diff(input_file, output_file)
@@ -258,7 +258,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   ---------------------------------------------------------------------
     #   1monperc
     subprocess_prods.do_percent_difference()
-    @follows(vgt_1monavg)
+    # @follows(vgt_1monavg)
     @active_if(activate_monanomalies_comput, activate_1monperc_comput)
     @transform(subprocess_prods.starting_files_mon_prod, formatter(subprocess_prods.formatter_in), add_inputs(subprocess_prods.ancillary_input), subprocess_prods.formatter_out)
     def vgt_1monperc(input_file, output_file):
@@ -270,7 +270,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     @active_if(activate_monanomalies_comput, activate_1monratio_comput)
     @transform(subprocess_prods.starting_files_mon_prod, formatter(subprocess_prods.formatter_in), add_inputs(subprocess_prods.ancillary_input),
                subprocess_prods.formatter_out)
-    @follows(vgt_1monavg)
+    # @follows(vgt_1monavg)
     def vgt_monthly_ratio(input_file, output_file):
         subprocess_std_prods.compute_product_ratio(input_file, output_file)
 
@@ -278,7 +278,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     #   ---------------------------------------------------------------------
     #   1monnp
     subprocess_prods.do_normalized_anomaly()
-    @follows(vgt_1monmax, vgt_1monmin)
+    # @follows(vgt_1monmax, vgt_1monmin)
     @active_if(activate_monanomalies_comput, activate_1monnp_comput)
     @transform(subprocess_prods.starting_files_mon_prod, formatter(subprocess_prods.formatter_in), add_inputs(subprocess_prods.ancillary_input_1, subprocess_prods.ancillary_input_2), subprocess_prods.formatter_out)
     def vgt_1monnp(input_file, output_file):
@@ -289,7 +289,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     subprocess_prods.do_standardized_prod()
     @active_if(activate_monanomalies_comput, activate_1monstandardized_comput)
-    @follows(vgt_1mondiff, vgt_1monstddev)
+    # @follows(vgt_1mondiff, vgt_1monstddev)
     @transform(subprocess_prods.starting_files_mondiff, formatter(subprocess_prods.formatter_in), add_inputs(subprocess_prods.ancillary_input), subprocess_prods.formatter_out)
     def vgt_prod_1monstdprod(input_file, output_file):
         subprocess_std_prods.compute_standardized_products(input_file, output_file)
