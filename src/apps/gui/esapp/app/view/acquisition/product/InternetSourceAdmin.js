@@ -113,23 +113,25 @@ Ext.define("esapp.view.acquisition.product.InternetSourceAdmin",{
             viewConfig: {
                 stripeRows: false,
                 enableTextSelection: true,
-                draggable:false,
+                draggable: false,
                 markDirty: false,
-                resizable:false,
+                resizable: false,
                 disableSelection: false,
-                trackOver:true
+                trackOver: true
             },
 
             bufferedRenderer: false,
             scrollable: 'y',    // vertical scrolling only
             collapsible: false,
-            enableColumnMove:false,
-            enableColumnResize:false,
+            enableColumnMove: false,
+            enableColumnResize: true,
             multiColumnSort: false,
             columnLines: false,
             rowLines: true,
             frame: false,
             border: false,
+
+            cls: 'grid-column-header-multiline',
 
             columns: [{
                 xtype: 'actioncolumn',
@@ -168,7 +170,7 @@ Ext.define("esapp.view.acquisition.product.InternetSourceAdmin",{
                 align: 'left',
                 menuDisabled: true,
                 sortable: true,
-                cellWrap:true
+                cellWrap: true
             }, {
                 dataIndex: 'descriptive_name',
                 header: esapp.Utils.getTranslation('name'), // 'Name'
@@ -177,16 +179,16 @@ Ext.define("esapp.view.acquisition.product.InternetSourceAdmin",{
                 align: 'left',
                 menuDisabled: true,
                 sortable: false,
-                cellWrap:true
+                cellWrap: true
             }, {
                 dataIndex: 'url',
                 header: esapp.Utils.getTranslation('url'), // 'URL'
-                width: 330,
+                width: 320,
                 minWidth: 200,
                 align: 'left',
                 menuDisabled: true,
                 sortable: false,
-                cellWrap:true
+                cellWrap: true
             }, {
                 dataIndex: 'type',
                 header: esapp.Utils.getTranslation('type'), // 'Type'
@@ -195,16 +197,16 @@ Ext.define("esapp.view.acquisition.product.InternetSourceAdmin",{
                 align: 'center',
                 menuDisabled: true,
                 sortable: true,
-                cellWrap:true
+                cellWrap: true
             }, {
                 dataIndex: 'update_datetime',
                 header: esapp.Utils.getTranslation('lastupdated'), // 'Last updated'
-                width: 110,
-                minWidth: 80,
+                width: 130,
+                minWidth: 120,
                 align: 'center',
                 menuDisabled: true,
                 sortable: false,
-                cellWrap:true
+                cellWrap: true
             },{
                xtype: 'actioncolumn',
                hidden: false,
@@ -215,16 +217,25 @@ Ext.define("esapp.view.acquisition.product.InternetSourceAdmin",{
                shrinkWrap: 0,
                items: [{
                    width:'35',
-                   disabled: false,
-                   getClass: function(v, meta, rec) {
+                   // disabled: false,
+                   isDisabled: function(view, rowIndex, colIndex, item, record){
+                        if (!record.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
+                            return false;
+                        }
+                        else {
+                            return true;
+                        }
+                   },
+                   getClass: function(cell, meta, rec) {
                        if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
                            return 'delete';
                        }
                        else {
+                           // cell.setDisabled(true);
                            return 'x-hide-display';
                        }
                    },
-                   getTip: function(v, meta, rec) {
+                   getTip: function(cell, meta, rec) {
                        if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
                            return esapp.Utils.getTranslation('deleteinternetsource');    // 'Delete Internet datasource',
                        }

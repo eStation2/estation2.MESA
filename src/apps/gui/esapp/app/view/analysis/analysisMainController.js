@@ -33,7 +33,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
 
         Ext.Ajax.request({
             method: 'POST',
-            url: '/analysis/workspacemapsgraphs',
+            url: 'analysis/workspacemapsgraphs',
             params: params,
             success: function(response, opts){
                 var result = Ext.JSON.decode(response.responseText);
@@ -54,7 +54,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                 var defaultworkspace = null;
                 Ext.Object.each(analysisWorkspaces, function(id, ws, thisObj) {
                     if (ws.workspaceid == 'defaultworkspace'){
-                        ws.setTitle(workspace.get('workspacename'));
+                        // ws.setTitle(workspace.get('workspacename'));
                         ws.setMaps(workspace.get('maps'));
                         ws.setGraphs(workspace.get('graphs'));
 

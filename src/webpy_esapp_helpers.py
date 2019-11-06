@@ -682,7 +682,7 @@ def deleteRequestJob(requestid):
         p5_requestfile = ''
         try:
             jobstatus = statusRequestJob(requestid)
-            if jobstatus['status'].lower() in ['finished']:  # 'finished', 'stopped', 'error', 'running'
+            if jobstatus['status'].lower() in ['finished', 'stopped', 'error']:  # 'finished', 'stopped', 'error', 'running'
                 success = True
                 message = 'Request deleted: ' + requestid
                 deleteJobDir(requestid)
@@ -710,7 +710,7 @@ def deleteRequestJob(requestid):
                 counter = 0
                 while stoppingjob and counter <= 3:
                     counter += 1
-                    time.sleep(5)
+                    time.sleep(8)
                     jobstatus = statusRequestJob(requestid)
                     if jobstatus['status'].lower() in ['stopped']:  # 'finished', 'stopped', 'error', 'running'
                         success = True
@@ -794,7 +794,14 @@ def createRequestJob(params):
             createnewrequest = True
 
         if createnewrequest:
-            request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
+            request = requests.create_request(productcode,
+                                              version,
+                                              mapsetcode=mapsetcode,
+                                              subproductcode=subproductcode,
+                                              dekad_frequency=int(params['dekad_frequency']),
+                                              daily_frequency=int(params['daily_frequency']),
+                                              high_frequency=int(params['high_frequency']))
+
             request_json = json.dumps(request,
                                       ensure_ascii=False,
                                       sort_keys=True,
@@ -1538,7 +1545,7 @@ def getUserWorkspaces(params):
 
 def getRefWorkspaces(params):
     workspaces_dict_all = []
-    refuser = 'jrc_ref'   # 'jrc_ref'
+    refuser = es_constants.es2globals['jrc_ref_user']  # 'jrc_ref'
 
     userworkspaces = querydb.get_user_workspaces(refuser)
     if hasattr(userworkspaces, "__len__") and userworkspaces.__len__() > 0:
@@ -1819,6 +1826,39 @@ def importWorkspaces(params):
         status = '{"success":true,"message":"Workspaces imported!"}'
     else:
         status = '{"success":false, "message":"An error occured while importing the workspaces!"}'
+
+    return status
+
+
+def importJRCRefWorkspaces():
+    try:
+        filename = 'jrc_ref_workspaces.json'
+
+        with open(es_constants.es2globals['base_dir'] + '/database/referenceWorkspaces/' + filename, 'r') as f:
+            workspaces_dict = json.load(f)
+
+        for workspace in workspaces_dict['workspaces']:
+            workspace['isNewWorkspace'] = 'true'
+            workspace['isrefworkspace'] = 'true'
+            workspace['pinned'] = 'false'
+            workspace['showindefault'] = 'false'
+            workspace['userid'] = es_constants.es2globals['jrc_ref_user']
+            workspace['workspaceid'] = None
+            for wsmap in workspace['maps']:
+                wsmap['userid'] = es_constants.es2globals['jrc_ref_user']
+            for wsgraph in workspace['graphs']:
+                wsgraph['userid'] = es_constants.es2globals['jrc_ref_user']
+
+            saveWorkspace(workspace)
+
+        success = True
+    except:
+        success = False
+
+    if success:
+        status = '{"success":true,"message":"JRC reference workspaces imported!"}'
+    else:
+        status = '{"success":false, "message":"An error occured while importing the JRC reference workspaces!"}'
 
     return status
 
@@ -4903,7 +4943,8 @@ def SaveLegend(params):
             'legend_name': params['title_in_legend'],
             'min_value': params['minvalue'],
             'max_value': params['maxvalue'],
-            'step_type': params['legend_type']
+            'step_type': params['legend_type'],
+            'defined_by': params['defined_by']
         }
         legendClasses = json.loads(params['legendClasses'])
 
@@ -5231,13 +5272,13 @@ def ProductNavigatorDataSets():
             prod_dict = functions.row2dict(row)
             productcode = prod_dict['productcode']
             version = prod_dict['version']
-            # print prod_dict
 
             p = Product(product_code=productcode, version=version)
 
             # does the product have mapsets AND subproducts?
             all_prod_mapsets = p.mapsets
             all_prod_subproducts = p.subproducts
+
             if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0:
                 prod_dict['productmapsets'] = []
                 for mapset in all_prod_mapsets:
@@ -5254,7 +5295,7 @@ def ProductNavigatorDataSets():
                             dataset_info = querydb.get_subproduct(productcode=productcode,
                                                                   version=version,
                                                                   subproductcode=subproductcode,
-                                                                  masked=True)
+                                                                  masked=True)   # -> TRUE means only NOT masked sprods
 
                             if dataset_info is not None:
                                 dataset_dict = functions.row2dict(dataset_info)
@@ -5267,7 +5308,9 @@ def ProductNavigatorDataSets():
                                 mapset_info['mapsetdatasets'].append(dataset_dict)
                         if mapset_info['mapsetdatasets'].__len__() > 0:
                             prod_dict['productmapsets'].append(mapset_info)
-                products_dict_all.append(prod_dict)
+
+                if prod_dict['productmapsets'].__len__() > 0:
+                    products_dict_all.append(prod_dict)
 
         prod_json = json.dumps(products_dict_all,
                                ensure_ascii=False,
@@ -5354,9 +5397,15 @@ def DataSets():
 
             p = Product(product_code=productcode, version=version)
             # print productcode
-            # does the product have mapsets AND subproducts?
+            # does the product have mapsets AND subproducts in the file system?
             all_prod_mapsets = p.mapsets
             all_prod_subproducts = p.subproducts
+            if all_prod_mapsets.__len__() == 0:
+                checkCreateSubproductDir(productcode, version)
+                p = Product(product_code=productcode, version=version)
+                all_prod_mapsets = p.mapsets
+                all_prod_subproducts = p.subproducts
+
             if all_prod_mapsets.__len__() > 0 and all_prod_subproducts.__len__() > 0:
                 prod_dict['productmapsets'] = []
                 for mapset in all_prod_mapsets:
@@ -6288,9 +6337,9 @@ def CreateIngestSubProduct(params):
                    'category_id': params['category_id'],
                    'product_type': 'Ingest',
                    'activated': 'f',
-                   'provider': params['provider'],
-                   'descriptive_name': params['descriptive_name'],
-                   'description': params['description'],
+                   'provider': params['provider'].replace("'", "''"),
+                   'descriptive_name': params['descriptive_name'].replace("'", "''"),
+                   'description': params['description'].replace("'", "''"),
                    'defined_by': params['defined_by'],
                    'frequency_id': params['frequency_id'],
                    'date_format': params['date_format'],
@@ -6327,9 +6376,9 @@ def UpdateIngestSubProduct(params):
                    'category_id': params['category_id'],
                    'product_type': 'Ingest',
                    'activated': 'f',
-                   'provider': params['provider'],
-                   'descriptive_name': params['descriptive_name'],
-                   'description': params['description'],
+                   'provider': params['provider'].replace("'", "''"),
+                   'descriptive_name': params['descriptive_name'].replace("'", "''"),
+                   'description': params['description'].replace("'", "''"),
                    'defined_by': params['defined_by'],
                    'frequency_id': params['frequency_id'],
                    'date_format': params['date_format'],

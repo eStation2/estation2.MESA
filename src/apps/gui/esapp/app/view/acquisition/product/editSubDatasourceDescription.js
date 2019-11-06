@@ -61,15 +61,16 @@ Ext.define("esapp.view.acquisition.product.editSubDatasourceDescription",{
             me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('newsubdatasourcedescr') + '</span>');
         }
 
-        me.buttons = [{
-            text: 'TEST',
-            // iconCls: 'fa fa-save fa-2x',
-            style: {color: 'lightblue'},
-            scale: 'medium',
-            disabled: false,
-            formBind: false,
-            handler: 'onTestClick'
-        },'->',{
+        me.buttons = [
+        //{     text: 'TEST',
+        //     // iconCls: 'fa fa-save fa-2x',
+        //     style: {color: 'lightblue'},
+        //     scale: 'medium',
+        //     disabled: false,
+        //     formBind: false,
+        //     handler: 'onTestClick'
+        // },
+            '->',{
             text: esapp.Utils.getTranslation('save'),    // 'Save',
             iconCls: 'fa fa-save fa-2x',
             style: { color: 'lightblue' },
@@ -101,6 +102,7 @@ Ext.define("esapp.view.acquisition.product.editSubDatasourceDescription",{
                 { preproc_type:'MSG_MPE', preproc_type_descr:'MSG MPE'},
                 { preproc_type:'MPE_UMARF', preproc_type_descr:'MPE UMARF'},
                 { preproc_type:'MODIS_HDF4_TILE', preproc_type_descr:'MODIS HDF4 TILE'},
+                { preproc_type:'MERGE_TILE', preproc_type_descr:'MERGE TILE'},
                 { preproc_type:'LSASAF_HDF5', preproc_type_descr:'LSASAF HDF5'},
                 { preproc_type:'PML_NETCDF', preproc_type_descr:'PML NETCDF'},
                 { preproc_type:'UNZIP', preproc_type_descr:'UNZIP'},
@@ -115,13 +117,17 @@ Ext.define("esapp.view.acquisition.product.editSubDatasourceDescription",{
                 { preproc_type:'NETCDF', preproc_type_descr:'NETCDF'},
                 { preproc_type:'JRC_WBD_GEE', preproc_type_descr:'JRC WBD GEE'},
                 { preproc_type:'ECMWF_MARS', preproc_type_descr:'ECMWF MARS'},
+                { preproc_type:'ENVI_2_GTIFF', preproc_type_descr:'ENVI TO GTIFF'},
                 { preproc_type:'CPC_BINARY', preproc_type_descr:'CPC BINARY'},
                 { preproc_type:'GSOD', preproc_type_descr:'GSOD'},
+                { preproc_type:'NETCDF_S3_WRR_ZIP', preproc_type_descr:'NETCDF S3 WRR ZIPPED'},
                 { preproc_type:'NETCDF_S3_WRR', preproc_type_descr:'NETCDF S3 WRR'},
                 { preproc_type:'NETCDF_GPT_SUBSET', preproc_type_descr:'NETCDF GPT SUBSET'},
                 { preproc_type:'NETCDF_S3_WST', preproc_type_descr:'NETCDF S3 WST'},
+                { preproc_type:'NETCDF_S3_WST_ZIP', preproc_type_descr:'NETCDF S3 WST ZIPPED'},
                 { preproc_type:'TARZIP', preproc_type_descr:'TARZIP'},
-                { preproc_type:'NETCDF_AVISO', preproc_type_descr:'NETCDF AVISO'}
+                { preproc_type:'NETCDF_AVISO', preproc_type_descr:'NETCDF AVISO'},
+                { preproc_type:'SNAP_SUBSET_NC', preproc_type_descr:'SNAP SUBSET NC'}
             ]
         });
 

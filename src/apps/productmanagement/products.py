@@ -188,10 +188,16 @@ class Product(object):
                         missing_dates.extend(dataset.get_interval_dates(dataset.get_first_date(),
                                                                         first_date, last_included=False))
                 if missing['to_end']:
-                    if last_date < dataset.get_last_date():
-                        missing_dates.extend(dataset.get_interval_dates(last_date,
-                            dataset.get_last_date(), first_included=False))
+                    if isinstance(last_date, datetime.datetime):
+                        if last_date.date() < dataset.get_last_date():
+                            missing_dates.extend(dataset.get_interval_dates(last_date,
+                                dataset.get_last_date(), first_included=False))
+                    else:
+                        if last_date < dataset.get_last_date():
+                            missing_dates.extend(dataset.get_interval_dates(last_date,
+                                dataset.get_last_date(), first_included=False))
 
+            # print(missing_dates)
             if existing_only:
                 dates_to_add = sorted(set(dates).intersection(set(missing_dates)))
             else:
@@ -241,7 +247,6 @@ class Product(object):
         missing_filenames = dataset.get_filenames()
 
         return missing_filenames
-
 
     @staticmethod
     def create_tar(missing_info, filetar=None, tgz=True):
@@ -400,7 +405,6 @@ class Product(object):
 
         return [filetar, result]
 
-
     @staticmethod
     def import_tar(filetar, tgz=False):
 
@@ -501,6 +505,7 @@ class Product(object):
 
         return list_ingested_and_derived_subproducts
 
+
 ######################################################################################
 #
 #   Purpose: reproject a file to a different mapset
@@ -510,7 +515,6 @@ class Product(object):
 #           target_mapset: the target mapset of reprojection
 #   Output: output_file
 #
-
 def reproject_output(input_file, native_mapset_id, target_mapset_id, output_dir=None, version=None, logger=None):
 
     # Check logger

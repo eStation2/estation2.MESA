@@ -62,6 +62,7 @@ Ext.define("esapp.view.analysis.addEditLegend",{
 
     initComponent: function () {
         var me = this;
+        var user = esapp.getUser();
         me.changedsaved = false;
         me.legend_type = me.params.legendrecord.get('legend_type');
 
@@ -122,6 +123,7 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                     me.lookupReference('title_in_legend').setValue(me.params.legendrecord.get('legendname'));
                     me.lookupReference('legend_minvalue').setValue(me.params.legendrecord.get('minvalue'));
                     me.lookupReference('legend_maxvalue').setValue(me.params.legendrecord.get('maxvalue'));
+                    me.lookupReference('defined_by_field').setValue(me.params.legendrecord.get('defined_by'));
                 }
                 me.setY(me.getY()-75);
             },
@@ -181,7 +183,7 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                             labelAlign: 'top',
                             width: 350,
                             allowBlank: false,
-                            disabled: me.params.view ? true : false
+                            editable: me.params.view ? false : true
                         }, {
                             // id: 'title_in_legend',
                             reference: 'title_in_legend',
@@ -199,7 +201,7 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                             enableLists: false,
                             enableSourceEdit: false,
                             enableAlignments: false,
-                            disabled: me.params.view ? true : false,
+                            readOnly: me.params.view ? true : false,
                             listeners: {
                                 change: function () {
                                     // var legendClassesStore = me.getViewModel().getStore('legendClassesStore');
@@ -218,7 +220,9 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                             fieldLabel: esapp.Utils.getTranslation('minvalue'),
                             width: 80,
                             allowBlank: false,
-                            disabled: me.params.view ? true : false
+                            editable: me.params.view ? false : true,
+                            spinDownEnabled: me.params.view ? false : true,
+                            spinUpEnabled: me.params.view ? false : true
                         }, {
                             // id: 'legend_maxvalue',
                             reference: 'legend_maxvalue',
@@ -228,7 +232,25 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                             fieldLabel: esapp.Utils.getTranslation('maxvalue'),
                             width: 80,
                             allowBlank: false,
-                            disabled: me.params.view ? true : false
+                            editable: me.params.view ? false : true,
+                            spinDownEnabled: me.params.view ? false : true,
+                            spinUpEnabled: me.params.view ? false : true
+                        },{
+                            reference: 'defined_by_field',
+                            name: 'defined_by_field',
+                            xtype: 'combobox',
+                            fieldLabel: esapp.Utils.getTranslation('definedby'),
+                            width: 100,
+                            allowBlank: false,
+                            store: {
+                                type: 'definedby'
+                            },
+                            valueField: 'defined_by',
+                            displayField: 'defined_by_descr',
+                            typeAhead: false,
+                            queryMode: 'local',
+                            emptyText: esapp.Utils.getTranslation('select'),    // 'Select...'
+                            hidden: (esapp.Utils.objectExists(user) && user.userlevel == 1) ? false : true
                         }]
                     }]
                 }]
@@ -345,12 +367,12 @@ Ext.define("esapp.view.analysis.addEditLegend",{
             collapsible: false,
             layout: 'column',
             defaults: {
-                margin:'5 20 5 5'
+                margin:'5 15 5 5'
             },
             items: [{
                 xtype: 'grid',
                 reference: 'legendclassesGrid',
-                width: 600,
+                width: me.params.view ? 570 : 630,
                 bind: '{legendClassesStore}',
                 autoScroll: false,
                 scrollable: true,
@@ -442,10 +464,10 @@ Ext.define("esapp.view.analysis.addEditLegend",{
 
                 tbar: {
                     padding: 4,
-                    hidden: me.params.view ? true : false,
+                    disabled: me.params.view ? true : false,
                     defaults: {
-                        scale: 'medium',
-                        hidden: me.params.view ? true : false
+                        scale: 'medium'
+                        // ,hidden: me.params.view ? true : false
                     },
                     items: [{
                         xtype: 'button',
@@ -474,15 +496,14 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                                 btn.generateLogValuesPanel = me.getController().generateLogValuesPanel(btn);
                             }
                         }
-                    }, '->'
-                        , {
-                            xtype: 'button',
-                            text: esapp.Utils.getTranslation('legend_delete_all_classes'),    // 'Delete all classes',
-                            name: 'legend_delete_all_classes',
-                            iconCls: 'fa fa-trash fa-2x',
-                            style: {color: 'red'},
-                            handler: 'deleteAllClasses'
-                        }]
+                    }, '->', {
+                        xtype: 'button',
+                        tooltip: esapp.Utils.getTranslation('legend_delete_all_classes'),    // 'Delete all classes',
+                        name: 'legend_delete_all_classes',
+                        iconCls: 'fa fa-trash fa-2x',
+                        style: {color: 'red'},
+                        handler: 'deleteAllClasses'
+                    }]
                 },
 
                 columns: {
@@ -565,7 +586,7 @@ Ext.define("esapp.view.analysis.addEditLegend",{
                     }, {
                         header: esapp.Utils.getTranslation('legendclass_group_label'), // 'Group label',
                         dataIndex: 'group_label',
-                        width: 95,
+                        width: 110,
                         editor: 'textfield'
                     }, {
                         xtype: 'actioncolumn',

@@ -46,7 +46,8 @@ Ext.define('esapp.view.acquisition.Acquisition',{
         resizable:false,
         trackOver:true,
         scrollable: true,
-        focusable: false
+        focusable: false,
+        loadMask: false
         //focusOnToFront: false,
         //preserveScrollOnRefresh: false,
         //focusRow: Ext.emptyFn
@@ -220,7 +221,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                         //me.getColumns()[0].show();  // Edit product action column
                         me.getColumns()[1].show();    // Activate Product column
                         me.getColumns()[2].setWidth(500);   // GET
-                        me.getColumns()[2].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 265px; left: 0px; tabindex="-1">' +
+                        me.getColumns()[2].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 265px; left: 0px;" tabindex="-1">' +
                         '           <div data-ref="titleEl" class="x-column-header-inner">' +
                         '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('type') + '</span>' +
                         '           </div>' +
@@ -257,7 +258,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                         '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproduct') + '</span>' +
                         '           </div>' +
                         '       </div>' +
-                        '       <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 235px; left: 195px; tabindex="-1">' +
+                        '       <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 235px; right: auto; left: 195px; margin: 0px; top: 0px;" tabindex="-1">' +
                         '           <div data-ref="titleEl" class="x-column-header-inner">' +
                         '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('mapset') + '</span>' +
                         '           </div>' +
@@ -289,7 +290,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                         me.getColumns()[1].hide();
 
                         me.getColumns()[2].setWidth(360);   // GET
-                        me.getColumns()[2].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 230px; left: 0px; tabindex="-1">' +
+                        me.getColumns()[2].setText(' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 230px; left: 0px;" tabindex="-1">' +
                                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                                 '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('type') + '</span>' +
                                 '           </div>' +
@@ -311,7 +312,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                                 '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproduct') + '</span>' +
                                 '           </div>' +
                                 '       </div>' +
-                                '       <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; left: 160px; tabindex="-1">' +
+                                '       <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; right: auto; left: 160px; margin: 0px; top: 0px;" tabindex="-1">' +
                                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                                 '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('mapset') + '</span>' +
                                 '           </div>' +
@@ -506,9 +507,10 @@ Ext.define('esapp.view.acquisition.Acquisition',{
         me.defaults = {
             menuDisabled: true,
             sortable: false,
-            groupable:true,
+            groupable:false,
             draggable:false,
-            hideable: true
+            hideable: false,
+            stopSelection: true
         };
 
         me.columns = [
@@ -518,9 +520,10 @@ Ext.define('esapp.view.acquisition.Acquisition',{
             defaults: {
                 menuDisabled: true,
                 sortable: false,
-                groupable:true,
+                groupable:false,
                 draggable:false,
-                hideable: true
+                hideable: false,
+                stopSelection: true
             },
             columns: [{
             //    xtype: 'actioncolumn',
@@ -612,16 +615,17 @@ Ext.define('esapp.view.acquisition.Acquisition',{
             defaults: {
                 menuDisabled: true,
                 sortable: false,
-                groupable:true,
+                groupable:false,
                 draggable:false,
-                hideable: true
+                hideable: false,
+                stopSelection: true
             },
             columns: [{
                 xtype: 'widgetcolumn',
                 width: Ext.getCmp('lockunlock').pressed ? 500 : 360,
                 variableRowHeight:false,
 
-                header: ' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 230px; left: 0px; tabindex="-1">' +
+                header: ' <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable x-column-header-first" style="border-top: 0px; width: 230px; left: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('type') + '</span>' +
                 '           </div>' +
@@ -671,7 +675,8 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                 sortable: false,
                 groupable:false,
                 draggable:false,
-                hideable: true
+                hideable: false,
+                stopSelection: true
             }
             ,columns: [{
                 xtype: 'widgetcolumn',
@@ -684,7 +689,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
                 '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproduct') + '</span>' +
                 '           </div>' +
                 '       </div>' +
-                '       <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; left: 160px; tabindex="-1">' +
+                '       <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; left: 160px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('mapset') + '</span>' +
                 '           </div>' +
@@ -736,7 +741,7 @@ Ext.define('esapp.view.acquisition.Acquisition',{
             width: 70,
             menuDisabled: true,
             align:'center',
-            stopSelection: false,
+            stopSelection: true,
             items: [{
                 iconCls:'log-icon',
                 width:32,

@@ -3,7 +3,17 @@ Ext.define('esapp.view.analysis.legendAdminController', {
     alias: 'controller.analysis-legendadmin'
 
     ,onClose: function(win, ev) {
-        // Ext.getCmp('analysismain').lookupReference('analysismain_legendsbtn').enable();
+        var me = this.getView();
+        if (me.assign){
+            var legendsstore  = Ext.data.StoreManager.lookup('LegendsStore');
+            var filters = legendsstore.getFilters();
+
+            var selecteddataset = me.productNavigatorObj.lookupReference('mapset-dataset-grid').getSelectionModel().getSelected().items[0];
+            me.productNavigatorObj.getController().mapsetDataSetGridRowClick(this, selecteddataset);
+
+            filters.removeAll();
+        }
+       // Ext.getCmp('analysismain').lookupReference('analysismain_legendsbtn').enable();
     }
 
     ,loadLegendsStore: function(win, ev) {
@@ -114,6 +124,7 @@ Ext.define('esapp.view.analysis.legendAdminController', {
     }
 
     ,newLegend: function(){
+        var user = esapp.getUser();
         // var me = this.getView();
         // var legendsgridstore  = Ext.data.StoreManager.lookup('LegendsStore');
 
@@ -123,6 +134,7 @@ Ext.define('esapp.view.analysis.legendAdminController', {
             legendname: null,
             minvalue: null,
             maxvalue: null,
+            defined_by: (esapp.Utils.objectExists(user) && user.userlevel == 1) ? 'JRC' : 'USER',
             legend_descriptive_name: null
         };
         var newrecord = new esapp.model.Legend(defaultData);

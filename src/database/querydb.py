@@ -2921,7 +2921,7 @@ def get_ingestions():
                 "        i.enabled, " + \
                 "        m.descriptive_name as mapsetname " + \
                 " FROM products.product p " + \
-                "      JOIN (SELECT * FROM products.ingestion i WHERE i.enabled) i ON  " + \
+                "      LEFT OUTER JOIN (SELECT * FROM products.ingestion i WHERE i.enabled) i ON  " + \
                 "           (p.productcode = i.productcode AND  " + \
                 "            p.subproductcode = i.subproductcode AND " + \
                 "            p.version = i.version) " + \
@@ -3171,16 +3171,22 @@ def get_products(activated=None, masked=None):
 
         if masked is None:
             if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
-                where = and_(pl.c.product_type == 'Native', pl.c.activated == 't', pl.c.defined_by != '')   # 'JRC-Test'
+                where = and_(pl.c.product_type == 'Native', pl.c.activated == 't')   # , pl.c.defined_by != ''     'JRC-Test'
             elif activated is False or activated in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
-                where = and_(pl.c.product_type == 'Native', pl.c.activated == 'f', pl.c.defined_by != '')   # 'JRC-Test'
+                where = and_(pl.c.product_type == 'Native', pl.c.activated == 'f')   # , pl.c.defined_by != ''   'JRC-Test'
             else:
-                where = and_(pl.c.product_type == 'Native', pl.c.defined_by != '')  # 'JRC-Test'
+                where = and_(pl.c.product_type == 'Native')  # , pl.c.defined_by != ''    'JRC-Test'
         else:
             if not masked:
-                where = and_(pl.c.product_type == 'Native', pl.c.masked == 'f')
+                if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+                    where = and_(pl.c.product_type == 'Native', pl.c.activated == 't', pl.c.masked == 'f')
+                else:
+                    where = and_(pl.c.product_type == 'Native', pl.c.activated == 'f', pl.c.masked == 'f')
             else:
-                where = and_(pl.c.product_type == 'Native', pl.c.masked == 't')
+                if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+                    where = and_(pl.c.product_type == 'Native', pl.c.activated == 't', pl.c.masked == 't')
+                else:
+                    where = and_(pl.c.product_type == 'Native', pl.c.activated == 'f', pl.c.masked == 't')
 
         productslist = pl.filter(where).order_by(asc(pl.c.order_index), asc(pl.c.productcode)).all()
 
@@ -4406,12 +4412,19 @@ def get_active_subdatasource_descriptions():
 def get_product_active_mapsets(productcode='', version='undefined'):
     global db
     try:
+        # "   AND activated = TRUE " \
 
         query = " SELECT DISTINCT mapsetcode FROM products.ingestion " \
                 " WHERE productcode = '" + productcode + "'" \
                 "   AND version = '" + version + "'" \
-                "   AND activated = TRUE " \
-                "   AND enabled = TRUE;"
+                "   AND enabled = TRUE " \
+                 " UNION " \
+                 " SELECT DISTINCT mapsetcode " \
+                 " FROM products.process_product " \
+                 " WHERE productcode = '" + productcode + "'" \
+                 " AND version = '" + version + "'" \
+                 " AND activated = TRUE;"
+
         productmapsets = db.execute(query)
         productmapsets = productmapsets.fetchall()
 

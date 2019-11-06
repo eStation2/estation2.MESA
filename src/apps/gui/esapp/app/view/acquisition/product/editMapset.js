@@ -530,7 +530,8 @@ Ext.define("esapp.view.acquisition.product.editMapset",{
                     width: 580,
                     labelWidth: labelwidth,
                     labelAlign: 'left',
-                    disabled: me.params.view ? true : false
+                    // disabled: me.params.view ? true : false
+                    editable: me.params.view ? false : true
                 },
                 items: [{
                     xtype: 'container',
@@ -604,7 +605,8 @@ Ext.define("esapp.view.acquisition.product.editMapset",{
                     enableFormat: true,
                     enableLinks: false,
                     enableLists: false,
-                    enableSourceEdit: true
+                    enableSourceEdit: true,
+                    readOnly: me.params.view ? true : false
                 },{
                     xtype: 'combobox',
                     fieldLabel: esapp.Utils.getTranslation('projection'),
@@ -613,6 +615,7 @@ Ext.define("esapp.view.acquisition.product.editMapset",{
                     width: 200 + 100,
                     // margin: '0 0 5 80',
                     allowBlank: false,
+                    disabled: me.params.view ? true : false,
                     bind: '{theMapset.proj_code}',
                     store: {
                         type: 'projections'
@@ -659,6 +662,7 @@ Ext.define("esapp.view.acquisition.product.editMapset",{
                             width: 190,
                             padding: '0 10 0 0',
                             allowBlank: false,
+                            disabled: me.params.view ? true : false,
                             bind: '{theMapset.resolutioncode}',
                             store: {
                                 type: 'resolutions'
@@ -791,7 +795,8 @@ Ext.define("esapp.view.acquisition.product.editMapset",{
                         },
                         padding: '0 5 0 0',
                         defaults: {
-                            disabled: me.params.view ? true : false,
+                            // disabled: me.params.view ? true : false,
+                            editable: me.params.view ? false : true,
                             labelWidth: labelwidth
                         },
 
@@ -811,6 +816,7 @@ Ext.define("esapp.view.acquisition.product.editMapset",{
                             reference: 'predefinedbbox',
                             inputValue: '0',
                             width: 200,
+                            disabled: me.params.view ? true : false,
                             bind: '{theMapset.predefined}'
                         }, {
                             xtype: 'numberfield',

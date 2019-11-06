@@ -36,6 +36,7 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
             title_in_legend = me.lookupReference('title_in_legend'),
             legendminvalue = me.lookupReference('legend_minvalue'),
             legendmaxvalue = me.lookupReference('legend_maxvalue'),
+            defined_by = me.lookupReference('defined_by_field'),
             legendClassesStore = me.getViewModel().getStore('legendClassesStore');
 
         if (!legenddescriptivename.validate() || !title_in_legend.validate() || !legendminvalue.validate() || !legendmaxvalue.validate()) {
@@ -59,6 +60,7 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
                                legendid: legendid,
                                minvalue: legendminvalue.getValue(),
                                maxvalue: legendmaxvalue.getValue(),
+                               defined_by: defined_by.getValue(),
                                legend_type: me.legend_type,
                                legendClasses:esapp.Utils.makeGridJSON(legendClassesStore)
                            },

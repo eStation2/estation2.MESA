@@ -29,13 +29,14 @@ Ext.define("esapp.view.analysis.legendAdmin",{
     closable: true,
     closeAction: 'destroy', // 'destroy',
     maximizable: false,
-    resizable: true,
+    resizable: false,
     //resizeHandles: 'n,s',
     autoScroll: true,
-    height: Ext.getBody().getViewSize().height < 830 ? Ext.getBody().getViewSize().height-130 : 830,  // 600,
+    height: Ext.getBody().getViewSize().height < 730 ? Ext.getBody().getViewSize().height-130 : 730,  // 600,
     minHeight: 500,
     maxHeight: 830,
-    width: 935,
+    width: 860,
+    // autoWidth: true,
 
     border:false,
     frame: false,
@@ -49,14 +50,83 @@ Ext.define("esapp.view.analysis.legendAdmin",{
         close: 'onClose'
         // ,show: 'onShow'
     },
-    // session:true,
+    config: {
+        assign: false,
+        productname: null,
+        productcode: null,
+        productversion: null,
+        subproductcode: null,
+        productNavigatorObj: null
+    },
 
     initComponent: function () {
         var me = this;
         var user = esapp.getUser();
+        var selMode = 'SINGLE'
 
-        me.title = '<div class="panel-title-style-16">' + esapp.Utils.getTranslation('legendsadministration') + '</div>';
-        me.height = Ext.getBody().getViewSize().height < 830 ? Ext.getBody().getViewSize().height-130 : 830;  // 600,
+        me.width = (esapp.Utils.objectExists(user) && user.userlevel == 1) ? 860+90 : 860
+
+        me.height = Ext.getBody().getViewSize().height < 730 ? Ext.getBody().getViewSize().height-130 : 730;  // 600,
+
+        if (me.assign){
+            me.title = '<div class="panel-title-style-16">' + esapp.Utils.getTranslation('assign_legends_to') + ': ' + me.productname + '<b class="smalltext"> - ' + me.productcode + ' - '  + me.productversion + ' - '  + me.subproductcode + '</b>' + '</div>'  // 'Assign legends to <productname>'
+            selMode = 'MULTI'
+
+            me.bbar = [{
+                xtype: 'box',
+                html: '<b style="color:orangered">' + esapp.Utils.getTranslation('hold_clrl_multiple_select') + '</b>'   // 'Hold the [Ctrl] key for multiple selections!'
+            },
+            '->',{
+                reference: 'assignLegendsBtn',
+                text: esapp.Utils.getTranslation('assign_selected_legends'), // 'Assign selected legends'
+                iconCls:'fa fa-plus-circle fa-1x',
+                style: {color:'green'},
+                handler: function(){
+                    var selrec = me.lookupReference('legendsGrid').getSelectionModel().getSelected();
+                    var selected_legendids = [];
+                    for ( var i=0, len=selrec.items.length; i<len; ++i ){
+                      selected_legendids.push(selrec.items[i].data.legendid);
+                    }
+
+                    Ext.Ajax.request({
+                       url:'legends/assignlegends',
+                       params:{
+                           productcode: me.productcode,
+                           productversion: me.productversion,
+                           subproductcode: me.subproductcode,
+                           legendids:Ext.util.JSON.encode(selected_legendids)
+                       },
+                       method: 'POST',
+                       waitMsg: esapp.Utils.getTranslation('assigning_legends'), // 'Assigning legends...',
+                       scope:this,
+                       success: function(result, request) {
+                           // The success handler is called if the XHR request actually
+                           // made it to the server and a response of some kind occurs.
+                           var returnData = Ext.util.JSON.decode(result.responseText);
+                           if (returnData.success){
+                               // var selecteddataset = me.lookupReference('mapset-dataset-grid').getSelectionModel().getSelected().items[0];
+                               // me.getController().mapsetDataSetGridRowClick(this, selecteddataset);
+
+                               // filters.remove(excludeProductLegends);
+                               Ext.toast({html: esapp.Utils.getTranslation('legends_assiged'), title: esapp.Utils.getTranslation('legends_assiged'), width: 200, align: 't'});
+                               me.close();
+                           } else if(!returnData.success){
+                               esapp.Utils.showError(returnData.message || result.responseText);
+                           }
+                       }, // eo function onSuccess
+                       failure: function(result, request) {
+                           // The failure handler is called if there's some sort of network error,
+                           // like you've unplugged your ethernet cable, the server is down, etc.
+                           var returnData = Ext.util.JSON.decode(result.responseText);
+                           esapp.Utils.showError(returnData.message || result.responseText);
+                       } // eo function onFailure
+                    });
+                }
+            }];
+        }
+        else {
+            me.title = '<div class="panel-title-style-16">' + esapp.Utils.getTranslation('legendsadministration') + '</div>';
+        }
 
         me.tools = [
         {
@@ -130,10 +200,10 @@ Ext.define("esapp.view.analysis.legendAdmin",{
 
             selModel : {
                 allowDeselect : false,
-                mode:'SINGLE'
-                ,listeners: {
-                    doubleclick: 'editLegend'
-                }
+                mode: selMode
+                // ,listeners: {
+                //     doubleclick: 'editLegend'
+                // }
             },
 
             //cls: 'grid-color-yellow',
@@ -149,14 +219,14 @@ Ext.define("esapp.view.analysis.legendAdmin",{
             border: false,
             bodyBorder: false,
 
-            listeners: {
-                // bodyscroll: function(scrollLeft, scrollTop){
-                //      console.log('scrolling grid ... ');
-                // },
-                // scope: 'controller',
-                // afterrender: 'loadLegendsStore',
-                rowdblclick : 'editLegend'
-            },
+            // listeners: {
+            //     // bodyscroll: function(scrollLeft, scrollTop){
+            //     //      console.log('scrolling grid ... ');
+            //     // },
+            //     // scope: 'controller',
+            //     // afterrender: 'loadLegendsStore',
+            //     rowdblclick : 'editLegend'
+            // },
 
             columns: [{
                 xtype: 'actioncolumn',
@@ -167,7 +237,7 @@ Ext.define("esapp.view.analysis.legendAdmin",{
                 draggable:false,
                 groupable:false,
                 hideable: false,
-                width: 50,
+                width: 40,
                 align: 'center',
                 stopSelection: false,
 
@@ -190,7 +260,7 @@ Ext.define("esapp.view.analysis.legendAdmin",{
                 }]
             }, {
                 text: esapp.Utils.getTranslation('legend_descriptive_name'),  // 'Sub menu',
-                width: 300,
+                width: 270,
                 dataIndex: 'legend_descriptive_name',
                 cellWrap:true,
                 menuDisabled: true,
@@ -201,7 +271,7 @@ Ext.define("esapp.view.analysis.legendAdmin",{
                 hideable: false
             }, {
                 text: esapp.Utils.getTranslation('colourscheme'),  // 'Colour Scheme',
-                width: 300,
+                width: 270,
                 dataIndex: 'colourscheme',
                 cellWrap:true,
                 menuDisabled: true,
@@ -210,20 +280,9 @@ Ext.define("esapp.view.analysis.legendAdmin",{
                 draggable:false,
                 groupable:false,
                 hideable: false
-            // }, {
-            //     text: esapp.Utils.getTranslation('legendname'),  // 'Legend name',
-            //     width: 200,
-            //     dataIndex: 'legendname',
-            //     cellWrap:true,
-            //     menuDisabled: true,
-            //     sortable: true,
-            //     variableRowHeight : true,
-            //     draggable:false,
-            //     groupable:false,
-            //     hideable: false
             }, {
                 text: esapp.Utils.getTranslation('minvalue'),  // 'Min value',
-                width: 90,
+                width: 105,
                 dataIndex: 'minvalue',
                 menuDisabled: true,
                 sortable: true,
@@ -233,7 +292,7 @@ Ext.define("esapp.view.analysis.legendAdmin",{
                 hideable: false
             }, {
                 text: esapp.Utils.getTranslation('maxvalue'),  // 'Max value',
-                width: 90,
+                width: 105,
                 dataIndex: 'maxvalue',
                 menuDisabled: true,
                 sortable: true,
@@ -241,6 +300,17 @@ Ext.define("esapp.view.analysis.legendAdmin",{
                 draggable: false,
                 groupable: false,
                 hideable: false
+            }, {
+                text: esapp.Utils.getTranslation('definedby'),  // 'Defined by',
+                width: 90,
+                dataIndex: 'defined_by',
+                cellWrap:true,
+                menuDisabled: true,
+                sortable: true,
+                variableRowHeight : true,
+                draggable:false,
+                groupable:false,
+                hidden: (esapp.Utils.objectExists(user) && user.userlevel == 1) ? false : true
             },{
                 xtype: 'actioncolumn',
                 // header: esapp.Utils.getTranslation('delete'),   // 'Actions',
@@ -250,7 +320,7 @@ Ext.define("esapp.view.analysis.legendAdmin",{
                 draggable:false,
                 groupable:false,
                 hideable: false,
-                width: 75,
+                width: 40,
                 align: 'center',
                 stopSelection: false,
 

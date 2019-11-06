@@ -187,16 +187,25 @@ Ext.define("esapp.view.acquisition.product.EumetcastSourceAdmin",{
                shrinkWrap: 0,
                items: [{
                    width:'35',
-                   disabled: false,
-                   getClass: function(v, meta, rec) {
+                   // disabled: false,
+                   isDisabled: function(view, rowIndex, colIndex, item, record){
+                        if (!record.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
+                            return false;
+                        }
+                        else {
+                            return true;
+                        }
+                   },
+                   getClass: function(cell, meta, rec) {
                        if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
                            return 'delete';
                        }
                        else {
+                           // cell.setDisabled(true);
                            return 'x-hide-display';
                        }
                    },
-                   getTip: function(v, meta, rec) {
+                   getTip: function(cell, meta, rec) {
                        if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
                            return esapp.Utils.getTranslation('deleteeumetcastsource');    // 'Delete Eumetcast datasource',
                        }

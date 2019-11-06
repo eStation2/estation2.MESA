@@ -64,6 +64,7 @@ Ext.define("esapp.view.acquisition.Ingestion", {
             forceFit: true,
             preserveScrollOnRefresh: false,
             focusable: false,
+            loadMask: false,
             getRowClass: function(record) {
                 return 'wordwrap';
             }
@@ -150,54 +151,62 @@ Ext.define("esapp.view.acquisition.Ingestion", {
                                 completeness = mapsetdatasetrecord.get('completeness') || mapsetdatasetrecord.getCompleteness(); // mapsetdatasetrecord.getAssociatedData().completeness;
                             // completeness = mapsetdatasetrecord.get('completeness');
 
-                            var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
-                            Ext.each(completenessTooltips, function(item) {
-                               // item.disable();
-                                if (item != tip){
-                                    item.hide();
+                            if (mapsetdatasetrecord.get('mapsetcode')!='') {
+
+                                var completenessTooltips = Ext.ComponentQuery.query('tooltip{id.search("_completness_tooltip") != -1}');
+                                Ext.each(completenessTooltips, function(item) {
+                                   // item.disable();
+                                    if (item != tip){
+                                        item.hide();
+                                    }
+                                });
+
+                                datasetForTipText = '<b>' + esapp.Utils.getTranslation('dataset_intervals_for') + ':</br>' +
+                                    mapsetdatasetrecord.get('productcode') + ' - ' +
+                                    mapsetdatasetrecord.get('version') + ' - ' +
+                                    (mapsetdatasetrecord.get('mapset_descriptive_name') || mapsetdatasetrecord.get('mapsetname')) + ' - ' +
+                                    mapsetdatasetrecord.get('subproductcode') + '</b></br></br>';
+
+                                tooltipintervals = datasetForTipText;
+                                if (mapsetdatasetrecord.get('frequency_id') == 'singlefile' && completeness.totfiles == 1 && completeness.missingfiles == 0) {
+                                    datasetinterval = '<span style="color:#81AF34">' + esapp.Utils.getTranslation('singlefile') + '</span>';
+                                    tooltipintervals += datasetinterval;
                                 }
-                            });
+                                else if (completeness.totfiles < 2 && completeness.missingfiles < 2) {
+                                    datasetinterval = '<span style="color:#808080">' + esapp.Utils.getTranslation('notanydata') + '</span>';
+                                    tooltipintervals += datasetinterval;
+                                }
+                                else {
+                                    completeness.intervals().getData().items.forEach(function (interval) {
+                                        // console.info(interval);
+                                        var color, intervaltype = '';
+                                        if (interval.get('intervaltype') == 'present') {
+                                            color = '#81AF34'; // green
+                                            intervaltype = esapp.Utils.getTranslation('present');
+                                        }
+                                        if (interval.get('intervaltype') == 'missing') {
+                                            color = '#FF0000'; // red
+                                            intervaltype = esapp.Utils.getTranslation('missing');
+                                        }
+                                        if (interval.get('intervaltype') == 'permanent-missing') {
+                                            color = '#808080'; // gray
+                                            intervaltype = esapp.Utils.getTranslation('permanent-missing');
+                                        }
+                                        datasetinterval = '<span style="color:' + color + '">' + esapp.Utils.getTranslation('from') + ' ' + interval.get('fromdate') + ' ' + esapp.Utils.getTranslation('to') + ' ' + interval.get('todate') + ' - ' + intervaltype + '</span></br>';
+                                        tooltipintervals += datasetinterval;
+                                    });
+                                }
 
-                            datasetForTipText = '<b>' + esapp.Utils.getTranslation('dataset_intervals_for') + ':</br>' +
-                                mapsetdatasetrecord.get('productcode') + ' - ' +
-                                mapsetdatasetrecord.get('version') + ' - ' +
-                                (mapsetdatasetrecord.get('mapset_descriptive_name') || mapsetdatasetrecord.get('mapsetname')) + ' - ' +
-                                mapsetdatasetrecord.get('subproductcode') + '</b></br></br>';
+                                tip.update(tooltipintervals);
+                                // tip.on('show', function(){
+                                //     Ext.defer(tip.hide, 10000, tip);
+                                // }, tip, {single: true});
 
-                            tooltipintervals = datasetForTipText;
-                            if (mapsetdatasetrecord.get('frequency_id') == 'singlefile' && completeness.totfiles == 1 && completeness.missingfiles == 0) {
-                                datasetinterval = '<span style="color:#81AF34">' + esapp.Utils.getTranslation('singlefile') + '</span>';
-                                tooltipintervals += datasetinterval;
-                            }
-                            else if (completeness.totfiles < 2 && completeness.missingfiles < 2) {
-                                datasetinterval = '<span style="color:#808080">' + esapp.Utils.getTranslation('notanydata') + '</span>';
-                                tooltipintervals += datasetinterval;
                             }
                             else {
-                                completeness.intervals().getData().items.forEach(function (interval) {
-                                    // console.info(interval);
-                                    var color, intervaltype = '';
-                                    if (interval.get('intervaltype') == 'present') {
-                                        color = '#81AF34'; // green
-                                        intervaltype = esapp.Utils.getTranslation('present');
-                                    }
-                                    if (interval.get('intervaltype') == 'missing') {
-                                        color = '#FF0000'; // red
-                                        intervaltype = esapp.Utils.getTranslation('missing');
-                                    }
-                                    if (interval.get('intervaltype') == 'permanent-missing') {
-                                        color = '#808080'; // gray
-                                        intervaltype = esapp.Utils.getTranslation('permanent-missing');
-                                    }
-                                    datasetinterval = '<span style="color:' + color + '">' + esapp.Utils.getTranslation('from') + ' ' + interval.get('fromdate') + ' ' + esapp.Utils.getTranslation('to') + ' ' + interval.get('todate') + ' - ' + intervaltype + '</span></br>';
-                                    tooltipintervals += datasetinterval;
-                                });
+                                tip.update(esapp.Utils.getTranslation('no_mapset_defined_for_subproduct'));    // 'No mapset defined for this ingest subproduct! Please assign a mapset by clicking on the + icon.'
+                                // tip.disable();
                             }
-
-                            tip.update(tooltipintervals);
-                            // tip.on('show', function(){
-                            //     Ext.defer(tip.hide, 10000, tip);
-                            // }, tip, {single: true});
                         }
                     }
                 }
@@ -247,7 +256,13 @@ Ext.define("esapp.view.acquisition.Ingestion", {
                     var version = record.get('version');
                     var subproductcode = record.get('subproductcode');
 
-                    var selectMapsetForIngestWin = new esapp.view.acquisition.selectMapsetForIngest({
+                    // var selectMapsetForIngestWin = new esapp.view.acquisition.selectMapsetForIngest({
+                    //     productcode: productcode,
+                    //     productversion: version,
+                    //     subproductcode: subproductcode
+                    // });
+                    var selectMapsetForIngestWin = new esapp.view.acquisition.product.MapsetAdmin({
+                        assigntoproduct: true,
                         productcode: productcode,
                         productversion: version,
                         subproductcode: subproductcode

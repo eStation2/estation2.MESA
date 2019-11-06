@@ -382,23 +382,43 @@ Ext.define('esapp.view.analysis.mapViewController', {
     ,refreshTitleData: function(){
         var me = this.getView();
         var pattern = /(\d{4})(\d{2})(\d{2})/;
-        var mydate = me.productdate.replace(pattern,'$3-$2-$1');
+        var titleObjDate = me.productdate.replace(pattern,'$3-$2-$1');
         var mapTitleObj = Ext.getCmp('title_obj_' + me.id);
 
         if (me.date_format == 'MMDD') {
-            mydate = new Date(me.productdate.replace(pattern,'$2/$3/$1'));
-            mydate.setHours(mydate.getHours()+5);   // add some hours so otherwise Highcharts.dateFormat assigns a day before if the hour is 00:00.
-            mydate = Highcharts.dateFormat('%d %b', mydate, true);
+            titleObjDate = new Date(me.productdate.replace(pattern,'$2/$3/$1'));
+            titleObjDate.setHours(titleObjDate.getHours()+5);   // add some hours so otherwise Highcharts.dateFormat assigns a day before if the hour is 00:00.
+            titleObjDate = Highcharts.dateFormat('%d %b', titleObjDate, true);
         }
 
         me.setTitleData({
             'selected_area': me.selectedarea,
             'product_name': me.productsensor + ' - ' + me.productname,
-            'product_date': mydate
+            'product_date': titleObjDate
         });
 
         mapTitleObj.changesmade = true;
         // mapTitleObj.fireEvent('refreshimage');
+
+
+        // Set the MapView window title to the selected product and date
+        var productcodetitle = ' <b class="smalltext">' + me.productcode + ' - ' + me.subproductcode + '</b>';
+        var versiontitle = '';
+        if (me.productversion !== 'undefined'){
+            versiontitle = ' - ' +  ' <b class="smalltext">' + me.productversion + '</b>';
+        }
+        var mapsetcodeHTML = ' - <b class="smalltext">' + me.mapsetcode + '</b>';
+
+        var productdateHTML = '<b class="" style="color: #ffffff; font-size: 14px;">' + me.productdate.replace(pattern,'$3-$2-$1') + '</b>';
+        if (me.date_format == 'MMDD') {
+            var mydate = new Date(me.productdate.replace(pattern,'$2/$3/$1'));
+            mydate.setHours(mydate.getHours()+5);   // add some hours so otherwise Highcharts.dateFormat assigns a day before if the hour is 00:00.
+            productdateHTML = '<b class="" style="color: #ffffff; font-size: 14px;">' + Highcharts.dateFormat('%d %b', mydate, true) + '</b>';
+        }
+        var mapviewTitle = productdateHTML + ' - ' + me.productsensor + ' - ' + me.productname + '<BR>' + productcodetitle + versiontitle;    // + mapsetcodeHTML
+
+        Ext.fly('mapview_title_productname_' + me.id).dom.innerHTML = mapviewTitle;
+
     }
 
     ,refreshDisclaimerData: function(){
@@ -434,6 +454,8 @@ Ext.define('esapp.view.analysis.mapViewController', {
         me.date_format = date_format;
         me.frequency_id = frequency_id;
         me.productsensor = productsensor;
+
+        me.getController().refreshTitleData();
 
         Ext.Ajax.request({
             method: 'GET',
@@ -506,33 +528,32 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     }
                 }
 
-                me.getController().refreshTitleData();
-
-                // Set the MapView window title to the selected product and date
-                var productcodetitle = ' <b class="smalltext">' + me.productcode + ' - ' + me.subproductcode + '</b>';
-
-                var versiontitle = '';
-                if (productversion !== 'undefined'){
-                    versiontitle = ' - ' +  ' <b class="smalltext">' + productversion + '</b>';
-                }
-                var mapsetcodeHTML = ' - <b class="smalltext">' + me.mapsetcode + '</b>';
-
-                var pattern = /(\d{4})(\d{2})(\d{2})/;
-                //me.productdate = me.productdate.replace(pattern,'$3-$2-$1');
-                //var dt = new Date(me.productdate.replace(pattern,'$3-$2-$1'));
-                var productdateHTML = '<b class="" style="color: #ffffff; font-size: 14px;">' + me.productdate.replace(pattern,'$3-$2-$1') + '</b>';
-                if (date_format == 'MMDD') {
-                    var mydate = new Date(me.productdate.replace(pattern,'$2/$3/$1'));
-                    mydate.setHours(mydate.getHours()+5);   // add some hours so otherwise Highcharts.dateFormat assigns a day before if the hour is 00:00.
-                    productdateHTML = '<b class="" style="color: #ffffff; font-size: 14px;">' + Highcharts.dateFormat('%d %b', mydate, true) + '</b>';
-                }
-                var mapviewTitle = productdateHTML + ' - ' + me.productsensor + ' - ' + productname + '<BR>' + productcodetitle + versiontitle;    // + mapsetcodeHTML
-
-                Ext.fly('mapview_title_productname_' + me.id).dom.innerHTML = mapviewTitle;
-                //me.setTitle(mapviewTitle);
-                // me.getController().refreshTitleData();
-
-                // me.getController().refreshDisclaimerData();
+                //
+                // // Set the MapView window title to the selected product and date
+                // var productcodetitle = ' <b class="smalltext">' + me.productcode + ' - ' + me.subproductcode + '</b>';
+                //
+                // var versiontitle = '';
+                // if (productversion !== 'undefined'){
+                //     versiontitle = ' - ' +  ' <b class="smalltext">' + productversion + '</b>';
+                // }
+                // var mapsetcodeHTML = ' - <b class="smalltext">' + me.mapsetcode + '</b>';
+                //
+                // var pattern = /(\d{4})(\d{2})(\d{2})/;
+                // //me.productdate = me.productdate.replace(pattern,'$3-$2-$1');
+                // //var dt = new Date(me.productdate.replace(pattern,'$3-$2-$1'));
+                // var productdateHTML = '<b class="" style="color: #ffffff; font-size: 14px;">' + me.productdate.replace(pattern,'$3-$2-$1') + '</b>';
+                // if (date_format == 'MMDD') {
+                //     var mydate = new Date(me.productdate.replace(pattern,'$2/$3/$1'));
+                //     mydate.setHours(mydate.getHours()+5);   // add some hours so otherwise Highcharts.dateFormat assigns a day before if the hour is 00:00.
+                //     productdateHTML = '<b class="" style="color: #ffffff; font-size: 14px;">' + Highcharts.dateFormat('%d %b', mydate, true) + '</b>';
+                // }
+                // var mapviewTitle = productdateHTML + ' - ' + me.productsensor + ' - ' + productname + '<BR>' + productcodetitle + versiontitle;    // + mapsetcodeHTML
+                //
+                // Ext.fly('mapview_title_productname_' + me.id).dom.innerHTML = mapviewTitle;
+                // //me.setTitle(mapviewTitle);
+                // // me.getController().refreshTitleData();
+                //
+                // // me.getController().refreshDisclaimerData();
 
 
                 // Set the timeline data, its rangeselector selected button and show product time line
@@ -635,6 +656,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 //}
                 //else outmask_togglebtn.hide();
 
+                me.getController().refreshTitleData();
             },
             //callback: function ( callinfo,responseOK,response ) {},
             failure: function ( result, request) {}
@@ -817,27 +839,27 @@ Ext.define('esapp.view.analysis.mapViewController', {
             //me.map.addLayer(me.productlayer);
             me.map.getLayers().insertAt(0, me.productlayer);
 
-            var productcodetitle = ' <b class="smalltext">' + me.productcode + ' - ' + me.subproductcode + '</b>';
-            var versiontitle = '';
-            if (me.productversion !== 'undefined'){
-                versiontitle = ' - ' + ' <b class="smalltext">' + me.productversion + '</b>';
-            }
-
-            var mapsetcodeHTML = ' - <b class="smalltext">' + me.mapsetcode + '</b>';
-
-            var pattern = /(\d{4})(\d{2})(\d{2})/;
-            //me.productdate = clickeddate.replace(pattern,'$3-$2-$1');
-            var productdateHTML = '<b class="" style="color: #ffffff; font-size: 14px;">' + me.productdate.replace(pattern,'$3-$2-$1') + '</b>';
-            if (me.date_format == 'MMDD') {
-                var mydate = new Date(me.productdate.replace(pattern,'$2/$3/$1'));
-                mydate.setHours(mydate.getHours()+5);   // add some hours so otherwise Highcharts.dateFormat assigns a day before if the hour is 00:00.
-                productdateHTML = '<b class="" style="color: #ffffff; font-size: 14px;">' + Highcharts.dateFormat('%d %b', mydate, true) + '</b>';
-            }
-            // var mapviewTitle = me.productname + versiontitle + ' - <b class="smalltext">' + me.productdate + '</b>';
-            // var mapviewTitle = productdateHTML + ' - ' + me.productname + versiontitle;     // + mapsetcodeHTML
-            var mapviewTitle = productdateHTML + ' - ' + me.productsensor + ' - ' + me.productname + '<BR>' + productcodetitle + versiontitle;    // + mapsetcodeHTML
-            Ext.fly('mapview_title_productname_' + me.id).dom.innerHTML = mapviewTitle;
-            //me.setTitle(mapviewTitle);
+            // var productcodetitle = ' <b class="smalltext">' + me.productcode + ' - ' + me.subproductcode + '</b>';
+            // var versiontitle = '';
+            // if (me.productversion !== 'undefined'){
+            //     versiontitle = ' - ' + ' <b class="smalltext">' + me.productversion + '</b>';
+            // }
+            //
+            // var mapsetcodeHTML = ' - <b class="smalltext">' + me.mapsetcode + '</b>';
+            //
+            // var pattern = /(\d{4})(\d{2})(\d{2})/;
+            // //me.productdate = clickeddate.replace(pattern,'$3-$2-$1');
+            // var productdateHTML = '<b class="" style="color: #ffffff; font-size: 14px;">' + me.productdate.replace(pattern,'$3-$2-$1') + '</b>';
+            // if (me.date_format == 'MMDD') {
+            //     var mydate = new Date(me.productdate.replace(pattern,'$2/$3/$1'));
+            //     mydate.setHours(mydate.getHours()+5);   // add some hours so otherwise Highcharts.dateFormat assigns a day before if the hour is 00:00.
+            //     productdateHTML = '<b class="" style="color: #ffffff; font-size: 14px;">' + Highcharts.dateFormat('%d %b', mydate, true) + '</b>';
+            // }
+            // // var mapviewTitle = me.productname + versiontitle + ' - <b class="smalltext">' + me.productdate + '</b>';
+            // // var mapviewTitle = productdateHTML + ' - ' + me.productname + versiontitle;     // + mapsetcodeHTML
+            // var mapviewTitle = productdateHTML + ' - ' + me.productsensor + ' - ' + me.productname + '<BR>' + productcodetitle + versiontitle;    // + mapsetcodeHTML
+            // Ext.fly('mapview_title_productname_' + me.id).dom.innerHTML = mapviewTitle;
+            // //me.setTitle(mapviewTitle);
 
             me.getController().refreshTitleData();
 
@@ -2527,6 +2549,13 @@ Ext.define('esapp.view.analysis.mapViewController', {
                         },
                         items: []
                     }
+                    // ,listeners: {
+                    //     focusenter: function(){
+                    //         Ext.util.Observable.capture(this, function(e){console.log('submenu - ' + this.id + ': ' + e);});
+                    //         console.info('submenu');
+                    //         this.updateLayout();
+                    //     }
+                    // }
                 }
             }
 
@@ -2540,8 +2569,12 @@ Ext.define('esapp.view.analysis.mapViewController', {
             var checkboxCmp = Ext.create('Ext.form.field.Checkbox', {
                 //boxLabel: esapp.Utils.getTranslation(layer.get('submenu')) + (layer.get('submenu') != '' ? ' ' : '') + esapp.Utils.getTranslation(layer.get('layerlevel')),
                 boxLabel: esapp.Utils.getTranslation(layer.get('layername')) + '</BR><b class="smalltext" style="color:darkgrey;">' + esapp.Utils.getTranslation(layer.get('provider')) +'</b>',
-                flex: 1,
-                maxWidth: 250,
+                // flex: 1,
+                autoWidth: true,
+                maxWidth: 170,
+                minWidth: 100,
+                // width: 180,
+                // columnWidth: 0.85,
                 margin: '0 5 0 5',
                 layerrecord: layer,
                 name: layer.get('layername'),
@@ -2553,13 +2586,19 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 handler: 'addVectorLayer'
             });
             containerItems.push(checkboxCmp);
-            containerItems.push({xtype: 'component', html: '<div style="border-left:1px solid #ababab;height:100%; display: inline-block;"></div>'});
+            // containerItems.push({
+            //     xtype: 'component',
+            //     width: 10,
+            //     // columnWidth: 0.05,
+            //     html: '<div style="border-left:1px solid #ababab;height:100%; display: inline-block;"></div>'
+            // });
             containerItems.push({
                 xtype: 'button',
                 cls: 'my-custom-button',
                 layerrecord: layer,
                 level: layer.get('layerlevel'),
-                width: 30,
+                width: 25,
+                // columnWidth: 0.10,
                 text: '',
                 tooltip: esapp.Utils.getTranslation('tipeditlayerdrawproperties'),   // 'Edit layer draw properties.',
                 iconCls: 'edit16',
@@ -2569,8 +2608,8 @@ Ext.define('esapp.view.analysis.mapViewController', {
             MenuItem = {
                 xtype: 'container',
                 layout: {
-                    type: 'hbox',
-                    align: 'stretch'
+                    type: 'column'
+                    // ,align: 'stretch'
                 },
                 overCls: 'over-item-cls',
                 items: containerItems
@@ -2637,6 +2676,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 this.down('[name=marine]').menu.add(marineVectorLayerMenuItems);
                 this.down('[name=other]').menu.removeAll();
                 this.down('[name=other]').menu.add(otherVectorLayerMenuItems);
+                this.updateLayout();
             },
             menu: {
                 hideOnClick: false,
@@ -2661,6 +2701,13 @@ Ext.define('esapp.view.analysis.mapViewController', {
                             collapseDirection: 'left'
                         },
                         plain: true,
+                        // listeners: {
+                        //     show: function(){
+                        //         Ext.util.Observable.capture(this, function(e){console.log('submenu - ' + this.id + ': ' + e);});
+                        //         console.info('bordermenu');
+                        //         this.updateLayout();
+                        //     }
+                        // },
                         items: []   // borderVectorLayerItems
                     }
                 },{
@@ -2675,6 +2722,13 @@ Ext.define('esapp.view.analysis.mapViewController', {
                             collapseDirection: 'left'
                         },
                         plain: true,
+                        // listeners: {
+                        //     show: function(){
+                        //         Ext.util.Observable.capture(this, function(e){console.log('submenu - ' + this.id + ': ' + e);});
+                        //         console.info('marinemenu');
+                        //         this.updateLayout();
+                        //     }
+                        // },
                         items: []   // marineVectorLayerMenuItems
                     }
                 },{
@@ -2689,6 +2743,13 @@ Ext.define('esapp.view.analysis.mapViewController', {
                             collapseDirection: 'left'
                         },
                         plain: true,
+                        // listeners: {
+                        //     show: function(){
+                        //         Ext.util.Observable.capture(this, function(e){console.log('submenu - ' + this.id + ': ' + e);});
+                        //         console.info('othermenu');
+                        //         this.updateLayout();
+                        //     }
+                        // },
                         items: []   // otherVectorLayerMenuItems
                     }
                 }]
@@ -2824,7 +2885,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                             // iconCls: 'fa fa-save fa-lg lightblue',
                             style: { color: 'lightblue' },
                             //cls: 'x-menu-no-icon button-gray',
-                            width: 165,
+                            width: 200,
                             handler: function(){
                                 me.isNewTemplate = true;
                                 me.getController().setMapTemplateName();
@@ -2898,7 +2959,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     hideOnClick: true,
                     alwaysOnTop: true,
                     //iconAlign: '',
-                    width: 125,
+                    width: 175,
                     defaults: {
                         hideOnClick: true,
                         //cls: "x-menu-no-icon",
@@ -2914,7 +2975,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                             // iconCls: 'fa fa-save fa-lg lightblue',
                             style: { color: 'lightblue' },
                             // cls: 'x-menu-no-icon button-gray',
-                            width: 60,
+                            width: 200,
                             handler: function(){
                                 // Open a small modal panel asking to name the layer file
                                 var writer = new ol.format.GeoJSON();

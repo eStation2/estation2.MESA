@@ -29,7 +29,7 @@ Ext.define("esapp.view.acquisition.product.MapsetAdmin",{
     resizable: true,
     resizeHandles: 'n,s',
     autoScroll: false,
-    width: 880,
+    width: 890,
     height: Ext.getBody().getViewSize().height < 800 ? Ext.getBody().getViewSize().height-10 : 800,
     minHeight:800,
 
@@ -131,14 +131,14 @@ Ext.define("esapp.view.acquisition.product.MapsetAdmin",{
             columns: [{
                 xtype: 'actioncolumn',
                 hidden: false,
-                width: 35,
+                width: 40,
                 align: 'center',
                 sortable: false,
                 menuDisabled: true,
                 shrinkWrap: 0,
                 items: [{
                     getClass: function (v, meta, rec) {
-                       if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)) {
+                       if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)) {
                            return 'edit';
                        }
                        else {
@@ -147,7 +147,7 @@ Ext.define("esapp.view.acquisition.product.MapsetAdmin",{
                        }
                     },
                     getTip: function (v, meta, rec) {
-                       if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)) {
+                       if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)) {
                            return esapp.Utils.getTranslation('editmapset');    // 'Edit Mapset',
                        }
                     },
@@ -209,12 +209,21 @@ Ext.define("esapp.view.acquisition.product.MapsetAdmin",{
                shrinkWrap: 0,
                items: [{
                    width:'35',
-                   disabled: false,
+                   // disabled: false,
+                   isDisabled: function(view, rowIndex, colIndex, item, record){
+                        if (!record.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
+                            return false;
+                        }
+                        else {
+                            return true;
+                        }
+                   },
                    getClass: function(v, meta, rec) {
                        if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
                            return 'delete';
                        }
                        else {
+                           // v.setDisabled(true);
                            return 'x-hide-display';
                        }
                    },

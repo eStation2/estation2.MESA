@@ -16,6 +16,10 @@ Ext.define('esapp.model.Product', {
         {name: 'provider'},
         {name: 'category_id'},
         {name: 'cat_descr_name'},
-        {name: 'order_index'}
+        {name: 'order_index'},
+        {name: 'subprods_productcode'},
+        {name: 'subprods_version'},
+        {name: 'subproductcode'},
+        {name: 'totsubprods'}
     ]
 });

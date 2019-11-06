@@ -341,49 +341,58 @@ Ext.define("esapp.view.widgets.LoginViewECAS",{
             // UserWorkspacesStore.each(function(workspace,id){
             //     console.info(workspace);
             // });
+            if (analysisWorkspaces != []) {
+                Ext.Object.each(analysisWorkspaces, function (id, workspace, thisObj) {
+                    workspace.lookupReference('maptemplateadminbtn_' + workspace.id.replace(/-/g, '_')).show();
+                    workspace.lookupReference('graphtemplateadminbtn_' + workspace.id.replace(/-/g, '_')).show();
+                    // workspace.lookupReference('analysismain_legendsbtn_'+workspace.id.replace(/-/g,'_')).show();
+                    workspace.lookupReference('analysismain_layersbtn_' + workspace.id.replace(/-/g, '_')).show();
+                    if (esapp.globals['typeinstallation'] != 'jrc_online') {
+                        workspace.lookupReference('analysismain_logosbtn_' + workspace.id.replace(/-/g, '_')).show();
+                    }
 
-            Ext.Object.each(analysisWorkspaces, function(id, workspace, thisObj) {
-                workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).show();
-                workspace.lookupReference('graphtemplateadminbtn_'+workspace.id.replace(/-/g,'_')).show();
-                workspace.lookupReference('analysismain_legendsbtn_'+workspace.id.replace(/-/g,'_')).show();
-                workspace.lookupReference('analysismain_layersbtn_'+workspace.id.replace(/-/g,'_')).show();
-                if (esapp.globals['typeinstallation'] != 'jrc_online'){
-                    workspace.lookupReference('analysismain_logosbtn_'+workspace.id.replace(/-/g,'_')).show();
-                }
+                    if (workspace.workspaceid != 'defaultworkspace') {
+                        workspace.lookupReference('saveWorkspaceBtn').show();
+                    }
+                    else {
+                        workspace.lookupReference('saveDefaultWorkspaceAsBtn').show();
+                    }
 
-                if (workspace.workspaceid != 'defaultworkspace'){
-                    workspace.lookupReference('saveWorkspaceBtn').show();
-                }
-                else {
-                    workspace.lookupReference('saveDefaultWorkspaceAsBtn').show();
-                }
-
-                if (Ext.isObject(workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).mapTemplateAdminPanel)){
-                    workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).mapTemplateAdminPanel.setDirtyStore(true);
-                }
-                if (Ext.isObject(workspace.lookupReference('graphtemplateadminbtn_'+workspace.id.replace(/-/g,'_')).graphTemplateAdminPanel)){
-                    workspace.lookupReference('graphtemplateadminbtn_'+workspace.id.replace(/-/g,'_')).graphTemplateAdminPanel.setDirtyStore(true);
-                }
-            });
+                    if (Ext.isObject(workspace.lookupReference('maptemplateadminbtn_' + workspace.id.replace(/-/g, '_')).mapTemplateAdminPanel)) {
+                        workspace.lookupReference('maptemplateadminbtn_' + workspace.id.replace(/-/g, '_')).mapTemplateAdminPanel.setDirtyStore(true);
+                    }
+                    if (Ext.isObject(workspace.lookupReference('graphtemplateadminbtn_' + workspace.id.replace(/-/g, '_')).graphTemplateAdminPanel)) {
+                        workspace.lookupReference('graphtemplateadminbtn_' + workspace.id.replace(/-/g, '_')).graphTemplateAdminPanel.setDirtyStore(true);
+                    }
+                });
+            }
             // mapTemplateBtn.show();
-            Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
-                if (mapview_window.templatename != ''){
-                    mapview_window.isTemplate = true;
-                    Ext.fly('mapview_title_templatename_' + mapview_window.id).dom.innerHTML = mapview_window.templatename;
-                }
-                mapview_window.lookupReference('saveMapTemplate_'+mapview_window.id.replace(/-/g,'_')).show();
-            });
+            if (mapViewWindows != []) {
+                Ext.Object.each(mapViewWindows, function (id, mapview_window, thisObj) {
+                    if (mapview_window.templatename != '') {
+                        mapview_window.isTemplate = true;
+                        if (Ext.isObject(Ext.fly('mapview_title_templatename_' + mapview_window.id))) {
+                            Ext.fly('mapview_title_templatename_' + mapview_window.id).dom.innerHTML = mapview_window.templatename;
+                        }
+                    }
+                    mapview_window.lookupReference('saveMapTemplate_' + mapview_window.id.replace(/-/g, '_')).show();
+                });
+            }
             // Ext.getCmp('userMapTemplates').setDirtyStore(true);
 
             // tsChartTemplateBtn.show();
-            Ext.Object.each(tsChartWindows, function(id, tschart_window, thisObj) {
-                if (tschart_window.graph_tpl_name != '' && tschart_window.graph_tpl_name != 'default'){
-                    tschart_window.isTemplate = true;
-                    Ext.fly('graphview_title_templatename_' + tschart_window.id).dom.innerHTML = tschart_window.graph_tpl_name;
-                }
-                tschart_window.lookupReference('changeSelectedProductsAndTimeframe_'+tschart_window.id.replace(/-/g,'_')).show();
-                tschart_window.lookupReference('saveGraphTemplate_'+tschart_window.id.replace(/-/g,'_')).show();
-            });
+            if (tsChartWindows != []) {
+                Ext.Object.each(tsChartWindows, function (id, tschart_window, thisObj) {
+                    if (tschart_window.graph_tpl_name != '' && tschart_window.graph_tpl_name != 'default') {
+                        tschart_window.isTemplate = true;
+                        if (Ext.isObject(Ext.fly('graphview_title_templatename_' + tschart_window.id))) {
+                            Ext.fly('graphview_title_templatename_' + tschart_window.id).dom.innerHTML = tschart_window.graph_tpl_name;
+                        }
+                    }
+                    tschart_window.lookupReference('changeSelectedProductsAndTimeframe_' + tschart_window.id.replace(/-/g, '_')).show();
+                    tschart_window.lookupReference('saveGraphTemplate_' + tschart_window.id.replace(/-/g, '_')).show();
+                });
+            }
             // Ext.getCmp('userGraphTemplates').setDirtyStore(true);
         }
         else {
@@ -393,48 +402,58 @@ Ext.define("esapp.view.widgets.LoginViewECAS",{
                 addWorkspaceBtn.hide();
             }
 
-            Ext.Object.each(analysisWorkspaces, function(id, workspace, thisObj) {
-                if (workspace.workspaceid != 'defaultworkspace'){
-                    workspace.close();
-                }
-                else {
-                    // mapTemplateBtn.hide();
-                    Ext.Object.each(mapViewWindows, function(id, mapview_window, thisObj) {
-                        if (mapview_window.isTemplate){
-                            mapview_window.isTemplate = false;
-                            Ext.fly('mapview_title_templatename_' + mapview_window.id).dom.innerHTML = '';
-                        }
-                        mapview_window.lookupReference('saveMapTemplate_'+mapview_window.id.replace(/-/g,'_')).hide();
-                    });
-                    // Ext.getCmp('userMapTemplates').hide();
-
-                    // tsChartTemplateBtn.hide();
-                    Ext.Object.each(tsChartWindows, function(id, tschart_window, thisObj) {
-                        if (tschart_window.isTemplate){
-                            tschart_window.isTemplate = false;
-                            Ext.fly('graphview_title_templatename_' + tschart_window.id).dom.innerHTML = '';
-                        }
-                        tschart_window.lookupReference('changeSelectedProductsAndTimeframe_'+tschart_window.id.replace(/-/g,'_')).hide();
-                        tschart_window.lookupReference('saveGraphTemplate_'+tschart_window.id.replace(/-/g,'_')).hide();
-                    });
-                    // Ext.getCmp('userGraphTemplates').hide();
-
-                    workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).hide();
-                    workspace.lookupReference('graphtemplateadminbtn_'+workspace.id.replace(/-/g,'_')).hide();
-
-                    workspace.lookupReference('analysismain_legendsbtn_'+workspace.id.replace(/-/g,'_')).hide();
-                    workspace.lookupReference('analysismain_layersbtn_'+workspace.id.replace(/-/g,'_')).hide();
-                    workspace.lookupReference('analysismain_logosbtn_'+workspace.id.replace(/-/g,'_')).hide();
-
-                    workspace.lookupReference('saveDefaultWorkspaceAsBtn').hide();
-                    if (Ext.isObject(workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).mapTemplateAdminPanel)){
-                        workspace.lookupReference('maptemplateadminbtn_'+workspace.id.replace(/-/g,'_')).mapTemplateAdminPanel.hide();
+            if (analysisWorkspaces != []) {
+                Ext.Object.each(analysisWorkspaces, function (id, workspace, thisObj) {
+                    if (workspace.workspaceid != 'defaultworkspace') {
+                        workspace.close();
                     }
-                    if (Ext.isObject(workspace.lookupReference('graphtemplateadminbtn_'+workspace.id.replace(/-/g,'_')).graphTemplateAdminPanel)){
-                        workspace.lookupReference('graphtemplateadminbtn_'+workspace.id.replace(/-/g,'_')).graphTemplateAdminPanel.hide();
+                    else {
+                        // mapTemplateBtn.hide();
+                        if (mapViewWindows != []) {
+                            Ext.Object.each(mapViewWindows, function (id, mapview_window, thisObj) {
+                                if (mapview_window.isTemplate) {
+                                    mapview_window.isTemplate = false;
+                                    if (Ext.isObject(Ext.fly('mapview_title_templatename_' + mapview_window.id))) {
+                                        Ext.fly('mapview_title_templatename_' + mapview_window.id).dom.innerHTML = '';
+                                    }
+                                }
+                                mapview_window.lookupReference('saveMapTemplate_' + mapview_window.id.replace(/-/g, '_')).hide();
+                            });
+                        }
+                        // Ext.getCmp('userMapTemplates').hide();
+
+                        // tsChartTemplateBtn.hide();
+                        if (tsChartWindows != []) {
+                            Ext.Object.each(tsChartWindows, function (id, tschart_window, thisObj) {
+                                if (tschart_window.isTemplate) {
+                                    tschart_window.isTemplate = false;
+                                    if (Ext.isObject(Ext.fly('graphview_title_templatename_' + tschart_window.id))) {
+                                        Ext.fly('graphview_title_templatename_' + tschart_window.id).dom.innerHTML = '';
+                                    }
+                                }
+                                tschart_window.lookupReference('changeSelectedProductsAndTimeframe_' + tschart_window.id.replace(/-/g, '_')).hide();
+                                tschart_window.lookupReference('saveGraphTemplate_' + tschart_window.id.replace(/-/g, '_')).hide();
+                            });
+                        }
+                        // Ext.getCmp('userGraphTemplates').hide();
+
+                        workspace.lookupReference('maptemplateadminbtn_' + workspace.id.replace(/-/g, '_')).hide();
+                        workspace.lookupReference('graphtemplateadminbtn_' + workspace.id.replace(/-/g, '_')).hide();
+
+                        workspace.lookupReference('analysismain_legendsbtn_' + workspace.id.replace(/-/g, '_')).hide();
+                        workspace.lookupReference('analysismain_layersbtn_' + workspace.id.replace(/-/g, '_')).hide();
+                        workspace.lookupReference('analysismain_logosbtn_' + workspace.id.replace(/-/g, '_')).hide();
+
+                        workspace.lookupReference('saveDefaultWorkspaceAsBtn').hide();
+                        if (Ext.isObject(workspace.lookupReference('maptemplateadminbtn_' + workspace.id.replace(/-/g, '_')).mapTemplateAdminPanel)) {
+                            workspace.lookupReference('maptemplateadminbtn_' + workspace.id.replace(/-/g, '_')).mapTemplateAdminPanel.hide();
+                        }
+                        if (Ext.isObject(workspace.lookupReference('graphtemplateadminbtn_' + workspace.id.replace(/-/g, '_')).graphTemplateAdminPanel)) {
+                            workspace.lookupReference('graphtemplateadminbtn_' + workspace.id.replace(/-/g, '_')).graphTemplateAdminPanel.hide();
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     }
 

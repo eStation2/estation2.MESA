@@ -13,9 +13,8 @@ Ext.define('esapp.store.ProductsStore', {
     ,autoLoad: false
     ,autoSync: true
     ,loadMask: true
-
-    // ,remoteSort: false
-    // ,remoteGroup: false
+    ,remoteSort: false
+    ,remoteGroup: false
     // ,session: true
 
     ,proxy: {
@@ -80,7 +79,7 @@ Ext.define('esapp.store.ProductsStore', {
     //         //if (operation.action == 'destroy') {
     //         //    // main.child('#form').setActiveRecord(null);
     //         //}
-    //         //Ext.toast({ html: operation.getResultSet().message, title: operation.action, width: 200, align: 't' });
+    //         Ext.toast({ html: operation.getResultSet().message, title: operation.action, width: 200, align: 't' });
     //     }
     //
     //     //,update: function(store, record, operation, modifiedFieldNames, details, eOpts  ){

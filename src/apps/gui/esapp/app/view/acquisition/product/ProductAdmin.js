@@ -41,9 +41,9 @@ Ext.define("esapp.view.acquisition.product.ProductAdmin",{
     height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-10 : 800,  // 600,
     maxHeight: 800,
 
-    layout: {
-        type  : 'fit'
-    },
+    // layout: {
+    //     type  : 'fit'
+    // },
 
     config: {
         changesmade:false
@@ -171,7 +171,7 @@ Ext.define("esapp.view.acquisition.product.ProductAdmin",{
 
         me.items = [{
             xtype : 'grid',
-            layout: 'fit',
+            // layout: 'fit',
             store: 'ProductsStore',
             // session: true,
             // bind: '{products}',
@@ -249,6 +249,7 @@ Ext.define("esapp.view.acquisition.product.ProductAdmin",{
                 // menuDisabled: true,
                 columns: [{
                    xtype: 'actioncolumn',
+                   reference: 'editproduct',
                    hidden: false,
                    width: 40,
                    align: 'center',
@@ -281,6 +282,7 @@ Ext.define("esapp.view.acquisition.product.ProductAdmin",{
                 }, {
                     xtype:'templatecolumn',
                     header: esapp.Utils.getTranslation('product'),  // 'Product',
+                    reference: 'productinfocolumn',
                     tpl: new Ext.XTemplate(
                             '<b>{prod_descriptive_name}</b>' +
                             '<tpl if="version != \'undefined\'">',
@@ -303,6 +305,7 @@ Ext.define("esapp.view.acquisition.product.ProductAdmin",{
                 }, {
                     xtype: 'actioncolumn',
                     header: esapp.Utils.getTranslation('activate'),  // 'Active',
+                    reference: 'activateproduct',
                     hideable: false,
                     hidden: false,
                     width: 75,
@@ -337,7 +340,8 @@ Ext.define("esapp.view.acquisition.product.ProductAdmin",{
                             rec.get('activated') ? rec.set('activated', false) : rec.set('activated', true);
                             // rec.save();
                             // rec.drop();
-                            grid.up().up().changesmade = true;
+                            me.changesmade = true;
+                            // grid.up().up().changesmade = true;
 
                             if (rec.get('activated')){
                                 Ext.toast({
@@ -355,6 +359,7 @@ Ext.define("esapp.view.acquisition.product.ProductAdmin",{
                     }]
                 },{
                     header: esapp.Utils.getTranslation('nrsubproducts'),  // 'Subproducts',
+                    reference: 'totsubprods',
                     dataIndex: 'totsubprods',
                     width: 110,
                     minWidth: 80,
@@ -373,6 +378,7 @@ Ext.define("esapp.view.acquisition.product.ProductAdmin",{
                 //     cellWrap:true
                 },{
                     header: esapp.Utils.getTranslation('definedby'),  // 'Defined by',
+                    reference: 'defined_by_column',
                     dataIndex: 'defined_by',
                     width: 90,
                     minWidth: 80,
@@ -383,6 +389,7 @@ Ext.define("esapp.view.acquisition.product.ProductAdmin",{
                     hidden: (esapp.Utils.objectExists(user) && user.userlevel == 1) ? false : true
                 },{
                    xtype: 'actioncolumn',
+                   reference: 'deleteproduct',
                    hidden: false,
                    width: 35,
                    align: 'center',
@@ -392,11 +399,20 @@ Ext.define("esapp.view.acquisition.product.ProductAdmin",{
                    items: [{
                        width:'35',
                        disabled: false,
-                       getClass: function(v, meta, rec) {
+                       isDisabled: function(view, rowIndex, colIndex, item, record){
+                            if (!record.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
+                                return false;
+                            }
+                            else {
+                                return true;
+                            }
+                       },
+                       getClass: function(cell, meta, rec) {
                            if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
                                return 'delete';
                            }
                            else {
+                               // cell.setDisabled(true);   // This will not make syncing record content possible!
                                return 'x-hide-display';
                            }
                        },

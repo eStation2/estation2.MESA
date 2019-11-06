@@ -183,6 +183,7 @@ class Frequency(object):
 
     def next_date(self, date):
         if self.frequency_type == self.TYPE.EVERY or self.value == 1:
+            print(date.strftime("%Y%m%d%H%M"))
             date = self.get_next_date(date, self.unit, self.value)
         elif self.frequency_type == self.TYPE.PER:
             new_date = self.get_next_date(date, self.unit, 1)
@@ -202,6 +203,34 @@ class Frequency(object):
             count += 1
         return count
 
+    # ES2-281 Check if the start date corresponds to the frequency type and skip the dates
+    def cast_to_frequency(self, dates, unit):
+        date = dates[0]
+        if unit == self.UNIT.MONTH:
+            if date.day == 1:
+                return dates[:-1]
+            else:
+                return dates[1:-1]
+        elif unit == self.UNIT.DEKAD:
+            if date.day == 1 or date.day == 11 or date.day == 21:
+                return dates[:-1]
+            else:
+                return dates[1:-1]
+        elif unit == self.UNIT.CGL_DEKAD:
+            if date.day == 10 or date.day == 20 or date.day == functions.get_number_days_month(str(date.year) + date.strftime('%m') + date.strftime('%d')):
+                return dates[:-1]
+            else:
+                return dates[1:-1]
+        elif unit == self.UNIT.PENTAD:
+            if (date.day-1) % 5 == 0 and date.day != 31:  # Check the multiple of 5 n % k == 0 but doesnt work for date 31
+                return dates[:-1]
+            else:
+                return dates[1:-1]
+        else:
+            return dates[:-1]
+            # raise Exception("Unit not managed: %s" % unit)
+
+
     def get_dates(self, fromdate, todate):
         if fromdate > todate:
             raise Exception("'To date' must be antecedent respect 'From date': %s %s" % (
@@ -211,7 +240,9 @@ class Frequency(object):
             dates.append(self.next_date(dates[-1]))
             if dates[-1] == dates[-2]:
                 raise Exception("Endless loop: %s" % dates[-1])
-        return dates[:-1]
+        # ES2-281 To make the dates robust:
+        return self.cast_to_frequency(dates, self.unit)
+        # return dates[:-1]
 
     def get_internet_dates(self, dates, template):
         # %{dkm}
@@ -418,6 +449,8 @@ class Dataset(object):
     def get_interval_dates(self, from_date, to_date, last_included=True, first_included=True):
         dates = []
         first_cycle = True
+        # print(from_date.strftime("%Y%m%d%H%M"))
+        # print(to_date.strftime("%Y%m%d%H%M"))
         while True:
             if not last_included and from_date == to_date:
                 break

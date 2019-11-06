@@ -19,7 +19,18 @@ from .exceptions import WrongSequence, WrongDateParameter, BadDate
 
 
 def str_to_date(value):
-    parts = value.split("-")
+    # If the passed datestring contains the time (e.g. 2019-10-28 00:00'), add the time.
+    # print(value)
+    # print(type(value))
+    parts1 = value.split(" ")
+    # print(parts1)
+    if len(parts1) == 2:
+        parts = parts1[0].split("-")
+        parts.extend(parts1[1].split(":"))
+        # print(parts)
+    else:
+        parts = value.split("-")
+
     if len(parts) == 2:
         return datetime.date(*([datetime.date.today().year] + [int(x) for x in parts]))
     elif len(parts) == 3:
@@ -73,18 +84,23 @@ def add_cgl_dekads(date, dekads=1):
     # Copernicus global data products are obtained from the vito website and the dekad naming format is different from the actual dekad patern.
     # The dekadal dates are 1stDekad - 10th day, 2ndDekad - 20th day and 3rdDekad - last day of the month.
     new_date = date
-    if date.day == 1:
-        new_date += datetime.timedelta(9)
-    elif date.day == 10:
-        new_date += datetime.timedelta(10)
-    elif date.day == 20:
-        tot_days = functions.get_number_days_month(str(date.year)+date.strftime('%m')+date.strftime('%d'))
-        new_date = datetime.datetime(new_date.year, new_date.month, tot_days)
-    elif date.day == 28 or date.day == 29 or date.day == 30 or date.day == 31 :
-        new_date = add_months(date, 1)
-        if new_date.month != date.month:
-            new_date = datetime.datetime(new_date.year, new_date.month, 10)
-
+    # ES2-281 Robust way to handle the dates
+    if date.day >= 1 and date.day < 10:
+        new_date = datetime.datetime(new_date.year, new_date.month, 10)
+    elif date.day >= 10 and date.day < 20:
+        new_date = datetime.datetime(new_date.year, new_date.month, 20)
+    # elif date.day >= 20 and date.day < 27:
+    #     tot_days = functions.get_number_days_month(str(date.year)+date.strftime('%m')+date.strftime('%d'))
+    #     new_date = datetime.datetime(new_date.year, new_date.month, tot_days)
+    else:
+        tot_days = functions.get_number_days_month(str(date.year) + date.strftime('%m') + date.strftime('%d'))  #Last day of the month
+        # check if the current day is last date of the month
+        if date.day != tot_days:
+            new_date = datetime.datetime(new_date.year, new_date.month, tot_days)
+        else:
+            new_date = add_months(date, 1)
+            if new_date.month != date.month:
+                new_date = datetime.datetime(new_date.year, new_date.month, 10)
     date = new_date
     return date
 

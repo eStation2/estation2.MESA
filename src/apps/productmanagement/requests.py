@@ -76,7 +76,7 @@ def get_from_date(frequency_id, dateformat):
     return from_date
 
 
-def create_request(productcode, version, mapsetcode=None, subproductcode=None):
+def create_request(productcode, version, mapsetcode=None, subproductcode=None, dekad_frequency=5, daily_frequency=1, high_frequency=3):
 
     # Define the 'request' object
     request = {'product': productcode,
@@ -112,23 +112,30 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
                             if hasattr(dataset_dbinfo, 'frequency_id'):
                                 if dataset_dbinfo.frequency_id == 'e15minute':
                                     today = datetime.date.today()
-                                    from_date = today - datetime.timedelta(days=3)
+                                    from_date = today - datetime.timedelta(days=int(high_frequency))
                                     kwargs = {'mapset': mapset,
                                               'sub_product_code': subproductcode,
                                               'from_date': from_date}
                                 elif dataset_dbinfo.frequency_id == 'e30minute':
                                     today = datetime.date.today()
-                                    from_date = today - datetime.timedelta(days=6)
+                                    from_date = today - datetime.timedelta(days=int(high_frequency))
                                     kwargs = {'mapset': mapset,
                                               'sub_product_code': subproductcode,
                                               'from_date': from_date}
                                 elif dataset_dbinfo.frequency_id == 'e1day':
                                     today = datetime.date.today()
-                                    from_date = today - relativedelta(years=1)
+                                    from_date = today - relativedelta(years=int(daily_frequency))
                                     # if sys.platform != 'win32':
                                     #     from_date = today - relativedelta(years=1)
                                     # else:
                                     #     from_date = today - datetime.timedelta(days=365)
+                                    kwargs = {'mapset': mapset,
+                                              'sub_product_code': subproductcode,
+                                              'from_date': from_date}
+                                elif dataset_dbinfo.date_format == 'YYYYMMDD':      # dataset_dbinfo.frequency_id == 'e1dekad' and
+                                    today = datetime.date.today()
+                                    from_date = today - relativedelta(years=int(dekad_frequency))
+
                                     kwargs = {'mapset': mapset,
                                               'sub_product_code': subproductcode,
                                               'from_date': from_date}
@@ -191,23 +198,30 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
                     if hasattr(dataset_dbinfo, 'frequency_id'):
                         if dataset_dbinfo.frequency_id == 'e15minute':
                             today = datetime.date.today()
-                            from_date = today - datetime.timedelta(days=3)
+                            from_date = today - datetime.timedelta(days=int(high_frequency))
                             kwargs = {'mapset': mapsetcode,
                                       'sub_product_code': subproductcode,
                                       'from_date': from_date}
                         elif dataset_dbinfo.frequency_id == 'e30minute':
                             today = datetime.date.today()
-                            from_date = today - datetime.timedelta(days=6)
+                            from_date = today - datetime.timedelta(days=int(high_frequency))
                             kwargs = {'mapset': mapsetcode,
                                       'sub_product_code': subproductcode,
                                       'from_date': from_date}
                         elif dataset_dbinfo.frequency_id == 'e1day':
                             today = datetime.date.today()
-                            from_date = today - relativedelta(years=1)
+                            from_date = today - relativedelta(years=int(daily_frequency))
                             # if sys.platform != 'win32':
                             #     from_date = today - relativedelta(years=1)
                             # else:
                             #     from_date = today - datetime.timedelta(days=365)
+                            kwargs = {'mapset': mapsetcode,
+                                      'sub_product_code': subproductcode,
+                                      'from_date': from_date}
+                        elif dataset_dbinfo.date_format == 'YYYYMMDD':  # dataset_dbinfo.frequency_id == 'e1dekad' and
+                            today = datetime.date.today()
+                            from_date = today - relativedelta(years=int(dekad_frequency))
+
                             kwargs = {'mapset': mapsetcode,
                                       'sub_product_code': subproductcode,
                                       'from_date': from_date}
@@ -249,37 +263,47 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
                 mapset_dict['mapsetdatasets'].append(dataset_dict)
 
             request['productmapsets'].append(mapset_dict)
-
         else:
             from_date = None
             to_date = None
             # All variable defined -> get missing object
             dataset_dbinfo = querydb.get_subproduct(productcode=productcode,
-                                                  version=version,
-                                                  subproductcode=subproductcode)
+                                                    version=version,
+                                                    subproductcode=subproductcode)
             kwargs = {'mapset': mapsetcode,
                       'sub_product_code': subproductcode}
             if dataset_dbinfo is not None:
                 if hasattr(dataset_dbinfo, 'frequency_id'):
                     if dataset_dbinfo.frequency_id == 'e15minute':
                         today = datetime.date.today()
-                        from_date = today - datetime.timedelta(days=3)
+                        from_date = today - datetime.timedelta(days=int(high_frequency))
+                        # from_date = today - relativedelta(days=int(high_frequency))
+                        # print(str(from_date))
+                        # print(type(from_date))
                         kwargs = {'mapset': mapsetcode,
                                   'sub_product_code': subproductcode,
                                   'from_date': from_date}
                     elif dataset_dbinfo.frequency_id == 'e30minute':
                         today = datetime.date.today()
-                        from_date = today - datetime.timedelta(days=6)
+                        from_date = today - datetime.timedelta(days=int(high_frequency))
+                        # from_date = today - relativedelta(days=int(high_frequency)*2)
                         kwargs = {'mapset': mapsetcode,
                                   'sub_product_code': subproductcode,
                                   'from_date': from_date}
                     elif dataset_dbinfo.frequency_id == 'e1day':
                         today = datetime.date.today()
-                        from_date = today - relativedelta(years=1)
+                        from_date = today - relativedelta(years=int(daily_frequency))
                         # if sys.platform != 'win32':
                         #     from_date = today - relativedelta(years=1)
                         # else:
                         #     from_date = today - datetime.timedelta(days=365)
+                        kwargs = {'mapset': mapsetcode,
+                                  'sub_product_code': subproductcode,
+                                  'from_date': from_date}
+                    elif dataset_dbinfo.date_format == 'YYYYMMDD':  # dataset_dbinfo.frequency_id == 'e1dekad' and
+                        today = datetime.date.today()
+                        from_date = today - relativedelta(years=int(dekad_frequency))
+
                         kwargs = {'mapset': mapsetcode,
                                   'sub_product_code': subproductcode,
                                   'from_date': from_date}
@@ -299,6 +323,7 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None):
 
             missing_info = product.get_missing_datasets(mapset=mapsetcode, sub_product_code=subproductcode,
                                                         from_date=from_date, to_date=to_date)
+
             request['productmapsets'] = []
             mapset_obj = Mapset(mapset_code=mapsetcode)
             mapset_dict = {'mapset': mapset_obj.to_dict(), 'mapsetdatasets': []}
@@ -393,6 +418,7 @@ def __create_request(productcode, version, mapsetcode=None, subproductcode=None)
             request['productmapsets'].append(mapset_dict)
     return request
     # Dump the request object to JSON
+
 
 def create_archive_from_request(request_file):
 

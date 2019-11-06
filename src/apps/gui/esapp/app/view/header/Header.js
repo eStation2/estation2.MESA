@@ -74,7 +74,7 @@ Ext.define("esapp.view.header.Header",{
                 '                 <li><a href="../">eStation</a></li>',
                 '             </ul>',
                 '         <div id="releaseBox" align="right">',
-                '             <div id="releaseBoxText">Release 2.1.2</div>',
+                '             <div id="releaseBoxText">Release 2.2.0-beta</div>',
                 '         </div>',
                 '     </div>'
                 //' </div>'

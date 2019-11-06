@@ -34,8 +34,8 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
     maximizable: false,
 
     //width: 975,
-    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-35 : 780,  // 725,
-    maxHeight: 780,
+    height: Ext.getBody().getViewSize().height < 840 ? Ext.getBody().getViewSize().height-50 : 840,  // 725,
+    maxHeight: 840,
 
     frame: true,
     border: false,
@@ -70,16 +70,18 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
             me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('newinternetdatasource') + '</span>');
         }
 
-        me.buttons = [{
-            text: 'TEST',
-            // iconCls: 'fa fa-save fa-2x',
-            style: {color: 'lightblue'},
-            scale: 'medium',
-            disabled: false,
-            formBind: true,
-            hidden: me.params.view ? true : false,
-            handler: 'onTestClick'
-        },'->',{
+        me.buttons = [
+        //     {
+        //     text: 'TEST',
+        //     // iconCls: 'fa fa-save fa-2x',
+        //     style: {color: 'lightblue'},
+        //     scale: 'medium',
+        //     disabled: false,
+        //     formBind: true,
+        //     hidden: me.params.view ? true : false,
+        //     handler: 'onTestClick'
+        // },
+            '->',{
             text: 'Save',
             iconCls: 'fa fa-save fa-2x',
             style: { color: 'lightblue' },
@@ -98,11 +100,20 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
             model   : 'esapp.model.InternetType',
             data: [
                 { internet_type_id:'ftp', internet_type_name:'FTP', internet_type_descr:'' },
-                { internet_type_id:'http_tmpl', internet_type_name:'HTTP', internet_type_descr:'' },
-                { internet_type_id:'motu_client', internet_type_name:'MOTU CLIENT', internet_type_descr:'' },
-                { internet_type_id:'sentinel_sat', internet_type_name:'SENTINEL SAT', internet_type_descr:'' }
+                { internet_type_id:'ftp_tmpl', internet_type_name:'FTP TEMPLATE', internet_type_descr:'' },
+                { internet_type_id:'http_tmpl', internet_type_name:'HTTP TEMPLATE', internet_type_descr:'' },
+                { internet_type_id:'http_multi_tmpl', internet_type_name:'HTTP MULTIPLE TEMPLATE', internet_type_descr:'' },
+                { internet_type_id:'http_tmpl_vito', internet_type_name:'HTTP TEMPLATE VITO', internet_type_descr:'' },
+                { internet_type_id:'http_tmpl_theia', internet_type_name:'HTTP TEMPLATE THEIA', internet_type_descr:'' },
+                { internet_type_id:'http_coda_eum', internet_type_name:'COPERNICUS ONLINE DATA ACCESS', internet_type_descr:'' },
+                { internet_type_id:'motu_client', internet_type_name:'MOTU CLIENT API', internet_type_descr:'' },
+                { internet_type_id:'sentinel_sat', internet_type_name:'SENTINEL SAT API', internet_type_descr:'' },
+                { internet_type_id:'jeodpp', internet_type_name:'JEODPP API', internet_type_descr:'' },
+                { internet_type_id:'local', internet_type_name:'LOCAL', internet_type_descr:'' },
+                { internet_type_id:'offline', internet_type_name:'OFFLINE ACCESS', internet_type_descr:'' }
             ]
         });
+
         var formattypes = new Ext.data.Store({
             model   : 'esapp.model.FormatType',
             data: [
@@ -110,6 +121,7 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                 { format_type:'fixed', format_type_descr:'Fixed'}
             ]
         });
+
         var areatypes = new Ext.data.Store({
             model   : 'esapp.model.AreaType',
             data: [
@@ -126,6 +138,7 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                 { preproc_type:'MSG_MPE', preproc_type_descr:'MSG MPE'},
                 { preproc_type:'MPE_UMARF', preproc_type_descr:'MPE UMARF'},
                 { preproc_type:'MODIS_HDF4_TILE', preproc_type_descr:'MODIS HDF4 TILE'},
+                { preproc_type:'MERGE_TILE', preproc_type_descr:'MERGE TILE'},
                 { preproc_type:'LSASAF_HDF5', preproc_type_descr:'LSASAF HDF5'},
                 { preproc_type:'PML_NETCDF', preproc_type_descr:'PML NETCDF'},
                 { preproc_type:'UNZIP', preproc_type_descr:'UNZIP'},
@@ -140,13 +153,17 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                 { preproc_type:'NETCDF', preproc_type_descr:'NETCDF'},
                 { preproc_type:'JRC_WBD_GEE', preproc_type_descr:'JRC WBD GEE'},
                 { preproc_type:'ECMWF_MARS', preproc_type_descr:'ECMWF MARS'},
+                { preproc_type:'ENVI_2_GTIFF', preproc_type_descr:'ENVI TO GTIFF'},
                 { preproc_type:'CPC_BINARY', preproc_type_descr:'CPC BINARY'},
                 { preproc_type:'GSOD', preproc_type_descr:'GSOD'},
+                { preproc_type:'NETCDF_S3_WRR_ZIP', preproc_type_descr:'NETCDF S3 WRR ZIPPED'},
                 { preproc_type:'NETCDF_S3_WRR', preproc_type_descr:'NETCDF S3 WRR'},
                 { preproc_type:'NETCDF_GPT_SUBSET', preproc_type_descr:'NETCDF GPT SUBSET'},
                 { preproc_type:'NETCDF_S3_WST', preproc_type_descr:'NETCDF S3 WST'},
+                { preproc_type:'NETCDF_S3_WST_ZIP', preproc_type_descr:'NETCDF S3 WST ZIPPED'},
                 { preproc_type:'TARZIP', preproc_type_descr:'TARZIP'},
-                { preproc_type:'NETCDF_AVISO', preproc_type_descr:'NETCDF AVISO'}
+                { preproc_type:'NETCDF_AVISO', preproc_type_descr:'NETCDF AVISO'},
+                { preproc_type:'SNAP_SUBSET_NC', preproc_type_descr:'SNAP SUBSET NC'}
             ]
         });
 
@@ -225,7 +242,7 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                         xtype: 'combobox',
                         fieldLabel: esapp.Utils.getTranslation('type'),    // 'Type',
                         labelWidth: 60,
-                        width: 230,
+                        width: 300,
                         reference: 'type',
                         msgTarget: 'side',
                         store: internettype,

@@ -22,149 +22,162 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         }
         filters.add(excludeProductLegends);
 
-        var assignLegendWin = Ext.getCmp('assignLegendWin');
-        if (assignLegendWin==null || assignLegendWin=='undefined' ) {
 
-            assignLegendWin = Ext.create('Ext.window.Window', {
-                 id: 'assignLegendWin'
-                // ,reference:'assignLegendWin'
-                ,referenceHolder: true
-                ,layout: 'fit'
-                ,hidden: true
-                ,autoHeight: false
-                ,maxHeight: 600
-                ,width: 640
-                ,resizable: false
-                ,plain: true
-                ,stateful :false
-                ,closable: true
-                ,loadMask: true
-                ,title: esapp.Utils.getTranslation('assign_legends_to') + ' ' + productname + '<b class="smalltext"> - ' + productversion + '</b>'  // 'Assign legends to <productname>'
-                ,closeAction:'destroy'
-                ,modal: true
-                ,deferredRender: false
-                ,frame: false
-                ,border: true
-                ,collapsible: false
-                // ,bodyStyle: 'padding: 15px 3px 0 3px;'
-                ,defaults: {autoScroll:true}
-                ,listeners: {
-                     close: function(){
-                         filters.remove(excludeProductLegends);
-                         var selecteddataset = me.lookupReference('mapset-dataset-grid').getSelectionModel().getSelected().items[0];
-                         me.getController().mapsetDataSetGridRowClick(this, selecteddataset);
-                     }
-                }
-                ,bbar: [{
-                    xtype: 'box',
-                    html: '<b style="color:orangered">' + 'Hold the [Ctrl] key for multiple selections!' + '</b>'
-                },
-                '->',{
-                    reference: 'assignLegendsBtn',
-                    text: esapp.Utils.getTranslation('assign_selected_legends'), // 'Assign selected legends'
-                    iconCls:'fa fa-plus-circle fa-1x',
-                    style: {color:'green'},
-                    handler: function(){
-                        var selrec = assignLegendWin.lookupReference('assignLegendsGrid').getSelectionModel().getSelected();
-                        var selected_legendids = [];
-                        for ( var i=0, len=selrec.items.length; i<len; ++i ){
-                          selected_legendids.push(selrec.items[i].data.legendid);
-                        }
+        var newAssignLegendWin = new esapp.view.analysis.legendAdmin({
+            assign: true,
+            productname: productname,
+            productcode: productcode,
+            productversion: productversion,
+            subproductcode: subproductcode,
+            productNavigatorObj: me
+        });
+        // this.getView().add(newLegendAdminWin);
+        newAssignLegendWin.show();
 
-                        Ext.Ajax.request({
-                           url:'legends/assignlegends',
-                           params:{
-                               productcode: productcode,
-                               productversion: productversion,
-                               subproductcode: subproductcode,
-                               legendids:Ext.util.JSON.encode(selected_legendids)
-                           },
-                           method: 'POST',
-                           waitMsg: esapp.Utils.getTranslation('assigning_legends'), // 'Assigning legends...',
-                           scope:this,
-                           success: function(result, request) {
-                               // The success handler is called if the XHR request actually
-                               // made it to the server and a response of some kind occurs.
-                               var returnData = Ext.util.JSON.decode(result.responseText);
-                               if (returnData.success){
-                                   var selecteddataset = me.lookupReference('mapset-dataset-grid').getSelectionModel().getSelected().items[0];
-                                   me.getController().mapsetDataSetGridRowClick(this, selecteddataset);
 
-                                   filters.remove(excludeProductLegends);
-                                   Ext.toast({html: esapp.Utils.getTranslation('legends_assiged'), title: esapp.Utils.getTranslation('legends_assiged'), width: 200, align: 't'});
-                                   assignLegendWin.close();
-                               } else if(!returnData.success){
-                                   esapp.Utils.showError(returnData.message || result.responseText);
-                               }
-                           }, // eo function onSuccess
-                           failure: function(result, request) {
-                               // The failure handler is called if there's some sort of network error,
-                               // like you've unplugged your ethernet cable, the server is down, etc.
-                               var returnData = Ext.util.JSON.decode(result.responseText);
-                               esapp.Utils.showError(returnData.message || result.responseText);
-                           } // eo function onFailure
-                        });
-                    }
-                }]
-                ,items: [{
-                    xtype : 'grid',
-                    reference: 'assignLegendsGrid',
-                    // bind: '{legends}',
-                    store: legendsstore,
-                    bufferedRenderer: false,
-                    viewConfig: {
-                        stripeRows: false,
-                        enableTextSelection: true,
-                        draggable: false,
-                        markDirty: false,
-                        preserveScrollOnRefresh: true,
-                        forceFit:true
-                    },
-
-                    selModel : {
-                        allowDeselect : false,
-                        mode:'MULTI'
-                    },
-
-                    hideHeaders: false,
-                    collapsible: false,
-                    enableColumnMove:false,
-                    enableColumnResize:true,
-                    sortableColumns:true,
-                    multiColumnSort: false,
-                    columnLines: true,
-                    rowLines: true,
-                    frame: false,
-                    border: false,
-                    bodyBorder: false,
-
-                    columns: [{
-                        text: esapp.Utils.getTranslation('legend_descriptive_name'),  // 'Sub menu',
-                        width: 300,
-                        dataIndex: 'legend_descriptive_name',
-                        cellWrap:true,
-                        menuDisabled: true,
-                        sortable: true,
-                        variableRowHeight : true,
-                        draggable:false,
-                        groupable:false,
-                        hideable: false
-                    }, {
-                        text: esapp.Utils.getTranslation('colourscheme'),  // 'Colour Scheme',
-                        width: 300,
-                        dataIndex: 'colourscheme',
-                        cellWrap:true,
-                        menuDisabled: true,
-                        sortable: true,
-                        variableRowHeight : true,
-                        draggable:false,
-                        groupable:false,
-                        hideable: false
-                    }]
-                }]
-            });
-        }
-        assignLegendWin.show();
+        // var assignLegendWin = Ext.getCmp('assignLegendWin');
+        // if (assignLegendWin==null || assignLegendWin=='undefined' ) {
+        //
+        //     assignLegendWin = Ext.create('Ext.window.Window', {
+        //          id: 'assignLegendWin'
+        //         // ,reference:'assignLegendWin'
+        //         ,referenceHolder: true
+        //         ,layout: 'fit'
+        //         ,hidden: true
+        //         ,autoHeight: false
+        //         ,maxHeight: 600
+        //         ,width: 640
+        //         ,resizable: false
+        //         ,plain: true
+        //         ,stateful :false
+        //         ,closable: true
+        //         ,loadMask: true
+        //         ,title: esapp.Utils.getTranslation('assign_legends_to') + ' ' + productname + '<b class="smalltext"> - ' + productversion + '</b>'  // 'Assign legends to <productname>'
+        //         ,closeAction:'destroy'
+        //         ,modal: true
+        //         ,deferredRender: false
+        //         ,frame: false
+        //         ,border: true
+        //         ,collapsible: false
+        //         // ,bodyStyle: 'padding: 15px 3px 0 3px;'
+        //         ,defaults: {autoScroll:true}
+        //         ,listeners: {
+        //              close: function(){
+        //                  filters.remove(excludeProductLegends);
+        //                  var selecteddataset = me.lookupReference('mapset-dataset-grid').getSelectionModel().getSelected().items[0];
+        //                  me.getController().mapsetDataSetGridRowClick(this, selecteddataset);
+        //              }
+        //         }
+        //         ,bbar: [{
+        //             xtype: 'box',
+        //             html: '<b style="color:orangered">' + 'Hold the [Ctrl] key for multiple selections!' + '</b>'
+        //         },
+        //         '->',{
+        //             reference: 'assignLegendsBtn',
+        //             text: esapp.Utils.getTranslation('assign_selected_legends'), // 'Assign selected legends'
+        //             iconCls:'fa fa-plus-circle fa-1x',
+        //             style: {color:'green'},
+        //             handler: function(){
+        //                 var selrec = assignLegendWin.lookupReference('assignLegendsGrid').getSelectionModel().getSelected();
+        //                 var selected_legendids = [];
+        //                 for ( var i=0, len=selrec.items.length; i<len; ++i ){
+        //                   selected_legendids.push(selrec.items[i].data.legendid);
+        //                 }
+        //
+        //                 Ext.Ajax.request({
+        //                    url:'legends/assignlegends',
+        //                    params:{
+        //                        productcode: productcode,
+        //                        productversion: productversion,
+        //                        subproductcode: subproductcode,
+        //                        legendids:Ext.util.JSON.encode(selected_legendids)
+        //                    },
+        //                    method: 'POST',
+        //                    waitMsg: esapp.Utils.getTranslation('assigning_legends'), // 'Assigning legends...',
+        //                    scope:this,
+        //                    success: function(result, request) {
+        //                        // The success handler is called if the XHR request actually
+        //                        // made it to the server and a response of some kind occurs.
+        //                        var returnData = Ext.util.JSON.decode(result.responseText);
+        //                        if (returnData.success){
+        //                            var selecteddataset = me.lookupReference('mapset-dataset-grid').getSelectionModel().getSelected().items[0];
+        //                            me.getController().mapsetDataSetGridRowClick(this, selecteddataset);
+        //
+        //                            filters.remove(excludeProductLegends);
+        //                            Ext.toast({html: esapp.Utils.getTranslation('legends_assiged'), title: esapp.Utils.getTranslation('legends_assiged'), width: 200, align: 't'});
+        //                            assignLegendWin.close();
+        //                        } else if(!returnData.success){
+        //                            esapp.Utils.showError(returnData.message || result.responseText);
+        //                        }
+        //                    }, // eo function onSuccess
+        //                    failure: function(result, request) {
+        //                        // The failure handler is called if there's some sort of network error,
+        //                        // like you've unplugged your ethernet cable, the server is down, etc.
+        //                        var returnData = Ext.util.JSON.decode(result.responseText);
+        //                        esapp.Utils.showError(returnData.message || result.responseText);
+        //                    } // eo function onFailure
+        //                 });
+        //             }
+        //         }]
+        //         ,items: [{
+        //             xtype : 'grid',
+        //             reference: 'assignLegendsGrid',
+        //             // bind: '{legends}',
+        //             store: legendsstore,
+        //             bufferedRenderer: false,
+        //             viewConfig: {
+        //                 stripeRows: false,
+        //                 enableTextSelection: true,
+        //                 draggable: false,
+        //                 markDirty: false,
+        //                 preserveScrollOnRefresh: true,
+        //                 forceFit:true
+        //             },
+        //
+        //             selModel : {
+        //                 allowDeselect : false,
+        //                 mode:'MULTI'
+        //             },
+        //
+        //             hideHeaders: false,
+        //             collapsible: false,
+        //             enableColumnMove:false,
+        //             enableColumnResize:true,
+        //             sortableColumns:true,
+        //             multiColumnSort: false,
+        //             columnLines: true,
+        //             rowLines: true,
+        //             frame: false,
+        //             border: false,
+        //             bodyBorder: false,
+        //
+        //             columns: [{
+        //                 text: esapp.Utils.getTranslation('legend_descriptive_name'),  // 'Sub menu',
+        //                 width: 300,
+        //                 dataIndex: 'legend_descriptive_name',
+        //                 cellWrap:true,
+        //                 menuDisabled: true,
+        //                 sortable: true,
+        //                 variableRowHeight : true,
+        //                 draggable:false,
+        //                 groupable:false,
+        //                 hideable: false
+        //             }, {
+        //                 text: esapp.Utils.getTranslation('colourscheme'),  // 'Colour Scheme',
+        //                 width: 300,
+        //                 dataIndex: 'colourscheme',
+        //                 cellWrap:true,
+        //                 menuDisabled: true,
+        //                 sortable: true,
+        //                 variableRowHeight : true,
+        //                 draggable:false,
+        //                 groupable:false,
+        //                 hideable: false
+        //             }]
+        //         }]
+        //     });
+        // }
+        // assignLegendWin.show();
 
     },
 
