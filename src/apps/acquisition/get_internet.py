@@ -32,7 +32,7 @@ from database import querydb
 from lib.python import functions
 from apps.productmanagement import datasets
 from apps.tools import motu_api
-# from apps.tools import sentinelsat_api
+from apps.tools import jeodpp_api
 from apps.tools import coda_eum_api
 
 logger = log.my_logger(__name__)
@@ -485,74 +485,72 @@ def build_list_matching_files_tmpl_theia(base_url, template, from_date, to_date,
 
     return list_matches
 
-# #####################################################################################
-# #   build_list_matching_files_jeodpp
-# #   Purpose: return the list of file names matching a 'template' with 'date' placeholders
-# #            It is the entry point for the 'http_templ' source type
-# #   Author: VIJAY CHARAN VENKATACHALAM, JRC, European Commission
-# #   Date: 2019/09
-# #   Inputs: template: object with the needed parameters to fill the template get
-# #           from_date: start date for the dataset (datetime.datetime object)
-# #           to_date: end date for the dataset (datetime.datetime object)
-# #           frequency: dataset 'frequency' (see DB 'frequency' table)
-# #
-# def build_list_matching_files_jeodpp(base_url, template, from_date, to_date, frequency_id,usr_pwd):
+#####################################################################################
+#   build_list_matching_files_jeodpp
+#   Purpose: return the list of file names matching a 'template' with 'date' placeholders
+#            It is the entry point for the 'http_templ' source type
+#   Author: VIJAY CHARAN VENKATACHALAM, JRC, European Commission
+#   Date: 2019/09
+#   Inputs: template: object with the needed parameters to fill the template get
+#           from_date: start date for the dataset (datetime.datetime object)
+#           to_date: end date for the dataset (datetime.datetime object)
+#           frequency: dataset 'frequency' (see DB 'frequency' table)
 #
-#     # Add a check on frequency
-#     try:
-#         frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
-#     except Exception as inst:
-#         logger.debug("Error in datasets.Dataset.get_frequency: %s" %inst.args[0])
-#         raise
-#
-#     # Manage the start_date (mandatory).
-#     try:
-#         # If it is a date, convert to datetime
-#         if functions.is_date_yyyymmdd(str(from_date), silent=True):
-#             datetime_start=datetime.datetime.strptime(str(from_date),'%Y%m%d')
-#         else:
-#             # If it is a negative number, subtract from current date
-#             if isinstance(from_date,int) or isinstance(from_date,long):
-#                 if from_date < 0:
-#                     datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
-#             else:
-#                 logger.debug("Error in Start Date: must be YYYYMMDD or -Ndays")
-#                 raise Exception("Start Date not valid")
-#     except:
-#         raise Exception("Start Date not valid")
-#
-#     # Manage the end_date (mandatory).
-#     try:
-#         if functions.is_date_yyyymmdd(str(to_date), silent=True):
-#             datetime_end=datetime.datetime.strptime(str(to_date),'%Y%m%d')
-#         # If it is a negative number, subtract from current date
-#         elif isinstance(to_date,int) or isinstance(to_date,long):
-#             if to_date < 0:
-#                 datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
-#         else:
-#             datetime_end=datetime.datetime.today()
-#     except:
-#         pass
-#
-#     try:
-#         dates = frequency.get_dates(datetime_start, datetime_end)
-#     except Exception as inst:
-#         logger.debug("Error in frequency.get_dates: %s" %inst.args[0])
-#         raise
-#
-#     try:
-#         if sys.platform == 'win32':
-#             template.replace("-","#")
-#
-#         from apps.tools import jeodpp_api
-#
-#         ooid_list = jeodpp_api.generate_list_products(dates, template, frequency, base_url, usr_pwd)
-#
-#     except Exception as inst:
-#         logger.debug("Error in frequency.get_internet_dates: %s" %inst.args[0])
-#         raise
-#
-#     return ooid_list
+def build_list_matching_files_jeodpp(base_url, template, from_date, to_date, frequency_id,usr_pwd):
+
+    # Add a check on frequency
+    try:
+        frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
+    except Exception as inst:
+        logger.debug("Error in datasets.Dataset.get_frequency: %s" %inst.args[0])
+        raise
+
+    # Manage the start_date (mandatory).
+    try:
+        # If it is a date, convert to datetime
+        if functions.is_date_yyyymmdd(str(from_date), silent=True):
+            datetime_start=datetime.datetime.strptime(str(from_date),'%Y%m%d')
+        else:
+            # If it is a negative number, subtract from current date
+            if isinstance(from_date,int) or isinstance(from_date,long):
+                if from_date < 0:
+                    datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
+            else:
+                logger.debug("Error in Start Date: must be YYYYMMDD or -Ndays")
+                raise Exception("Start Date not valid")
+    except:
+        raise Exception("Start Date not valid")
+
+    # Manage the end_date (mandatory).
+    try:
+        if functions.is_date_yyyymmdd(str(to_date), silent=True):
+            datetime_end=datetime.datetime.strptime(str(to_date),'%Y%m%d')
+        # If it is a negative number, subtract from current date
+        elif isinstance(to_date,int) or isinstance(to_date,long):
+            if to_date < 0:
+                datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
+        else:
+            datetime_end=datetime.datetime.today()
+    except:
+        pass
+
+    try:
+        dates = frequency.get_dates(datetime_start, datetime_end)
+    except Exception as inst:
+        logger.debug("Error in frequency.get_dates: %s" %inst.args[0])
+        raise
+
+    try:
+        if sys.platform == 'win32':
+            template.replace("-","#")
+
+        list_productid_band = jeodpp_api.generate_list_products(dates, template, frequency, base_url, usr_pwd)
+
+    except Exception as inst:
+        logger.debug("Error in frequency.get_internet_dates: %s" %inst.args[0])
+        raise
+
+    return list_productid_band
 
 
 
@@ -1269,6 +1267,135 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                 except:
                                     logger.error("Error in creating motu_client lists. Continue")
                                     continue
+
+                            elif internet_type == 'jeodpp':
+                                # Create the full filename from a 'template' which contains
+                                jeodpp_internet_url = str(internet_source.url)
+
+                                ongoing_list = []
+                                ongoing_list_filename = es_constants.get_internet_processed_list_prefix + str(internet_source.internet_id) + '_Ongoing' + '.list'
+                                ongoing_list = functions.restore_obj_from_pickle(ongoing_list, ongoing_list_filename)
+
+
+                                try:
+                                    current_list = []
+                                    # Create current list in format IM:Band
+                                    current_list = build_list_matching_files_jeodpp(jeodpp_internet_url,
+                                                                                    str(internet_source.include_files_expression),
+                                                                                    internet_source.start_date,
+                                                                                    internet_source.end_date,
+                                                                                    str(internet_source.frequency_id),
+                                                                                    str(usr_pwd)
+                                                                                    )
+
+                                    # ongoing_product_list = jeodpp_api.get_product_id_from_list(ongoing_list)
+                                    # product_product_list = jeodpp_api.get_product_id_from_list(processed_list)
+
+                                    # read ongoing list from the file (in format IM:Band:ID:url) and convert to format IM:Band
+                                    ongoing_product_band_list = jeodpp_api.get_product_id_band_from_list(ongoing_list)
+                                    # read processed list from the file (in format IM:Band:ID:url) and convert to format IM:Band
+                                    # processed_product_band_list = jeodpp_api.get_product_id_band_from_list(processed_list)
+                                    # Loop over current list
+                                    if len(current_list) > 0:
+                                        listtoprocessrequest = []
+                                        for current_file in current_list:
+                                            # Check if current list is not in processed list
+                                            if len(processed_list) == 0 and len(ongoing_list) == 0:
+                                                listtoprocessrequest.append(current_file)
+                                            else:
+                                                if current_file not in processed_list and current_file not in ongoing_product_band_list:
+                                                    # if current_file not in processed_list and current_file not in ongoing_product_band_list:
+                                                    listtoprocessrequest.append(current_file)
+                                        #ongoing_list= listtoprocessrequest   #line for test vto be commented
+                                        if listtoprocessrequest != set([]):   #What if error occurs in this loop
+                                            # logger_spec.info("Loop on the List to Process Request files.")
+                                            for filename in list(listtoprocessrequest):  #What if error occurs in this loop
+                                                logger_spec.info("Creating Job request for Product ID with Band: " + filename)
+                                                try:
+                                                    # Give request to JEODPP to process
+                                                    # HTTP request to JEODPP follow here once the request is success add the oid to ongoing list
+                                                    current_product_id = filename.split(':')[0]
+                                                    current_product_band = filename.split(':')[1]
+                                                    created_ongoing_link = jeodpp_api.create_jeodpp_job(
+                                                                            base_url=jeodpp_internet_url,
+                                                                            product_id=current_product_id, band=current_product_band,
+                                                                            usr_pwd=usr_pwd,
+                                                                            https_params=str(internet_source.https_params)
+                                                    )
+                                                    if created_ongoing_link is not None:
+                                                        ongoing_list.append(created_ongoing_link) ## TODO have to dump object to pickle
+                                                        functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+                                                except:
+                                                    logger_spec.warning(
+                                                        "Problem while creating Job request to JEODPP: %s.", filename)
+                                    # functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+                                    if len(ongoing_list) > 0:
+                                        logger_spec.info("Loop over the downloadable list files.")
+                                        ongoing_product_list = jeodpp_api.get_product_id_from_list(ongoing_list)
+                                        #Make the ongoing_product_list unique to loop over
+                                        ongoing_product_list = functions.conv_list_2_unique_value(ongoing_product_list)
+                                        # ongoing_job_list = jeodpp_api.get_job_id_from_list(ongoing_list)
+                                        for each_product_id in ongoing_product_list: #What if error occurs in this loop
+                                            listtodownload = []
+                                            for ongoing in ongoing_list:
+                                                ongoing_product_id = ongoing.split(':')[0]
+
+                                                if each_product_id == ongoing_product_id:
+                                                    ongoing_job_id = ongoing.split(':')[2]
+                                                    job_status = jeodpp_api.get_jeodpp_job_status(
+                                                                        base_url=jeodpp_internet_url,
+                                                                        job_id=ongoing_job_id, usr_pwd=usr_pwd,
+                                                                        https_params=str(internet_source.https_params))
+                                                    if job_status:
+                                                        listtodownload.append(ongoing)
+
+                                            if listtodownload != set([]):
+                                                download_urls = []
+                                                for ongoing in list(listtodownload):
+                                                    download_urls.append(ongoing.split(':')[3])
+
+                                                if len(download_urls) > 0:
+                                                    logger_spec.info("Downloading Product: " + str(each_product_id))
+                                                    try:
+                                                        download_result = jeodpp_api.download_file(
+                                                            jeodpp_internet_url, target_dir=es_constants.ingest_dir,
+                                                            product_id=each_product_id, userpwd=usr_pwd,
+                                                            https_params=str(internet_source.https_params),
+                                                            download_urls=download_urls)
+                                                        if download_result:
+                                                            logger_spec.info("Downloading Success for : " + str(each_product_id))
+                                                            for ongoing in list(listtodownload):
+                                                                ongoing_product_id = ongoing.split(':')[0]
+                                                                ongoing_product_band = ongoing.split(':')[1]
+                                                                ongoing_product_id_band = str(ongoing_product_id)+':'+str(ongoing_product_band)
+                                                                processed_list.append(ongoing_product_id_band)   # Add the processed list only with product id and band
+                                                                # processed_list.append(ongoing)
+                                                                functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+                                                                ongoing_list.remove(ongoing)
+                                                                functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+                                                                ongoing_job_id = ongoing.split(':')[2]
+                                                                deleted = jeodpp_api.delete_results_jeodpp_job(
+                                                                                    base_url=jeodpp_internet_url,
+                                                                                    job_id=ongoing_job_id, usr_pwd=usr_pwd,
+                                                                                    https_params=str(internet_source.https_params))
+                                                                if not deleted:   # To manage the delete store the job id in the  delete list and remove the job
+                                                                    logger_spec.warning("Problem while deleting Product job id: %s.",str(each_product_id)+str(ongoing_job_id))
+                                                    except:
+                                                        logger_spec.warning("Problem while Downloading Product: %s.",str(each_product_id))
+                                    functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+                                    # functions.dump_obj_to_pickle(ongoing_info, ongoing_info_filename)
+                                    #  Processed list will be added atlast
+                                    functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+                                    # functions.dump_obj_to_pickle(processed_info, processed_info_filename)
+
+
+                                except:
+                                    logger.error("Error in JEODPP Internet service. Continue")
+
+                                finally:
+                                    logger.info("JEODPP Internet service completed")
+                                    current_list = []
+
 
                             # elif internet_type == 'sentinel_sat':
                             #     # Create the full filename from a 'template' which contains
