@@ -817,9 +817,9 @@ class TestIngestion(unittest.TestCase):
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
 
-    def test_ingest_jrc_wbd(self):
+    def test_ingest_jrc_wbd_avg(self):
 
-        date_fileslist = glob.glob('/data/ingest/JRC-WBD-AVG*')
+        date_fileslist = glob.glob('/data/ingest/JRC-WBD-AVG-ICPAC_1985-2015_1201*')
         #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
         in_date = '1201'
         productcode = 'wd-gee'
@@ -850,6 +850,43 @@ class TestIngestion(unittest.TestCase):
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
+        self.assertEqual(1, 1)
+
+    def test_ingest_jrc_wbd_avg_tarzip(self):
+
+        date_fileslist = glob.glob('/data/ingest/MESA_JRC_wd-gee_avg_1201_WD-GEE-IGAD-AVG_1.0.tgz')
+        # date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
+        in_date = '1201'
+        productcode = 'wd-gee'
+        productversion = '1.0'
+        subproductcode = 'avg'
+        mapsetcode = 'WD-GEE-IGAD-AVG'
+        datasource_descrID = 'EO:EUM:DAT:LANDSAT:MESA-JRC-WBD-GEE-AVG'
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
+
+        subproducts = []
+        subproducts.append(sprod)
+
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -948,10 +985,11 @@ class TestIngestion(unittest.TestCase):
 
         ingestion.ingest_archives_eumetcast()
 
-    def test_ingest_jrc_wbd_2(self):
+    def test_ingest_jrc_wbd_occ(self):
 
-        date_fileslist = glob.glob('/data/processing/exchange/WD-GEE/JRC-WBD-AVG-ICPAC*.tif')
-        in_date = '20190701'
+
+        date_fileslist = glob.glob('/data/ingest/JRC-WBD_ICPAC_20181201*.tif')
+        in_date = '20181201'
         productcode = 'wd-gee'
         productversion = '1.0'
         subproductcode = 'occurr'
@@ -1440,7 +1478,7 @@ class TestIngestion(unittest.TestCase):
 
         #date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_201706*_GLOBE_PROBAV_V2.2.1.nc')
         # date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_19*_GLOBE_VGT_V2.2.1.nc')
-        date_fileslist = glob.glob('/data/processing/exchange/c_gls_NDVI_201909010000_GLOBE_PROBAV_V2.2.1.nc')
+        date_fileslist = glob.glob('/data/processing/exchange/c_gls_NDVI_201811010000_GLOBE_PROBAV_V2.2.1.nc')
 
         for one_file in date_fileslist:
 
