@@ -14,8 +14,6 @@ def my_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False):
     version='sv2-pv2.2'
     start_date='19990101'
     end_date='20181231'
-    start_date=None
-    end_date=None
 
     list_dates = proc_functions.get_list_dates_for_dataset(productcode, subproductcode, version, start_date=start_date, end_date=end_date)
 
@@ -28,13 +26,13 @@ def my_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False):
             'version': version,
             'starting_dates': list_dates,
             'logfile':'test_processing_ndvi',
-            'touch_files_only':touch_files_only}
+            'touch_files_only':False}
 
     #res_queue = Queue()
     res_queue = None
-    proc_lists = processing_std_ndvi_prods_only(res_queue,**args)
-    # proc_lists = processing_std_ndvi_stats_only(res_queue,**args)
-    # proc_lists = processing_std_ndvi_all(res_queue,**args)
+    # proc_lists = processing_std_ndvi_prods_only(res_queue,**args)
+    proc_lists = processing_std_ndvi_stats_only(res_queue,**args)
+    #proc_lists = processing_std_ndvi_all(res_queue,**args)
 
 #   ---------------------------------------------------------------------
 # vgt-ndvi merge (for sv2-pv2.2)
@@ -743,8 +741,8 @@ def my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=Fa
 
 from apps.processing.processing_std_vgt import *
 def test_subprocess_vgt_fapar(pipe_run=4, pipe_print=0, touch_files_only=False):
-    start_date = '19990101'
-    end_date = '20181221'
+    start_date = None
+    end_date = None
 
     if start_date is not None and end_date is not None:
         starting_dates = proc_functions.get_list_dates_for_dataset('vgt-fapar', 'fapar', 'V2.0', start_date=start_date, end_date=end_date)
@@ -759,12 +757,12 @@ def test_subprocess_vgt_fapar(pipe_run=4, pipe_print=0, touch_files_only=False):
             'version':'V2.0',
             'starting_dates': starting_dates,
             'logfile':'vgt-fapar',
-            'upsert_db' : True,
+            'upsert_db' : False,
             'touch_only':touch_files_only
             }
     res_queue = None
 
-    processing_std_vgt_stats_only(res_queue, **args)
+    processing_std_vgt_prods_only(res_queue, **args)
 
 def test_subprocess_vgt_fcover(pipe_run=4, pipe_print=0, touch_files_only=False):
     start_date = '19990101'
@@ -809,7 +807,7 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
             'version':'V2.0',
             'logfile':'vgt-lai',
             'starting_dates':starting_dates,
-            'upsert_db' : True,
+            'upsert_db' : False,
             'touch_only':touch_files_only
             }
     res_queue = None
@@ -849,12 +847,12 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 #   ---------------------------------------------------------------------
 
 # test_subprocess_swi(pipe_run=3, pipe_print=0, touch_files_only=False)
-#test_subprocess_vgt_lai(pipe_run=0, pipe_print=4, touch_files_only=False)
+# test_subprocess_vgt_lai(pipe_run=0, pipe_print=4, touch_files_only=False)
 # test_subprocess_vgt_fcover(pipe_run=3, pipe_print=0, touch_files_only=False)
-
-my_proc_std_ndvi(pipe_run=3, pipe_print=0, touch_files_only=True)
+test_subprocess_vgt_fapar(pipe_run=0, pipe_print=4, touch_files_only=False)
+# my_proc_std_ndvi(pipe_run=3, pipe_print=0, touch_files_only=False)
 #my_proc_ndvi_merge(pipe_run=0, pipe_print=3, touch_files_only=False)
-#my_proc_pml_modis_fronts(pipe_run=3, pipe_print=0, touch_files_only=False)
+# my_proc_pml_modis_fronts(pipe_run=3, pipe_print=0, touch_files_only=False)
 #my_proc_std_fronts(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_std_modis_chla(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_std_modis_sst(pipe_run=0, pipe_print=3, touch_files_only=False)
@@ -868,9 +866,9 @@ my_proc_std_ndvi(pipe_run=3, pipe_print=0, touch_files_only=True)
 # my_proc_chirps_dekad(pipe_run=3, pipe_print=0, start_date='20180101', end_date='20181231', upsert_db=False, touch_files_only=False)
 # my_proc_arc2rain_dekad(pipe_run=0, pipe_print=6, start_date='19810101', end_date='20171231', upsert_db=False, touch_files_only=False)
 # my_proc_chirps_lp(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False, type='')
-start_y='2019'; start_m='01'; start_d='01';       start_date=start_y+start_m+start_d+'0000'
-end_y  ='2019'; end_m  ='12'; end_d  ='31';       end_date=end_y+end_m+end_d+'2345'
-start_date=None; end_date=None
+# start_y='2019'; start_m='01'; start_d='01';       start_date=start_y+start_m+start_d+'0000'
+# end_y  ='2019'; end_m  ='12'; end_d  ='31';       end_date=end_y+end_m+end_d+'2345'
+# start_date=None; end_date=None
 #my_proc_std_lsasaf_et(pipe_run=6, pipe_print=0, start_date=start_date, end_date=end_date, touch_files_only=False)
 #my_proc_std_lsasaf_lst(pipe_run=4, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
 #my_proc_std_modis_firms(pipe_run=4, pipe_print=0, start_date='20020701', end_date='20180630',touch_files_only=False)
