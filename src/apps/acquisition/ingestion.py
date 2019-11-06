@@ -1231,6 +1231,55 @@ def pre_process_tarzip(subproducts, tmpdir , input_files, my_logger):
     return out_tmp_gtiff_file
 
 
+def pre_process_tarzip_wd_gee(subproducts, tmpdir , input_files, my_logger):
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process .tgz files (e.g. WD-GEE)
+#
+    out_tmp_gtiff_file = []
+    #  should be a single file
+    # if isinstance(input_files, list):
+    #     if len(input_files) > 1:
+    #         logger.error('Only 1 file expected. Exit')
+    #         raise Exception("Only 1 file expected. Exit")
+    #     else:
+    #         input_file = input_files[0]
+    # complicated_case = False
+    # if len(input_files)!=len(subproducts):
+    #     complicated_case = True
+
+    for sprod in subproducts:
+        if sprod != 0:
+            mapset_code = sprod['mapsetcode']
+
+        fake_file_needed = True   # False only if the product exists and untared
+        for index, input_file in enumerate(input_files):
+            file = os.path.basename(input_file)
+            input_file_mapset = file.split('_')[5]
+
+            if str(mapset_code) == str(input_file_mapset):
+                logger.debug('Extracting from .tgz: .tarzip case')
+                if tarfile.is_tarfile(input_file):
+                    tar_file = tarfile.open(input_file,'r:*')           # Open the .tgz
+                    tar_file.extractall(path=tmpdir)
+                    append_file_list = glob.glob(tmpdir+os.path.sep+'*'+input_file_mapset+'*.tif')
+                    if len(append_file_list) > 0:
+                        append_file = glob.glob(tmpdir + os.path.sep + '*' + input_file_mapset + '*.tif')[0]
+                    out_tmp_gtiff_file.append(append_file)
+                    tar_file.close()
+                    fake_file_needed = False
+                else:
+                    my_logger.error("File %s is not a valid .tgz. Exit", input_files)
+                    raise Exception("File %s is not a valid .tgz. Exit", input_files)
+            # elif index == 2:
+            #     # append empty file to out_tmp_gtiff_file
+            #     out_tmp_gtiff_file.append('/dumpy')
+
+        if fake_file_needed:
+            out_tmp_gtiff_file.append('/fake_link/')
+                # TODO-M.C.:Check all datasets have been found (len(intermFile) ==len(subprods)))
+
+    return out_tmp_gtiff_file
+
 def pre_process_bzip2 (subproducts, tmpdir, input_files, my_logger):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process bzip2 files
@@ -1658,8 +1707,68 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
 #   gdal_merge.py format:
 #       -ps 0.000269494585236 0.000269494585236
 #       -ul_lr -17.5290058 27.3132762 24.0006488 4.2682552
+    region = 'IGAD'
+
+    # Get date from file name
+    input_file_name  = os.path.basename(input_files[0])
+    # date = '20181201'
+    sprod = subproducts[0]
+    sprod_code = str(sprod.get('subproduct'))
+
+    if sprod_code == 'avg':
+        #typical file name is JRC-WBD-AVG-CA_1985-2015_0601-0000000000-0000000000.tif
+        date = input_file_name.split('_')[2]    #0601-0000000000-0000000000.tif
+        date = date.split('-')[0]
+        region_code = input_file_name.split('_')[0]
+        region_code = region_code.split('-')[3]
+    else:
+        #JRC-WBD_NA_20190101-0000000000-0000000000.tif
+        date = input_file_name.split('_')[2]  # 0601-0000000000-0000000000.tif
+        date = date.split('-')[0]
+        region_code = input_file_name.split('_')[0]
+        region_code = region_code.split('-')[3]
+
+    if region_code == 'ICPAC':
+        region='IGAD'
+        # ullr_xy=' -17.5290058 27.3132762 24.0006488 4.2682552 '      # ECOWAS
+        ullr_xy=' 21.8145086965016 23.1455424529815 51.4155244442228 -11.7612826888632 '      # IGAD
+        # output_tar = '/data/ingest/MESA_JRC_wd-gee_avg_' + date + '_WD-GEE-' + region + '-AVG_1.0.tgz'  # for avg
+        # output_tar='/data/ingest/MESA_JRC_wd-gee_occurr_'+date+'_WD-GEE-'+region+'-AVG_1.0.tgz'    # for occurr
+        file_naming = 'MESA_JRC_wd-gee_' + sprod_code + '_' + date + '_WD-GEE-' + region + '-AVG_1.0'
+        # output_tar = '/data/ingest/'+file_naming+'.tgz'
+
+    elif region_code == 'NA':
+        region = 'NORTHAFRICA'
+        ullr_xy = ' -17.1042823357493 14.7154823322187 36.2489081763193 37.5610773118327 '
+        file_naming = 'MESA_JRC_wd-gee_' + sprod_code + '_' + date + '_WD-GEE-' + region + '-AVG_1.0'
+        # output_tar = '/data/ingest/'+file_naming+'.tgz'
+
+    elif region_code == 'SA':
+        region = 'SOUTHAFRICA'
+        ullr_xy = ' 11.67019352	-46.98153003 40.83947894 -4.388180331 '
+        file_naming = 'MESA_JRC_wd-gee_' + sprod_code + '_' + date + '_WD-GEE-' + region + '-AVG_1.0'
+
+    elif region_code == 'CA':
+        region = 'CENTRALAFRICA'
+        ullr_xy = ' 5.6170756400709561 -13.4558646408263130 31.3120368693836895 23.4395610454738517 '
+        file_naming = 'MESA_JRC_wd-gee_' + sprod_code + '_' + date + '_WD-GEE-' + region + '-AVG_1.0'
+
+    elif region_code == 'WA':
+        region = 'WESTAFRICA'
+        ullr_xy = ' -25.3589014815236 4.26852473555073 15.9958511066742 25.0002041885746 '
+        file_naming = 'MESA_JRC_wd-gee_' + sprod_code + '_' + date + '_WD-GEE-' + region + '-AVG_1.0'
+
+    else :
+        region = 'ECOWAS'
+        ullr_xy = ' -17.5290058 27.3132762 24.0006488 4.2682552 '  # ECOWAS
+        # ullr_xy = ' 21.8145086965016 23.1455424529815 51.4155244442228 -11.7612826888632 '  # IGAD
+        # output_tar = '/data/ingest/MESA_JRC_wd-gee_occurr_' + date + '_WD-GEE-' + region + '-AVG_1.0.tgz'  # for occurr
+        # output_tar = '/data/ingest/MESA_JRC_wd-gee_avg_' + date + '_WD-GEE-' + region + '-AVG_1.0.tgz'  # for avg
+        file_naming = 'MESA_JRC_wd-gee_' + sprod_code + '_' + date + '_WD-GEE-' + region + '-AVG_1.0'
+        # output_tar = '/data/ingest/'+file_naming+'.tgz'
 
 
+    output_tar = '/data/ingest/'+file_naming+'.tgz'
     # Prepare the output as an empty list
     interm_files_list = []
 
@@ -1685,7 +1794,9 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
     # Does check the number of files ?
     output_file         = tmpdir+os.path.sep + 'merge_output.tif'
     output_file_vrt = tmpdir + os.path.sep + 'merge_output_rescaled.vrt'
-    output_file_mapset  = tmpdir+os.path.sep + 'merge_output_WD-GEE-ECOWAS-AVG.tif'
+    # output_file_mapset  = tmpdir+os.path.sep + 'merge_output_WD-GEE-'+region+'-AVG.tif'
+    output_file_mapset = tmpdir + os.path.sep + file_naming + '.tif'
+
 
     # -------------------------------------------------------------------------
     # STEP 1: Merge all input products into a 'tmp' file
@@ -1694,7 +1805,7 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         command = es_constants.gdal_merge
         command += ' -co \"compress=lzw\"'
         command += ' -ps 0.000269494585236 0.000269494585236 '
-        command += ' -ul_lr -17.5290058 27.3132762 24.0006488 4.2682552 '
+        # command += ' -ul_lr '+ ullr_xy      # If not specified it take the input file extent which is fine for us?
         command += ' -o ' + output_file
         command += ' -ot BYTE '
         for file in good_input_files:
@@ -1729,13 +1840,14 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         pass
 
     #Manually save tar file in the /data/ingest and send it to mesa-proc for the processing
-    command = 'tar -cvzf /data/ingest/MESA_JRC_wd-gee_occurr_20190801_WD-GEE-ECOWAS-AVG_1.0.tgz -C ' + os.path.dirname(output_file_mapset) + ' ' + os.path.basename(output_file_mapset)
+    command = 'tar -cvzf '+output_tar+' -C ' + os.path.dirname(output_file_mapset) + ' ' + os.path.basename(output_file_mapset)
+    # command = 'tar -cvzf /data/ingest/MESA_JRC_wd-gee_occurr_20190801_WD-GEE-ECOWAS-AVG_1.0.tgz -C ' + os.path.dirname(output_file_mapset) + ' ' + os.path.basename(output_file_mapset)
     my_logger.debug('Command for tar the file is: ' + command)
     os.system(command)
     # Assign output file
     # interm_files_list.append(output_file_mapset)
 
-    return interm_files_list
+    return []
 
 
 def pre_process_ecmwf_mars(subproducts, tmpdir , input_files, my_logger):
@@ -3246,6 +3358,10 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
         elif preproc_type == 'TARZIP':
             interm_files = pre_process_tarzip(subproducts, tmpdir, input_files, my_logger)
 
+        elif preproc_type == 'TARZIP_WD_GEE':
+            interm_files = pre_process_tarzip_wd_gee(subproducts, tmpdir, input_files, my_logger)
+            georef_already_done = True
+
         elif preproc_type == 'NETCDF_AVISO':
             interm_files = pre_process_aviso_mwind(subproducts, tmpdir, input_files, my_logger)
         # elif preproc_type == 'GSOD':
@@ -3337,9 +3453,9 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
     version_undef = 'undefined'
     my_logger.info("Entering routine %s for product %s - date %s" % ('ingest_file', product['productcode'], in_date))
 
-    # Test the file/files exists
+    # Test the file/files exists  (if the file doesn't exists but if the file list is more than 1 then it proceed to next step
     for infile in interm_files_list:
-        if not os.path.isfile(infile):
+        if not os.path.isfile(infile) and len(interm_files_list)<=1 :
             my_logger.error('Input file: %s does not exist' % infile)
             return 1
 
@@ -3357,6 +3473,11 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
     ii = 0
 
     for intermFile in interm_files_list:
+
+        # This case was implemented as the successor of "Test teh file/files exists" since if the file doesnot exist but list is more than 1 we dont throw in the previous case but here that particular error is catched
+        if not os.path.isfile(intermFile):     #if intermFile == '/fake_link/':
+            ii += 1
+            continue
 
         my_logger.info("Processing intermediate file: %s" % os.path.basename(intermFile))
         tmp_dir = os.path.dirname(intermFile)
@@ -3548,7 +3669,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         merge_existing_output = False
         # Check if the output file already exists
-        if os.path.isfile(output_filename) and datasource_descr.area_type in ['tile','region']:
+        if os.path.isfile(output_filename) and datasource_descr.area_type in ['tile','region'] and not trg_mapset.is_wbd():
 
             merge_existing_output = True
             # In case of merge, output_filename is generated first in 'tmp_dir', otherwise in final dir
@@ -3691,6 +3812,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # WD-GEE case
         else:
             sds_meta.assign_input_files(in_files)
+            sds_meta.assign_input_files(os.path.basename(intermFile))
             sds_meta.write_to_file(intermFile)
             shutil.copy(intermFile,output_filename)
 
