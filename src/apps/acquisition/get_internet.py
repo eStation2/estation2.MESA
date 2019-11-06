@@ -1308,9 +1308,9 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                     listtoprocessrequest.append(current_file)
                                         #ongoing_list= listtoprocessrequest   #line for test vto be commented
                                         if listtoprocessrequest != set([]):   #What if error occurs in this loop
-                                            logger_spec.info("Loop on the List to Process Request files.")
+                                            # logger_spec.info("Loop on the List to Process Request files.")
                                             for filename in list(listtoprocessrequest):  #What if error occurs in this loop
-                                                logger_spec.debug("Processing file: " + jeodpp_internet_url + os.path.sep + filename)
+                                                logger_spec.info("Creating Job request for Product ID with Band: " + filename)
                                                 try:
                                                     # Give request to JEODPP to process
                                                     # HTTP request to JEODPP follow here once the request is success add the oid to ongoing list
@@ -1330,7 +1330,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                         "Problem while creating Job request to JEODPP: %s.", filename)
                                     # functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
                                     if len(ongoing_list) > 0:
-
+                                        logger_spec.info("Loop over the downloadable list files.")
                                         ongoing_product_list = jeodpp_api.get_product_id_from_list(ongoing_list)
                                         #Make the ongoing_product_list unique to loop over
                                         ongoing_product_list = functions.conv_list_2_unique_value(ongoing_product_list)
@@ -1350,7 +1350,6 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                         listtodownload.append(ongoing)
 
                                             if listtodownload != set([]):
-                                                logger_spec.info("Loop on the downloadable_list files.")
                                                 download_urls = []
                                                 for ongoing in list(listtodownload):
                                                     download_urls.append(ongoing.split(':')[3])
@@ -1364,6 +1363,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                             https_params=str(internet_source.https_params),
                                                             download_urls=download_urls)
                                                         if download_result:
+                                                            logger_spec.info("Downloading Success for : " + str(each_product_id))
                                                             for ongoing in list(listtodownload):
                                                                 ongoing_product_id = ongoing.split(':')[0]
                                                                 ongoing_product_band = ongoing.split(':')[1]

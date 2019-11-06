@@ -1027,8 +1027,8 @@ class TestGetInternet(unittest.TestCase):
                          'pull_frequency': internet_source.pull_frequency,
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
-                         'start_date':20120201,
-                         'end_date':20160801,
+                         'start_date':-365,
+                         'end_date':-20,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type}
 
@@ -1196,8 +1196,8 @@ class TestGetInternet(unittest.TestCase):
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
                          'https_params': internet_source.https_params,
-                         'start_date':20041010,
-                         'end_date': 20050120,
+                         'start_date':-365,
+                         'end_date': -10,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type}
 

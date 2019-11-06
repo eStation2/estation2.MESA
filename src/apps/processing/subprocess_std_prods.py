@@ -57,7 +57,9 @@ class SubProcessProdsES2:
         if self.starting_dates is not None:
             # starting_files = []
             for my_date in self.starting_dates:
-                self.starting_files.append(input_dir+my_date+self.in_prod_ident)
+                #ES2 450 #+++++++ Check file exists before appending  +++++++++++++++
+                if functions.is_file_exists_in_path(input_dir+my_date+self.in_prod_ident):
+                    self.starting_files.append(input_dir+my_date+self.in_prod_ident)
         else:
             self.starting_files=input_dir+"*"+self.in_prod_ident
 
@@ -93,7 +95,9 @@ class SubProcessProdsES2:
         if self.starting_dates is not None:
             # starting_files = []
             for my_date in self.starting_dates:
-                self.starting_files.append(input_dir + my_date + self.in_prod_ident)
+                #ES2 450 #+++++++ Check file exists before appending  +++++++++++++++
+                if functions.is_file_exists_in_path(input_dir+my_date+self.in_prod_ident):
+                    self.starting_files.append(input_dir + my_date + self.in_prod_ident)
         else:
             self.starting_files = input_dir + "*" + self.in_prod_ident
 
@@ -194,7 +198,7 @@ class SubProcessProdsES2:
                                                             date_format='YYYYMMDD',
                                                             masked=False,
                                                             timeseries_role=self.starting_sprod, #'10d',
-                                                            display_index=6,
+                                                            # display_index=6,
                                                             active_default=True)
             out_prod_ident = functions.set_path_filename_no_date(self.prod, output_sprod, self.mapset, self.version, self.ext)
             output_subdir = functions.set_path_sub_directory(self.prod, output_sprod, 'Derived', self.version, self.mapset)
@@ -218,7 +222,7 @@ class SubProcessProdsES2:
                                                        date_format='YYYYMMDD',
                                                        masked=False,
                                                         timeseries_role=self.input_subprod_monthly,  # '10d',
-                                                        display_index=116,
+                                                        # display_index=116,
                                                        active_default=True)
 
             prod_ident_1mondiff = functions.set_path_filename_no_date(self.prod, output_sprod, self.mapset, self.version, self.ext)
@@ -243,7 +247,7 @@ class SubProcessProdsES2:
                                                             date_format='YYYYMMDD',
                                                             masked=False,
                                                             timeseries_role=self.starting_sprod,  # '10d',
-                                                            display_index=7,
+                                                            # display_index=7,
                                                             active_default=True)
             out_prod_ident = functions.set_path_filename_no_date(self.prod, output_sprod, self.mapset, self.version, self.ext)
             output_subdir = functions.set_path_sub_directory(self.prod, output_sprod, 'Derived', self.version, self.mapset)
@@ -265,7 +269,7 @@ class SubProcessProdsES2:
                                                        date_format='YYYYMMDD',
                                                        masked=False,
                                                         timeseries_role=self.input_subprod_monthly,  # '10d',
-                                                        display_index=117,
+                                                        # display_index=117,
                                                        active_default=True)
             prod_ident_1monperc = functions.set_path_filename_no_date(self.prod, output_sprod, self.mapset, self.version, self.ext)
             subdir_1monperc = functions.set_path_sub_directory(self.prod, output_sprod, 'Derived', self.version, self.mapset)
@@ -292,7 +296,7 @@ class SubProcessProdsES2:
                                                             date_format='YYYYMMDD',
                                                             masked=False,
                                                             timeseries_role=self.starting_sprod, #'10d',
-                                                            display_index=9,
+                                                            # display_index=9,
                                                             active_default=True)
             out_prod_ident = functions.set_path_filename_no_date(self.prod, output_sprod, self.mapset, self.version,
                                                                  self.ext)
@@ -324,7 +328,7 @@ class SubProcessProdsES2:
                                                        date_format='YYYYMMDD',
                                                        masked=False,
                                                         timeseries_role=self.input_subprod_monthly,  # '10d',
-                                                        display_index=119,
+                                                        # display_index=119,
                                                        active_default=True)
             out_prod_ident = functions.set_path_filename_no_date(self.prod, output_sprod, self.mapset, self.version, self.ext)
             output_subdir = functions.set_path_sub_directory(self.prod, output_sprod, 'Derived', self.version, self.mapset)
@@ -355,7 +359,7 @@ class SubProcessProdsES2:
                                                             date_format='YYYYMMDD',
                                                             masked=False,
                                                             timeseries_role=self.starting_sprod, #'10d',
-                                                            display_index=8,
+                                                            # display_index=8,
                                                             active_default=True)
             out_prod_ident = functions.set_path_filename_no_date(self.prod, output_sprod, self.mapset, self.version,
                                                                  self.ext)
@@ -379,8 +383,8 @@ class SubProcessProdsES2:
                                                        frequency_id='e1month',
                                                        date_format='YYYYMMDD',
                                                        masked=False,
-                                                        timeseries_role=self.input_subprod_monthly,  # '10d',
-                                                        display_index=118,
+                                                       timeseries_role=self.input_subprod_monthly,  # '10d',
+                                                        # display_index=118,
                                                        active_default=True)
 
             prod_ident_ratio_linearx2 = functions.set_path_filename_no_date(self.prod, output_sprod, self.mapset, self.version, self.ext)
@@ -407,13 +411,13 @@ class SubProcessProdsES2:
                                                             date_format='YYYYMMDD',
                                                             masked=False,
                                                             timeseries_role=self.starting_sprod,  # '10d',
-                                                            display_index=10,
+                                                            # display_index=10,
                                                             active_default=True)
 
             prod_ident_10dsndvi = functions.set_path_filename_no_date(self.prod, output_sprod, self.mapset, self.version, self.ext)
             subdir_10dsndvi = functions.set_path_sub_directory(self.prod, output_sprod, 'Derived', self.version, self.mapset)
 
-            input_subprod_10diff = "10diff"
+            input_subprod_10diff = "10ddiff"
             in_prod_ident_10diff = functions.set_path_filename_no_date(self.prod, input_subprod_10diff, self.mapset, self.version, self.ext)
             input_dir_10diff = self.es2_data_dir + \
                                functions.set_path_sub_directory(self.prod, input_subprod_10diff, 'Derived', self.version, self.mapset)
@@ -434,7 +438,7 @@ class SubProcessProdsES2:
                                                        date_format='YYYYMMDD',
                                                        masked=False,
                                                         timeseries_role=self.input_subprod_monthly,  # '10d',
-                                                        display_index=120,
+                                                        # display_index=120,
                                                        active_default=True)
 
             prod_ident_1monstdprod = functions.set_path_filename_no_date(self.prod, output_sprod, self.mapset, self.version, self.ext)
