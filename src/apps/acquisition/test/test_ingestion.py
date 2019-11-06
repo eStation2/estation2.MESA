@@ -948,15 +948,14 @@ class TestIngestion(unittest.TestCase):
 
         ingestion.ingest_archives_eumetcast()
 
-    def test_ingest_jrc_wbd(self):
+    def test_ingest_jrc_wbd_2(self):
 
-        date_fileslist = glob.glob('/data/ingest/JRC-WBD_20190801*')
-        #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
+        date_fileslist = glob.glob('/data/processing/exchange/WD-GEE/JRC-WBD-AVG-ICPAC*.tif')
         in_date = '20190701'
         productcode = 'wd-gee'
         productversion = '1.0'
         subproductcode = 'occurr'
-        mapsetcode = 'WD-GEE-ECOWAS-AVG'
+        mapsetcode = 'WD-GEE-IGAD-AVG'
         datasource_descrID='JRC:WBD:GEE'
 
         product = {"productcode": productcode,
@@ -1441,7 +1440,7 @@ class TestIngestion(unittest.TestCase):
 
         #date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_201706*_GLOBE_PROBAV_V2.2.1.nc')
         # date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_19*_GLOBE_VGT_V2.2.1.nc')
-        date_fileslist = glob.glob('/data/processing/exchange/c_gls_NDVI_201811010000_GLOBE_PROBAV_V2.2.1.nc')
+        date_fileslist = glob.glob('/data/processing/exchange/c_gls_NDVI_201909010000_GLOBE_PROBAV_V2.2.1.nc')
 
         for one_file in date_fileslist:
 
