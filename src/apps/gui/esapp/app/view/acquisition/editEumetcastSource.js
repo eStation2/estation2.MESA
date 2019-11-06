@@ -30,8 +30,8 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
     maximizable: false,
 
     //width: 1100,
-    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-35 : 680,  // 600,
-    maxHeight: 680,
+    height: Ext.getBody().getViewSize().height < 730 ? Ext.getBody().getViewSize().height-50 : 730,  // 600,
+    maxHeight: 730,
 
     frame: true,
     border: false,
@@ -66,16 +66,18 @@ Ext.define("esapp.view.acquisition.editEumetcastSource",{
             me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('neweumetcastdatasource') + '</span>');
         }
 
-        me.buttons = [{
-            text: 'TEST',
-            // iconCls: 'fa fa-save fa-2x',
-            style: {color: 'lightblue'},
-            scale: 'medium',
-            disabled: false,
-            formBind: true,
-            hidden: me.params.view ? true : false,
-            handler: 'onTestClick'
-        },'->',{
+        me.buttons = [
+        //     {
+        //     text: 'TEST',
+        //     // iconCls: 'fa fa-save fa-2x',
+        //     style: {color: 'lightblue'},
+        //     scale: 'medium',
+        //     disabled: false,
+        //     formBind: true,
+        //     hidden: me.params.view ? true : false,
+        //     handler: 'onTestClick'
+        // },
+            '->',{
             text: esapp.Utils.getTranslation('save'),    // 'Save',
             iconCls: 'fa fa-save fa-2x',
             style: { color: 'lightblue' },

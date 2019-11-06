@@ -152,6 +152,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                         width: 150 + 100,
                         margin: '0 0 5 80',
                         allowBlank: false,
+                        editable: false,
                         store: {
                             type: 'definedby'
                         },
@@ -303,12 +304,14 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     minHeight: 105,
                     collapsible: false,
                     enableColumnMove: false,
-                    enableColumnResize: false,
+                    enableColumnResize: true,
                     multiColumnSort: false,
                     columnLines: false,
                     rowLines: true,
                     frame: false,
                     border: true,
+
+                    cls: 'grid-column-header-multiline',
 
                     // defaults: {
                     //     disabled: me.params.view ? true : false
@@ -317,12 +320,12 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     columns: [{
                         xtype: 'actioncolumn',
                         hidden: false,
-                        width: 50,
+                        width: 40,
                         align: 'center',
                         sortable: false,
                         menuDisabled: true,
                         items: [{
-                            getClass: function (v, meta, rec) {
+                            getClass: function (cell, meta, rec) {
                                 // console.info(rec.get('defined_by'));
                                if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)) {
                                    return 'edit';
@@ -332,7 +335,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                                    return 'vieweye';
                                }
                             },
-                            getTip: function (v, meta, rec) {
+                            getTip: function (cell, meta, rec) {
                                if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)) {
                                    return esapp.Utils.getTranslation('editdatasource')    // 'Edit Data Source',
                                }
@@ -352,7 +355,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                         header: esapp.Utils.getTranslation('id'),    // 'ID',
                         dataIndex: 'data_source_id',
                         //bind: '{productdatasources.data_source_id}',
-                        width: 265,
+                        width: 270,
                         sortable: false,
                         hideable: false,
                         variableRowHeight: true,
@@ -363,20 +366,20 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                         hideable: false,
                         hidden: false,
                         menuDisabled: true,
-                        width: 120,
+                        width: 130,
                         align: 'center',
                         shrinkWrap: 0,
                         items: [{
                             // scope: me,
                             disabled: false,
-                            getClass: function(v, meta, rec) {
+                            getClass: function(cell, meta, rec) {
                                 if (rec.get('store_original_data')) {
                                     return 'activated';
                                 } else {
                                     return 'deactivated';
                                 }
                             },
-                            getTip: function(v, meta, rec) {
+                            getTip: function(cell, meta, rec) {
                                 if (rec.get('store_original_data')) {
                                     return esapp.Utils.getTranslation('tipdeactivatestoreoriginalget');     // 'Deactivate store original data for this Get';
                                 } else {
@@ -401,14 +404,14 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                         align: 'center',
                         shrinkWrap: 0,
                         items: [{
-                            getClass: function (v, meta, rec) {
+                            getClass: function (cell, meta, rec) {
                                 if (rec.get('activated')) {
                                     return 'activated';
                                 } else {
                                     return 'deactivated';
                                 }
                             },
-                            getTip: function (v, meta, rec) {
+                            getTip: function (cell, meta, rec) {
                                 if (rec.get('activated')) {
                                     return esapp.Utils.getTranslation('deactivatedatasource');    // 'Deactivate Data Source';
                                 } else {
@@ -437,17 +440,26 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                        shrinkWrap: 0,
                        items: [{
                            width:'35',
-                           disabled: false,
-                           getClass: function(v, meta, rec) {
+                           // disabled: false,
+                           isDisabled: function(view, rowIndex, colIndex, item, record){
+                                if (!record.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
+                                    return false;
+                                }
+                                else {
+                                    return true;
+                                }
+                           },
+                           getClass: function(cell, meta, rec) {
                                // return 'delete';
                                if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
                                    return 'delete';
                                }
                                else {
+                                   // cell.setDisabled(true);
                                    return 'x-hide-display';
                                }
                            },
-                           getTip: function(v, meta, rec) {
+                           getTip: function(cell, meta, rec) {
                                if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
                                    var tipText = esapp.Utils.getTranslation('unassignproductdatasource') + ': <BR>' +
                                        '<b>' + Ext.getCmp('product_name').getValue() + '</b>';
@@ -544,12 +556,14 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     minHeight: 105,
                     collapsible: false,
                     enableColumnMove: false,
-                    enableColumnResize: false,
+                    enableColumnResize: true,
                     multiColumnSort: false,
                     columnLines: false,
                     rowLines: true,
                     frame: false,
                     border: true,
+
+                    cls: 'grid-column-header-multiline',
 
                     // defaults: {
                     //     disabled: me.params.view ? true : false
@@ -558,14 +572,14 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                     columns: [{
                         xtype: 'actioncolumn',
                         hidden: false,
-                        width: 50,
+                        width: 40,
                         align: 'center',
                         sortable: false,
                         menuDisabled: true,
                         items: [{
                             // icon: 'resources/img/icons/edit.png',
                             // tooltip: esapp.Utils.getTranslation('editingestion'),    // 'Edit Ingestion',
-                            getClass: function (v, meta, rec) {
+                            getClass: function (cell, meta, rec) {
                                 // console.info(rec.get('defined_by'));
                                if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)) {
                                    return 'edit';
@@ -575,7 +589,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                                    return 'vieweye';
                                }
                             },
-                            getTip: function (v, meta, rec) {
+                            getTip: function (cell, meta, rec) {
                                if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)) {
                                    return esapp.Utils.getTranslation('editingestsubproduct')    // 'Edit Ingest Sub Product',
                                }
@@ -584,7 +598,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                         }]
                     }, {
                         xtype:'templatecolumn',
-                        header: esapp.Utils.getTranslation('subproduct'),
+                        text: esapp.Utils.getTranslation('subproduct'),
                         tpl: new Ext.XTemplate(
                                 '<b>{descriptive_name}</b>' +
                                 // '<tpl if="version != \'undefined\'">',
@@ -598,36 +612,48 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                                 ' - {subproductcode}' +
                                 '</span></b>'
                             ),
-                        minWidth: 270,
+                        width: 220,
                         cellWrap:true,
                         sortable: false,
                         hideable: false,
                         variableRowHeight : true,
                         menuDisabled:true
                     }, {
-                        header: esapp.Utils.getTranslation('scale_factor'),
+                        text: esapp.Utils.getTranslation('scale_factor'),
+                        headerWrap: true,
                         dataIndex: 'scale_factor',
-                        width: 95,
+                        width: 80,
                         sortable: false,
                         hideable: false,
                         variableRowHeight: true,
                         menuDisabled: true
                     }, {
-                        header: esapp.Utils.getTranslation('scale_offset'),
+                        text: esapp.Utils.getTranslation('scale_offset'),
+                        headerWrap: true,
                         dataIndex: 'scale_offset',
-                        width: 95,
+                        width: 140,
                         sortable: false,
                         hideable: false,
                         variableRowHeight: true,
                         menuDisabled: true
                     }, {
-                        header: esapp.Utils.getTranslation('nodata'),
+                        text: esapp.Utils.getTranslation('nodata'),
+                        headerWrap: true,
                         dataIndex: 'nodata',
-                        width: 110,
+                        width: 80,
                         sortable: false,
                         hideable: false,
                         variableRowHeight: true,
                         menuDisabled: true
+                    },{
+                        text: esapp.Utils.getTranslation('definedby'),  // 'Defined by',
+                        dataIndex: 'defined_by',
+                        width: 60,
+                        align: 'center',
+                        menuDisabled: true,
+                        sortable: false,
+                        cellWrap:true,
+                        hidden: (esapp.Utils.objectExists(user) && user.userlevel == 1) ? false : true
                     },{
                        xtype: 'actioncolumn',
                        hidden: false,
@@ -639,16 +665,17 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                        items: [{
                            width:'35',
                            disabled: false,
-                           getClass: function(v, meta, rec) {
+                           getClass: function(cell, meta, rec) {
                                // return 'delete';
                                if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
                                    return 'delete';
                                }
                                else {
+                                   cell.setDisabled(true);
                                    return 'x-hide-display';
                                }
                            },
-                           getTip: function(v, meta, rec) {
+                           getTip: function(cell, meta, rec) {
                                if (!rec.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
                                    var tipText = esapp.Utils.getTranslation('delete_ingest_product') + ': <BR>' +
                                        '<b>' + rec.get('descriptive_name') + '</b>';

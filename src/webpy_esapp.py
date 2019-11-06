@@ -1252,6 +1252,7 @@ class GetRequest:
         version = None
         mapsetcode = None
         subproductcode = None
+
         if hasattr(getparams, "level"):
             if getparams['level'] == 'product':
                 productcode = getparams['productcode']
@@ -1266,7 +1267,14 @@ class GetRequest:
                 mapsetcode = getparams['mapsetcode']
                 subproductcode = getparams['subproductcode']
 
-            request = requests.create_request(productcode=productcode, version=version, mapsetcode=mapsetcode, subproductcode=subproductcode)
+            request = requests.create_request(productcode=productcode,
+                                              version=version,
+                                              mapsetcode=mapsetcode,
+                                              subproductcode=subproductcode,
+                                              dekad_frequency=int(getparams['dekad_frequency']),
+                                              daily_frequency=int(getparams['daily_frequency']),
+                                              high_frequency=int(getparams['high_frequency'])
+                                              )
             request_json = json.dumps(request,
                                    ensure_ascii=False,
                                    sort_keys=True,
@@ -1370,7 +1378,14 @@ class SaveRequest:
                 subproductcode = getparams['subproductcode']
                 requestfilename = getparams['productcode'] + '_' + getparams['version'] + '_' + getparams['mapsetcode'] + '_' + getparams['subproductcode']
 
-            request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
+            request = requests.create_request(productcode,
+                                              version,
+                                              mapsetcode=mapsetcode,
+                                              subproductcode=subproductcode,
+                                              dekad_frequency=int(getparams['dekad_frequency']),
+                                              daily_frequency=int(getparams['daily_frequency']),
+                                              high_frequency=int(getparams['high_frequency'])
+                                              )
             request_json = json.dumps(request,
                                    ensure_ascii=False,
                                    sort_keys=True,
@@ -2819,6 +2834,7 @@ class GetMapsets:
 
         if hasattr(mapsets, "__len__") and mapsets.__len__() > 0:
             for mapset in mapsets:
+                # print(mapset)
                 mapset_dict = functions.row2dict(mapset)
                 mapsets_dict_all.append(mapset_dict)
 
@@ -4497,9 +4513,9 @@ class UpdateProductInfo:
             'productcode': getparams['productcode'],
             'subproductcode': getparams['productcode']+'_native',
             'version': getparams['version'],
-            'provider': getparams['provider'],
-            'descriptive_name': getparams['prod_descriptive_name'],
-            'description': getparams['description'],
+            'provider': getparams['provider'].replace("'", "''"),
+            'descriptive_name': getparams['prod_descriptive_name'].replace("'", "''"),
+            'description': getparams['description'].replace("'", "''"),
             'category_id': getparams['category_id'],
             'defined_by': getparams['defined_by'],
             'activated': getparams['activated']
@@ -4533,9 +4549,9 @@ class CreateProduct:
                        'product_type': 'Native',
                        'defined_by': getparams['defined_by'],
                        'activated': getparams['activated'],
-                       'provider': getparams['provider'],
-                       'descriptive_name': getparams['prod_descriptive_name'],
-                       'description': getparams['description'],
+                       'provider': getparams['provider'].replace("'", "''"),
+                       'descriptive_name': getparams['prod_descriptive_name'].replace("'", "''"),
+                       'description': getparams['description'].replace("'", "''"),
                        'category_id': getparams['category_id'],
                        'frequency_id': 'undefined',
                        'date_format': 'undefined',

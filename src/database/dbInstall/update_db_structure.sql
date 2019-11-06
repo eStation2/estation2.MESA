@@ -16,7 +16,7 @@ ADD COLUMN  showindefault boolean DEFAULT FALSE;
 
 
 -- DROP TABLE products.resolution CASCADE;
-CREATE TABLE products.resolution
+CREATE TABLE IF NOT EXISTS products.resolution
 (
   resolutioncode character varying NOT NULL,
   descriptive_name character varying,
@@ -33,7 +33,7 @@ ALTER TABLE products.resolution
 
 
 -- DROP TABLE products.projection CASCADE;
-CREATE TABLE products.projection
+CREATE TABLE IF NOT EXISTS products.projection
 (
   proj_code character varying NOT NULL,
   descriptive_name character varying,
@@ -48,7 +48,7 @@ ALTER TABLE products.projection
   OWNER TO estation;
 
 -- DROP TABLE products.bbox CASCADE;
-CREATE TABLE products.bbox
+CREATE TABLE IF NOT EXISTS products.bbox
 (
   bboxcode character varying NOT NULL,
   descriptive_name character varying,
@@ -67,7 +67,7 @@ ALTER TABLE products.bbox
   OWNER TO estation;
 
 -- DROP TABLE products.mapset_new;
-CREATE TABLE products.mapset_new
+CREATE TABLE IF NOT EXISTS products.mapset_new
 (
   mapsetcode character varying NOT NULL,
   descriptive_name character varying NOT NULL,
@@ -150,7 +150,7 @@ ADD CONSTRAINT product_dependencies_fk
 
 
 
-CREATE TABLE analysis.user_role
+CREATE TABLE IF NOT EXISTS analysis.user_role
 (
   role_id integer NOT NULL,
   role_name character varying(50) NOT NULL,
@@ -164,7 +164,7 @@ ALTER TABLE analysis.user_role
   OWNER TO estation;
 
 
-CREATE TABLE analysis.logos
+CREATE TABLE IF NOT EXISTS analysis.logos
 (
   logo_id bigserial NOT NULL,
   logo_filename character varying(80),
@@ -756,6 +756,60 @@ ALTER TABLE analysis.user_map_templates ADD COLUMN productdate character varying
   BEGIN update insert all functions
  *********************************************************/
 
+CREATE OR REPLACE FUNCTION analysis.update_insert_logo(
+    logo_id integer,
+    logo_filename character varying,
+    logo_description character varying,
+    active boolean,
+    deletable boolean,
+    defined_by character varying,
+    isdefault boolean,
+    orderindex_defaults integer)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+		_logo_id 		ALIAS FOR  $1;
+		_logo_filename 		ALIAS FOR  $2;
+		_logo_description 	ALIAS FOR  $3;
+		_active 		ALIAS FOR  $4;
+		_deletable 		ALIAS FOR  $5;
+		_defined_by 		ALIAS FOR  $6;
+		_isdefault 		ALIAS FOR  $7;
+		_orderindex_defaults 	ALIAS FOR  $8;
+
+	BEGIN
+		PERFORM * FROM analysis.logos l WHERE l.logo_id = _logo_id;
+		IF FOUND THEN
+			UPDATE analysis.logos l
+			SET logo_filename = TRIM(_logo_filename),
+			    logo_description = TRIM(_logo_description),
+			    active = _active,
+			    deletable = _deletable,
+			    defined_by = TRIM(_defined_by),
+			    isdefault = _isdefault,
+			    orderindex_defaults = _orderindex_defaults
+			WHERE l.logo_id = _logo_id;
+		ELSE
+			INSERT INTO analysis.logos (logo_id, logo_filename, logo_description, active, deletable, defined_by, isdefault, orderindex_defaults)
+			VALUES (_logo_id,
+				TRIM(_logo_filename),
+				TRIM(_logo_description),
+				_active,
+				_deletable,
+				TRIM(_defined_by),
+				_isdefault,
+				_orderindex_defaults);
+		END IF;
+		RETURN TRUE;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION analysis.update_insert_logo(integer, character varying, character varying, boolean, boolean, character varying, boolean, integer)
+  OWNER TO estation;
+
+
+
 CREATE OR REPLACE FUNCTION products.update_insert_mapset_new(
     mapsetcode character varying,
     descriptive_name character varying,
@@ -804,7 +858,7 @@ $BODY$
 				    pixel_size_x = _pixel_size_x,
 				    pixel_size_y = _pixel_size_y,
 				    footprint_image = TRIM(_footprint_image),
-				    center_of_pixel = TRIM(_center_of_pixel)
+				    center_of_pixel = _center_of_pixel
 				WHERE m.mapsetcode = TRIM(_mapsetcode);
 			ELSE
 				RAISE NOTICE 'Of existing JRC mapsets all columns can be updated by the User, do not overwrite!';
@@ -2084,7 +2138,7 @@ $BODY$
 		_https_params   		ALIAS FOR  $19;
 		_full_copy   			ALIAS FOR  $20;
 	BEGIN
-		PERFORM * FROM products.internet_source i WHERE i.internet_id = TRIM(_internet_id) AND i.defined_by = 'JRC';
+		PERFORM * FROM products.internet_source i WHERE i.internet_id = TRIM(_internet_id);
 
 		IF FOUND THEN
 			IF _full_copy THEN
@@ -3582,6 +3636,24 @@ BEGIN
 	RETURN QUERY SELECT chr(10);
 
 
+	RETURN QUERY SELECT 'PERFORM analysis.update_insert_logo('
+		|| ' logo_id := ' || logo_id
+		|| ', logo_filename := ' || COALESCE('''' || logo_filename || '''', 'NULL')
+		|| ', logo_description := ' || COALESCE('''' || replace(replace(logo_description,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', active :=  ' || active
+		|| ', deletable :=  ' || deletable
+		|| ', defined_by := ' || COALESCE('''' || defined_by || '''', 'NULL')
+		|| ', isdefault :=  ' || isdefault
+		|| ', orderindex_defaults := ' || COALESCE(TRIM(to_char(orderindex_defaults, '99999999')), 'NULL')
+		|| ' );'  as inserts
+	FROM analysis.logos
+	WHERE logo_id < 100
+	ORDER BY logo_id;
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
 	RETURN QUERY SELECT 'PERFORM analysis.update_insert_legend('
 		|| ' legend_id := ' || legend_id
 		|| ', legend_name := ' || COALESCE('''' || replace(replace(legend_name,'"',''''), '''', '''''') || '''', 'NULL')
@@ -3599,7 +3671,7 @@ BEGIN
 		|| ' );'  as inserts
 	FROM analysis.legend
 	WHERE legend_id < 400
-	-- AND defined_by = 'JRC'
+	AND defined_by = 'JRC'
 	ORDER BY legend_id;
 
 	RETURN QUERY SELECT chr(10);
@@ -3826,11 +3898,9 @@ ALTER FUNCTION products.export_jrc_data(boolean)
 
 
 
-
 -- Function: products.export_all_data(boolean)
 
 -- DROP FUNCTION products.export_all_data(boolean);
-
 
 CREATE OR REPLACE FUNCTION products.export_all_data(full_copy boolean DEFAULT true)
   RETURNS SETOF text AS
@@ -4284,6 +4354,24 @@ BEGIN
 	RETURN QUERY SELECT chr(10);
 
 
+	RETURN QUERY SELECT 'PERFORM analysis.update_insert_logo('
+		|| ' logo_id := ' || logo_id
+		|| ', logo_filename := ' || COALESCE('''' || logo_filename || '''', 'NULL')
+		|| ', logo_description := ' || COALESCE('''' || replace(replace(logo_description,'"',''''), '''', '''''') || '''', 'NULL')
+		|| ', active :=  ' || active
+		|| ', deletable :=  ' || deletable
+		|| ', defined_by := ' || COALESCE('''' || defined_by || '''', 'NULL')
+		|| ', isdefault :=  ' || isdefault
+		|| ', orderindex_defaults := ' || COALESCE(TRIM(to_char(orderindex_defaults, '99999999')), 'NULL')
+		|| ' );'  as inserts
+	FROM analysis.logos
+	WHERE logo_id < 100
+	ORDER BY logo_id;
+
+	RETURN QUERY SELECT chr(10);
+	RETURN QUERY SELECT chr(10);
+
+
 	RETURN QUERY SELECT 'PERFORM analysis.update_insert_legend('
 		|| ' legend_id := ' || legend_id
 		|| ', legend_name := ' || COALESCE('''' || replace(replace(legend_name,'"',''''), '''', '''''') || '''', 'NULL')
@@ -4525,168 +4613,6 @@ $BODY$
 ALTER FUNCTION products.export_all_data(boolean)
   OWNER TO estation;
 
-
-
-
-
--- Function: products.export_product_data(character varying, boolean)
--- DROP FUNCTION products.export_product_data(character varying, boolean);
-
-CREATE OR REPLACE FUNCTION products.export_product_data(
-    product_code character varying,
-    full_copy boolean DEFAULT true)
-  RETURNS SETOF text AS
-$BODY$
-DECLARE
-	_productcode 			ALIAS FOR  $1;
-	_full_copy 			ALIAS FOR  $2;
-BEGIN
-
-
-	RETURN QUERY SELECT 'SELECT products.update_insert_product('
-		|| '  productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
-		|| ', subproductcode := ' || COALESCE('''' || subproductcode || '''', 'NULL')
-		|| ', version := ' || COALESCE('''' || version || '''', 'NULL')
-		|| ', defined_by := ' || COALESCE('''' || defined_by || '''', 'NULL')
-		|| ', activated := ' || activated
-		|| ', category_id := ' || COALESCE('''' || category_id || '''', 'NULL')
-		|| ', product_type := ' || COALESCE('''' || product_type || '''', 'NULL')
-		|| ', descriptive_name := ' || COALESCE('''' || replace(replace(descriptive_name,'"',''''), '''', '''''') || '''', 'NULL')
-		|| ', description := ' || COALESCE('''' || replace(replace(description,'"',''''), '''', '''''') || '''', 'NULL')
-		|| ', provider := ' || COALESCE('''' || provider || '''', 'NULL')
-		|| ', frequency_id := ' || COALESCE('''' || frequency_id || '''', '''undefined''')
-		|| ', date_format := ' || COALESCE('''' || date_format || '''', '''undefined''')
-		|| ', scale_factor := ' || COALESCE(TRIM(to_char(scale_factor, '99999999D999999')), 'NULL')
-		|| ', scale_offset := ' || COALESCE(TRIM(to_char(scale_offset, '99999999D999999')), 'NULL')
-		|| ', nodata := ' || COALESCE(TRIM(to_char(nodata, '99999999')), 'NULL')
-		|| ', mask_min := ' || COALESCE(TRIM(to_char(mask_min, '99999999D999999')), 'NULL')
-		|| ', mask_max := ' || COALESCE(TRIM(to_char(mask_max, '99999999D999999')), 'NULL')
-		|| ', unit := ' || COALESCE('''' || unit || '''', 'NULL')
-		|| ', data_type_id := ' || COALESCE('''' || data_type_id || '''', '''undefined''')
-		|| ', masked := ' || masked
-		|| ', timeseries_role := ' || COALESCE('''' || timeseries_role || '''', 'NULL')
-		|| ', display_index := ' || COALESCE(TRIM(to_char(display_index, '99999999')), 'NULL')
-		|| ', full_copy := ' || _full_copy
-		|| ' );'  as inserts
-	FROM products.product
-	WHERE products.product.productcode = _productcode;
-
-
-	RETURN QUERY SELECT chr(10);
-	RETURN QUERY SELECT chr(10);
-
-
-	RETURN QUERY SELECT 'SELECT products.update_insert_processing('
-		|| ' process_id := ' || process_id
-		|| ', defined_by := ' || COALESCE('''' || defined_by || '''', 'NULL')
-		|| ', output_mapsetcode := ' || COALESCE('''' || output_mapsetcode || '''', 'NULL')
-		|| ', activated := ' || activated
-		|| ', derivation_method := ' || COALESCE('''' || derivation_method || '''', 'NULL')
-		|| ', algorithm := ' || COALESCE('''' || algorithm || '''', 'NULL')
-		|| ', priority := ' || COALESCE('''' || priority || '''', 'NULL')
-		|| ', enabled := ' || enabled
-		|| ', full_copy := ' || _full_copy
-		|| ' );'  as inserts
-	FROM products.processing
-	WHERE products.processing.process_id in (SELECT process_id FROM products.process_product WHERE products.process_product.productcode = _productcode);
-
-
-	RETURN QUERY SELECT chr(10);
-	RETURN QUERY SELECT chr(10);
-
-
-	RETURN QUERY SELECT 'SELECT products.update_insert_process_product('
-		|| ' process_id := ' || process_id
-		|| ', productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
-		|| ', subproductcode := ' || COALESCE('''' || subproductcode || '''', 'NULL')
-		|| ', version := ' || COALESCE('''' || version || '''', 'NULL')
-		|| ', mapsetcode := ' || COALESCE('''' || mapsetcode || '''', 'NULL')
-		|| ', type := ' || COALESCE('''' || type || '''', 'NULL')
-		|| ', activated := ' || activated
-		|| ', final := ' || final
-		|| ', date_format := ' || COALESCE('''' || date_format || '''', '''undefined''')
-		|| ', start_date:=   ' || COALESCE(TRIM(to_char(start_date, '999999999999')), 'NULL')
-		|| ', end_date:= ' || COALESCE(TRIM(to_char(end_date, '999999999999')), 'NULL')
-		|| ', full_copy := ' || _full_copy
-		|| ' );'  as inserts
-	FROM products.process_product
-	WHERE products.process_product.productcode = _productcode;
-
-
-	RETURN QUERY SELECT chr(10);
-	RETURN QUERY SELECT chr(10);
-
-
-	RETURN QUERY SELECT 'SELECT analysis.update_insert_graph_yaxes('
-		|| ', yaxe_id := ' || COALESCE('''' || yaxe_id || '''', 'NULL')
-		|| ', title := ' || COALESCE('''' || title || '''', 'NULL')
-		|| ', title_color := ' || COALESCE('''' || title_color || '''', 'NULL')
-		|| ', title_font_size := ' || COALESCE(TRIM(to_char(title_font_size, '99999999D999999')), 'NULL')
-		|| ', min := ' || COALESCE(TRIM(to_char(min, '99999999D999999')), 'NULL')
-		|| ', max := ' || COALESCE(TRIM(to_char(max, '99999999D999999')), 'NULL')
-		|| ', unit := ' || COALESCE('''' || unit || '''', 'NULL')
-		|| ', oposite := ' || oposite
-		|| ', aggregation_type := ' || COALESCE('''' || aggregation_type || '''', 'NULL')
-		|| ', aggregation_min := ' || COALESCE(TRIM(to_char(aggregation_min, '99999999D999999')), 'NULL')
-		|| ', aggregation_max := ' || COALESCE(TRIM(to_char(aggregation_max, '99999999D999999')), 'NULL')
-		|| ' );'  as inserts
-	FROM analysis.graph_yaxes
-	WHERE analysis.graph_yaxes.yaxe_id IN (SELECT yaxe_id FROM analysis.timeseries_drawproperties_new WHERE analysis.timeseries_drawproperties_new.productcode = _productcode);
-
-
-	RETURN QUERY SELECT chr(10);
-	RETURN QUERY SELECT chr(10);
-
-
-	RETURN QUERY SELECT 'SELECT analysis.update_insert_timeseries_drawproperties('
-		|| ' productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
-		|| ', subproductcode := ' || COALESCE('''' || subproductcode || '''', 'NULL')
-		|| ', version := ' || COALESCE('''' || version || '''', 'NULL')
-		|| ', title := ' || COALESCE('''' || title || '''', 'NULL')
-		|| ', unit := ' || COALESCE('''' || unit || '''', 'NULL')
-		|| ', min := ' || COALESCE(TRIM(to_char(min, '99999999D999999')), 'NULL')
-		|| ', max := ' || COALESCE(TRIM(to_char(max, '99999999D999999')), 'NULL')
-		|| ', oposite := ' || oposite
-		|| ', tsname_in_legend := ' || COALESCE('''' || tsname_in_legend || '''', 'NULL')
-		|| ', charttype := ' || COALESCE('''' || charttype || '''', 'NULL')
-		|| ', linestyle := ' || COALESCE('''' || linestyle || '''', 'NULL')
-		|| ', linewidth := ' || COALESCE(TRIM(to_char(linewidth, '99999999')), 'NULL')
-		|| ', color := ' || COALESCE('''' || color || '''', 'NULL')
-		|| ', yaxes_id := ' || COALESCE('''' || yaxes_id || '''', 'NULL')
-		|| ', title_color := ' || COALESCE('''' || title_color || '''', 'NULL')
-		|| ', aggregation_type := ' || COALESCE('''' || aggregation_type || '''', 'NULL')
-		|| ', aggregation_min := ' || COALESCE(TRIM(to_char(aggregation_min, '99999999D999999')), 'NULL')
-		|| ', aggregation_max := ' || COALESCE(TRIM(to_char(aggregation_max, '99999999D999999')), 'NULL')
-		|| ' );'  as inserts
-	FROM analysis.timeseries_drawproperties
-	WHERE analysis.timeseries_drawproperties.productcode = _productcode;
-
-
-	RETURN QUERY SELECT chr(10);
-	RETURN QUERY SELECT chr(10);
-
-
-	RETURN QUERY SELECT 'SELECT analysis.update_insert_timeseries_drawproperties_new('
-		|| ' productcode := ' || COALESCE('''' || productcode || '''', 'NULL')
-		|| ', subproductcode := ' || COALESCE('''' || subproductcode || '''', 'NULL')
-		|| ', version := ' || COALESCE('''' || version || '''', 'NULL')
-		|| ', tsname_in_legend := ' || COALESCE('''' || tsname_in_legend || '''', 'NULL')
-		|| ', charttype := ' || COALESCE('''' || charttype || '''', 'NULL')
-		|| ', linestyle := ' || COALESCE('''' || linestyle || '''', 'NULL')
-		|| ', linewidth := ' || COALESCE(TRIM(to_char(linewidth, '99999999')), 'NULL')
-		|| ', color := ' || COALESCE('''' || color || '''', 'NULL')
-		|| ', yaxe_id := ' || COALESCE('''' || yaxe_id || '''', 'NULL')
-		|| ' );'  as inserts
-	FROM analysis.timeseries_drawproperties_new
-	WHERE analysis.timeseries_drawproperties_new.productcode = _productcode;
-
-END;
-$BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100
-  ROWS 1000;
-ALTER FUNCTION products.export_product_data(character varying, boolean)
-  OWNER TO estation;
 
 
 

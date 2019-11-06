@@ -248,7 +248,7 @@ Ext.define('esapp.Application', {
         var taskMain = new Ext.util.DelayedTask(function() {
             Ext.create('esapp.view.main.Main');
         });
-        taskMain.delay(50);
+        taskMain.delay(1000);
 
         if (esapp.globals['typeinstallation'].toLowerCase() == 'windows' ||
             esapp.globals['typeinstallation'].toLowerCase() == 'online' ||

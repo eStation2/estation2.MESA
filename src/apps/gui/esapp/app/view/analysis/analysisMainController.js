@@ -33,7 +33,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
 
         Ext.Ajax.request({
             method: 'POST',
-            url: '/analysis/workspacemapsgraphs',
+            url: 'analysis/workspacemapsgraphs',
             params: params,
             success: function(response, opts){
                 var result = Ext.JSON.decode(response.responseText);

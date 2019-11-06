@@ -34,8 +34,8 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
     maximizable: false,
 
     //width: 975,
-    height: Ext.getBody().getViewSize().height < 625 ? Ext.getBody().getViewSize().height-35 : 780,  // 725,
-    maxHeight: 780,
+    height: Ext.getBody().getViewSize().height < 840 ? Ext.getBody().getViewSize().height-50 : 840,  // 725,
+    maxHeight: 840,
 
     frame: true,
     border: false,
@@ -70,16 +70,18 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
             me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('newinternetdatasource') + '</span>');
         }
 
-        me.buttons = [{
-            text: 'TEST',
-            // iconCls: 'fa fa-save fa-2x',
-            style: {color: 'lightblue'},
-            scale: 'medium',
-            disabled: false,
-            formBind: true,
-            hidden: me.params.view ? true : false,
-            handler: 'onTestClick'
-        },'->',{
+        me.buttons = [
+        //     {
+        //     text: 'TEST',
+        //     // iconCls: 'fa fa-save fa-2x',
+        //     style: {color: 'lightblue'},
+        //     scale: 'medium',
+        //     disabled: false,
+        //     formBind: true,
+        //     hidden: me.params.view ? true : false,
+        //     handler: 'onTestClick'
+        // },
+            '->',{
             text: 'Save',
             iconCls: 'fa fa-save fa-2x',
             style: { color: 'lightblue' },

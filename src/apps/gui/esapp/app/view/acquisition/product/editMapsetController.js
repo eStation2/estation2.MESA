@@ -51,11 +51,14 @@ Ext.define('esapp.view.acquisition.product.editMapsetController', {
         var pixel_size = me.lookupReference('pixel_shift_long').getValue();
         var center_of_pixel = me.lookupReference('center_of_pixel').getValue();
 
-        var image_width = Math.round((lower_right_long - upper_left_long)/pixel_size);
-        var image_height = Math.round((upper_left_lat - lower_right_lat)/pixel_size);
+        var image_width = Math.abs(Math.round((lower_right_long - upper_left_long)/pixel_size));
+        var image_height = Math.abs(Math.round((upper_left_lat - lower_right_lat)/pixel_size));
 
-        if (upper_left_long == -180 && lower_right_long == 180 && center_of_pixel){
+        if (!(upper_left_long == -180 && lower_right_long == 180) && center_of_pixel){
             image_width += 1;
+        }
+        if (!(upper_left_lat == 80 && lower_right_lat == -60) && center_of_pixel){
+            image_height += 1;
         }
 
         var bbox = [{
@@ -207,17 +210,17 @@ Ext.define('esapp.view.acquisition.product.editMapsetController', {
 
     ,saveFootprintImage: function() {
         var me = this.getView(),
-            filename = me.params.mapsetcode,
-            footprintimage_url = '',
+            // filename = me.params.mapsetcode,
+            // footprintimage_url = '',
             footprintimage_base64 = ''
         ;
 
-        if (filename == null || filename.trim() == '')
-            filename = 'eStation2_mapset.png'
-        else {
-            filename = filename.replace(/<\/?[^>]+(>|$)/g, "");
-            filename = filename + '.png';
-        }
+        // if (filename == null || filename.trim() == '')
+        //     filename = 'eStation2_mapset.png'
+        // else {
+        //     filename = filename.replace(/<\/?[^>]+(>|$)/g, "");
+        //     filename = filename + '.png';
+        // }
 
         var taskSaveFootprintImage = new Ext.util.DelayedTask(function() {
             me.overviewMap.once('postcompose', function(event) {
@@ -236,6 +239,9 @@ Ext.define('esapp.view.acquisition.product.editMapsetController', {
             me.overviewMap.renderSync();
 
             me.params.mapsetrecord.set('footprint_image', footprintimage_base64);
+            // me.footprint_image = footprintimage_base64;
+            // me.lookupReference('footprint_image').src = footprintimage_base64;
+
             // if (Ext.fly('downloadlink')) {
             //     Ext.fly('downloadlink').destroy();
             // }
@@ -247,7 +253,9 @@ Ext.define('esapp.view.acquisition.product.editMapsetController', {
             // downloadlink.setAttribute('download', filename);
             // downloadlink.setAttribute('href', footprintimage_url);
             // downloadlink.click();
-            footprintimage_url = null;
+            //
+            // footprintimage_url = null;
+            footprintimage_base64 = null;
         });
         taskSaveFootprintImage.delay(1000);
     }

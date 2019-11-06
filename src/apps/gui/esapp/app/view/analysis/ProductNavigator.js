@@ -545,6 +545,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                     // minWidth: 35,
                     align: 'center',
                     menuDisabled:true,
+                    hidden: esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online',
                     items: [{
                         // scope: me,
                         width:'35',

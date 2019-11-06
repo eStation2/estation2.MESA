@@ -37,7 +37,7 @@ Ext.define("esapp.view.analysis.userWorkspaceAdmin",{
 
     //height: Ext.getBody().getViewSize().height < 400 ? Ext.getBody().getViewSize().height-10 : 400,
     height: 400,
-    width: 480,
+    width: 500,
     layout: 'fit',
 
     border:false,
@@ -93,7 +93,7 @@ Ext.define("esapp.view.analysis.userWorkspaceAdmin",{
             });
         }
         else {
-            me.width = 480;
+            me.width = 500;
             me.setBind({
                 store: '{userworkspaces}'
             });
@@ -257,7 +257,7 @@ Ext.define("esapp.view.analysis.userWorkspaceAdmin",{
             draggable: false,
             groupable: false,
             // hidden: me.refworkspaces ? true : false,
-            hidden: (me.refworkspaces && esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
+            hidden: (me.refworkspaces && (esapp.getUser() == 'undefined' || esapp.getUser() == null) ? true : false),
             items: [{
                 getClass: function (v, meta, rec) {
                     if (rec.get('showindefault')) {
@@ -334,7 +334,7 @@ Ext.define("esapp.view.analysis.userWorkspaceAdmin",{
         //     }
         },{
             xtype: 'actioncolumn',
-            header: esapp.Utils.getTranslation('delete'),   // 'Delete',
+            // header: esapp.Utils.getTranslation('delete'),   // 'Delete',
             menuDisabled: true,
             sortable: true,
             variableRowHeight : true,

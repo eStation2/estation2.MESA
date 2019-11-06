@@ -36,7 +36,7 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
     autoScroll: true,
     layout: 'fit',
     height: 300,
-    width: 760,
+    width: 785,
 
     border:false,
     frame: false,
@@ -83,7 +83,7 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
 
         me.mon(me, {
             loadstore: function() {
-                me.focus();
+                me.focus(true);
 
                 if (me.forceStoreLoad || !me.getViewModel().getStore('requests').isLoaded() || me.dirtyStore) {
                     // me.getViewModel().getStore('requests').proxy.extraParams = {userid: esapp.getUser().userid};
@@ -120,14 +120,17 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
         me.listeners = {
             afterrender: function(){
                 me.alignTarget = me.owner;
-                me.focus();
+                me.focus(true);
             },
             show: function(){
                 me.dirtyStore = true;
                 me.fireEvent('loadstore');
-                // me.focus();
-            },
-            focusleave: function(){
+                me.focus(true);
+            }
+            ,focusleave: function(){
+                if (Ext.isObject(me.myMask)) {
+                    me.myMask.hide();
+                }
                 me.hide();
             }
         };
@@ -252,7 +255,7 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
                 '<b style="color:darkgrey;">' + esapp.Utils.getTranslation("requestid") + ': {requestid}</b>' +
                 '</span></br>'
             ),
-            width: 365,
+            width: 350,
             cellWrap:true,
             menuDisabled: true,
             sortable: true,
@@ -262,7 +265,7 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
             hideable: false
         },{
             text: esapp.Utils.getTranslation('totalfiles'),  // 'Total files',
-            width: 85,
+            width: 120,
             dataIndex: 'totfiles',
             cellWrap:true,
             menuDisabled: true,
@@ -284,7 +287,7 @@ Ext.define("esapp.view.datamanagement.requestsAdmin",{
             hideable: false
         },{
             text: esapp.Utils.getTranslation('error'),  // 'Error',
-            width: 55,
+            width: 80,
             dataIndex: 'totko',
             cellWrap:true,
             menuDisabled: true,

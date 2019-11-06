@@ -4,7 +4,7 @@ Ext.define('esapp.view.acquisition.product.editIngestSubProductController', {
 
     setup: function() {
         var me = this.getView();
-        // var user = esapp.getUser();
+        var user = esapp.getUser();
 
         var subDatasourceDescriptionStore = me.getViewModel().get('subdatasourcedescriptions');
 
@@ -20,6 +20,7 @@ Ext.define('esapp.view.acquisition.product.editIngestSubProductController', {
 
         me.lookupReference('description').setValue(me.params.ingestsubproductrecord.get('description'));
         me.lookupReference('masked').setValue(!me.params.ingestsubproductrecord.get('masked'));
+        me.lookupReference('defined_by_field').setValue(me.params.ingestsubproductrecord.get('defined_by'));
 
         if (me.params.edit){
             me.height = 825;
@@ -27,12 +28,12 @@ Ext.define('esapp.view.acquisition.product.editIngestSubProductController', {
             me.center();
         }
         else {
-            // if (esapp.Utils.objectExists(user) && user.userlevel == 1){
-            //     Ext.getCmp('defined_by_field').setValue('JRC');
-            // }
-            // else {
-            //     Ext.getCmp('defined_by_field').setValue('USER');
-            // }
+            if (esapp.Utils.objectExists(user) && user.userlevel == 1){
+                Ext.getCmp('defined_by_field').setValue('JRC');
+            }
+            else {
+                Ext.getCmp('defined_by_field').setValue('USER');
+            }
         }
     }
 
@@ -55,7 +56,7 @@ Ext.define('esapp.view.acquisition.product.editIngestSubProductController', {
             provider: me.params.ingestsubproductrecord.get('provider'),
             descriptive_name: me.params.ingestsubproductrecord.get('descriptive_name'),
             description: me.lookupReference('description').getValue(),
-            defined_by: me.params.ingestsubproductrecord.get('defined_by'),
+            defined_by:  me.lookupReference('defined_by_field').getValue(),      //  me.params.ingestsubproductrecord.get('defined_by'),
 
             frequency_id: me.params.ingestsubproductrecord.get('frequency_id'),
             date_format: me.params.ingestsubproductrecord.get('date_format'),

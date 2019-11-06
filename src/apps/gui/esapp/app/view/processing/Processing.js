@@ -124,9 +124,10 @@ Ext.define("esapp.view.processing.Processing",{
             variableRowHeight : true,
             menuDisabled: true,
             sortable: false,
-            groupable:true,
+            groupable:false,
             draggable:false,
-            hideable: true
+            hideable: false,
+            stopSelection: true
         };
 
         me.columns = [{
@@ -139,14 +140,15 @@ Ext.define("esapp.view.processing.Processing",{
                 sortable: false,
                 groupable: false,
                 draggable: false,
-                hideable: true
+                hideable: false,
+                stopSelection: true
             },
             columns: [{
                 xtype: 'widgetcolumn',
                 width: 625,
                 bodyPadding: 0,
 
-                header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 260px; left: 0px; tabindex="-1">' +
+                header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 260px; left: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('product') + '</span>' +
                 '           </div>' +
@@ -200,7 +202,8 @@ Ext.define("esapp.view.processing.Processing",{
                 sortable: false,
                 groupable:false,
                 draggable:false,
-                hideable: true
+                hideable: false,
+                stopSelection: true
             },
             columns: [{
                 header: esapp.Utils.getTranslation('type'),    // 'Type',
@@ -282,14 +285,15 @@ Ext.define("esapp.view.processing.Processing",{
                 sortable: false,
                 groupable:false,
                 draggable:false,
-                hideable: true
+                hideable: false,
+                stopSelection: true
             }
             ,columns: [{
                 xtype: 'widgetcolumn',
                 width: 600,
                 bodyPadding:0,
 
-                header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; left: 0px; tabindex="-1">' +
+                header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 200px; left: 0px;" tabindex="-1">' +
                 '           <div data-ref="titleEl" class="x-column-header-inner">' +
                 '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproductname') + '</span>' +
                 '           </div>' +

@@ -229,7 +229,7 @@ Ext.define("esapp.view.analysis.workspace",{
                 iconCls: 'legends',
                 style: { color: 'gray' },
                 scale: 'small',
-                hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
+                hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null || esapp.globals['typeinstallation'] == 'jrc_online' ? true : false),
                 handler: 'legendAdmin'
             },{
                 xtype: 'button',

@@ -4,6 +4,10 @@ Ext.define('esapp.view.acquisition.product.MapsetAdminController', {
 
     onAssignMapsetClick: function(){
         var me = this.getView();
+        var selrec = me.lookupReference('mapsetGrid').getSelectionModel().getSelected();
+        for ( var i=0, len=selrec.items.length; i<len; ++i ){
+          me.selectedmapset = selrec.items[i].data.mapsetcode;
+        }
 
         Ext.Ajax.request({
             method: 'GET',
@@ -110,7 +114,7 @@ Ext.define('esapp.view.acquisition.product.MapsetAdminController', {
 
         var edit = false;
         var view = true;
-        if (!record.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel <= 1)){
+        if (!record.get('defined_by').includes('JRC') || (esapp.Utils.objectExists(user) && user.userlevel == 1)){
             edit = true;
             view = false;
         }

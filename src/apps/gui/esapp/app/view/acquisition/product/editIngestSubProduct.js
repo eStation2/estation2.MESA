@@ -68,7 +68,7 @@ Ext.define("esapp.view.acquisition.product.editIngestSubProduct",{
         }
         else {
             me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('newingestsubproduct') + '</span>');
-            me.height = 660;
+            me.height = 700;
         }
 
 
@@ -131,7 +131,7 @@ Ext.define("esapp.view.acquisition.product.editIngestSubProduct",{
                     },
                     layout: {
                         type: 'hbox'
-                        , align: 'stretch'
+                        // , align: 'stretch'
                     },
                     items: [{
                         xtype: 'displayfield',
@@ -380,15 +380,33 @@ Ext.define("esapp.view.acquisition.product.editIngestSubProduct",{
                             width: 100 + 130,
                             allowBlank: true,
                             bind: '{theIngestSubProduct.enable_in_timeseries}'
+                        },{
+                            reference: 'defined_by_field',
+                            xtype: 'combobox',
+                            fieldLabel: esapp.Utils.getTranslation('definedby'),
+                            labelWidth: 100,
+                            width: 150 + 100,
+                            // margin: '0 0 5 80',
+                            allowBlank: false,
+                            editable: false,
+                            store: {
+                                type: 'definedby'
+                            },
+                            valueField: 'defined_by',
+                            displayField: 'defined_by_descr',
+                            typeAhead: false,
+                            queryMode: 'local',
+                            emptyText: esapp.Utils.getTranslation('select'),    // 'Select...'
+                            hidden: (esapp.Utils.objectExists(user) && user.userlevel == 1) ? false : true
                         }]
                     }]
                 },{
                     xtype: 'button',
                     text: esapp.Utils.getTranslation('save'),    // 'Save',
-                    width: 90,
                     iconCls: 'fa fa-save fa-2x',    // 'icon-disk',
                     style: {color: 'lightblue'},
                     scale: 'medium',
+                    width: 135,
                     disabled: false,
                     handler: 'saveIngestSubProductInfo'
                 }]

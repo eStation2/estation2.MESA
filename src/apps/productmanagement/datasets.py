@@ -183,6 +183,7 @@ class Frequency(object):
 
     def next_date(self, date):
         if self.frequency_type == self.TYPE.EVERY or self.value == 1:
+            print(date.strftime("%Y%m%d%H%M"))
             date = self.get_next_date(date, self.unit, self.value)
         elif self.frequency_type == self.TYPE.PER:
             new_date = self.get_next_date(date, self.unit, 1)
@@ -418,6 +419,8 @@ class Dataset(object):
     def get_interval_dates(self, from_date, to_date, last_included=True, first_included=True):
         dates = []
         first_cycle = True
+        # print(from_date.strftime("%Y%m%d%H%M"))
+        # print(to_date.strftime("%Y%m%d%H%M"))
         while True:
             if not last_included and from_date == to_date:
                 break

@@ -19,7 +19,18 @@ from .exceptions import WrongSequence, WrongDateParameter, BadDate
 
 
 def str_to_date(value):
-    parts = value.split("-")
+    # If the passed datestring contains the time (e.g. 2019-10-28 00:00'), add the time.
+    # print(value)
+    # print(type(value))
+    parts1 = value.split(" ")
+    # print(parts1)
+    if len(parts1) == 2:
+        parts = parts1[0].split("-")
+        parts.extend(parts1[1].split(":"))
+        # print(parts)
+    else:
+        parts = value.split("-")
+
     if len(parts) == 2:
         return datetime.date(*([datetime.date.today().year] + [int(x) for x in parts]))
     elif len(parts) == 3:

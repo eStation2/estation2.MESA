@@ -195,7 +195,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
 
                         Ext.Ajax.request({
                             method: 'POST',
-                            url: '/analysis/workspacemapsgraphs',
+                            url: 'analysis/workspacemapsgraphs',
                             params: params,
                             success: function(response, opts){
                                 var result = Ext.JSON.decode(response.responseText);
@@ -211,12 +211,12 @@ Ext.define("esapp.view.analysis.analysisMain",{
                                             ws.setGraphs(defaultws.get('graphs'));
 
                                             // ws.getController().closeAllMapsGraphs();
-                                            if (ws.maps.length > 0) {
-                                                ws.getController().openWorkspaceMaps(ws.maps);
-                                            }
-                                            if (ws.graphs.length > 0) {
-                                                ws.getController().openWorkspaceGraphs(ws.graphs);
-                                            }
+                                            // if (ws.maps.length > 0) {
+                                            //     ws.getController().openWorkspaceMaps(ws.maps);
+                                            // }
+                                            // if (ws.graphs.length > 0) {
+                                            //     ws.getController().openWorkspaceGraphs(ws.graphs);
+                                            // }
                                         }
                                     });
                                 }

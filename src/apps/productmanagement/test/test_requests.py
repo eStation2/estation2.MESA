@@ -114,7 +114,10 @@ class TestCreateRequests(unittest.TestCase):
             'productcode': 'lsasaf-lst',
             'version': 'undefined',
             'mapsetcode': 'MSG-satellite-3km',
-            'subproductcode': 'lst'
+            'subproductcode': 'lst',
+            'dekad_frequency': '5',
+            'daily_frequency': '3',
+            'high_frequency': '3'
         }
         productcode = None
         version = None
@@ -134,7 +137,13 @@ class TestCreateRequests(unittest.TestCase):
             mapsetcode = getparams['mapsetcode']
             subproductcode = getparams['subproductcode']
 
-        request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
+        request = requests.create_request(productcode,
+                                          version,
+                                          mapsetcode=mapsetcode,
+                                          subproductcode=subproductcode,
+                                          dekad_frequency=int(getparams['dekad_frequency']),
+                                          daily_frequency=int(getparams['daily_frequency']),
+                                          high_frequency=int(getparams['high_frequency']))
         request_json = json.dumps(request,
                                ensure_ascii=False,
                                sort_keys=True,

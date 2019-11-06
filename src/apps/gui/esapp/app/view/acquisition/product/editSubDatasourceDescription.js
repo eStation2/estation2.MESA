@@ -61,15 +61,16 @@ Ext.define("esapp.view.acquisition.product.editSubDatasourceDescription",{
             me.setTitle('<span class="panel-title-style">' + esapp.Utils.getTranslation('newsubdatasourcedescr') + '</span>');
         }
 
-        me.buttons = [{
-            text: 'TEST',
-            // iconCls: 'fa fa-save fa-2x',
-            style: {color: 'lightblue'},
-            scale: 'medium',
-            disabled: false,
-            formBind: false,
-            handler: 'onTestClick'
-        },'->',{
+        me.buttons = [
+        //{     text: 'TEST',
+        //     // iconCls: 'fa fa-save fa-2x',
+        //     style: {color: 'lightblue'},
+        //     scale: 'medium',
+        //     disabled: false,
+        //     formBind: false,
+        //     handler: 'onTestClick'
+        // },
+            '->',{
             text: esapp.Utils.getTranslation('save'),    // 'Save',
             iconCls: 'fa fa-save fa-2x',
             style: { color: 'lightblue' },

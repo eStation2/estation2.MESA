@@ -4,14 +4,22 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
 
     getRequest: function() {
         var me = this.getView();
+        var params = {};
 
-        //var params = Ext.JSON.encode(win.params);
-        var params = {}
+        // console.info(me.params.record);
+
+        me.dekad_frequency = me.lookupReference('dekad_frequency').getValue();
+        me.daily_frequency = me.lookupReference('daily_frequency').getValue();
+        me.high_frequency = me.lookupReference('high_frequency').getValue();
+
         if (me.params.level == 'product') {
             params = {
                 level: me.params.level,
                 productcode: me.params.record.get('productcode'),
-                version: me.params.record.get('version')
+                version: me.params.record.get('version'),
+                dekad_frequency: me.dekad_frequency,
+                daily_frequency: me.daily_frequency,
+                high_frequency: me.high_frequency
             };
         }
         else if (me.params.level == 'mapset') {
@@ -21,7 +29,10 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
                 level: me.params.level,
                 productcode: me.params.record.get('productcode'),
                 version: me.params.record.get('version'),
-                mapsetcode: me.params.record.get('mapsetcode')
+                mapsetcode: me.params.record.get('mapsetcode'),
+                dekad_frequency: me.dekad_frequency,
+                daily_frequency: me.daily_frequency,
+                high_frequency: me.high_frequency
             };
         }
         else {
@@ -30,7 +41,10 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
                 productcode: me.params.record.get('productcode'),
                 version: me.params.record.get('version'),
                 mapsetcode: me.params.record.get('mapsetcode'),
-                subproductcode: me.params.record.get('subproductcode')
+                subproductcode: me.params.record.get('subproductcode'),
+                dekad_frequency: me.dekad_frequency,
+                daily_frequency: me.daily_frequency,
+                high_frequency: me.high_frequency
             };
         }
 
@@ -92,13 +106,20 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
         var me = this.getView();
         var thiscontroller = this;
 
+        me.dekad_frequency = me.lookupReference('dekad_frequency').getValue();
+        me.daily_frequency = me.lookupReference('daily_frequency').getValue();
+        me.high_frequency = me.lookupReference('high_frequency').getValue();
+
         //var params = Ext.JSON.encode(win.params);
         var params = {}
         if (me.params.level == 'product') {
             params = {
                 level: me.params.level,
                 productcode: me.params.record.get('productcode'),
-                version: me.params.record.get('version')
+                version: me.params.record.get('version'),
+                dekad_frequency: me.dekad_frequency,
+                daily_frequency: me.daily_frequency,
+                high_frequency: me.high_frequency
             };
         }
         else if (me.params.level == 'mapset') {
@@ -108,7 +129,10 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
                 level: me.params.level,
                 productcode: me.params.record.get('productcode'),
                 version: me.params.record.get('version'),
-                mapsetcode: me.params.record.get('mapsetcode')
+                mapsetcode: me.params.record.get('mapsetcode'),
+                dekad_frequency: me.dekad_frequency,
+                daily_frequency: me.daily_frequency,
+                high_frequency: me.high_frequency
             };
         }
         else {
@@ -117,7 +141,10 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
                 productcode: me.params.record.get('productcode'),
                 version: me.params.record.get('version'),
                 mapsetcode: me.params.record.get('mapsetcode'),
-                subproductcode: me.params.record.get('subproductcode')
+                subproductcode: me.params.record.get('subproductcode'),
+                dekad_frequency: me.dekad_frequency,
+                daily_frequency: me.daily_frequency,
+                high_frequency: me.high_frequency
             };
         }
 
@@ -173,13 +200,20 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
     ,onSaveClick: function () {
         var me = this.getView();
 
+        me.dekad_frequency = me.lookupReference('dekad_frequency').getValue();
+        me.daily_frequency = me.lookupReference('daily_frequency').getValue();
+        me.high_frequency = me.lookupReference('high_frequency').getValue();
+
         //var params = Ext.JSON.encode(win.params);
         var params = {}
         if (me.params.level == 'product') {
             params = {
                 level: me.params.level,
                 productcode: me.params.record.get('productcode'),
-                version: me.params.record.get('version')
+                version: me.params.record.get('version'),
+                dekad_frequency: me.dekad_frequency,
+                daily_frequency: me.daily_frequency,
+                high_frequency: me.high_frequency
             };
         }
         else if (me.params.level == 'mapset') {
@@ -189,7 +223,10 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
                 level: me.params.level,
                 productcode: me.params.record.get('productcode'),
                 version: me.params.record.get('version'),
-                mapsetcode: me.params.record.get('mapsetcode')
+                mapsetcode: me.params.record.get('mapsetcode'),
+                dekad_frequency: me.dekad_frequency,
+                daily_frequency: me.daily_frequency,
+                high_frequency: me.high_frequency
             };
         }
         else {
@@ -198,7 +235,10 @@ Ext.define('esapp.view.datamanagement.sendRequestController', {
                 productcode: me.params.record.get('productcode'),
                 version: me.params.record.get('version'),
                 mapsetcode: me.params.record.get('mapsetcode'),
-                subproductcode: me.params.record.get('subproductcode')
+                subproductcode: me.params.record.get('subproductcode'),
+                dekad_frequency: me.dekad_frequency,
+                daily_frequency: me.daily_frequency,
+                high_frequency: me.high_frequency
             };
         }
 
