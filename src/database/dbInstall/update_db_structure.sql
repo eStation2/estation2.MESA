@@ -398,7 +398,7 @@ ALTER TABLE products.thema ADD COLUMN activated boolean DEFAULT FALSE::boolean;
 
 UPDATE products.thema set activated = FALSE;
 
--- ToDo: In Postinst of RPM, READ themaid from /eStation2/settings/system_settings.ini
+-- Done: In Postinst of RPM, READ themaid from /eStation2/settings/system_settings.ini
 -- systemsettings = functions.getSystemSettings()
 -- themaid = systemsettings['thema'];
 -- UPDATE products.thema set activated = TRUE WHERE thema_id = themaid;
@@ -1538,130 +1538,133 @@ DROP TRIGGER IF EXISTS update_product ON products.product;
 -- 	EXECUTE PROCEDURE products.activate_deactivate_ingestion_pads_processing();
 
 
-DROP FUNCTION IF EXISTS products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean);
+
+
+-- Function: products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean)
+-- DROP FUNCTION products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean);
 
 CREATE OR REPLACE FUNCTION products.activate_deactivate_product_ingestion_pads_processing(
     productcode character varying,
     version character varying,
     activate boolean DEFAULT false,
-    force boolean DEFAULT false)
+    forse boolean DEFAULT false)
   RETURNS boolean AS
 $BODY$
 DECLARE
     _productcode  ALIAS FOR  $1;
     _version  ALIAS FOR  $2;
     _activate  ALIAS FOR  $3;
-    _force  ALIAS FOR  $4;
+    _forse  ALIAS FOR  $4;
 BEGIN
     IF TRIM(_productcode) != '' AND TRIM(_version) != '' THEN
         -- BEGIN
-      IF _force = TRUE THEN
-        UPDATE products.product p
-        SET activated = _activate
-        WHERE p.product_type = 'Native'
-        AND p.productcode = _productcode
-        AND p.version = _version
-        AND (p.productcode, p.version) IN (SELECT DISTINCT tp.productcode, tp.version FROM products.thema_product tp
-                 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-                 -- AND activated = TRUE
-                 AND tp.productcode = _productcode
-                 AND tp.version = _version);
+      IF _forse = TRUE THEN
+	UPDATE products.product p
+	SET activated = _activate
+	WHERE p.product_type = 'Native'
+	AND p.productcode = _productcode
+	AND p.version = _version
+	AND (p.productcode, p.version) IN (SELECT DISTINCT tp.productcode, tp.version FROM products.thema_product tp
+			     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+			     -- AND activated = TRUE
+			     AND tp.productcode = _productcode
+			     AND tp.version = _version);
 
-        UPDATE products.ingestion i
-        SET activated = _activate,
-            enabled = _activate
-        WHERE i.productcode = _productcode
-        AND i.version = _version
-        AND i.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-                 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-                 -- AND activated = TRUE
-                 AND tp.productcode = _productcode
-                 AND tp.version = _version);
+	UPDATE products.ingestion i
+	SET activated = _activate,
+	    enabled = _activate
+	WHERE i.productcode = _productcode
+	AND i.version = _version
+	AND i.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+			     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+			     -- AND activated = TRUE
+			     AND tp.productcode = _productcode
+			     AND tp.version = _version);
 
-        UPDATE products.process_product pp
-        SET activated = _activate
-        WHERE pp.productcode = _productcode
-        AND pp.version = _version
-        AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-                  WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-                  -- AND activated = TRUE
-                  AND tp.productcode = _productcode
-                  AND tp.version = _productcode);
+	UPDATE products.process_product pp
+	SET activated = _activate
+	WHERE pp.productcode = _productcode
+	AND pp.version = _version
+	AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+			      WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+			      -- AND activated = TRUE
+			      AND tp.productcode = _productcode
+			      AND tp.version = _productcode);
 
-        UPDATE products.processing p
-        SET activated = _activate,
-            enabled = _activate
-        WHERE (p.process_id) in (SELECT process_id
-               FROM products.process_product pp
-               WHERE pp.productcode = _productcode
-           AND pp.version = _version
-           AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-                     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-                 -- AND activated = TRUE
-                 AND tp.productcode = _productcode
-                 AND tp.version = _version));
+	UPDATE products.processing p
+	SET activated = _activate,
+	    enabled = _activate
+	WHERE (p.process_id) in (SELECT process_id
+	       FROM products.process_product pp
+	       WHERE pp.productcode = _productcode
+		 AND pp.version = _version
+		 AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+				       WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+					 -- AND activated = TRUE
+					 AND tp.productcode = _productcode
+					 AND tp.version = _version));
 
-        UPDATE products.product_acquisition_data_source pads
-        SET activated = _activate
-        WHERE pads.productcode = _productcode AND pads.version = _version
-        AND (pads.productcode, pads.version) in (SELECT tp.productcode, tp.version
-                   FROM products.thema_product tp
-                   WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE));
+	/* UPDATE products.product_acquisition_data_source pads
+	SET activated = _activate
+	WHERE pads.productcode = _productcode AND pads.version = _version
+	AND (pads.productcode, pads.version) in (SELECT tp.productcode, tp.version
+						 FROM products.thema_product tp
+						 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)); */
 
 
       ELSE
-        UPDATE products.product p
-        SET activated = _activate
-        WHERE p.product_type = 'Native'
-        AND p.productcode = _productcode
-        AND p.version = _version
-        AND (p.productcode, p.version) IN (SELECT DISTINCT tp.productcode, tp.version FROM products.thema_product tp
-                 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-                 AND activated = TRUE
-                 AND tp.productcode = _productcode
-                 AND tp.version = _version);
+	UPDATE products.product p
+	SET activated = _activate
+	WHERE p.product_type = 'Native'
+	AND p.productcode = _productcode
+	AND p.version = _version
+	AND (p.productcode, p.version) IN (SELECT DISTINCT tp.productcode, tp.version FROM products.thema_product tp
+			     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+			     AND activated = TRUE
+			     AND tp.productcode = _productcode
+			     AND tp.version = _version);
 
-        UPDATE products.ingestion i
-        SET activated = _activate,
-            enabled = _activate
-        WHERE i.productcode = _productcode
-        AND i.version = _version
-        AND i.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-                 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-                 AND tp.activated = TRUE
-                 AND tp.productcode = _productcode
-                 AND tp.version = _version);
+	UPDATE products.ingestion i
+	SET activated = _activate,
+	    enabled = _activate
+	WHERE i.productcode = _productcode
+	AND i.version = _version
+	AND i.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+			     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+			     AND tp.activated = TRUE
+			     AND tp.productcode = _productcode
+			     AND tp.version = _version);
 
-        UPDATE products.process_product pp
-        SET activated = _activate
-        WHERE pp.productcode = _productcode
-        AND pp.version = _version
-        AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-                  WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-                  AND tp.activated = TRUE
-                  AND tp.productcode = _productcode
-                  AND tp.version = _productcode);
+	UPDATE products.process_product pp
+	SET activated = _activate
+	WHERE pp.productcode = _productcode
+	AND pp.version = _version
+	AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+			      WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+			      AND tp.activated = TRUE
+			      AND tp.productcode = _productcode
+			      AND tp.version = _productcode);
 
-        UPDATE products.processing p
-        SET activated = _activate,
-            enabled = _activate
-        WHERE (p.process_id) in (SELECT process_id
-               FROM products.process_product pp
-               WHERE pp.productcode = _productcode
-           AND pp.version = _version
-           AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-                     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-                 AND tp.activated = TRUE
-                 AND tp.productcode = _productcode
-                 AND tp.version = _version));
+	UPDATE products.processing p
+	SET activated = _activate,
+	    enabled = _activate
+	WHERE (p.process_id) in (SELECT process_id
+	       FROM products.process_product pp
+	       WHERE pp.productcode = _productcode
+		 AND pp.version = _version
+		 AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+				       WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+					 AND tp.activated = TRUE
+					 AND tp.productcode = _productcode
+					 AND tp.version = _version));
 
-        UPDATE products.product_acquisition_data_source pads
-        SET activated = _activate
-        WHERE pads.productcode = _productcode AND pads.version = _version
-        AND (pads.productcode, pads.version) in (SELECT tp.productcode, tp.version
-                   FROM products.thema_product tp
-                   WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-                   AND tp.activated = TRUE);
+	/* UPDATE products.product_acquisition_data_source pads
+	SET activated = _activate
+	WHERE pads.productcode = _productcode AND pads.version = _version
+	AND (pads.productcode, pads.version) in (SELECT tp.productcode, tp.version
+						 FROM products.thema_product tp
+						 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+						 AND tp.activated = TRUE); */
 
       END IF;
 
@@ -1677,6 +1680,7 @@ $BODY$
   COST 100;
 ALTER FUNCTION products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean)
   OWNER TO estation;
+
 
 
 
@@ -1755,7 +1759,8 @@ ALTER FUNCTION products.activate_deactivate_product(character varying, character
 
 
 
-
+-- Function: products.set_thema(character varying)
+-- DROP FUNCTION products.set_thema(character varying);
 CREATE OR REPLACE FUNCTION products.set_thema(themaid character varying)
   RETURNS boolean AS
 $BODY$
@@ -1785,9 +1790,9 @@ BEGIN
       SET activated = FALSE
       WHERE (pp.process_id) in (SELECT process_id FROM products.processing WHERE defined_by = 'JRC');
 
-      UPDATE products.product_acquisition_data_source
+      /* UPDATE products.product_acquisition_data_source
       SET activated = FALSE
-      WHERE defined_by = 'JRC';
+      WHERE defined_by = 'JRC'; */
 
 
       IF themaid != 'ALL' THEN
@@ -1813,9 +1818,9 @@ BEGIN
            WHERE pp.type = 'INPUT'
              AND (pp.productcode, pp.version, pp.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id = themaid AND activated = TRUE));
 
-          UPDATE products.product_acquisition_data_source pads
+          /* UPDATE products.product_acquisition_data_source pads
           SET activated = TRUE
-          WHERE (pads.productcode, pads.version) in (SELECT productcode, version FROM products.thema_product WHERE thema_id = themaid AND activated = TRUE);
+          WHERE (pads.productcode, pads.version) in (SELECT productcode, version FROM products.thema_product WHERE thema_id = themaid AND activated = TRUE); */
 
       ELSE
           UPDATE products.product p
@@ -1840,9 +1845,9 @@ BEGIN
            WHERE pp.type = 'INPUT'
              AND (pp.productcode, pp.version, pp.mapsetcode) in (SELECT productcode, version, mapsetcode FROM products.thema_product WHERE thema_id != themaid AND activated = TRUE));
 
-          UPDATE products.product_acquisition_data_source pads
+          /* UPDATE products.product_acquisition_data_source pads
           SET activated = TRUE
-          WHERE (pads.productcode, pads.version) in (SELECT productcode, version FROM products.thema_product WHERE thema_id != themaid AND activated = TRUE);
+          WHERE (pads.productcode, pads.version) in (SELECT productcode, version FROM products.thema_product WHERE thema_id != themaid AND activated = TRUE); */
       END IF;
 
       RETURN TRUE;
@@ -1857,6 +1862,7 @@ $BODY$
   COST 100;
 ALTER FUNCTION products.set_thema(character varying)
   OWNER TO estation;
+
 
 
 
@@ -3174,7 +3180,6 @@ ALTER FUNCTION analysis.update_insert_graph_yaxes(character varying, character v
 -- Function: products.export_jrc_data(boolean)
 -- DROP FUNCTION products.export_jrc_data(boolean);
 
-
 CREATE OR REPLACE FUNCTION products.export_jrc_data(full_copy boolean DEFAULT false)
   RETURNS SETOF text AS
 $BODY$
@@ -3508,7 +3513,7 @@ BEGIN
 		|| ', type := ''' || type || ''''
 		|| ', activated := ' || activated
 		|| ', store_original_data := ' || store_original_data
-		|| ', full_copy := ' || FALSE
+		|| ', full_copy := ' || TRUE
 		|| ' );'  as inserts
 	FROM products.product_acquisition_data_source pads
 	WHERE defined_by = 'JRC'
@@ -3898,6 +3903,10 @@ ALTER FUNCTION products.export_jrc_data(boolean)
 
 
 
+
+-- Function: products.export_all_data(boolean)
+-- DROP FUNCTION products.export_all_data(boolean);
+
 -- Function: products.export_all_data(boolean)
 
 -- DROP FUNCTION products.export_all_data(boolean);
@@ -4229,7 +4238,7 @@ BEGIN
 		|| ', type := ''' || type || ''''
 		|| ', activated := ' || activated
 		|| ', store_original_data := ' || store_original_data
-		|| ', full_copy := ' || FALSE
+		|| ', full_copy := ' || TRUE
 		|| ' );'  as inserts
 	FROM products.product_acquisition_data_source pads
 	WHERE (pads.productcode, pads.version, pads.subproductcode) in (SELECT productcode, version, subproductcode FROM products.product);
@@ -4612,7 +4621,6 @@ $BODY$
   ROWS 1000;
 ALTER FUNCTION products.export_all_data(boolean)
   OWNER TO estation;
-
 
 
 
