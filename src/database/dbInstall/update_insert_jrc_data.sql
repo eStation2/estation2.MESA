@@ -1,4 +1,4 @@
-﻿SET statement_timeout = 0;
+SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
@@ -16,7 +16,7 @@ SET search_path = products, analysis, pg_catalog;
 DO $$
 BEGIN
 	PERFORM * FROM analysis.users u WHERE u.userid = 'adminuser';
-	  
+
 	IF NOT FOUND THEN
 		-- Insert new user, adminuser for the MESA station administartor, who can add new products but not edit the JRC defined.
 		INSERT INTO analysis.users(userid, username, password, userlevel, email, prefered_language)
@@ -24,12 +24,12 @@ BEGIN
 	END IF;
 
 	PERFORM * FROM analysis.users u WHERE u.userid = 'jrc_ref';
-	  
+
 	IF NOT FOUND THEN
 		-- Insert new user, jrc_ref for the JRC administartor, who can add new products and edit existing. User used for the Reference Workspaces.
 		INSERT INTO analysis.users(userid, username, password, userlevel, email, prefered_language)
 		VALUES ('jrc_ref','JRC Reference user','mesadmin',1,'','eng');
-	END IF;		
+	END IF;
 END $$;
 
 
@@ -234,7 +234,7 @@ SELECT products.update_insert_mapset_new(mapsetcode := 'SPOTV-SADC-300m', descri
 DELETE FROM products.sub_datasource_description
 WHERE datasource_descr_id IN ('JRC:WBD:GEE','JRC:WBD:GEE:AVG');
 
-DELETE FROM products.datasource_description 
+DELETE FROM products.datasource_description
 WHERE datasource_descr_id IN ('JRC:WBD:GEE','JRC:WBD:GEE:AVG');
 
 -- Remove pads for wd-gee
@@ -12358,8 +12358,6 @@ DELETE FROM products.processing WHERE algorithm = 'std_modis_pp';
 
 -- Delete the TAFIRI thema.
 DELETE FROM products.thema WHERE thema_id = 'TAFIRI';
-
-
 
 
 

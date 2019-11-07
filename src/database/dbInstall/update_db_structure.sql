@@ -1541,7 +1541,7 @@ DROP TRIGGER IF EXISTS update_product ON products.product;
 
 
 -- Function: products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean)
--- DROP FUNCTION products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean);
+DROP FUNCTION products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean);
 
 CREATE OR REPLACE FUNCTION products.activate_deactivate_product_ingestion_pads_processing(
     productcode character varying,
