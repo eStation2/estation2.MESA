@@ -113,15 +113,19 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None, d
                                 if dataset_dbinfo.frequency_id == 'e15minute':
                                     today = datetime.date.today()
                                     from_date = today - datetime.timedelta(days=int(high_frequency))
+                                    to_date = today + datetime.timedelta(days=1)
                                     kwargs = {'mapset': mapset,
                                               'sub_product_code': subproductcode,
-                                              'from_date': from_date}
+                                              'from_date': from_date,
+                                              'to_date': to_date}
                                 elif dataset_dbinfo.frequency_id == 'e30minute':
                                     today = datetime.date.today()
                                     from_date = today - datetime.timedelta(days=int(high_frequency))
+                                    to_date = today + datetime.timedelta(days=1)
                                     kwargs = {'mapset': mapset,
                                               'sub_product_code': subproductcode,
-                                              'from_date': from_date}
+                                              'from_date': from_date,
+                                              'to_date': to_date}
                                 elif dataset_dbinfo.frequency_id == 'e1day':
                                     today = datetime.date.today()
                                     from_date = today - relativedelta(years=int(daily_frequency))
@@ -135,6 +139,7 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None, d
                                 elif dataset_dbinfo.date_format == 'YYYYMMDD':      # dataset_dbinfo.frequency_id == 'e1dekad' and
                                     today = datetime.date.today()
                                     from_date = today - relativedelta(years=int(dekad_frequency))
+                                    from_date = from_date.replace(day=1)  # always start at the first of the month!
 
                                     kwargs = {'mapset': mapset,
                                               'sub_product_code': subproductcode,
@@ -199,15 +204,19 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None, d
                         if dataset_dbinfo.frequency_id == 'e15minute':
                             today = datetime.date.today()
                             from_date = today - datetime.timedelta(days=int(high_frequency))
+                            to_date = today + datetime.timedelta(days=1)
                             kwargs = {'mapset': mapsetcode,
                                       'sub_product_code': subproductcode,
-                                      'from_date': from_date}
+                                      'from_date': from_date,
+                                      'to_date': to_date}
                         elif dataset_dbinfo.frequency_id == 'e30minute':
                             today = datetime.date.today()
                             from_date = today - datetime.timedelta(days=int(high_frequency))
+                            to_date = today + datetime.timedelta(days=1)
                             kwargs = {'mapset': mapsetcode,
                                       'sub_product_code': subproductcode,
-                                      'from_date': from_date}
+                                      'from_date': from_date,
+                                      'to_date': to_date}
                         elif dataset_dbinfo.frequency_id == 'e1day':
                             today = datetime.date.today()
                             from_date = today - relativedelta(years=int(daily_frequency))
@@ -221,6 +230,7 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None, d
                         elif dataset_dbinfo.date_format == 'YYYYMMDD':  # dataset_dbinfo.frequency_id == 'e1dekad' and
                             today = datetime.date.today()
                             from_date = today - relativedelta(years=int(dekad_frequency))
+                            from_date = from_date.replace(day=1)  # always start at the first of the month!
 
                             kwargs = {'mapset': mapsetcode,
                                       'sub_product_code': subproductcode,
@@ -277,19 +287,21 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None, d
                     if dataset_dbinfo.frequency_id == 'e15minute':
                         today = datetime.date.today()
                         from_date = today - datetime.timedelta(days=int(high_frequency))
+                        to_date = today + datetime.timedelta(days=1)
                         # from_date = today - relativedelta(days=int(high_frequency))
-                        # print(str(from_date))
-                        # print(type(from_date))
                         kwargs = {'mapset': mapsetcode,
                                   'sub_product_code': subproductcode,
-                                  'from_date': from_date}
+                                  'from_date': from_date,
+                                  'to_date': to_date}
                     elif dataset_dbinfo.frequency_id == 'e30minute':
                         today = datetime.date.today()
                         from_date = today - datetime.timedelta(days=int(high_frequency))
                         # from_date = today - relativedelta(days=int(high_frequency)*2)
+                        to_date = today + datetime.timedelta(days=1)
                         kwargs = {'mapset': mapsetcode,
                                   'sub_product_code': subproductcode,
-                                  'from_date': from_date}
+                                  'from_date': from_date,
+                                  'to_date': to_date}
                     elif dataset_dbinfo.frequency_id == 'e1day':
                         today = datetime.date.today()
                         from_date = today - relativedelta(years=int(daily_frequency))
@@ -303,6 +315,7 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None, d
                     elif dataset_dbinfo.date_format == 'YYYYMMDD':  # dataset_dbinfo.frequency_id == 'e1dekad' and
                         today = datetime.date.today()
                         from_date = today - relativedelta(years=int(dekad_frequency))
+                        from_date = from_date.replace(day=1)    # always start at the first of the month!
 
                         kwargs = {'mapset': mapsetcode,
                                   'sub_product_code': subproductcode,

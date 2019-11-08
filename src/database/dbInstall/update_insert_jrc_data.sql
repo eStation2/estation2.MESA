@@ -18,7 +18,7 @@ BEGIN
 	PERFORM * FROM analysis.users u WHERE u.userid = 'adminuser';
 
 	IF NOT FOUND THEN
-		-- Insert new user, adminuser for the MESA station administartor, who can add new products but not edit the JRC defined.
+		-- Insert new user, adminuser for the MESA station administrator, who can add new products but not edit the JRC defined.
 		INSERT INTO analysis.users(userid, username, password, userlevel, email, prefered_language)
 		VALUES ('adminuser','Administrator','mesadmin',0,'','eng');
 	END IF;
@@ -26,11 +26,15 @@ BEGIN
 	PERFORM * FROM analysis.users u WHERE u.userid = 'jrc_ref';
 
 	IF NOT FOUND THEN
-		-- Insert new user, jrc_ref for the JRC administartor, who can add new products and edit existing. User used for the Reference Workspaces.
+		-- Insert new user, jrc_ref for the JRC administrator, who can add new products and edit existing. User used for the Reference Workspaces.
 		INSERT INTO analysis.users(userid, username, password, userlevel, email, prefered_language)
 		VALUES ('jrc_ref','JRC Reference user','mesadmin',1,'','eng');
 	END IF;
 END $$;
+
+-- On dessimination PC3 is first updated and inserts jrc_ref workspaces, which are synced to PC2 by bucardo.
+-- The installation on PC2 gives errors because the workspaces already exist, so deleted them and insert them after (in .spec).
+DELETE FROM analysis.user_workspaces WHERE userid = 'jrc_ref';
 
 
 /*******************************************************************************************

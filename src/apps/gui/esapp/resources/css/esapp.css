@@ -976,19 +976,15 @@ p {
 /*#logo{position:relative;z-index:10;min-height:0;max-width:435px;padding:2px;background-color:#fff;}*/
 #logo{position:relative;z-index:10;min-height:0;padding:2px;background-color:#fff;}
 
-/*.x-window-header-default {*/
-    /*border-width: 2px !important;*/
-/*}*/
-/*.x-window-header-title-default {*/
-    /*line-height: 13px !important;*/
-/*}*/
 
-/*.mapview-header {*/
-    /*padding: 0px !important;*/
-    /*border-width: 2px !important;*/
-    /*line-height: 13px !important;*/
-/*}*/
 .mapview-header .x-window-header-title-default .x-title-text{
+    padding: 0px!important;
+    border-width: 2px!important;
+    line-height: 13px!important;
+    white-space: unset!important;
+}
+
+.graphview-header .x-window-header-title-default .x-title-text{
     padding: 0px!important;
     border-width: 2px!important;
     line-height: 13px!important;

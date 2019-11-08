@@ -21,7 +21,8 @@ Ext.define("esapp.view.analysis.timeseriesChartView",{
     title: '<span class="panel-title-style">'+esapp.Utils.getTranslation('timeseries')+'</span>',
     header: {
         titlePosition: 2,
-        titleAlign: "left"
+        titleAlign: "left",
+        cls: 'graphview-header'
     },
     constrainHeader: true,
     //constrain: true,

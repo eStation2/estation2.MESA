@@ -183,7 +183,7 @@ class Frequency(object):
 
     def next_date(self, date):
         if self.frequency_type == self.TYPE.EVERY or self.value == 1:
-            print(date.strftime("%Y%m%d%H%M"))
+            # print(date.strftime("%Y%m%d%H%M"))
             date = self.get_next_date(date, self.unit, self.value)
         elif self.frequency_type == self.TYPE.PER:
             new_date = self.get_next_date(date, self.unit, 1)
@@ -229,7 +229,6 @@ class Frequency(object):
         else:
             return dates[:-1]
             # raise Exception("Unit not managed: %s" % unit)
-
 
     def get_dates(self, fromdate, todate):
         if fromdate > todate:
