@@ -988,10 +988,11 @@ p {
     /*border-width: 2px !important;*/
     /*line-height: 13px !important;*/
 /*}*/
-.mapview-header .x-window-header-title-default {
+.mapview-header .x-window-header-title-default .x-title-text{
     padding: 0px!important;
     border-width: 2px!important;
     line-height: 13px!important;
+    white-space: unset!important;
 }
 
 .mapview-regionname {

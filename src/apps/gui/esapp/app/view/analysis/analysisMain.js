@@ -210,13 +210,13 @@ Ext.define("esapp.view.analysis.analysisMain",{
                                             ws.setMaps(defaultws.get('maps'));
                                             ws.setGraphs(defaultws.get('graphs'));
 
-                                            // ws.getController().closeAllMapsGraphs();
-                                            // if (ws.maps.length > 0) {
-                                            //     ws.getController().openWorkspaceMaps(ws.maps);
-                                            // }
-                                            // if (ws.graphs.length > 0) {
-                                            //     ws.getController().openWorkspaceGraphs(ws.graphs);
-                                            // }
+                                            ws.getController().closeAllMapsGraphs();
+                                            if (ws.maps.length > 0) {
+                                                ws.getController().openWorkspaceMaps(ws.maps);
+                                            }
+                                            if (ws.graphs.length > 0) {
+                                                ws.getController().openWorkspaceGraphs(ws.graphs);
+                                            }
                                         }
                                     });
                                 }
@@ -227,7 +227,7 @@ Ext.define("esapp.view.analysis.analysisMain",{
                         });
                     }
                 });
-                task.delay(4000);
+                task.delay(0);
             }
         };
 
