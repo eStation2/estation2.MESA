@@ -9,6 +9,13 @@ SET client_min_messages = warning;
   For version 2.2.0
  *********************************************************/
 
+ALTER TABLE analysis.product_legend
+DROP CONSTRAINT IF EXISTS product_legend_product_pkey,
+ADD CONSTRAINT product_legend_product_pkey FOREIGN KEY (productcode, subproductcode, version)
+      REFERENCES products.product (productcode, subproductcode, version) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE CASCADE;
+
+
 -- ALTER TABLE analysis.user_workspaces ADD COLUMN IF NOT EXISTS showindefault boolean DEFAULT FALSE;
 -- ADD COLUMN IF NOT EXISTS does not work with the Postgresql version of MESA stations!
 ALTER TABLE analysis.user_workspaces

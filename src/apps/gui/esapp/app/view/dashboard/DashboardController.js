@@ -84,36 +84,36 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                 if (me.type_installation == 'full'){
                     me.setTitle('<span class="dashboard-header-title-style">' + esapp.Utils.getTranslation('mesa_full_estation') + '</span>');  // 'MESA Full eStation',
 
-                    var acquisitiontab = Ext.getCmp('acquisitionmaintab');
-                    var processingtab = Ext.getCmp('processingmaintab');
-                    var datamanagementtab = Ext.getCmp('datamanagementmaintab');
-                    var analysistab = Ext.getCmp('analysistab');
-                    var systemtab = Ext.getCmp('systemtab');
-                    var maintabpanel = Ext.getCmp('maintabpanel');
+                    // var acquisitiontab = Ext.getCmp('acquisitionmaintab');
+                    // var processingtab = Ext.getCmp('processingmaintab');
+                    // var datamanagementtab = Ext.getCmp('datamanagementmaintab');
+                    // var analysistab = Ext.getCmp('analysistab');
+                    // var systemtab = Ext.getCmp('systemtab');
+                    // var maintabpanel = Ext.getCmp('maintabpanel');
 
-                    var indexAcquisitionTab = 1;
-                    var indexProcessingTab = 2;
-                    var indexDataManagementTab = 3;
-                    var indexAnalysisTab = 4; // maintabpanel.getTabBar().items.indexOf(analysistab);
-                    var indexSystemTab = 5;
+                    // var indexAcquisitionTab = 1;
+                    // var indexProcessingTab = 2;
+                    // var indexDataManagementTab = 3;
+                    // var indexAnalysisTab = 4; // maintabpanel.getTabBar().items.indexOf(analysistab);
+                    // var indexSystemTab = 5;
 
-                    if (me.activePC == '') {
-                        maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).hide();
-                        acquisitiontab.disable();
-
-                        maintabpanel.getTabBar().items.getAt(indexProcessingTab).hide();
-                        processingtab.disable();
-
-                        maintabpanel.getTabBar().items.getAt(indexDataManagementTab).hide();
-                        datamanagementtab.disable();
-
-                        maintabpanel.getTabBar().items.getAt(indexAnalysisTab).hide();
-                        analysistab.disable();
-
-                        maintabpanel.getTabBar().items.getAt(indexSystemTab).show();
-                        systemtab.enable();
-                        maintabpanel.setActiveTab(indexSystemTab);
-                    }
+                    // if (me.activePC == '') {
+                    //     maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).hide();
+                    //     acquisitiontab.disable();
+                    //
+                    //     maintabpanel.getTabBar().items.getAt(indexProcessingTab).hide();
+                    //     processingtab.disable();
+                    //
+                    //     maintabpanel.getTabBar().items.getAt(indexDataManagementTab).hide();
+                    //     datamanagementtab.disable();
+                    //
+                    //     maintabpanel.getTabBar().items.getAt(indexAnalysisTab).hide();
+                    //     analysistab.disable();
+                    //
+                    //     maintabpanel.getTabBar().items.getAt(indexSystemTab).show();
+                    //     systemtab.enable();
+                    //     maintabpanel.setActiveTab(indexSystemTab);
+                    // }
                     if (me.activePC == 'pc1') {
                         pc1Active = true;
                     }
@@ -123,23 +123,23 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                         pc2DisabledPartial = false;
                         pc3DisabledAll = true;
 
-                        maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).show();
-                        acquisitiontab.enable();
-
-                        maintabpanel.getTabBar().items.getAt(indexProcessingTab).show();
-                        processingtab.enable();
-
-                        maintabpanel.getTabBar().items.getAt(indexDataManagementTab).show();
-                        datamanagementtab.enable();
-
-                        if (me.PC2_mode == 'nominal') {
-                            maintabpanel.getTabBar().items.getAt(indexAnalysisTab).hide();
-                            analysistab.disable();
-                        }
-                        else if (me.PC2_mode == 'recovery'){
-                            maintabpanel.getTabBar().items.getAt(indexAnalysisTab).show();
-                            analysistab.enable();
-                        }
+                        // maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).show();
+                        // acquisitiontab.enable();
+                        //
+                        // maintabpanel.getTabBar().items.getAt(indexProcessingTab).show();
+                        // processingtab.enable();
+                        //
+                        // maintabpanel.getTabBar().items.getAt(indexDataManagementTab).show();
+                        // datamanagementtab.enable();
+                        //
+                        // if (me.PC2_mode == 'nominal') {
+                        //     maintabpanel.getTabBar().items.getAt(indexAnalysisTab).hide();
+                        //     analysistab.disable();
+                        // }
+                        // else if (me.PC2_mode == 'recovery'){
+                        //     maintabpanel.getTabBar().items.getAt(indexAnalysisTab).show();
+                        //     analysistab.enable();
+                        // }
                     }
                     if (me.activePC == 'pc3') {
                         pc3Active = true;
@@ -148,32 +148,32 @@ Ext.define('esapp.view.dashboard.DashboardController', {
                         pc2DisabledAll = true;
 
                         if (me.PC3_mode == 'nominal') {
-                            maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).hide();
-                            acquisitiontab.disable();
-
-                            maintabpanel.getTabBar().items.getAt(indexProcessingTab).hide();
-                            processingtab.disable();
-
-                            maintabpanel.getTabBar().items.getAt(indexDataManagementTab).hide();
-                            datamanagementtab.disable();
-
-                            maintabpanel.getTabBar().items.getAt(indexAnalysisTab).show();
-                            analysistab.enable();
+                            // maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).hide();
+                            // acquisitiontab.disable();
+                            //
+                            // maintabpanel.getTabBar().items.getAt(indexProcessingTab).hide();
+                            // processingtab.disable();
+                            //
+                            // maintabpanel.getTabBar().items.getAt(indexDataManagementTab).hide();
+                            // datamanagementtab.disable();
+                            //
+                            // maintabpanel.getTabBar().items.getAt(indexAnalysisTab).show();
+                            // analysistab.enable();
                         }
                         else if (me.PC3_mode == 'recovery') {
                             pc3DisabledPartial = false;
 
-                            maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).show();
-                            acquisitiontab.enable();
-
-                            maintabpanel.getTabBar().items.getAt(indexProcessingTab).show();
-                            processingtab.enable();
-
-                            maintabpanel.getTabBar().items.getAt(indexDataManagementTab).show();
-                            datamanagementtab.enable();
-
-                            maintabpanel.getTabBar().items.getAt(indexAnalysisTab).show();
-                            analysistab.enable();
+                            // maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).show();
+                            // acquisitiontab.enable();
+                            //
+                            // maintabpanel.getTabBar().items.getAt(indexProcessingTab).show();
+                            // processingtab.enable();
+                            //
+                            // maintabpanel.getTabBar().items.getAt(indexDataManagementTab).show();
+                            // datamanagementtab.enable();
+                            //
+                            // maintabpanel.getTabBar().items.getAt(indexAnalysisTab).show();
+                            // analysistab.enable();
                         }
                     }
 

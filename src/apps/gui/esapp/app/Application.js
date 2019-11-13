@@ -165,7 +165,7 @@ Ext.define('esapp.Application', {
                         var splashscreen = Ext.getBody().mask(esapp.Utils.getTranslation('splashscreenmessage'), 'splashscreen');
                         // fade out the body mask
                         splashscreen.fadeOut({
-                            duration: 1000,
+                            duration: 2000,
                             remove: true
                         });
                         // console.info(splashscreen);

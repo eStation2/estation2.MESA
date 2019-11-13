@@ -909,6 +909,17 @@ Ext.define('esapp.view.analysis.mapViewController', {
                subproductcode:me.subproductcode
         };
 
+        var myMask = Ext.create('Ext.LoadMask', {
+            msg    : esapp.Utils.getTranslation('loading'),
+            target : me.lookupReference('time-line-chart' + me.id),
+            alwaysOnTop: true,
+            maxHeight: 200,
+            border : false,
+            frame : false
+        });
+
+        myMask.show();
+
         Ext.Ajax.request({
             method: 'GET',
             url:'analysis/gettimeline',
@@ -975,6 +986,8 @@ Ext.define('esapp.view.analysis.mapViewController', {
                 // mapviewtimeline.fireEvent('show');
                 me.getController().redrawTimeLine();
 
+                myMask.hide();
+
                 // if (frequency_id == 'e1day' && dataLength > 30){
                 //     mapview_timelinechart_container.timelinechart.rangeSelector.setSelected(0);
                 //     mapview_timelinechart_container.timelinechart.rangeSelector.clickButton(0);
@@ -995,7 +1008,9 @@ Ext.define('esapp.view.analysis.mapViewController', {
 
             },
             //callback: function ( callinfo,responseOK,response ) {},
-            failure: function ( result, request) {}
+            failure: function ( result, request) {
+                myMask.hide();
+            }
         });
     }
 
@@ -2284,7 +2299,12 @@ Ext.define('esapp.view.analysis.mapViewController', {
                     me.selectedFeatureFromDrawLayer = true;
                     regionname_html = esapp.Utils.getTranslation('drawn') + " " + feature.getGeometry().getType();     // "Drawn "
                 }
-                selectedregion.setValue(regionname_html.replace(/<BR>/g, ' - '));
+                if (feature_columns.length > 1){
+                    selectedregion.setValue(regionname_html.replace(/<BR>/g, ' - '));
+                }
+                else {
+                    selectedregion.setValue(regionname_html.replace(/<BR>/g, ''));
+                }
 
                 me.selectedarea = regionname_html;
 
