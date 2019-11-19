@@ -2438,7 +2438,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                             graph_title_font_color: {
                                 displayName: esapp.Utils.getTranslation('titlecolor'),   // 'Title color',
                                 editor: {
-                                    xtype: 'mycolorpicker'
+                                    xtype: 'mycolorselector'    // 'mycolorpicker'
                                 }
                                 , renderer: crenderer
                             },
@@ -2456,7 +2456,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                             graph_subtitle_font_color: {
                                 displayName: esapp.Utils.getTranslation('subtitlecolor'),   // 'Sub title color',
                                 editor: {
-                                    xtype: 'mycolorpicker'
+                                    xtype: 'mycolorselector'    // 'mycolorpicker'
                                     //,floating: false
                                 }
                                 , renderer: crenderer
@@ -2472,7 +2472,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                             legend_font_color: {
                                 displayName: esapp.Utils.getTranslation('legendfontcolor'),   // 'Legend font colour',
                                 editor: {
-                                    xtype: 'mycolorpicker'
+                                    xtype: 'mycolorselector'    // 'mycolorpicker'
                                 }
                                 , renderer: crenderer
                             },
@@ -2483,7 +2483,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                             xaxe_font_color: {
                                 displayName: esapp.Utils.getTranslation('xaxefontcolor'),   // 'xAxe font color',
                                 editor: {
-                                    xtype: 'mycolorpicker'
+                                    xtype: 'mycolorselector'    // 'mycolorpicker'
                                 }
                                 , renderer: crenderer
                             },
@@ -2517,7 +2517,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                             yaxe1_color: {
                                 displayName: 'yAxe 1 ' + esapp.Utils.getTranslation('color'),
                                 editor: {
-                                    xtype: 'mycolorpicker'
+                                    xtype: 'mycolorselector'    // 'mycolorpicker'
                                 }
                                 , renderer: crenderer
                             },
@@ -2582,7 +2582,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                             yaxe2_color: {
                                 displayName: 'yAxe 2 ' + esapp.Utils.getTranslation('color'),
                                 editor: {
-                                    xtype: 'mycolorpicker'
+                                    xtype: 'mycolorselector'    // 'mycolorpicker'
                                 }
                                 , renderer: crenderer
                             },
@@ -2647,7 +2647,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                             yaxe3_color: {
                                 displayName: 'yAxe 3 ' + esapp.Utils.getTranslation('color'),
                                 editor: {
-                                    xtype: 'mycolorpicker'
+                                    xtype: 'mycolorselector'    // 'mycolorpicker'
                                 }
                                 , renderer: crenderer
                             },
@@ -2712,7 +2712,7 @@ Ext.define('esapp.view.analysis.timeseriesChartViewController', {
                             yaxe4_color: {
                                 displayName: 'yAxe 4 ' + esapp.Utils.getTranslation('color'),
                                 editor: {
-                                    xtype: 'mycolorpicker'
+                                    xtype: 'mycolorselector'    // 'mycolorpicker'
                                 }
                                 , renderer: crenderer
                             },

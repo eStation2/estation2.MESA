@@ -426,6 +426,71 @@ Ext.define('esapp.Utils', {
 });
 
 
+Ext.define('Ext.ux.ColorSelector', {
+    extend : 'Ext.form.field.Picker',
+    xtype: 'mycolorselector',
+    createPicker: function(){
+        var me = this;
+
+        me.selector = Ext.create('Ext.panel.Panel', {
+             reference: 'color_selector'
+            ,layout:'fit'
+            ,hidden: false
+            ,minWidth: 600
+            ,minHeigth: 500
+            ,autoShow: true
+            ,closable: true
+            ,closeAction: 'hide'
+            ,modal: true
+            ,deferredRender: false
+            ,frame: false
+            ,border: false
+            ,collapsible: false
+            ,bodyStyle: 'padding: 10px 3px 0px 3px;'
+            ,cls: 'newpanelstyle'
+            ,ownerCt: this
+            // ,renderTo:  this.up().up().up().getEl()  //document.body,
+            ,floating: true
+            ,focusOnShow: true
+            ,listeners: {
+                 show: function(){
+                     this.down('colorselector').setValue(me.value);
+                 }
+            }
+            ,bbar: {
+                padding: 4,
+                defaults: {
+                    scale: 'medium',
+                    hidden: false
+                },
+                items: ['->', {
+                    xtype: 'button',
+                    text: esapp.Utils.getTranslation('ok'),    // 'Ok',
+                    handler: function(){
+                        var hexvalue = this.up().up().down('colorselector').getValue();
+                        var rgbvalue = esapp.Utils.HexToRGB(hexvalue);
+                        rgbvalue = rgbvalue.replace(/,/g, ' ');
+                        me.setValue(hexvalue);
+
+                        me.selector.close();
+                    }
+                }]
+            }
+            ,items: [{
+                xtype: 'colorselector',
+                format: "#HEX6",
+                value: me.value
+            }]
+        });
+
+        // me.selector.alignTo(me.inputEl, 'tl-bl?');
+        // me.selector.show(me.inputEl);
+
+        return me.selector
+    }
+});
+
+
 Ext.define('Ext.ux.ColorPicker', {
     extend : 'Ext.form.field.Picker',
     xtype: 'mycolorpicker',

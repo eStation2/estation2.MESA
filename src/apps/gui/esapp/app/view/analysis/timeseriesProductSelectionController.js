@@ -235,7 +235,7 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionController', {
                         color: {
                             displayName: esapp.Utils.getTranslation('color'),   // 'Colour',
                             editor: {
-                                xtype: 'mycolorpicker'
+                                xtype: 'mycolorselector'
                             }
                             ,renderer: esapp.Utils.colorrenderer
                         }
