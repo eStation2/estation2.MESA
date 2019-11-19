@@ -2,7 +2,6 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.analysis-productnavigator',
 
-
     assignLegend: function(){
         var me = this.getView();
         var productname = me.selectedproduct['productname'];
@@ -181,7 +180,6 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
 
     },
 
-
     unassignLegend: function(view, rowIndex, colIndex, item, e, record){
         var me = this.getView();
         var legendid = record.get('legend_id');
@@ -220,7 +218,6 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         });
 
     },
-
 
     editLegend: function(grid, record, element, rowIndex, e, eOpts){
         if(!isNaN(record)) {    // record is the rowIndex so get the record from the store through the rowIndex
@@ -337,7 +334,6 @@ Ext.define('esapp.view.analysis.ProductNavigatorController', {
         mapsetdatasetgrid.show();
 
     },
-
 
     mapsetDataSetGridRowClick: function(gridview, record, tr, rowIndex, e, eOpts) { // for rowclick
         var me = this.getView();
