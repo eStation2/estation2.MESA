@@ -8,15 +8,15 @@ new_user='analyst'
 
 # tmp dir
 dir='/tmp/eStation2/'
-find ${dir} -user ${old_user} -exec chown ${new_user}:estation {} \; -exec chmod 775 {} \;
+find -L ${dir} -user ${old_user} -exec chown ${new_user}:estation {} \; -exec chmod 775 {} \;
 
 # eStation2 dir
 dir='/eStation2/'
-find ${dir} -user ${old_user} -exec chown ${new_user}:estation {} \; -exec chmod 775 {} \;
+find -L ${dir} -user ${old_user} -exec chown ${new_user}:estation {} \; -exec chmod 775 {} \;
 
 # data dir
 dir='/data/'
-find ${dir} -user ${old_user} -exec chown ${new_user}:estation {} \; -exec chmod 775 {} \;
+find -L ${dir} -user ${old_user} -exec chown ${new_user}:estation {} \; -exec chmod 775 {} \;
 
 # Change permissions /var/www/ (for allowing analyst to change version)
 # chmod 777 /var/www/
