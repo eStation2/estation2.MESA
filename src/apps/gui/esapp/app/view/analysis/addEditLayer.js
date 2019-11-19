@@ -331,8 +331,8 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                             //type: 'colorfield',
                             displayName: esapp.Utils.getTranslation('outline_colour'),     // 'Outline colour',
                             editor: {
-                                xtype: 'mycolorpicker'
-                                //xtype: 'colorfield',
+                                // xtype: 'mycolorpicker'
+                                xtype: 'mycolorselector'
                                 //format: '#HEX6'
                             }
                             ,renderer: colorrenderer
@@ -344,8 +344,8 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                         feature_highlight_outlinecolor: {
                             displayName: esapp.Utils.getTranslation('highlight_outline_colour'),     // 'Highlight outline colour',
                             editor: {
-                                xtype: 'mycolorpicker'
-                                //xtype: 'colorfield',
+                                // xtype: 'mycolorpicker'
+                                xtype: 'mycolorselector'
                                 //format: '#HEX6'
                             }
                             ,renderer: colorrenderer
@@ -357,8 +357,8 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                         feature_highlight_fillcolor: {
                             displayName: esapp.Utils.getTranslation('highlight_fill_colour'),     // 'Highlight fill colour',
                             editor: {
-                                xtype: 'mycolorpicker'
-                                //xtype: 'colorfield',
+                                // xtype: 'mycolorpicker'
+                                xtype: 'mycolorselector'
                                 //format: '#HEX6'
                             }
                             ,renderer: colorrenderer
@@ -374,8 +374,8 @@ Ext.define("esapp.view.analysis.addEditLayer",{
                         feature_selected_outlinecolor: {
                             displayName: esapp.Utils.getTranslation('selected_feature_outline_colour'),     // 'Selected feature outline colour',
                             editor: {
-                                xtype: 'mycolorpicker'
-                                //xtype: 'colorfield',
+                                // xtype: 'mycolorpicker'
+                                xtype: 'mycolorselector'
                                 //format: '#HEX6'
                             }
                             ,renderer: colorrenderer

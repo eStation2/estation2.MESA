@@ -27,6 +27,141 @@ req_dir=es_constants.es2globals['requests_dir']
 
 class TestCreateRequests(unittest.TestCase):
 
+    def test_requests_new_highfrequency(self):
+        getparams = {
+            'level': 'dataset',
+            'productcode': 'lsasaf-lst',
+            'version': 'undefined',
+            'mapsetcode': 'MSG-satellite-3km',
+            'subproductcode': 'lst',
+            'dekad_frequency': '5',
+            'daily_frequency': '3',
+            'high_frequency': '3'
+        }
+        productcode = None
+        version = None
+        mapsetcode = None
+        subproductcode = None
+
+        if getparams['level'] == 'product':
+            productcode = getparams['productcode']
+            version = getparams['version']
+        elif getparams['level'] == 'mapset':
+            productcode = getparams['productcode']
+            version = getparams['version']
+            mapsetcode = getparams['mapsetcode']
+        elif getparams['level'] == 'dataset':
+            productcode = getparams['productcode']
+            version = getparams['version']
+            mapsetcode = getparams['mapsetcode']
+            subproductcode = getparams['subproductcode']
+
+        request = requests.create_request(productcode,
+                                          version,
+                                          mapsetcode=mapsetcode,
+                                          subproductcode=subproductcode,
+                                          dekad_frequency=int(getparams['dekad_frequency']),
+                                          daily_frequency=int(getparams['daily_frequency']),
+                                          high_frequency=int(getparams['high_frequency']))
+        request_json = json.dumps(request,
+                               ensure_ascii=False,
+                               sort_keys=True,
+                               indent=4,
+                               separators=(', ', ': '))
+
+        print request_json
+
+
+    def test_requests_new_dekad(self):
+        getparams = {
+            'level': 'dataset',
+            'productcode': 'vgt-ndvi',
+            'version': 'sv2-pv2.2',
+            'mapsetcode': 'SPOTV-Africa-1km',
+            'subproductcode': 'ndv',
+            'dekad_frequency': '5',
+            'daily_frequency': '3',
+            'high_frequency': '3'
+        }
+        productcode = None
+        version = None
+        mapsetcode = None
+        subproductcode = None
+
+        if getparams['level'] == 'product':
+            productcode = getparams['productcode']
+            version = getparams['version']
+        elif getparams['level'] == 'mapset':
+            productcode = getparams['productcode']
+            version = getparams['version']
+            mapsetcode = getparams['mapsetcode']
+        elif getparams['level'] == 'dataset':
+            productcode = getparams['productcode']
+            version = getparams['version']
+            mapsetcode = getparams['mapsetcode']
+            subproductcode = getparams['subproductcode']
+
+        request = requests.create_request(productcode,
+                                          version,
+                                          mapsetcode=mapsetcode,
+                                          subproductcode=subproductcode,
+                                          dekad_frequency=int(getparams['dekad_frequency']),
+                                          daily_frequency=int(getparams['daily_frequency']),
+                                          high_frequency=int(getparams['high_frequency']))
+        request_json = json.dumps(request,
+                               ensure_ascii=False,
+                               sort_keys=True,
+                               indent=4,
+                               separators=(', ', ': '))
+
+        print request_json
+
+    def test_requests_new_daily(self):
+        getparams = {
+            'level': 'dataset',
+            'productcode': 'arc2-rain',
+            'version': '2.0',
+            'mapsetcode': 'ARC2-Africa-11km',
+            'subproductcode': '1day',
+            'dekad_frequency': '5',
+            'daily_frequency': '3',
+            'high_frequency': '3'
+        }
+        productcode = None
+        version = None
+        mapsetcode = None
+        subproductcode = None
+
+        if getparams['level'] == 'product':
+            productcode = getparams['productcode']
+            version = getparams['version']
+        elif getparams['level'] == 'mapset':
+            productcode = getparams['productcode']
+            version = getparams['version']
+            mapsetcode = getparams['mapsetcode']
+        elif getparams['level'] == 'dataset':
+            productcode = getparams['productcode']
+            version = getparams['version']
+            mapsetcode = getparams['mapsetcode']
+            subproductcode = getparams['subproductcode']
+
+        request = requests.create_request(productcode,
+                                          version,
+                                          mapsetcode=mapsetcode,
+                                          subproductcode=subproductcode,
+                                          dekad_frequency=int(getparams['dekad_frequency']),
+                                          daily_frequency=int(getparams['daily_frequency']),
+                                          high_frequency=int(getparams['high_frequency']))
+        request_json = json.dumps(request,
+                               ensure_ascii=False,
+                               sort_keys=True,
+                               indent=4,
+                               separators=(', ', ': '))
+
+        print request_json
+
+
+
     # Type 1: only product/version defined
     def test_requests_1(self):
 
@@ -104,51 +239,6 @@ class TestCreateRequests(unittest.TestCase):
         with open(test_json_dump,'w+') as f:
             f.write(request_json)
         f.close()
-
-        print request_json
-
-
-    def test_requests_4(self):
-        getparams = {
-            'level': 'dataset',
-            'productcode': 'lsasaf-lst',
-            'version': 'undefined',
-            'mapsetcode': 'MSG-satellite-3km',
-            'subproductcode': 'lst',
-            'dekad_frequency': '5',
-            'daily_frequency': '3',
-            'high_frequency': '3'
-        }
-        productcode = None
-        version = None
-        mapsetcode = None
-        subproductcode = None
-
-        if getparams['level'] == 'product':
-            productcode = getparams['productcode']
-            version = getparams['version']
-        elif getparams['level'] == 'mapset':
-            productcode = getparams['productcode']
-            version = getparams['version']
-            mapsetcode = getparams['mapsetcode']
-        elif getparams['level'] == 'dataset':
-            productcode = getparams['productcode']
-            version = getparams['version']
-            mapsetcode = getparams['mapsetcode']
-            subproductcode = getparams['subproductcode']
-
-        request = requests.create_request(productcode,
-                                          version,
-                                          mapsetcode=mapsetcode,
-                                          subproductcode=subproductcode,
-                                          dekad_frequency=int(getparams['dekad_frequency']),
-                                          daily_frequency=int(getparams['daily_frequency']),
-                                          high_frequency=int(getparams['high_frequency']))
-        request_json = json.dumps(request,
-                               ensure_ascii=False,
-                               sort_keys=True,
-                               indent=4,
-                               separators=(', ', ': '))
 
         print request_json
 

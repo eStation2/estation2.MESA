@@ -171,7 +171,7 @@ Ext.define('esapp.view.analysis.addEditLegendController', {
             ,frame: false
             ,border: false
             ,collapsible:false
-            ,bodyStyle: 'padding: 15px 3px 3px 3px;'
+            ,bodyStyle: 'padding: 10px 3px 0px 3px;'
             ,bbar: {
                 padding: 4,
                 defaults: {

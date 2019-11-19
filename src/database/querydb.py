@@ -1793,7 +1793,7 @@ def update_product_info(productinfo):
         if productinfo['productcode'] != productinfo['orig_productcode'] or productinfo['version'] != productinfo['orig_version']:
             query = "UPDATE products.product SET " + \
                     "  productcode = '" + productinfo['productcode'] + "', " + \
-                    "  version = '" + productinfo['version'] + "', " + \
+                    "  version = '" + productinfo['version'] + "' " + \
                     " WHERE productcode = '" + productinfo['orig_productcode'] + "' " + \
                     "  AND version = '" + productinfo['orig_version'] + "' "
 

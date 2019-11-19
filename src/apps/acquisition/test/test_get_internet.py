@@ -1613,5 +1613,38 @@ class TestGetInternet(unittest.TestCase):
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
 
+    def TestMOTU(self):
+
+        internet_id='MOTU:PHY:TDS'
+
+        # Direct test !
+        if False:
+            return
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':-2,
+                         'end_date': 8,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type,
+                         'files_filter_expression':internet_source.files_filter_expression,
+                         'https_params': '',
+
+        }
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
+
+
 if __name__ == '__main__':
         unittest.main()

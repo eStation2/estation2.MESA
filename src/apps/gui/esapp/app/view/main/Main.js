@@ -50,7 +50,7 @@ Ext.define('esapp.view.main.Main', {
             title: esapp.Utils.getTranslation('dashboard'),  // 'Dashboard',
             id:'dashboardtab',
             xtype:'container',
-            hidden: false,
+            hidden: true,
             autoScroll: true,
             layout : 'center',
             bodyCls:'dashboard-panel-body',
@@ -77,7 +77,7 @@ Ext.define('esapp.view.main.Main', {
             xtype:'container',
             closable: false,
             autoScroll: true,
-            hidden: false,
+            hidden: true,
             layout: 'fit',
             items: [{
                 // html: '<img alt="Mockup Acquisition" width="100%" height="100%" src="../resources/img/mockup_acquisition.png">'
@@ -156,7 +156,7 @@ Ext.define('esapp.view.main.Main', {
             id:'processingmaintab',
             xtype:'container',
             autoScroll: true,
-            hidden: false,
+            hidden: true,
             layout: 'fit',
             items: [{
                xtype  : 'processing-main',
@@ -176,7 +176,7 @@ Ext.define('esapp.view.main.Main', {
             id:'datamanagementmaintab',
             xtype:'container',
             autoScroll: true,
-            hidden: false,
+            hidden: true,
             layout: 'fit',
             items: [{
                xtype  : 'datamanagement-main',
@@ -214,8 +214,7 @@ Ext.define('esapp.view.main.Main', {
             xtype:'container',
             autoScroll: true,
             layout : 'fit',
-            hidden: false,
-            disabled: false,
+            hidden: true,
             items: [{
                 xtype  : 'analysis-main',
                 id:'analysismain',
@@ -251,7 +250,7 @@ Ext.define('esapp.view.main.Main', {
             title: esapp.Utils.getTranslation('system'),  // 'System',
             id:'systemtab',
             xtype:'container',
-            hidden: false,
+            hidden: true,
             autoScroll: true,
             layout : 'center',
             items: [{
@@ -453,17 +452,21 @@ Ext.define('esapp.view.main.Main', {
             }
         });
 
-        if (esapp.globals['typeinstallation'].toLowerCase() == 'online'){
+        var indexDashboardTab = 0;
+        var indexAcquisitionTab = 1;
+        var indexProcessingTab = 2;
+        var indexDataManagementTab = 3;
+        var indexAnalysisTab = 4; // maintabpanel.getTabBar().items.indexOf(analysistab);
+        var indexSystemTab = 5;
+
+        if (['online', 'jrc_online'].includes(esapp.globals['typeinstallation'].toLowerCase())){
             me.maintabpanel.add(me.analysis);
             // me.maintabpanel.add(me.system);
             me.maintabpanel.add(me.help);
+
+            me.maintabpanel.getTabBar().items.getAt(0).show();
         }
-        else if (esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online'){
-            me.maintabpanel.add(me.analysis);
-            // me.maintabpanel.add(me.system);
-            me.maintabpanel.add(me.help);
-        }
-        else if (esapp.globals['typeinstallation'] != 'jrc_online'){
+        else if (['windows', 'server', 'singlepc'].includes(esapp.globals['typeinstallation'].toLowerCase())){
             // Pierluigi
             me.maintabpanel.add(me.dashboard);
             me.maintabpanel.add(me.acquisition);
@@ -473,13 +476,71 @@ Ext.define('esapp.view.main.Main', {
             me.maintabpanel.add(me.analysis);
             me.maintabpanel.add(me.system);
             me.maintabpanel.add(me.help);
-            // me.maintabpanel.setActiveTab('analysistab');
-            // me.maintabpanel.setActiveTab('dashboardtab');
+
+            me.maintabpanel.getTabBar().items.getAt(indexDashboardTab).show();
+            me.maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).show();
+            me.maintabpanel.getTabBar().items.getAt(indexProcessingTab).show();
+            me.maintabpanel.getTabBar().items.getAt(indexDataManagementTab).show();
+            me.maintabpanel.getTabBar().items.getAt(indexAnalysisTab).show();
+            me.maintabpanel.getTabBar().items.getAt(indexSystemTab).show();
+
+        }
+        else if (esapp.globals['typeinstallation'].toLowerCase() == 'full'){
+            me.maintabpanel.add(me.dashboard);
+            me.maintabpanel.add(me.acquisition);
+            me.maintabpanel.add(me.processing);
+            me.maintabpanel.add(me.datamanagement);
+            me.maintabpanel.add(me.analysis);
+            me.maintabpanel.add(me.system);
+            me.maintabpanel.add(me.help);
+
+           if (esapp.globals['role'] == '') {
+                me.maintabpanel.getTabBar().items.getAt(indexDashboardTab).hide();
+                me.maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).hide();
+                me.maintabpanel.getTabBar().items.getAt(indexProcessingTab).hide();
+                me.maintabpanel.getTabBar().items.getAt(indexDataManagementTab).hide();
+                me.maintabpanel.getTabBar().items.getAt(indexAnalysisTab).hide();
+                me.maintabpanel.getTabBar().items.getAt(indexSystemTab).show();
+                me.maintabpanel.setActiveTab(indexSystemTab);
+           }
+           if (esapp.globals['role'] == 'pc2') {
+                me.maintabpanel.getTabBar().items.getAt(indexDashboardTab).show();
+                me.maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).show();
+                me.maintabpanel.getTabBar().items.getAt(indexProcessingTab).show();
+                me.maintabpanel.getTabBar().items.getAt(indexDataManagementTab).show();
+
+                if (esapp.globals['mode'] == 'nominal') {
+                    me.maintabpanel.getTabBar().items.getAt(indexAnalysisTab).hide();
+                }
+                else if (esapp.globals['mode'] == 'recovery'){
+                    me.maintabpanel.getTabBar().items.getAt(indexAnalysisTab).show();
+                }
+                me.maintabpanel.getTabBar().items.getAt(indexSystemTab).show();
+           }
+           if (esapp.globals['role'] == 'pc3') {
+                if (esapp.globals['mode'] == 'nominal') {
+                    me.maintabpanel.getTabBar().items.getAt(indexDashboardTab).show();
+                    me.maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).hide();
+                    me.maintabpanel.getTabBar().items.getAt(indexProcessingTab).hide();
+                    me.maintabpanel.getTabBar().items.getAt(indexDataManagementTab).hide();
+                    me.maintabpanel.getTabBar().items.getAt(indexAnalysisTab).show();
+                    me.maintabpanel.getTabBar().items.getAt(indexSystemTab).show();
+                }
+                else if (esapp.globals['mode'] == 'recovery') {
+                    me.maintabpanel.getTabBar().items.getAt(indexDashboardTab).show();
+                    me.maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).show();
+                    me.maintabpanel.getTabBar().items.getAt(indexProcessingTab).show();
+                    me.maintabpanel.getTabBar().items.getAt(indexDataManagementTab).show();
+                    me.maintabpanel.getTabBar().items.getAt(indexAnalysisTab).show();
+                    me.maintabpanel.getTabBar().items.getAt(indexSystemTab).show();
+                }
+           }
         }
         else {
             me.maintabpanel.add(me.analysis);
             // me.maintabpanel.add(me.system);
             me.maintabpanel.add(me.help);
+            me.maintabpanel.getTabBar().items.getAt(0).show();
         }
 
         me.items = [
@@ -489,13 +550,7 @@ Ext.define('esapp.view.main.Main', {
 
         me.callParent();
 
-        if (esapp.globals['typeinstallation'] == 'windows'){
-            me.maintabpanel.setActiveTab('dashboardtab');
-        }
-        else if (esapp.globals['typeinstallation'].toLowerCase() == 'online') {
-            me.maintabpanel.setActiveTab('analysistab');
-        }
-        else if (esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online'){
+        if (['online', 'jrc_online'].includes(esapp.globals['typeinstallation'].toLowerCase())) {
             me.maintabpanel.setActiveTab('analysistab');
         }
         else {

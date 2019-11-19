@@ -671,7 +671,7 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                                    return 'delete';
                                }
                                else {
-                                   cell.setDisabled(true);
+                                   // cell.setDisabled(true);
                                    return 'x-hide-display';
                                }
                            },

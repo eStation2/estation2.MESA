@@ -54,9 +54,9 @@ Ext.define('esapp.store.IngestSubProductsStore', {
 
     ,listeners: {
         write: function(store, operation){
-            Ext.toast({ html: operation.getResultSet().message,
-                        title: esapp.Utils.getTranslation('ingestproductupdated'),  // "Ingest product updated",
-                        width: 300, align: 't' });
+            // Ext.toast({ html: operation.getResultSet().message,
+            //             title: esapp.Utils.getTranslation('ingestproductupdated'),  // "Ingest product updated",
+            //             width: 300, align: 't' });
         }
     }
 

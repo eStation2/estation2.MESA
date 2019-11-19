@@ -2399,104 +2399,109 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
     #
     # Notes:'The command expects exactly 3 input files, in 3 arguments.'
     #       'The input_nodata defines the output_nodata as well (no recoding)'
+    try:
+        # Manage options
+        options_list = [es_constants.ES2_OUTFILE_OPTIONS]
+        options_list.append(options)
 
-    # Manage options
-    options_list = [es_constants.ES2_OUTFILE_OPTIONS]
-    options_list.append(options)
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+                                  dir=es_constants.base_tmp_dir)
 
-    tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
-                              dir=es_constants.base_tmp_dir)
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
-    output_file_final = output_file
-    output_file = tmpdir + os.sep + os.path.basename(output_file)
+        # Open the threee files (add checks)
+        f0 = gdal.Open(input_file, GA_ReadOnly)
+        fm1 = gdal.Open(before_file, GA_ReadOnly)
+        fp1 = gdal.Open(after_file, GA_ReadOnly)
 
-    # Open the threee files (add checks)
-    f0 = gdal.Open(input_file, GA_ReadOnly)
-    fm1 = gdal.Open(before_file, GA_ReadOnly)
-    fp1 = gdal.Open(after_file, GA_ReadOnly)
+        # get infos from the input_file
+        nb = f0.RasterCount
+        ns = f0.RasterXSize
+        nl = f0.RasterYSize
+        dataType = f0.GetRasterBand(1).DataType
+        geoTransform = f0.GetGeoTransform()
+        projection = f0.GetProjection()
+        driver_type = f0.GetDriver().ShortName
 
-    # get infos from the input_file
-    nb = f0.RasterCount
-    ns = f0.RasterXSize
-    nl = f0.RasterYSize
-    dataType = f0.GetRasterBand(1).DataType
-    geoTransform = f0.GetGeoTransform()
-    projection = f0.GetProjection()
-    driver_type = f0.GetDriver().ShortName
-
-    # Try and assign input_nodata if it is UNDEF
-    if input_nodata is None:
-        sds_meta = metadata.SdsMetadata()
-        if os.path.exists(input_file):
-            input_nodata = float(sds_meta.get_nodata_value(input_file))
-        else:
-            logger.info('Test file not existing: do not assign metadata')
-
-    # manage out_type (take the input one as default)
-    if output_type is None:
-        outType = dataType
-    else:
-        outType = ParseType(output_type)
-
-    # manage out_format (take the input one as default)
-    if output_format is None:
-        outFormat = driver_type
-    else:
-        outFormat = output_format
-
-    # instantiate output(s)
-    outDrv = gdal.GetDriverByName(outFormat)
-    outDS = outDrv.Create(output_file, ns, nl, nb, outType, options_list)
-    outDS.SetGeoTransform(geoTransform)
-    outDS.SetProjection(projection)
-
-    for ib in range(nb):
-
-        f0band = f0.GetRasterBand(ib + 1)
-        fm1band = fm1.GetRasterBand(ib + 1)
-        fp1band = fp1.GetRasterBand(ib + 1)
-        outband = outDS.GetRasterBand(ib + 1)
-
-        for il in range(f0.RasterYSize):
-
-            data = N.ravel(f0band.ReadAsArray(0, il, f0band.XSize, 1)).astype(float)
-            data_m1 = N.ravel(fm1band.ReadAsArray(0, il, fm1band.XSize, 1)).astype(float)
-            data_p1 = N.ravel(fp1band.ReadAsArray(0, il, fp1band.XSize, 1)).astype(float)
-
-            if input_nodata is None:
-                wtp = N.ravel((data_m1 != 0) * (data_p1 != 0))
+        # Try and assign input_nodata if it is UNDEF
+        if input_nodata is None:
+            sds_meta = metadata.SdsMetadata()
+            if os.path.exists(input_file):
+                input_nodata = float(sds_meta.get_nodata_value(input_file))
             else:
-                wtp = N.ravel(
-                    (data_m1 != input_nodata) * (data_p1 != input_nodata) * N.ravel((data_m1 != 0) * (data_p1 != 0)))
+                logger.info('Test file not existing: do not assign metadata')
 
-            correct = data
-            if wtp.any():
-                slope1 = N.zeros(data.shape)
-                slope1[wtp] = (data[wtp] - data_m1[wtp]) / abs(data_m1[wtp])
-                slope2 = N.zeros(data.shape)
-                slope2[wtp] = (data_p1[wtp] - data[wtp]) / abs(data_p1[wtp])
-                wtc = (slope1 < -threshold) * (slope2 > threshold)
+        # manage out_type (take the input one as default)
+        if output_type is None:
+            outType = dataType
+        else:
+            outType = ParseType(output_type)
 
-                if wtc.any():
-                    correct[wtc] = 0.5 * (data_m1[wtc] + data_p1[wtc])
+        # manage out_format (take the input one as default)
+        if output_format is None:
+            outFormat = driver_type
+        else:
+            outFormat = output_format
 
-            correct.shape = (1, len(correct))
-            outband.WriteArray(N.array(correct), 0, il)
+        # instantiate output(s)
+        outDrv = gdal.GetDriverByName(outFormat)
+        outDS = outDrv.Create(output_file, ns, nl, nb, outType, options_list)
+        outDS.SetGeoTransform(geoTransform)
+        outDS.SetProjection(projection)
 
-    #   ----------------------------------------------------------------------------------------------------
-    #   Writes metadata to output
-    input_list = []
-    input_list.append(before_file)
-    input_list.append(input_file)
-    input_list.append(after_file)
-    #   Close outputs
-    outDrv = None
-    outDS = None
+        for ib in range(nb):
 
-    assign_metadata_processing(input_list, output_file)
+            f0band = f0.GetRasterBand(ib + 1)
+            fm1band = fm1.GetRasterBand(ib + 1)
+            fp1band = fp1.GetRasterBand(ib + 1)
+            outband = outDS.GetRasterBand(ib + 1)
 
-    shutil.move(output_file, output_file_final)
-    shutil.rmtree(tmpdir)
+            for il in range(f0.RasterYSize):
+
+                data = N.ravel(f0band.ReadAsArray(0, il, f0band.XSize, 1)).astype(float)
+                data_m1 = N.ravel(fm1band.ReadAsArray(0, il, fm1band.XSize, 1)).astype(float)
+                data_p1 = N.ravel(fp1band.ReadAsArray(0, il, fp1band.XSize, 1)).astype(float)
+
+                if input_nodata is None:
+                    wtp = N.ravel((data_m1 != 0) * (data_p1 != 0))
+                else:
+                    wtp = N.ravel(
+                        (data_m1 != input_nodata) * (data_p1 != input_nodata) * N.ravel((data_m1 != 0) * (data_p1 != 0)))
+
+                correct = data
+                if wtp.any():
+                    slope1 = N.zeros(data.shape)
+                    slope1[wtp] = (data[wtp] - data_m1[wtp]) / abs(data_m1[wtp])
+                    slope2 = N.zeros(data.shape)
+                    slope2[wtp] = (data_p1[wtp] - data[wtp]) / abs(data_p1[wtp])
+                    wtc = (slope1 < -threshold) * (slope2 > threshold)
+
+                    if wtc.any():
+                        correct[wtc] = 0.5 * (data_m1[wtc] + data_p1[wtc])
+
+                correct.shape = (1, len(correct))
+                outband.WriteArray(N.array(correct), 0, il)
+
+        #   ----------------------------------------------------------------------------------------------------
+        #   Writes metadata to output
+        input_list = []
+        input_list.append(before_file)
+        input_list.append(input_file)
+        input_list.append(after_file)
+        #   Close outputs
+        outDrv = None
+        outDS = None
+
+        assign_metadata_processing(input_list, output_file)
+    except:
+        logger.warning('Error in do_ts_linear_filter. Remove outputs')
+        if os.path.isfile(output_file):
+            os.remove(output_file)
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 def do_rain_onset(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
                   output_type=None, options='', current_dekad=None):
