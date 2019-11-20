@@ -1,6 +1,6 @@
 #
 #   Release Note for 2.2.0
-#   Changes are with respect to 2.2.1
+#   Changes are with respect to 2.1.2
 #   Unless specification, they refer to Apps.rpm package.
 #   The references ES2-NNN reports the number of the corresponding ticket opened in
 #   YouTrack (https://estation2.myjetbrains.com/youtrack/)
@@ -12,68 +12,81 @@
 Summary:
 
 1.0 General
-    ES2-361 — Create new type of installation "online" for RICs.
-    ES2-342 — Minimize JavaScript code into one file, to gain 1000% performance in loading the web user interface.
+    ES2-107 — Simplify vgt-ndvi versioning
+    ES2-262 — Correct/normalize permissions
+    ES2-307 — Create new mapset for new products
+    ES2-434 — Documentation
+    ES2-359 — Add a link in the Desktop (or under the CentOS menus) for SNAP
+
 
 1.1 Dashboard
-    ES2-204 — Improve service report (logfiles).
 
-2.2 Acquisition
-    ES2-89  — CHIRPS LTS disseminated by EUMETSAT.
-    ES2-275 — Improve the generation of the completeness bars.
-    ES2-276 — Dissemination of JRC WBD Product.
-    ES2-280 — Sentinel-3 files archiving/removing.
 
-2.3 Processing
-    ES2-38  — MODIS FIRMS 6.0.
-    ES2-45  — Generate the MODIS Primary Production LTS.
-    ES2-208 — Processing of Sentinel-3 images: satpy.
-    ES2-222 — Additional Subproducts for NDVI.
-    ES2-223 — CHIRPS RFE RATIO subproducts.
-    ES2-197 — CHIRPS processing chain - Control that the preliminary CHIRPS are automatically replaced by final CHIRPS.
-    ES2-217 — Computation of LTS for CHIRPS and VGT-NDVI.
+1.2 Acquisition
+    ES2-395 — Product administration tool in the GUI under Acquisition
+    ES2-224 — ECMWF subproducts
+    ES2-384 — Generate and disseminate the Water Body product on GEE for all regions and disseminate on eStations
+    ES2-397 — Create new Get internet type for CODA- EUM
 
-2.4 Data Management
-    ES2-275 — Improve the generation of the completeness bars.
-    ES2-263 — Request management feature added for missing data sync management to syncronyze missing data from
-               an ftp server, and replace the previous 'Requests' mechanism.
 
-2.5 Visualization/General
-    ES2-171 — In the New Graph window, display the subproducts ordered per mapset.
-    ES2-185 — Logarithmic color palette generation. Added to Legend admin.
-    ES2-152 — Workspaces - Have the possibility to organize an analysis 'dash board' or 'work space'
-               by saving a session with various map(s) and/or graph(s) templates and windows arrangement with the
-               selected indicators.
-    ES2-270 — Add ECOAGRIS logo.
-    ES2-365 — Add logos for OSS.
-    ES2-323 — Put sensor of selected product in mapview.
+1.3 Processing
+    ES2-410 — Generic name for derived products from the processing chain
+    ES2-108 — Deactivate obsolete VGT processing chains
+    ES2-312 — processing chain - create output in temp dir and mv the file to the output dir
+    ES2-45 — Generate the MODIS Primary Production LTS
+    ES2-468 — Processing chains to be activated
 
-2.6 Visualization/Maps
-    ES2-238 — Save the date of each map window in a workspace.
-    ES2-76  — Pool of vector layers.
-    ES2-106 — Legends for SST-Fronts.
-    ES2-133 — Product Navigator - Organize sub products per time lag and add sorting.
-    ES2-203 — SST front visualization.
 
-2.7 Visualization/Graphs
-    ES2-116 — Implement graph template saving. Include saving all graph settings changed by the user.
-    ES2-150 — Have the possibility to define/save/restore a graphs template and update once all the date related graphs.
-    ES2-227 — CUMUL GRAPH: stop the cumul comparison when no more REF data.
+1.4 Data Management
+    ES2-418 — Define the products for each thema
+    ES2-164 — GUI - Data Management - Product naming and ordering as in Acquisition and Analysis.
+    ES2-335 — Request creation in Datamanagement for Sync tool
+    ES2-160 — GUI - Analysis - Data Management - Introduce a 'single' source to download all products activated for the THEMA.  (Duplicated)
 
-2.8 Configuration/DB
-    ES2-39 — Database Mapset for TAFIRI.
+1.5 Visualization/General
+    ES2-184 — Logos import
+    ES2-423 — Add new preproctypes and internettypes to GUI
+    ES2-413 — Analysis - Workspaces - Layers, Legend and Logo admin only when logged in
+    ES2-155 — GUI - Analysis - Acquisition - New mapset and edit mapset
+    ES2-226 — IMPORT AND EXPORT MY VARIOUS TEMPLATES (Duplicated)
 
-2.9 Other packages
+1.6 Visualization/Maps
+    ES2-311 — Workspace saved mapview productdate not available message.
+    ES2-316 — Create a logo store in the GUI and add importing and administering of logos
+    ES2-471 — Subproducts without a legend assigned
+    ES2-135 — GUI - Analysis - Maps - Map templates - Add outmasking to map template
+    ES2-278 — Layers visibility selection saved in map template
+    ES2-350 — Create and make available 'Public' Workspaces
+    ES2-128 — Assign a legend to sub products through the legend administration tool
+    ES2-334 — Create a legend on the fly when opening a subproduct
+    ES2-325 — Add refresh timeline button to timeline in Mapview
+
+
+1.7 Visualization/Graphs
+    ES2-277 — Legend font size
+    ES2-457 — RFE TAMSAT v3
+    ES2-142 — GUI - Analysis - Graphs - Associate the draw properties of prod/subprod to the graphs.
+    ES2-149 — GUI - Analysis - Graphs - Have the possibility to ADD a logo/image in the graph
+    ES2-151 — GUI - Analysis - Graphs - Have the possibility to define all the graphical properties of graphs, including additional elements like logo and disclaimer
+    ES2-175 — Calculate the water quantity fallen over a polygon
+    ES2-290 — One graph update button
+    ES2-172 — Display the values from two different polygons (Duplicated)
+
+1.8 Configuration/DB
+
+
+1.9 Other packages
+    ES2-453 — Add Anydesk to 2.2.0 rpms
+    ES2-123 — Integration of Sentinel Toolboxes on eStation 2.0 ( Full packages will be distributed)
+    ES2-411 — TeamViewer policy is blocking usage from our machines - use Anydesk instead
+    ES2-362 — Distribution of Motu-client and sentinelsat API to MESA station
 
     Docs package:
-        ES2-221 — Prepare the 2.1.2 Documentation in EN and FR.
+    ES2-295 — Doc for Validation
+
 
     Layer package:
-        ES2-214 — EEZ file has additional lines.
-        ES2-215 — Wrong feature on Libya coastline in Gaul layer.
-        ES2-261 — The install of the 2.1.2 package removes the previous layers -> correct the ISO 1.3.0.
-        ES2-104 — Layer for northern Africa.
-        ES2-314 — Add WDPA of Africa vector layer to the layer package.
+    ES2-196 — New Layers Preparation
 
 
 2. PRODUCTS
@@ -81,83 +94,132 @@ Summary:
 
 Summary:
 
+2.1 Acquisition
+    ES2-381 — Ingestion of the OLCI/S3 products (TSM)
+    ES2-460 — CMES
+    ES2-264 — DMP V2.0
+    ES2-404 — Products verification
+    ES2-399 — Water Satisfaction Index from CHIRPS rainfall
+    ES2-421 — Burnt Area 300m - Get internet and Ingestion
+    ES2-464 — S3a chla
+    ES2-336 — Internet source for MODIS FIRMS 6.0 changed ?
+    ES2-385 — Ingestion of the Global Land Products at 300m resolution
+    ES2-386 — Compute SPI for 1/3/6/12/24 months periods (for SADC-CSC and ICPAC)
+    ES2-391 — Ingestion and visualization of the Water Level over river and lakes from Sentinel 3 observations
+    ES2-371 — ASCAT SWI Soil Water Index
+    ES2-420 — Creation of JEODPP get internet service
+    ES2-201 — TAMSAT v3
+    ES2-445 — RFE-ECMWF
+    ES2-444 — RFE-ARC2
+
+2.2 Processing
+    ES2-389 — Compute standard anomaly indicators for FAPAR/FCOVER/LAI
+    ES2-89 — CHIRPS LTS disseminated by EUMETSAT
+    ES2-122 — MODIS-FIRMS products at 10 km not created
+    ES2-45 Generate the MODIS Primary Production LTS
+    ES2-400 — Verification of vgt-ndvi
+    ES2-103 — Activate the Relative difference anomaly for NDVI
+
+
 
 3. BUG FIXING
 -------------
 
 Summary:
 
-1.1 Dashboard
+3.1 Dashboard
     System service:
-    ES2-119 — Update .rpm are not rsynced from PC1 to PC2 and PC3.
+    ES2-422 — Request admin tool in data management tab does not close
 
-1.2 Acquisition
-    ES2-241 — Ingestion of MODIS PAR, Kd490 and SST fails.
-    ES2-282 — Completeness bars are sometimes wrong.
-    ES2-284 — Ingestion of Sentinel-3 WRR over two mapsets.
-    ES2-345 — In Acquisition display only products having an entry in PADS table.
-    ES2-357 — Activating a product activates its ingestions over all defined mapsets and
-               all the associated processing chains.
 
-1.3 Processing
-    ES2-84  — CHIRP/CHIRPS products - clarity needed.
-    ES2-121 — Fire ratio and relative difference %values when LTA and CURRENT=0.
-    ES2-198 — MPE RFE Quality Control.
-    ES2-231 — MSG-MPE to be re-activated.
-    ES2-285 — Error in SST-Fronts conversion to shapefile.
-    ES2-267 — Sentinel 3 SLSTR- SST product strange values in the border.
-    ES2-289 — GEE WBD Long Term Statistic products is wrong.
-    ES2-293 — Edit header in MODIS SST.
-    ES2-336 — Internet source for MODIS FIRMS 6.0 changed.
-    ES2-292 — LSAF SST wrong eStation2_unit=K should be °C.
+3.2 Acquisition
+    ES2-124 — Errors in get_internet
+    ES2-376 — Modifiy acquisition for LSASAT-ET
+    ES2-332 — Includes file expression in get_internet different for certain periods
+    ES2-447 — Error in creating current list internet type = FTP
+    ES2-394 — Ingestion goes in error for SENTINEL-3A SLSTR in mesa-proc
+    ES2-448 — Evaluation of LAI/FAPAR/FCOVER versioning (RT0,1,2,6)
+    ES2-452 — Activation of the data sources
+    ES2-345 — In Acquisition display only products having an entry in PADS table
+    ES2-357 — Activating a product activates its ingestions over all defined mapsets and all the associated processing chains.
+    ES2-454 — Delayed reception of data at TAFIRI (PML SST)
+    ES2-281 — Make more robust the frequency.get_dates() method
+    ES2-424 — PML 3day ingestion stops
+    ES2-465 — sentinel s3a sst
+    ES2-351 — Over Algeria, RFE from FEWSNET, CHIRPS and ARC returns very different values  ???????????????
 
-1.4 DataManagement
-    ES2-343 — Data sync tool - The mapset of all available data sets on the aruba server must cover all smaller mapsets.
-    ES2-282 — Completeness bars are sometimes wrong.
+3.3 Processing
+    ES2-416 — Errors in processing chain of LSASAF-ET
+    ES2-304 — Correct the modis_pp chain
+    ES2-235 — Product display
+    ES2-200 — SPOT-PV NDVI chain
+    ES2-87 — Processing of vgt-ndvi on Reference Station
+    ES2-441 — fAPAR
+    ES2-446 — RFE-FEWSNET
+    ES2-291 — MODIS PP creates products with 'random' dates in 1monmax dir - at TAFIRI
+    ES2-466 — misc - soil moisture and ET ?????????????????????
 
-1.5 Visualization
-    ES2-93  — Same vector layers are extremely slow to load in the MAP.
-               A vector layer pool has been implemented so that a vector layer will be downloaded only once and can be
-               used in multiple map views.
-    ES2-110 — Map Server Optimization. Performance gain after fine tuning the bucket settings.
-    ES2-245 — Analysis - New Graph - selecting products deselects the selected timeframe.
-    ES2-259 — Cumulative graph: who's who. Use Cur and Ref. GREEN : Curr > Ref. RED: Curr < Ref.
-    ES2-265 — RANKING and ZSCORE GRAPHS, not all years are shown.
-    ES2-288 — Timeseries for WD-GEE products does not work.
-    ES2-271 — Correct the computation of 'Surface' in Timeseries.
-    ES2-353 — Modifying/saving a WS does not update the maps/graphs positions.
-    ES2-318 — Opening a workspace and closing it immediately gives errors in the GUI.
-    ES2-352 — Saving WS without a product.
-    ES2-260 — MAP window size varies if the time bar is expanded or not (in Windows version).
-    ES2-298 — Correct/optimize MODIS-FIRMS legends.
-    ES2-313 — WD-GEE Timeseries - Over long period, the x-axis labels should include less values (not every month),
-               in order to be readable.
-    ES2-322 — Matrix graph gradient legend not shown well.
-    ES2-368 — Z-score representation, the z-score is normalized/unit-less - so the Unit has not to be presented on the
-               axis of z-score.
+3.4 DataManagement
+    ES2-327 — Dataset class in datasets.py crashes system when passed product not in DB
+    ES2-403 — Datamanagement requests goes in error with e1day products that have no files in filesystem.
+    ES2-408 — Request job randomly goes in error and its request file is deleted.
+    ES2-216 — Create archive from request not working properly
+    ES2-425 — Product administration - add ingest product puts defined_by USER
+    ES2-163 — GUI - Analysis - Data Management - Correct error in generating/managing requests when no mapset is defined.
+    ES2-470 — Edit product in product admin delete ingested subproduct not working.
 
-1.6 System
-    ES2-356 — Ingest historical archive is not working from the GUI system tab.
-    ES2-328 — Change data directory from system tab should delete completeness bar files.
-    ES2-358 — In the System Tab - the get internet target directory has a weird value.
+3.5 Visualization
+    ES2-443 — Masking products (Native) from the Acquisition tab and subproducts from the Product Navigator
+    ES2-396 — New Workspace name cannot changed (before saving it)
+    ES2-317 — Bug in vector layer menu, which sometimes doesn't show
+    ES2-401 — The maps in re-opened WS does only show date and version in the Title
+    ES2-437 — FCOVER, small issues
+    ES2-436 — JRC/MARS WSI - Differences between values plot in maps and in graphs. ??????????????????????????
+    ES2-463 — MODIS - SST
+    ES2-252 — Replace MESA with G&A logo in the MapView object
+    ES2-320 — Save graph as template, sometimes does not show the popup window to give the name of the graph template.
+    ES2-398 — Timeseries computation - different aggregation types and units
+    ES2-442 — GUI - logout when not having opened the Analysis tab gives error and blocks the GUI.
+    ES2-299 — Add the getTimeseries the aggregation-type 'precip'
+    ES2-440 — SPOT-NDVI
+    ES2-247 — Saving a .png in mapview does not take all elements
+    ES2-428 — Small bug when changing color for several lines
+    ES2-439 — vgt-lat V2.0 small issues
 
-1.7 Help
-    ES2-1181 — The Administration Manual in French is still at 1.0.
+3.6 System
+    ES2-286 — The 'Analysis' tool is caching images
+    ES2-210 — VM and Window Versions do not see data (if disk initially not plugged in)
+    ES2-393 — Mapset normalization
+    ES2-438 — Correction on the interface
+    ES2-415 — Product Navigator in Mapview - load of data once and not for each Mapview Product Navigator
+    ES2-302 — OTJT - Service status not represented
+    ES2-402 — Online version bugs and adjustments
+    ES2-71 — EUMETCast High Volume Service requires and upgrade of sw on mesa-proc
+    ES2-97 — Error in fts_config.py
 
-1.8 Configuration/DB
-    ES2-66  — SQLSoupError: table 'product' does not have a primary key defined.
-    ES2-244 — Check all queries in querydb.py for use of echo parameter and remove the echo parameter.
-    ES2-246 — TS draw properties are missing for modis-firms 10KM mapset subproducts.
-    ES2-254 — The polygons of the EEZ layer do not have a name.
-    ES2-321 — Some products have 2 or more legends as their default legend,
-               change the DB so that all products have only one default legend.
-    ES2-330 — Product table for 'Native' Products. A lot of fields should be empty for the Native
-               ones (e.g. scale factor/offset, nodata, etc.).
+3.7 Help
 
-1.9 Installation
-    ES2-243 — Restart Apache in post install in build script eStation2-Apps.spec
-    ES2-262 — Correct/normalize permissions.
-    ES2-373 — Changing the pip interpreter location in the file /usr/local/src/tas/anaconda/bin/pip
-    ES2-338 — Distribution of SNAP to MESA station.
-    ES2-362 — Distribution of Motu-client and sentinelsat API to MESA station.
 
+3.8 Configuration/DB
+    ES2-251 — The DB synchronization logfile too large
+    ES2-117 — Upgrade not done on PC2
+
+
+3.9 Installation
+    ES2-370 — Error in Installation Manual
+
+
+
+
+
+????????????????????????????
+ES2-230 — Ingest/Import seasonal RFE forecast from ICPAC ??????????????
+ES2-451 — Product to be added to EUMETCast Africa dissemination
+
+
+Submitted
+ES2-455 — SPI1 and SPI3: inconsistency between products
+ES2-472 — Add the Copernicus Global land cover product at 100m resolution
+ES2-467 — MISC LSA
+ES2-347 — Add the option of 'exporting' layers
+ES2-426 — Bug in the Landsat Water Body product
