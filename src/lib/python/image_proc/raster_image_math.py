@@ -68,11 +68,10 @@ def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata
                  output_type=None, options='', output_stddev=None):
     # Note: no 'update' functionality is foreseen -> creates output EVERY TIME
     try:
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
         # Force input to be a list
         input_list = return_as_list(input_file)
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_list[0]),
-                                  dir=es_constants.base_tmp_dir)
 
         output_file_final =  output_file
         output_file = tmpdir + os.sep +os.path.basename(output_file)
@@ -233,11 +232,10 @@ def do_stddev_image(input_file='', avg_file='', input_nodata=None, output_nodata
 
     # debug = True
     try:
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_stddev),
+                                  dir=es_constants.base_tmp_dir)
         # Force input to be a list
         input_list = return_as_list(input_file)
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_list[0]),
-                                  dir=es_constants.base_tmp_dir)
 
         output_file_final =  output_stddev
         output_stddev = tmpdir + os.sep +os.path.basename(output_stddev)
@@ -398,11 +396,11 @@ def do_min_image(input_file='', output_file='', input_nodata=None, output_nodata
     # TODO-M.C.: : can be used in 'update' functionality ??? -> reuse output file ??
 
     try:
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
         # Force input to be a list
         input_list = return_as_list(input_file)
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_list[0]),
-                                  dir=es_constants.base_tmp_dir)
 
         output_file_final =  output_file
         output_file = tmpdir + os.sep +os.path.basename(output_file)
@@ -538,11 +536,12 @@ def do_max_image(input_file='', output_file='', input_nodata=None, output_nodata
     # TODO-M.C.: : can be used in 'update' functionality ??? -> reuse output file ??
 
     try:
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
+
         # Force input to be a list
         input_list = return_as_list(input_file)
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_list[0]),
-                                  dir=es_constants.base_tmp_dir)
 
         output_file_final =  output_file
         output_file = tmpdir + os.sep +os.path.basename(output_file)
@@ -685,11 +684,11 @@ def do_med_image(input_file='', output_file='', input_nodata=None, output_nodata
     # TODO-M.C.: : NODATA now are considered as 'normal' values ... should be removed !
 
     try:
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
         # Force input to be a list
         input_list = return_as_list(input_file)
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_list[0]),
-                                  dir=es_constants.base_tmp_dir)
 
         output_file_final =  output_file
         output_file = tmpdir + os.sep +os.path.basename(output_file)
@@ -794,12 +793,11 @@ def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output
     # Notes:'The command expects exactly 2 files in input.'
 
     try:
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file[0]),
-                                  dir=es_constants.base_tmp_dir)
 
         output_file_final =  output_file
         output_file = tmpdir + os.sep +os.path.basename(output_file)
@@ -898,12 +896,12 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
     epsilon = 1e-10
 
     try:
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file[0]),
-                                  dir=es_constants.base_tmp_dir)
 
         output_file_final =  output_file
         output_file = tmpdir + os.sep +os.path.basename(output_file)
@@ -1002,12 +1000,12 @@ def do_oper_scalar_multiplication(input_file='', output_file='', scalar=1, input
     # Notes:'The command expects exactly 1 file in input.'
 
     try:
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file[0]),
-                                  dir=es_constants.base_tmp_dir)
 
         output_file_final =  output_file
         output_file = tmpdir + os.sep +os.path.basename(output_file)
@@ -1093,12 +1091,12 @@ def do_make_vci(input_file='', min_file='', max_file='', output_file='', input_n
                 output_format=None,
                 output_type=None, options=''):
     try:
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
-                                  dir=es_constants.base_tmp_dir)
 
         output_file_final =  output_file
         output_file = tmpdir + os.sep +os.path.basename(output_file)
@@ -1226,12 +1224,12 @@ def do_make_baresoil(input_file='', avg_file='', min_file='', max_file='', outpu
     #   Note: nodata are considered only in the NDVIcurr file (NOT in min/max).
     #
     try:
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
-                                  dir=es_constants.base_tmp_dir)
 
         output_file_final =  output_file
         output_file = tmpdir + os.sep +os.path.basename(output_file)
@@ -1384,12 +1382,12 @@ def do_mask_image(input_file='', mask_file='', output_file='', output_format=Non
     #
 
     try:
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
-                                  dir=es_constants.base_tmp_dir)
 
         output_file_final =  output_file
         output_file = tmpdir + os.sep +os.path.basename(output_file)
@@ -1472,12 +1470,12 @@ def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=
     # Notes:'The command expects exactly 1 file in input.'
 
     try:
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file[0]),
-                                  dir=es_constants.base_tmp_dir)
 
         output_file_final =  output_file
         output_file = tmpdir + os.sep +os.path.basename(output_file)
@@ -1622,12 +1620,12 @@ def do_compute_perc_diff_vs_avg(input_file='', avg_file='', output_file='', inpu
     epsilon = 1e-10
 
     try:
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
-                                  dir=es_constants.base_tmp_dir)
 
         output_file_final =  output_file
         output_file = tmpdir + os.sep +os.path.basename(output_file)
@@ -1729,12 +1727,12 @@ def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_fil
                                   output_file='', output_nodata=None, output_format=None, output_type=None,
                                   options=''):
     try:
+
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(chla_file),
-                                  dir=es_constants.base_tmp_dir)
 
         output_file_final =  output_file
         output_file = tmpdir + os.sep +os.path.basename(output_file)
@@ -1951,7 +1949,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
                 unbufferedMask[:] = numpy.logical_or(unbufferedMask, masks[i] < maskValues[i])
 
             elif maskTests[i] == u'anybitstrue':
-                # print ' Debug: Masking cells where mask ', i, '(mask) bitwise-ANDed with ', X, ' is not zero.'
+                print ' Debug: Masking cells where mask ', i, '(mask) bitwise-ANDed with ', X, ' is not zero.'
                 unbufferedMask[:] = numpy.logical_or(unbufferedMask, numpy.bitwise_and(masks[i], maskValues[i]) != 0)
 
             else:
@@ -2241,6 +2239,8 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
                          output_nodata=None, output_format=None, output_type=None, options=''):
 
     try:
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
         # Parameters is expected to be None, or a dictionary
         if parameters is not None:
 
@@ -2281,9 +2281,6 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
 
         rid = ''
         debug = 0
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
-                                  dir=es_constants.base_tmp_dir)
 
         output_file_final = output_file
         output_file = tmpdir + os.sep + os.path.basename(output_file)
@@ -2400,12 +2397,11 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
     # Notes:'The command expects exactly 3 input files, in 3 arguments.'
     #       'The input_nodata defines the output_nodata as well (no recoding)'
     try:
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
-                                  dir=es_constants.base_tmp_dir)
 
         output_file_final = output_file
         output_file = tmpdir + os.sep + os.path.basename(output_file)
@@ -2506,12 +2502,11 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
 def do_rain_onset(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
                   output_type=None, options='', current_dekad=None):
     try:
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file[0]),
-                                  dir=es_constants.base_tmp_dir)
 
         output_file_final = output_file
         output_file = tmpdir + os.sep + os.path.basename(output_file)
@@ -2697,75 +2692,82 @@ def return_as_list(input_args):
 
 def do_reproject(inputfile, output_file, native_mapset_name, target_mapset_name):
 
-    native_mapset = mapset.MapSet()
-    native_mapset.assigndb(native_mapset_name)
+    try:
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
 
-    # Define the Native mapset
-    target_mapset = mapset.MapSet()
-    target_mapset.assigndb(target_mapset_name)
+        native_mapset = mapset.MapSet()
+        native_mapset.assigndb(native_mapset_name)
 
-    tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(inputfile),
-                              dir=es_constants.base_tmp_dir)
+        # Define the Native mapset
+        target_mapset = mapset.MapSet()
+        target_mapset.assigndb(target_mapset_name)
 
-    output_file_final = output_file
-    output_file = tmpdir + os.sep + os.path.basename(output_file)
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
-    # Open the input file
-    orig_ds = gdal.Open(inputfile)
+        # Open the input file
+        orig_ds = gdal.Open(inputfile)
 
-    orig_cs = osr.SpatialReference(wkt=native_mapset.spatial_ref.ExportToWkt())
-    orig_geo_transform = native_mapset.geo_transform
-    orig_size_x = native_mapset.size_x
-    orig_size_y = native_mapset.size_y
-    orig_band = orig_ds.GetRasterBand(1)
-    orig_ds.SetGeoTransform(native_mapset.geo_transform)
-    orig_ds.SetProjection(orig_cs.ExportToWkt())
+        orig_cs = osr.SpatialReference(wkt=native_mapset.spatial_ref.ExportToWkt())
+        orig_geo_transform = native_mapset.geo_transform
+        orig_size_x = native_mapset.size_x
+        orig_size_y = native_mapset.size_y
+        orig_band = orig_ds.GetRasterBand(1)
+        orig_ds.SetGeoTransform(native_mapset.geo_transform)
+        orig_ds.SetProjection(orig_cs.ExportToWkt())
 
-    in_data_type = orig_band.DataType
+        in_data_type = orig_band.DataType
 
-    # Get the Target mapset
-    trg_mapset = mapset.MapSet()
-    trg_mapset.assigndb(target_mapset_name)
-    out_cs = trg_mapset.spatial_ref
-    out_size_x = trg_mapset.size_x
-    out_size_y = trg_mapset.size_y
+        # Get the Target mapset
+        trg_mapset = mapset.MapSet()
+        trg_mapset.assigndb(target_mapset_name)
+        out_cs = trg_mapset.spatial_ref
+        out_size_x = trg_mapset.size_x
+        out_size_y = trg_mapset.size_y
 
-    # Create target in memory
-    mem_driver = gdal.GetDriverByName('MEM')
+        # Create target in memory
+        mem_driver = gdal.GetDriverByName('MEM')
 
-    # Assign mapset to dataset in memory
-    out_data_type_gdal = in_data_type
-    mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
-    mem_ds.SetGeoTransform(trg_mapset.geo_transform)
-    mem_ds.SetProjection(out_cs.ExportToWkt())
+        # Assign mapset to dataset in memory
+        out_data_type_gdal = in_data_type
+        mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
+        mem_ds.SetGeoTransform(trg_mapset.geo_transform)
+        mem_ds.SetProjection(out_cs.ExportToWkt())
 
-    # Do the Re-projection
-    orig_wkt = orig_cs.ExportToWkt()
-    res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
-                              es_constants.ES2_OUTFILE_INTERP_METHOD)
+        # Do the Re-projection
+        orig_wkt = orig_cs.ExportToWkt()
+        res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
+                                  es_constants.ES2_OUTFILE_INTERP_METHOD)
 
-    out_data = mem_ds.ReadAsArray()
+        out_data = mem_ds.ReadAsArray()
 
-    output_driver = gdal.GetDriverByName('GTiff')
-    output_ds = output_driver.Create(output_file, out_size_x, out_size_y, 1, in_data_type)
-    output_ds.SetGeoTransform(trg_mapset.geo_transform)
-    output_ds.SetProjection(out_cs.ExportToWkt())
-    output_ds.GetRasterBand(1).WriteArray(out_data, 0, 0)
+        output_driver = gdal.GetDriverByName('GTiff')
+        output_ds = output_driver.Create(output_file, out_size_x, out_size_y, 1, in_data_type)
+        output_ds.SetGeoTransform(trg_mapset.geo_transform)
+        output_ds.SetProjection(out_cs.ExportToWkt())
+        output_ds.GetRasterBand(1).WriteArray(out_data, 0, 0)
 
-    trg_ds = None
-    mem_ds = None
-    orig_ds = None
-    output_driver = None
-    output_ds = None
+        trg_ds = None
+        mem_ds = None
+        orig_ds = None
+        output_driver = None
+        output_ds = None
 
-    # Copy metadata, by changing mapset only
-    meta_data = metadata.SdsMetadata()
-    meta_data.read_from_file(inputfile)
-    meta_data.assign_mapset(target_mapset_name)
-    meta_data.write_to_file(output_file)
+        # Copy metadata, by changing mapset only
+        meta_data = metadata.SdsMetadata()
+        meta_data.read_from_file(inputfile)
+        meta_data.assign_mapset(target_mapset_name)
+        meta_data.write_to_file(output_file)
 
-    shutil.move(output_file, output_file_final)
-    shutil.rmtree(tmpdir)
+    except:
+        logger.warning('Error in do_reproject. Remove outputs')
+        if os.path.isfile(output_file):
+            os.remove(output_file)
+    else:
+        shutil.move(output_file, output_file_final)
+    finally:
+        shutil.rmtree(tmpdir)
 
 #   -------------------------------------------------------------------------------------------
 def getRasterBox(fid, xstart, xend, ystart, yend, band):
@@ -2826,7 +2828,7 @@ def create_surface_area_raster(input_file=None, output_file='', output_format=No
 
     try:
 
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
                                   dir=es_constants.base_tmp_dir)
 
         output_file_final = output_file
@@ -3061,7 +3063,7 @@ def do_raster_stats(fid, fidID, outDS, iband, roi, minId, maxId, nodata, operati
 def do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapset_name, grid_mapset_name,
                       output_format=None, nodata=None, output_type=None, options=None, args=None):
 
-    tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+    tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
                               dir=es_constants.base_tmp_dir)
 
     output_file_final = output_file
@@ -3164,7 +3166,7 @@ def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_
                              output_type=None, options=''):
     try:
 
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
                                   dir=es_constants.base_tmp_dir)
 
         output_file_final =  output_file
@@ -3275,7 +3277,7 @@ def compute_extrapolated_chla_gradient(input_file='', nodata=None, output_file='
                                        output_format=None,
                                        output_type=None, options=''):
     try:
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
                                   dir=es_constants.base_tmp_dir)
 
         output_file_final = output_file
@@ -3482,8 +3484,7 @@ def compute_extrapolated_chla_gradient(input_file='', nodata=None, output_file='
 def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_nodata=None, output_format=None,
                              output_type=None, options=''):
     try:
-
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
                                   dir=es_constants.base_tmp_dir)
 
         output_file_final = output_file
@@ -3784,7 +3785,7 @@ def compute_difference(input_file='', nodata=None, output_file='', output_nodata
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
 
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_file),
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
                                   dir=es_constants.base_tmp_dir)
 
         output_file_final = output_file
