@@ -1,25 +1,23 @@
-#!/bin/bash
+#!/bin/sh
 # Correct and Normalize permission of the ingest and processing folder after the debug run.
-# This scrip as to be executed as ROOT (e.g. from its crontab)
 # Ticket ES2-262 Correct/normalize permissions
-#
-old_user='adminuser'
-new_user='analyst'
+# Since 25.11.19 include ES2-478: sanity check on the ingested/derived products
 
-# tmp dir
-dir='/tmp/eStation2/'
-find -L ${dir} -user ${old_user} -exec chown ${new_user}:estation {} \; -exec chmod 775 {} \;
+#chmod 755 -R /var/www/eStation2-%{version}
 
-# eStation2 dir
-dir='/eStation2/'
-find -L ${dir} -user ${old_user} -exec chown ${new_user}:estation {} \; -exec chmod 775 {} \;
+chown -R analyst:estation /tmp/eStation2/
+chmod 775 -R /tmp/eStation2/
 
-# data dir
-dir='/data/'
-find -L ${dir} -user ${old_user} -exec chown ${new_user}:estation {} \; -exec chmod 775 {} \;
+chown -R analyst:estation /eStation2/
+chmod 775 -R /eStation2/
 
-# Change permissions /var/www/ (for allowing analyst to change version)
-# chmod 777 /var/www/
+# Change owner of /data/
+# echo "`date +'%Y-%m-%d %H:%M '` Assign /data to analyst User"
+chown -R analyst:estation /data/
+chmod 775 -R /data/
+
+# Change permissions /var/www (for allowing analyst to change version)
+# chmod 777 /var/www
 
 # Change permissions for writing in Desktop
 #chown -R adminuser:adminuser /home/adminuser/*
@@ -30,3 +28,6 @@ find -L ${dir} -user ${old_user} -exec chown ${new_user}:estation {} \; -exec ch
 # Change permissions of the Layers dir (2.0.4) -> it is done in layers-2.0.4
 #echo "`date +'%Y-%m-%d %H:%M '` Change permissions of /eStation2/layers to 775"
 #chmod 775 -R /eStation2/layers
+
+# Call also the sanity check routine, with -remove option
+/var/www/eStation2/apps/es2system/sanity_check.sh -remove
