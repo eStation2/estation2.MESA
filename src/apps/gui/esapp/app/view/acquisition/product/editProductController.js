@@ -8,6 +8,7 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
 
         var productDatasourcesStore = me.getViewModel().get('productdatasources');
         var ingestsubproductsStore = me.getViewModel().get('ingestsubproducts');
+
         if (me.params.edit){
             Ext.getCmp('category').setValue(me.params.product.get('category_id'));
             Ext.getCmp('productcode').setValue(me.params.product.get('productcode'));
@@ -267,7 +268,7 @@ Ext.define('esapp.view.acquisition.product.editProductController', {
             version: Ext.getCmp('version').getValue(),
             provider: Ext.getCmp('provider').getValue(),
             prod_descriptive_name: Ext.getCmp('product_name').getValue(),
-            description: Ext.getCmp('productdescription').getValue(),
+            description: Ext.getCmp('productdescription').getValue().trim(),
             defined_by: Ext.getCmp('defined_by_field').getValue(),
             activated: Ext.getCmp('activate_product_field').getValue()
         };

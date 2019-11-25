@@ -1,6 +1,6 @@
-Ext.define('esapp.store.CategoriesStore', {
+Ext.define('esapp.store.CategoriesAllStore', {
     extend  : 'Ext.data.Store',
-    alias: 'store.categories',
+    alias: 'store.categoriesall',
 
     requires : [
         'esapp.model.Category'
@@ -8,14 +8,14 @@ Ext.define('esapp.store.CategoriesStore', {
 
     model: 'esapp.model.Category',
 
-    storeId : 'categories'
+    storeId : 'categoriesall'
 
     ,autoLoad: true
 
     ,proxy: {
         type : 'ajax',
         url : 'categories',
-        extraParams: {all: false},
+        extraParams: {all: true},
         reader: {
              type: 'json'
             ,successProperty: 'success'

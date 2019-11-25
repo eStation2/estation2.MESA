@@ -30,6 +30,7 @@ Ext.define('esapp.Application', {
         ,'LanguagesStore'
         ,'SystemSettingsStore'
         ,'CategoriesStore'
+        ,'CategoriesAllStore'
         ,'FrequenciesStore'
         ,'DateFormatsStore'
         ,'DataTypesStore'

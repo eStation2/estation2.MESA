@@ -55,7 +55,7 @@ Ext.define('esapp.view.acquisition.product.editIngestSubProductController', {
             product_type: me.params.ingestsubproductrecord.get('product_type'),
             provider: me.params.ingestsubproductrecord.get('provider'),
             descriptive_name: me.params.ingestsubproductrecord.get('descriptive_name'),
-            description: me.lookupReference('description').getValue(),
+            description: me.lookupReference('description').getValue().trim(),
             defined_by:  me.lookupReference('defined_by_field').getValue(),      //  me.params.ingestsubproductrecord.get('defined_by'),
 
             frequency_id: me.params.ingestsubproductrecord.get('frequency_id'),

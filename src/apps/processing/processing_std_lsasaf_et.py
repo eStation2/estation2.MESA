@@ -205,11 +205,13 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
 
             reproject_output(tmp_output_file, native_mapset, target_mapset)
 
-            shutil.rmtree(tmpdir)
-
             # Do also the house-keeping, by deleting the files older than 6 months
             number_months_keep = 6
             remove_old_files(prod, "10d30min-et", version, native_mapset, 'Derived', number_months_keep)
+
+        # Remove tmp dir (moved out of if-clause - 21.11.19)
+        shutil.rmtree(tmpdir)
+
 
     # ----------------------------------------------------------------------------------------------------------------
     # 1moncum

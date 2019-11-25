@@ -217,6 +217,40 @@ def ChangeThema(thema):
 
 def checkCreateSubproductDir(productcode, version):
     subproducts = querydb.get_product_subproducts(productcode=productcode, version=version)
+    if hasattr(subproducts, "__len__") and subproducts.__len__() > 0:
+        for subproduct in subproducts:
+            subproductcode = subproduct['subproductcode']
+            product_type = subproduct['product_type']
+            if product_type == 'Ingest':
+                mapsets = querydb.get_product_active_ingest_mapsets(productcode=productcode,
+                                                                    subproductcode=subproductcode,
+                                                                    version=version)
+                for mapset in mapsets:
+                    mapsetcode = mapset['mapsetcode']
+                    subproductdir = functions.set_path_sub_directory(productcode,
+                                                                     subproductcode,
+                                                                     product_type,
+                                                                     version,
+                                                                     mapsetcode)
+                    subproductdir = es_constants.es2globals['processing_dir'] + os.path.sep + subproductdir
+                    functions.check_output_dir(subproductdir)
+            else:
+                mapsets = querydb.get_product_active_derived_mapsets(productcode=productcode,
+                                                                     subproductcode=subproductcode,
+                                                                     version=version)
+                for mapset in mapsets:
+                    mapsetcode = mapset['mapsetcode']
+                    subproductdir = functions.set_path_sub_directory(productcode,
+                                                                     subproductcode,
+                                                                     product_type,
+                                                                     version,
+                                                                     mapsetcode)
+                    subproductdir = es_constants.es2globals['processing_dir'] + os.path.sep + subproductdir
+                    functions.check_output_dir(subproductdir)
+
+
+def __checkCreateSubproductDir(productcode, version):
+    subproducts = querydb.get_product_subproducts(productcode=productcode, version=version)
     mapsets = querydb.get_product_active_mapsets(productcode=productcode, version=version)
     if hasattr(subproducts, "__len__") and subproducts.__len__() > 0:
         if hasattr(mapsets, "__len__") and mapsets.__len__() > 0:
@@ -6339,7 +6373,7 @@ def CreateIngestSubProduct(params):
                    'activated': 'f',
                    'provider': params['provider'].replace("'", "''"),
                    'descriptive_name': params['descriptive_name'].replace("'", "''"),
-                   'description': params['description'].replace("'", "''"),
+                   'description': params['description'].strip(u'\u200b').replace("'", "''"),
                    'defined_by': params['defined_by'],
                    'frequency_id': params['frequency_id'],
                    'date_format': params['date_format'],
@@ -6378,7 +6412,7 @@ def UpdateIngestSubProduct(params):
                    'activated': 'f',
                    'provider': params['provider'].replace("'", "''"),
                    'descriptive_name': params['descriptive_name'].replace("'", "''"),
-                   'description': params['description'].replace("'", "''"),
+                   'description': params['description'].strip(u'\u200b').replace("'", "''"),
                    'defined_by': params['defined_by'],
                    'frequency_id': params['frequency_id'],
                    'date_format': params['date_format'],
