@@ -6,6 +6,9 @@ Ext.define('esapp.view.analysis.timeseriesProductSelectionModel', {
         categories: {
             source: 'CategoriesStore',
             session: true
+            // ,proxy:{
+            //   extraParams: {all: false}
+            // }
         },
         products: {
             source: 'TimeseriesProductsStore',

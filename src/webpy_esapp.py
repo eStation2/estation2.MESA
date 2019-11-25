@@ -1510,8 +1510,12 @@ class GetCategories:
         self.lang = "eng"
 
     def GET(self):
+        params = web.input()
+        all = False
+        if params['all'] == 'true':
+            all = True
         categories_dict_all = []
-        categories = querydb.get_categories()
+        categories = querydb.get_categories(all=all)
 
         if hasattr(categories, "__len__") and categories.__len__() > 0:
             for row in categories:
@@ -1734,6 +1738,7 @@ class GetEumetcastSources:
                                    'filter_expression_jrc': row_dict['filter_expression_jrc'],
                                    'description': row_dict['description'],
                                    'typical_file_name': row_dict['typical_file_name'],
+                                   'frequency': row_dict['frequency'],
                                    'keywords_theme': row_dict['keywords_theme'],
                                    'keywords_societal_benefit_area': row_dict['keywords_societal_benefit_area'],
                                    'defined_by': row_dict['defined_by'],
@@ -4515,7 +4520,7 @@ class UpdateProductInfo:
             'version': getparams['version'],
             'provider': getparams['provider'].replace("'", "''"),
             'descriptive_name': getparams['prod_descriptive_name'].replace("'", "''"),
-            'description': getparams['description'].replace("'", "''"),
+            'description': getparams['description'].strip(u'\u200b').replace("'", "''"),
             'category_id': getparams['category_id'],
             'defined_by': getparams['defined_by'],
             'activated': getparams['activated']
@@ -4551,7 +4556,7 @@ class CreateProduct:
                        'activated': getparams['activated'],
                        'provider': getparams['provider'].replace("'", "''"),
                        'descriptive_name': getparams['prod_descriptive_name'].replace("'", "''"),
-                       'description': getparams['description'].replace("'", "''"),
+                       'description': getparams['description'].strip(u'\u200b').replace("'", "''"),
                        'category_id': getparams['category_id'],
                        'frequency_id': 'undefined',
                        'date_format': 'undefined',

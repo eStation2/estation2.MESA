@@ -92,7 +92,7 @@ Ext.define("esapp.view.acquisition.product.editIngestSubProduct",{
         };
 
 
-        var categoryrec = Ext.data.StoreManager.lookup('categories').findRecord('category_id', me.params.ingestsubproductrecord.get('category_id'), 0, true, false, false);
+        var categoryrec = Ext.data.StoreManager.lookup('categoriesall').findRecord('category_id', me.params.ingestsubproductrecord.get('category_id'), 0, true, false, false);
         me.params.categoryname = categoryrec.get('descriptive_name');
 
         me.items = [{

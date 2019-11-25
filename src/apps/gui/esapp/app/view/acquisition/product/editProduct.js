@@ -107,9 +107,9 @@ Ext.define("esapp.view.acquisition.product.editProduct",{
                         fieldLabel: esapp.Utils.getTranslation('category'),    // 'Category',
                         width: 150 + 100,
                         allowBlank: false,
-                        //store: 'categories',
+                        // store: 'categories',
                         store: {
-                            type: 'categories'
+                            type: 'categoriesall'
                         },
                         valueField: 'category_id',
                         displayField: 'descriptive_name',

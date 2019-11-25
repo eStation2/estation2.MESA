@@ -2112,11 +2112,13 @@ def get_predefined_bboxes():
             db.session.close()
 
 
-def get_categories():
+def get_categories(all=False):
     global db
     try:
-        # query = "SELECT * FROM products.product_category ORDER BY category_id"
-        query = "select * from products.product_category where category_id in (select distinct category_id from products.product where activated = true) ORDER BY order_index"
+        if all:
+            query = "SELECT * FROM products.product_category ORDER BY category_id"
+        else:
+            query = "select * from products.product_category where category_id in (select distinct category_id from products.product where activated = true) ORDER BY order_index"
         categories = db.execute(query)
         categories = categories.fetchall()
 
@@ -4395,6 +4397,78 @@ def get_active_subdatasource_descriptions():
         logger.error("get_active_subdatasource_descriptions : Database query error!\n -> {}".format(exceptionvalue))
         subdatasource_descriptions = []
         return subdatasource_descriptions
+    finally:
+        if db.session:
+            db.session.close()
+
+
+######################################################################################
+#   get_product_active_ingest_mapsets(productcode='', subproductcode='', version='undefined')
+#   Purpose: Query the database to get the mapsetcodes of the active and enabled ingestions of a specific product.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2019/03/11
+#   Input: productcode      - The productcode of the specific product info requested. Default=''
+#          subproductcode   - The subproductcode of the specific subproduct info requested. Default=''
+#          version          - The product version
+#
+#   Output: Return the mapsetcodes of the active and enabled ingestions of a specific product record.
+def get_product_active_ingest_mapsets(productcode='', subproductcode='', version='undefined'):
+    global db
+    try:
+        query = " SELECT DISTINCT mapsetcode FROM products.ingestion " \
+                " WHERE productcode = '" + productcode + "'" \
+                "   AND version = '" + version + "'" \
+                "   AND subproductcode = '" + subproductcode + "'" \
+                "   AND enabled = TRUE;"
+
+        productmapsets = db.execute(query)
+        productmapsets = productmapsets.fetchall()
+
+        return productmapsets
+
+    except exc.NoResultFound:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_product_active_ingest_mapsets : Database query error!\n -> {}".format(exceptionvalue))
+        productmapsets = []
+        return productmapsets
+    finally:
+        if db.session:
+            db.session.close()
+
+
+######################################################################################
+#   get_product_active_derived_mapsets(productcode='', version='undefined')
+#   Purpose: Query the database to get the mapsetcodes of the active and enabled ingestions of a specific product.
+#   Author: Jurriaan van 't Klooster
+#   Date: 2019/03/11
+#   Input: productcode      - The productcode of the specific product info requested. Default=''
+#          subproductcode   - The subproductcode of the specific subproduct info requested. Default=''
+#          version          - The product version
+#
+#   Output: Return the mapsetcodes of the active and enabled ingestions of a specific product record.
+def get_product_active_derived_mapsets(productcode='', subproductcode='', version='undefined'):
+    global db
+    try:
+        query = " SELECT DISTINCT mapsetcode " \
+                " FROM products.process_product " \
+                " WHERE productcode = '" + productcode + "'" \
+                " AND version = '" + version + "'" \
+                " AND subproductcode = '" + subproductcode + "'" \
+                " AND type = 'OUTPUT'" \
+                " AND activated = TRUE;"
+
+        productmapsets = db.execute(query)
+        productmapsets = productmapsets.fetchall()
+
+        return productmapsets
+
+    except exc.NoResultFound:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_product_active_derived_mapsets : Database query error!\n -> {}".format(exceptionvalue))
+        productmapsets = []
+        return productmapsets
     finally:
         if db.session:
             db.session.close()

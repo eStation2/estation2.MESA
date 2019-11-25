@@ -501,6 +501,7 @@ def row2dict(row):
 def tojson(queryresult):
     jsonresult = ''
     for row in queryresult:
+        print(row)
         da = row2dict(row)
         jsonresult = jsonresult + json.dumps(da,
                                              ensure_ascii=False,
