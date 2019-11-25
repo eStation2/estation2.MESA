@@ -6,6 +6,7 @@ Ext.define('esapp.model.EumetcastSource', {
         {name: 'orig_eumetcast_id'},
         {name: 'collection_name'},
         {name: 'filter_expression_jrc'},
+        {name: 'frequency'},
         {name: 'description'},
         {name: 'typical_file_name'},
         {name: 'keywords_theme'},

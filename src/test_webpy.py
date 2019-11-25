@@ -27,6 +27,16 @@ logger = log.my_logger(__name__)
 
 class TestWebpy(unittest.TestCase):
 
+    def test_checkCreateSubproductDir(self):
+        # productcode = 'vgt-ndvi'
+        # version = 'sv2-pv2.2'
+
+        productcode = 'lsasaf-et'
+        version = 'undefined'
+
+        webpy_esapp_helpers.checkCreateSubproductDir(productcode, version)
+        self.assertEqual(1, 1)
+
     def test_DeleteProduct(self):
         getparams = {
             'productcode': 'jur3',

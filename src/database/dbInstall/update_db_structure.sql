@@ -1596,7 +1596,7 @@ BEGIN
 			      WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
 			      -- AND activated = TRUE
 			      AND tp.productcode = _productcode
-			      AND tp.version = _productcode);
+			      AND tp.version = _version);
 
 	UPDATE products.processing p
 	SET activated = _activate,
@@ -1650,7 +1650,7 @@ BEGIN
 			      WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
 			      AND tp.activated = TRUE
 			      AND tp.productcode = _productcode
-			      AND tp.version = _productcode);
+			      AND tp.version = _version);
 
 	UPDATE products.processing p
 	SET activated = _activate,
