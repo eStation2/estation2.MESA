@@ -32,6 +32,22 @@ from lib.python import es_logging as log
 logger = log.my_logger(__name__)
 
 
+# New function to correct the mapset object returned by the mapset class (\apps\productmanagement\mapsets.py)
+# which calls the query get_mapset that now returns the new mapset info but in a dict with all strings.
+# The eStationSync.jar expects float or int values for certain mapset fields, which in this function are casted to
+# the correct datatype.
+def correctMapset(mapset_corrected):
+    mapset_corrected['upper_left_long'] = float(mapset_corrected['upper_left_long'])
+    mapset_corrected['upper_left_lat'] = float(mapset_corrected['upper_left_lat'])
+    mapset_corrected['pixel_shift_long'] = float(mapset_corrected['pixel_shift_long'])
+    mapset_corrected['pixel_shift_lat'] = float(mapset_corrected['pixel_shift_lat'])
+    mapset_corrected['pixel_size_x'] = int(mapset_corrected['pixel_size_x'])
+    mapset_corrected['pixel_size_y'] = int(mapset_corrected['pixel_size_y'])
+    mapset_corrected['rotation_factor_long'] = float(mapset_corrected['rotation_factor_long'])
+    mapset_corrected['rotation_factor_lat'] = float(mapset_corrected['rotation_factor_lat'])
+    return mapset_corrected
+
+
 def get_from_date(frequency_id, dateformat):
     if frequency_id in ['e15minute', 'e30minute']:
         today = datetime.date.today()
@@ -96,7 +112,9 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None, d
                 request['productmapsets'] = []
                 for mapset in all_prod_mapsets:
                     mapset_obj = Mapset(mapset_code=mapset)
-                    mapset_dict = {'mapset': mapset_obj.to_dict(), 'mapsetdatasets': []}
+                    mapset_corrected = correctMapset(mapset_obj.to_dict())
+                    mapset_dict = {'mapset': mapset_corrected, 'mapsetdatasets': []}
+                    # mapset_dict = {'mapset': mapset_obj.to_dict(), 'mapsetdatasets': []}
 
                     all_mapset_datasets = product.get_subproducts(mapset=mapset)
                     for subproductcode in all_mapset_datasets:
@@ -188,7 +206,9 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None, d
             # Get full list of subproducts (ingest/derived) for the given mapset
             request['productmapsets'] = []
             mapset_obj = Mapset(mapset_code=mapsetcode)
-            mapset_dict = {'mapset': mapset_obj.to_dict(), 'mapsetdatasets': []}
+            mapset_corrected = correctMapset(mapset_obj.to_dict())
+            mapset_dict = {'mapset': mapset_corrected, 'mapsetdatasets': []}
+            # mapset_dict = {'mapset': mapset_obj.to_dict(), 'mapsetdatasets': []}
 
             all_mapset_datasets = product.get_subproducts(mapset=mapsetcode)
             for subproductcode in all_mapset_datasets:
@@ -279,7 +299,9 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None, d
 
             request['productmapsets'] = []
             mapset_obj = Mapset(mapset_code=mapsetcode)
-            mapset_dict = {'mapset': mapset_obj.to_dict(), 'mapsetdatasets': []}
+            mapset_corrected = correctMapset(mapset_obj.to_dict())
+            mapset_dict = {'mapset': mapset_corrected, 'mapsetdatasets': []}
+            # mapset_dict = {'mapset': mapset_obj.to_dict(), 'mapsetdatasets': []}
 
             # All variable defined -> get missing object
             dataset_dbinfo = querydb.get_subproduct(productcode=productcode,
