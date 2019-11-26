@@ -30,4 +30,5 @@ chmod 775 -R /data/
 #chmod 775 -R /eStation2/layers
 
 # Call also the sanity check routine, with -remove option
-/var/www/eStation2/apps/es2system/sanity_check.sh -remove
+chmod 775 /var/www/eStation2/apps/es2system/sanity_check.sh
+/var/www/eStation2/apps/es2system/sanity_check.sh remove
