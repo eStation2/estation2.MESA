@@ -1086,27 +1086,46 @@ Ext.define("esapp.view.analysis.mapView",{
                     mapLegendObj.legendLayout = me.legendlayout;
                     mapLegendObj.showlegend = me.showlegend;
 
-                    Ext.data.StoreManager.lookup('DataSetsStore').each(function(rec){
-                        if (rec.get('productcode')== me.productcode && rec.get('version')== me.productversion ){
-                            me.productsensor = rec.get('prod_descriptive_name');
-                            if (esapp.Utils.objectExists(rec.get('productmapsets'))) {
-                                rec.get('productmapsets').forEach(function (mapset) {
-                                    if (mapset.mapsetcode == me.mapsetcode) {
-                                        mapset.mapsetdatasets.forEach(function (mapsetdataset) {
-                                            if (mapsetdataset.subproductcode == me.subproductcode) {
-                                                me.productname = mapsetdataset.descriptive_name;
-                                                me.date_format = mapsetdataset.date_format;
-                                                me.frequency_id = mapsetdataset.frequency_id;
-                                            }
-                                        }, this);
-                                    }
-                                }, this);
-                            }
+                    // Ext.data.StoreManager.lookup('DataSetsStore').each(function(rec){
+                    //     if (rec.get('productcode')== me.productcode && rec.get('version')== me.productversion ){
+                    //         me.productsensor = rec.get('prod_descriptive_name');
+                    //         if (esapp.Utils.objectExists(rec.get('productmapsets'))) {
+                    //             rec.get('productmapsets').forEach(function (mapset) {
+                    //                 if (mapset.mapsetcode == me.mapsetcode) {
+                    //                     mapset.mapsetdatasets.forEach(function (mapsetdataset) {
+                    //                         if (mapsetdataset.subproductcode == me.subproductcode) {
+                    //                             me.productname = mapsetdataset.descriptive_name;
+                    //                             me.date_format = mapsetdataset.date_format;
+                    //                             me.frequency_id = mapsetdataset.frequency_id;
+                    //                         }
+                    //                     }, this);
+                    //                 }
+                    //             }, this);
+                    //         }
+                    //     }
+                    // },this);
+
+                    var productRec = Ext.data.StoreManager.lookup('DataSetsStore').findRecord('productid', me.productcode + '_' + me.productversion);
+                    // console.info(productRec);
+                    if (esapp.Utils.objectExists(productRec)) {
+                        me.productsensor = productRec.get('prod_descriptive_name');
+                        if (esapp.Utils.objectExists(productRec.get('productmapsets'))) {
+                            productRec.get('productmapsets').forEach(function (mapset) {
+                                if (mapset.mapsetcode == me.mapsetcode) {
+                                    mapset.mapsetdatasets.forEach(function (mapsetdataset) {
+                                        if (mapsetdataset.subproductcode == me.subproductcode) {
+                                            me.productname = mapsetdataset.descriptive_name;
+                                            me.date_format = mapsetdataset.date_format;
+                                            me.frequency_id = mapsetdataset.frequency_id;
+                                        }
+                                    }, this);
+                                }
+                            }, this);
                         }
-                    },this);
+                    }
 
                     Ext.data.StoreManager.lookup('ColorSchemesStore').each(function(rec){
-                        if (rec.get('legend_id')==me.legendid){
+                        if (rec.get('legend_id')== me.legendid){
                             //me.colorschemeHTML = rec.get('colorschemeHTML');
                             me.legendHTML = rec.get('legendHTML');
                             me.legendHTMLVertical = rec.get('legendHTMLVertical');

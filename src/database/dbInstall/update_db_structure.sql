@@ -1566,112 +1566,142 @@ BEGIN
     IF TRIM(_productcode) != '' AND TRIM(_version) != '' THEN
         -- BEGIN
       IF _forse = TRUE THEN
-	UPDATE products.product p
-	SET activated = _activate
-	WHERE p.product_type = 'Native'
-	AND p.productcode = _productcode
-	AND p.version = _version
-	AND (p.productcode, p.version) IN (SELECT DISTINCT tp.productcode, tp.version FROM products.thema_product tp
-			     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-			     -- AND activated = TRUE
-			     AND tp.productcode = _productcode
-			     AND tp.version = _version);
+    UPDATE products.product p
+    SET activated = _activate
+    WHERE p.product_type = 'Native'
+    AND p.productcode = _productcode
+    AND p.version = _version
+    AND (p.productcode, p.version) IN (SELECT DISTINCT tp.productcode, tp.version FROM products.thema_product tp
+                 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                 -- AND activated = TRUE
+                 AND tp.productcode = _productcode
+                 AND tp.version = _version);
 
-	UPDATE products.ingestion i
-	SET activated = _activate,
-	    enabled = _activate
-	WHERE i.productcode = _productcode
-	AND i.version = _version
-	AND i.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-			     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-			     -- AND activated = TRUE
-			     AND tp.productcode = _productcode
-			     AND tp.version = _version);
+    UPDATE products.ingestion i
+    SET activated = _activate,
+        enabled = _activate
+    WHERE i.productcode = _productcode
+    AND i.version = _version
+    AND i.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+                 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                 -- AND activated = TRUE
+                 AND tp.productcode = _productcode
+                 AND tp.version = _version);
 
-	UPDATE products.process_product pp
-	SET activated = _activate
-	WHERE pp.productcode = _productcode
-	AND pp.version = _version
-	AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-			      WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-			      -- AND activated = TRUE
-			      AND tp.productcode = _productcode
-			      AND tp.version = _version);
+    UPDATE products.process_product pp
+    SET activated = _activate
+    WHERE pp.productcode = _productcode
+    AND pp.version = _version
+    AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+                  WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                  -- AND activated = TRUE
+                  AND tp.productcode = _productcode
+                  AND tp.version = _version);
 
-	UPDATE products.processing p
-	SET activated = _activate,
-	    enabled = _activate
-	WHERE (p.process_id) in (SELECT process_id
-	       FROM products.process_product pp
-	       WHERE pp.productcode = _productcode
-		 AND pp.version = _version
-		 AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-				       WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-					 -- AND activated = TRUE
-					 AND tp.productcode = _productcode
-					 AND tp.version = _version));
+    UPDATE products.processing p
+    SET activated = _activate,
+        enabled = _activate
+    WHERE (p.process_id) in (SELECT distinct process_id
+           FROM products.process_product pp
+           WHERE pp.productcode = _productcode
+         AND pp.version = _version)
+     AND p.output_mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+                     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                    -- AND tp.activated = TRUE
+                    AND tp.productcode = _productcode
+                    AND tp.version = _version);
 
-	/* UPDATE products.product_acquisition_data_source pads
-	SET activated = _activate
-	WHERE pads.productcode = _productcode AND pads.version = _version
-	AND (pads.productcode, pads.version) in (SELECT tp.productcode, tp.version
-						 FROM products.thema_product tp
-						 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)); */
+    /*
+    -- wrong update query, updates all mapsets!
+    UPDATE products.processing p
+    SET activated = _activate,
+        enabled = _activate
+    WHERE (p.process_id) in (SELECT process_id
+           FROM products.process_product pp
+           WHERE pp.productcode = _productcode
+         AND pp.version = _version
+         AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+                       WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                     -- AND activated = TRUE
+                     AND tp.productcode = _productcode
+                     AND tp.version = _version));
+
+    UPDATE products.product_acquisition_data_source pads
+    SET activated = _activate
+    WHERE pads.productcode = _productcode AND pads.version = _version
+    AND (pads.productcode, pads.version) in (SELECT tp.productcode, tp.version
+                         FROM products.thema_product tp
+                         WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)); */
 
 
       ELSE
-	UPDATE products.product p
-	SET activated = _activate
-	WHERE p.product_type = 'Native'
-	AND p.productcode = _productcode
-	AND p.version = _version
-	AND (p.productcode, p.version) IN (SELECT DISTINCT tp.productcode, tp.version FROM products.thema_product tp
-			     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-			     AND activated = TRUE
-			     AND tp.productcode = _productcode
-			     AND tp.version = _version);
+    UPDATE products.product p
+    SET activated = _activate
+    WHERE p.product_type = 'Native'
+    AND p.productcode = _productcode
+    AND p.version = _version
+    AND (p.productcode, p.version) IN (SELECT DISTINCT tp.productcode, tp.version FROM products.thema_product tp
+                 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                 AND activated = TRUE
+                 AND tp.productcode = _productcode
+                 AND tp.version = _version);
 
-	UPDATE products.ingestion i
-	SET activated = _activate,
-	    enabled = _activate
-	WHERE i.productcode = _productcode
-	AND i.version = _version
-	AND i.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-			     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-			     AND tp.activated = TRUE
-			     AND tp.productcode = _productcode
-			     AND tp.version = _version);
+    UPDATE products.ingestion i
+    SET activated = _activate,
+        enabled = _activate
+    WHERE i.productcode = _productcode
+    AND i.version = _version
+    AND i.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+                 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                 AND tp.activated = TRUE
+                 AND tp.productcode = _productcode
+                 AND tp.version = _version);
 
-	UPDATE products.process_product pp
-	SET activated = _activate
-	WHERE pp.productcode = _productcode
-	AND pp.version = _version
-	AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-			      WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-			      AND tp.activated = TRUE
-			      AND tp.productcode = _productcode
-			      AND tp.version = _version);
+    UPDATE products.process_product pp
+    SET activated = _activate
+    WHERE pp.productcode = _productcode
+    AND pp.version = _version
+    AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+                  WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                  AND tp.activated = TRUE
+                  AND tp.productcode = _productcode
+                  AND tp.version = _version);
 
-	UPDATE products.processing p
-	SET activated = _activate,
-	    enabled = _activate
-	WHERE (p.process_id) in (SELECT process_id
-	       FROM products.process_product pp
-	       WHERE pp.productcode = _productcode
-		 AND pp.version = _version
-		 AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
-				       WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-					 AND tp.activated = TRUE
-					 AND tp.productcode = _productcode
-					 AND tp.version = _version));
+    UPDATE products.processing p
+    SET activated = _activate,
+        enabled = _activate
+    WHERE (p.process_id) in (SELECT distinct process_id
+           FROM products.process_product pp
+           WHERE pp.productcode = _productcode
+         AND pp.version = _version)
+     AND p.output_mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+                     WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                    AND tp.activated = TRUE
+                    AND tp.productcode = _productcode
+                    AND tp.version = _version);
 
-	/* UPDATE products.product_acquisition_data_source pads
-	SET activated = _activate
-	WHERE pads.productcode = _productcode AND pads.version = _version
-	AND (pads.productcode, pads.version) in (SELECT tp.productcode, tp.version
-						 FROM products.thema_product tp
-						 WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
-						 AND tp.activated = TRUE); */
+    /*
+    -- wrong update query, updates all mapsets!
+    UPDATE products.processing p
+    SET activated = _activate,
+        enabled = _activate
+    WHERE (p.process_id) in (SELECT process_id
+           FROM products.process_product pp
+           WHERE pp.productcode = _productcode
+         AND pp.version = _version
+         AND pp.mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+                       WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                     AND tp.activated = TRUE
+                     AND tp.productcode = _productcode
+                     AND tp.version = _version));
+
+    UPDATE products.product_acquisition_data_source pads
+    SET activated = _activate
+    WHERE pads.productcode = _productcode AND pads.version = _version
+    AND (pads.productcode, pads.version) in (SELECT tp.productcode, tp.version
+                         FROM products.thema_product tp
+                         WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                         AND tp.activated = TRUE); */
 
       END IF;
 
@@ -1687,7 +1717,6 @@ $BODY$
   COST 100;
 ALTER FUNCTION products.activate_deactivate_product_ingestion_pads_processing(character varying, character varying, boolean, boolean)
   OWNER TO estation;
-
 
 
 
@@ -1737,6 +1766,19 @@ BEGIN
         UPDATE products.processing p
         SET activated = _activate,
             enabled = _activate
+        WHERE (p.process_id) in (SELECT distinct process_id
+               FROM products.process_product pp
+               WHERE pp.productcode = _productcode
+             AND pp.version = _version)
+         AND p.output_mapsetcode in (SELECT DISTINCT mapsetcode FROM products.thema_product tp
+                         WHERE tp.thema_id = (SELECT thema_id FROM products.thema WHERE activated = TRUE)
+                        AND tp.activated = TRUE
+                        AND tp.productcode = _productcode
+                        AND tp.version = _version);
+
+        /* UPDATE products.processing p
+        SET activated = _activate,
+            enabled = _activate
         WHERE (p.process_id) in (SELECT process_id
                                  FROM products.process_product pp
                                  WHERE pp.productcode = _productcode
@@ -1745,7 +1787,7 @@ BEGIN
                                       SELECT tp.mapsetcode FROM products.thema_product tp
                                       WHERE tp.thema_id IN (SELECT t.thema_id FROM products.thema t WHERE t.activated IS TRUE)
                                       AND tp.productcode = _productcode
-                                      AND tp.version = _version));
+                                      AND tp.version = _version));  */
 
         UPDATE products.product_acquisition_data_source pads
         SET activated = _activate
