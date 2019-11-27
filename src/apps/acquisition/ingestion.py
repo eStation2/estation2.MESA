@@ -430,7 +430,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
         my_logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
         raise NameError('Error in creating tmpdir')
 
-    if preproc_type != 'None' and preproc_type != '""' and preproc_type != "''" and preproc_type != '':
+    if preproc_type != None and preproc_type != 'None' and preproc_type != '""' and preproc_type != "''" and preproc_type != '':
         do_preprocess = 1
 
     if do_preprocess == 1:
