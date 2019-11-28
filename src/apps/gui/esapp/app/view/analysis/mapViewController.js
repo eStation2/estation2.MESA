@@ -1071,7 +1071,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
         var me = this.getView(),
             filename = '',
             mapviewwin = btn.up().up(),
-            mapimage_url = '',
+            mapimage_url = null,
             ObjectToggleBtn = me.lookupReference('objectsbtn_'+me.id.replace(/-/g,'_')),
 
             legendObj = me.lookupReference('product-legend_' + me.id.replace(/-/g,'_')),
@@ -1178,7 +1178,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             downloadlink.setAttribute('download', filename);
             downloadlink.setAttribute('href', mapimage_url);
             downloadlink.click();
-            mapimage_url = null;
+            // mapimage_url = null;
         });
         taskSaveMap.delay(3500);
 
