@@ -56,7 +56,7 @@ Ext.define("esapp.view.header.Header",{
                 '                 <a class="first" accesskey="1" href="http://ec.europa.eu/geninfo/legal_notices_en.htm">Legal notice</a>',
                 '            </li>',
                 '            <li>',
-                '                 <a accesskey="2" href="https://ec.europa.eu/jrc/en/privacy-statement">Cookies</a>',
+                '                 <a accesskey="2" href="https://ec.europa.eu/info/cookies_en">Cookies</a>',
                 '            </li>',
                 '            <li>',
                 '                <a accesskey="3" href="mailto:estation@jrc.ec.europa.eu" target="_top">Contact</a>',
@@ -74,7 +74,7 @@ Ext.define("esapp.view.header.Header",{
                 '                 <li><a href="../">eStation</a></li>',
                 '             </ul>',
                 '         <div id="releaseBox" align="right">',
-                '             <div id="releaseBoxText">Release 2.2.0-beta</div>',
+                '             <div id="releaseBoxText">Release 2.2.0</div>',
                 '         </div>',
                 '     </div>'
                 //' </div>'
