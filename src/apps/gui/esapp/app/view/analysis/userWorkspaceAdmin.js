@@ -37,7 +37,7 @@ Ext.define("esapp.view.analysis.userWorkspaceAdmin",{
 
     //height: Ext.getBody().getViewSize().height < 400 ? Ext.getBody().getViewSize().height-10 : 400,
     height: 400,
-    width: 500,
+    width: 550,
     layout: 'fit',
 
     border:false,
@@ -93,7 +93,7 @@ Ext.define("esapp.view.analysis.userWorkspaceAdmin",{
             });
         }
         else {
-            me.width = 500;
+            me.width = 550;
             me.setBind({
                 store: '{userworkspaces}'
             });
