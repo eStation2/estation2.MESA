@@ -125,7 +125,7 @@ Ext.define("esapp.view.analysis.userWorkspaceAdmin",{
             loadstore: function() {
                 if(me.refworkspaces){
                     if (me.forceStoreLoad || !me.getViewModel().getStore('refworkspaces').getSource().isLoaded() || me.dirtyStore) {
-                        me.getViewModel().getStore('refworkspaces').getSource().proxy.extraParams = {userid: esapp.getUser().userid};
+                        // me.getViewModel().getStore('refworkspaces').getSource().proxy.extraParams = {userid: esapp.getUser().userid};
                         me.getViewModel().getStore('refworkspaces').getSource().load({
                             callback: function (records, options, success) {
                             }
