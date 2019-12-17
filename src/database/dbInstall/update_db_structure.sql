@@ -5,22 +5,14 @@ SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 
+
+/**********************************************************
+  BEGIN TABLE CREATION
+ *********************************************************/
+ 
 /**********************************************************
   For version 2.2.0
  *********************************************************/
-
-ALTER TABLE analysis.product_legend
-DROP CONSTRAINT IF EXISTS product_legend_product_pkey,
-ADD CONSTRAINT product_legend_product_pkey FOREIGN KEY (productcode, subproductcode, version)
-      REFERENCES products.product (productcode, subproductcode, version) MATCH SIMPLE
-      ON UPDATE CASCADE ON DELETE CASCADE;
-
-
--- ALTER TABLE analysis.user_workspaces ADD COLUMN IF NOT EXISTS showindefault boolean DEFAULT FALSE;
--- ADD COLUMN IF NOT EXISTS does not work with the Postgresql version of MESA stations!
-ALTER TABLE analysis.user_workspaces
-ADD COLUMN  showindefault boolean DEFAULT FALSE;
-
 
 -- DROP TABLE products.resolution CASCADE;
 CREATE TABLE IF NOT EXISTS products.resolution
@@ -106,57 +98,6 @@ ALTER TABLE products.mapset_new
 COMMENT ON COLUMN products.mapset_new.defined_by IS 'values: JRC or USER';
 
 
-
--- DROP INDEX products.ingestion_mapsetcode_idx;
-
-CREATE INDEX ingestion_mapsetcode_idx
-  ON products.ingestion
-  USING btree
-  (mapsetcode COLLATE pg_catalog."default");
-
--- DROP INDEX products.mapsetcode_idx;
-
-CREATE INDEX mapsetcode_idx
-  ON products.mapset
-  USING btree
-  (mapsetcode COLLATE pg_catalog."default");
-
-
-ALTER TABLE products.eumetcast_source
-  ADD COLUMN  defined_by character varying;
-
-
-CREATE OR REPLACE FUNCTION products.check_update_internet_source()
-  RETURNS trigger AS
-$BODY$
-BEGIN
-	NEW.update_datetime = now();
-
-	RETURN NEW;
-END;
-$BODY$
-  LANGUAGE plpgsql VOLATILE STRICT
-  COST 100;
-ALTER FUNCTION products.check_update_internet_source()
-  OWNER TO estation;
-
-
-CREATE TRIGGER update_internet_source
-  BEFORE UPDATE
-  ON products.internet_source
-  FOR EACH ROW
-  EXECUTE PROCEDURE products.check_update_internet_source();
-
-
-ALTER TABLE products.process_product
-DROP CONSTRAINT product_dependencies_fk,
-ADD CONSTRAINT product_dependencies_fk
-	FOREIGN KEY (productcode, subproductcode, version)
-	REFERENCES products.product (productcode, subproductcode, version) MATCH SIMPLE
-	ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 CREATE TABLE IF NOT EXISTS analysis.user_role
 (
   role_id integer NOT NULL,
@@ -195,20 +136,7 @@ ALTER TABLE analysis.logos
   For version 2.1.2
  *********************************************************/
 
-ALTER TABLE products.internet_source ADD COLUMN  https_params character varying;
-
-ALTER TABLE products.spirits ADD COLUMN out_data_type character varying;
-ALTER TABLE products.spirits ADD COLUMN out_scale_factor double precision;
-ALTER TABLE products.spirits ADD COLUMN out_offset double precision;
-
-/**********************************************************
-  FIRST TABLE CREATION, then alter table adding columns
- *********************************************************/
-
--- Table: products.ecoagris
-
 -- DROP TABLE products.ecoagris;
-
 CREATE TABLE IF NOT EXISTS products.ecoagris
 (
   recordid serial NOT NULL,
@@ -236,9 +164,7 @@ ALTER TABLE products.ecoagris
   OWNER TO estation;
 
 
--- Table: analysis.users
 -- DROP TABLE analysis.users;
-
 CREATE TABLE IF NOT EXISTS analysis.users
 (
   userid character varying(50) NOT NULL,
@@ -295,12 +221,6 @@ ALTER TABLE analysis.layers
   OWNER TO estation;
 
 
-ALTER TABLE analysis.layers
-   ALTER COLUMN polygon_fillcolor SET DEFAULT 'Transparent'::character varying;
-ALTER TABLE analysis.layers
-   ALTER COLUMN feature_highlight_fillcolor SET DEFAULT 'Transparent'::character varying;
-
-
 
 CREATE TABLE IF NOT EXISTS analysis.chart_drawproperties
 (
@@ -328,10 +248,7 @@ ALTER TABLE analysis.chart_drawproperties
 
 
 
--- Table: analysis.map_templates
-
 -- DROP TABLE analysis.map_templates;
-
 CREATE TABLE IF NOT EXISTS analysis.map_templates
 (
   templatename character varying(80) NOT NULL,
@@ -372,7 +289,6 @@ ALTER TABLE analysis.map_templates
 
 
 -- DROP TABLE products.geoserver;
-
 CREATE TABLE IF NOT EXISTS products.geoserver
 (
   geoserver_id serial NOT NULL,
@@ -398,60 +314,7 @@ COMMENT ON TABLE products.geoserver
 
 
 
-
-ALTER TABLE products.product ADD COLUMN display_index integer;
-
-ALTER TABLE products.thema ADD COLUMN activated boolean DEFAULT FALSE::boolean;
-
-UPDATE products.thema set activated = FALSE;
-
--- Done: In Postinst of RPM, READ themaid from /eStation2/settings/system_settings.ini
--- systemsettings = functions.getSystemSettings()
--- themaid = systemsettings['thema'];
--- UPDATE products.thema set activated = TRUE WHERE thema_id = themaid;
--- SELECT * FROM products.set_thema(themaid);
-
-ALTER TABLE analysis.timeseries_drawproperties ADD COLUMN aggregation_type character varying DEFAULT 'mean';
-ALTER TABLE analysis.timeseries_drawproperties ADD COLUMN aggregation_min double precision;
-ALTER TABLE analysis.timeseries_drawproperties ADD COLUMN aggregation_max double precision;
-
-
-
-/**********************************************************
-  For version 2.1.1
- *********************************************************/
-
-ALTER TABLE analysis.legend ADD COLUMN defined_by character varying DEFAULT 'USER';
-ALTER TABLE analysis.legend ALTER COLUMN step_type SET DEFAULT 'irregular';
-
-ALTER TABLE analysis.chart_drawproperties ADD COLUMN yaxe4_font_size integer;
-UPDATE analysis.chart_drawproperties SET yaxe4_font_size = 26;
-
-ALTER TABLE analysis.map_templates ALTER COLUMN vectorlayers TYPE character varying;
-ALTER TABLE analysis.map_templates ADD COLUMN zoomextent character varying;
-ALTER TABLE analysis.map_templates ADD COLUMN mapsize character varying;
-ALTER TABLE analysis.map_templates ADD COLUMN mapcenter character varying;
-
--- The following columns in the analysis.layers table are not added when going from version 2.0.3 to 2.1.x
--- These columns were added in version 2.0.4 and thus will give errors with the layers because of these missing columns.
-ALTER TABLE analysis.layers ADD COLUMN defined_by character varying DEFAULT 'USER'::character varying;
-ALTER TABLE analysis.layers ADD COLUMN open_in_mapview boolean DEFAULT false;
-ALTER TABLE analysis.layers ADD COLUMN provider character varying;
-
-
-
-/**********************************************************
-  BEGIN - For version 2.1.2
- *********************************************************/
-
-
-/**********************************************************
-  BEGIN NEW WORKSPACE AND GRAPH TEMPLATE TABLE STUCTURE
- *********************************************************/
-
-
 -- DROP TABLE analysis.user_workspaces;
-
 CREATE TABLE IF NOT EXISTS analysis.user_workspaces
 (
   userid character varying(50) NOT NULL,
@@ -475,7 +338,6 @@ ALTER TABLE analysis.user_workspaces
 
 
 -- DROP TABLE analysis.user_map_templates;
-
 CREATE TABLE IF NOT EXISTS analysis.user_map_templates
 (
   userid character varying(50) NOT NULL,
@@ -553,9 +415,7 @@ ALTER TABLE analysis.graph_drawproperties
 
 
 
-
 -- DROP TABLE analysis.graph_yaxes;
-
 CREATE TABLE IF NOT EXISTS analysis.graph_yaxes
 (
   yaxe_id character varying NOT NULL,
@@ -581,7 +441,6 @@ ALTER TABLE analysis.graph_yaxes
 
 
 -- DROP TABLE analysis.timeseries_drawproperties_new;
-
 CREATE TABLE IF NOT EXISTS analysis.timeseries_drawproperties_new
 (
   productcode character varying NOT NULL,
@@ -608,7 +467,6 @@ ALTER TABLE analysis.timeseries_drawproperties_new
 
 
 -- DROP TABLE analysis.user_graph_templates;
-
 CREATE TABLE IF NOT EXISTS analysis.user_graph_templates
 (
   userid character varying(50) NOT NULL,
@@ -650,7 +508,6 @@ ALTER TABLE analysis.user_graph_templates
 
 
 -- DROP TABLE analysis.user_tpl_graph_drawproperties;
-
 CREATE TABLE IF NOT EXISTS analysis.user_graph_tpl_drawproperties
 (
   graph_tpl_id bigint NOT NULL,
@@ -681,7 +538,6 @@ ALTER TABLE analysis.user_graph_tpl_drawproperties
 
 
 -- DROP TABLE analysis.user_tpl_graph_yaxes;
-
 CREATE TABLE IF NOT EXISTS analysis.user_graph_tpl_yaxes
 (
   graph_tpl_id bigint NOT NULL,
@@ -710,7 +566,6 @@ ALTER TABLE analysis.user_graph_tpl_yaxes
 
 
 -- DROP TABLE analysis.user_tpl_timeseries_drawproperties;
-
 CREATE TABLE IF NOT EXISTS analysis.user_graph_tpl_timeseries_drawproperties
 (
   graph_tpl_id bigint NOT NULL,
@@ -739,25 +594,144 @@ ALTER TABLE analysis.user_graph_tpl_timeseries_drawproperties
 
 
 /**********************************************************
-  END NEW WORKSPACE AND GRAPH TEMPLATE TABLE STUCTURE
+  END TABLE CREATION
  *********************************************************/
 
 
-ALTER TABLE products.sub_datasource_description
-  ADD COLUMN scale_type character varying DEFAULT 'linear';
+/***************************************************************************************
+  BEGIN  ALTER TABLE adding columns, triggers and indexes (always after TABLE CREATION)
+ **************************************************************************************/
+
+/**********************************************************
+  For version 2.2.0
+ *********************************************************/
+
+ALTER TABLE analysis.product_legend
+DROP CONSTRAINT IF EXISTS product_legend_product_pkey,
+ADD CONSTRAINT product_legend_product_pkey FOREIGN KEY (productcode, subproductcode, version)
+      REFERENCES products.product (productcode, subproductcode, version) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE CASCADE;
+ 
+-- ALTER TABLE analysis.user_workspaces ADD COLUMN IF NOT EXISTS showindefault boolean DEFAULT FALSE;
+-- ADD COLUMN IF NOT EXISTS does not work with the Postgresql version of MESA stations!
+ALTER TABLE analysis.user_workspaces
+ADD COLUMN  showindefault boolean DEFAULT FALSE;
 
 
-ALTER TABLE analysis.users
-  ADD COLUMN prefered_language character varying DEFAULT 'eng';
+-- DROP INDEX products.ingestion_mapsetcode_idx;
+
+CREATE INDEX ingestion_mapsetcode_idx
+  ON products.ingestion
+  USING btree
+  (mapsetcode COLLATE pg_catalog."default");
+
+-- DROP INDEX products.mapsetcode_idx;
+
+CREATE INDEX mapsetcode_idx
+  ON products.mapset
+  USING btree
+  (mapsetcode COLLATE pg_catalog."default");
+
+
+ALTER TABLE products.eumetcast_source
+  ADD COLUMN  defined_by character varying;
+  
+  
+CREATE OR REPLACE FUNCTION products.check_update_internet_source()
+  RETURNS trigger AS
+$BODY$
+BEGIN
+	NEW.update_datetime = now();
+
+	RETURN NEW;
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE STRICT
+  COST 100;
+ALTER FUNCTION products.check_update_internet_source()
+  OWNER TO estation;
+
+
+CREATE TRIGGER update_internet_source
+  BEFORE UPDATE
+  ON products.internet_source
+  FOR EACH ROW
+  EXECUTE PROCEDURE products.check_update_internet_source();
+
+
+ALTER TABLE products.process_product
+DROP CONSTRAINT product_dependencies_fk,
+ADD CONSTRAINT product_dependencies_fk
+	FOREIGN KEY (productcode, subproductcode, version)
+	REFERENCES products.product (productcode, subproductcode, version) MATCH SIMPLE
+	ON UPDATE CASCADE ON DELETE CASCADE;
+	
+	
+/**********************************************************
+  For version 2.1.2
+ *********************************************************/
+ 
+ALTER TABLE products.internet_source ADD COLUMN  https_params character varying;
+
+ALTER TABLE products.spirits ADD COLUMN out_data_type character varying;
+ALTER TABLE products.spirits ADD COLUMN out_scale_factor double precision;
+ALTER TABLE products.spirits ADD COLUMN out_offset double precision;
+
+ALTER TABLE analysis.layers ALTER COLUMN polygon_fillcolor SET DEFAULT 'Transparent'::character varying;
+ALTER TABLE analysis.layers ALTER COLUMN feature_highlight_fillcolor SET DEFAULT 'Transparent'::character varying;
+   
+   
+ALTER TABLE products.product ADD COLUMN display_index integer;
+
+ALTER TABLE products.thema ADD COLUMN activated boolean DEFAULT FALSE::boolean;
+
+UPDATE products.thema set activated = FALSE;
+
+-- Done: In Postinst of RPM, READ themaid from /eStation2/settings/system_settings.ini
+-- systemsettings = functions.getSystemSettings()
+-- themaid = systemsettings['thema'];
+-- UPDATE products.thema set activated = TRUE WHERE thema_id = themaid;
+-- SELECT * FROM products.set_thema(themaid);
+
+ALTER TABLE analysis.timeseries_drawproperties ADD COLUMN aggregation_type character varying DEFAULT 'mean';
+ALTER TABLE analysis.timeseries_drawproperties ADD COLUMN aggregation_min double precision;
+ALTER TABLE analysis.timeseries_drawproperties ADD COLUMN aggregation_max double precision;
+
+
+ALTER TABLE products.sub_datasource_description ADD COLUMN scale_type character varying DEFAULT 'linear';
+
+ALTER TABLE analysis.users ADD COLUMN prefered_language character varying DEFAULT 'eng';
 
 ALTER TABLE analysis.user_map_templates ADD COLUMN productdate character varying;
 
 
 /**********************************************************
-  END - For version 2.1.2
+  For version 2.1.1
  *********************************************************/
 
+ALTER TABLE analysis.legend ADD COLUMN defined_by character varying DEFAULT 'USER';
+ALTER TABLE analysis.legend ALTER COLUMN step_type SET DEFAULT 'irregular';
 
+ALTER TABLE analysis.chart_drawproperties ADD COLUMN yaxe4_font_size integer;
+UPDATE analysis.chart_drawproperties SET yaxe4_font_size = 26;
+
+ALTER TABLE analysis.map_templates ALTER COLUMN vectorlayers TYPE character varying;
+ALTER TABLE analysis.map_templates ADD COLUMN zoomextent character varying;
+ALTER TABLE analysis.map_templates ADD COLUMN mapsize character varying;
+ALTER TABLE analysis.map_templates ADD COLUMN mapcenter character varying;
+
+-- The following columns in the analysis.layers table are not added when going from version 2.0.3 to 2.1.x
+-- These columns were added in version 2.0.4 and thus will give errors with the layers because of these missing columns.
+ALTER TABLE analysis.layers ADD COLUMN defined_by character varying DEFAULT 'USER'::character varying;
+ALTER TABLE analysis.layers ADD COLUMN open_in_mapview boolean DEFAULT false;
+ALTER TABLE analysis.layers ADD COLUMN provider character varying;
+
+
+/***************************************************************************************
+  END  ALTER TABLE adding columns, triggers and indexes (always after TABLE CREATION)
+ **************************************************************************************/
+ 
+ 
 
 /**********************************************************
   BEGIN update insert all functions

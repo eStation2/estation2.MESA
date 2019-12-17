@@ -508,15 +508,21 @@ def statusRequestJob(requestid):
                     p5_requestfile
                     ]
 
-            job = Popen(['java', '-jar'] + args, stdout=PIPE, stderr=STDOUT)  # .pid
-            # job.poll()
+            if sys.platform.startswith('win'):
+                job = Popen(['java', '-jar'] + args, shell=True, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            else:
+                job = Popen(['java', '-jar'] + args, stdout=PIPE, stderr=STDOUT)  # .pid
+
             statusresult = job.communicate()
-            # statusresult = job.stdout.readline().rstrip("\n\r")   # Not good, creates defunct process with no kill
-            # job.terminate()
-            # job.kill()
 
             status = statusresult[0].split(';')
-            if len(status)>=3:
+            if status[0] == 'Error':
+                jobstatus = 'error'  #status[2]
+                datestatus = status[1]
+                totfiles = None
+                totok = None
+                totko = None
+            elif len(status)>=3:
                 jobstatus = status[0].split(':')[0]
                 datestatus = status[1]
                 totfiles = status[2].split(':')[1]
@@ -530,6 +536,11 @@ def statusRequestJob(requestid):
                 totko = None
 
             message = 'Status info request: ' + requestid
+
+            # statusresult = job.stdout.readline().rstrip("\n\r")   # Not good, creates defunct process with no kill
+            # job.poll()
+            # job.terminate()
+            # job.kill()
 
         except subprocess.CalledProcessError:
             message = 'Error getting the status of the request: ' + requestid
@@ -877,11 +888,14 @@ def createRequestJob(params):
                         p5_requestfile
                         ]
 
-            job = Popen(['nohup', 'java', '-jar'] + args,
-                        # close_fds=True,
-                        # shell=True,    # pass args as string
-                        stdout=PIPE,
-                        stderr=STDOUT)  # .pid
+            if sys.platform.startswith('win'):
+                job = Popen(['java', '-jar'] + args, shell=True, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            else:
+                job = Popen(['nohup', 'java', '-jar'] + args,
+                            # close_fds=True,
+                            # shell=True,    # pass args as string
+                            stdout=PIPE,
+                            stderr=STDOUT)  # .pid
 
             # time.sleep(6)
             creatingjob = True
@@ -1875,7 +1889,7 @@ def importJRCRefWorkspaces():
             workspace['isNewWorkspace'] = 'true'
             workspace['isrefworkspace'] = 'true'
             workspace['pinned'] = 'false'
-            workspace['showindefault'] = 'false'
+            # workspace['showindefault'] = 'false'
             workspace['userid'] = es_constants.es2globals['jrc_ref_user']
             workspace['workspaceid'] = None
             for wsmap in workspace['maps']:
