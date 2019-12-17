@@ -13159,7 +13159,7 @@ WHERE (p.process_id) in (SELECT process_id
                         ) AS tmp (productcode,version)
                          WHERE tmp.productcode = pp.productcode AND tmp.version = pp.version);
 
-
+/*
 UPDATE products.product_acquisition_data_source pads
 SET activated = FALSE
 FROM (VALUES
@@ -13205,6 +13205,7 @@ FROM (VALUES
       ('wsi-hp','V1.0')
   ) AS tmp (productcode,version)
 WHERE tmp.productcode = pads.productcode AND tmp.version = pads.version;
+*/
 
 
 SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('arc2-rain','2.0', TRUE, FALSE);
