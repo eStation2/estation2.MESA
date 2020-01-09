@@ -258,14 +258,14 @@ class TestDatasets(unittest.TestCase):
 
     def test_find_gaps(self):
         start_time = time.time()
-        from_date = datetime.datetime(2017, 7, 1, 0, 0)
-        to_date = datetime.datetime(2017, 8, 1, 0, 0)
+        from_date = datetime.date(2020, 1, 1)
+        to_date = datetime.date(2020, 12, 31)
 
         kwargs = {
-                'product_code':"lsasaf-lst",
-                'version': "undefined",
-                'sub_product_code': "10d15min",      #  "lst"
-                'mapset': 'MSG-satellite-3km',
+                'product_code':"modis-pp",
+                'version': "v2013.1",
+                'sub_product_code': "8daysmax",      #  "lst"
+                'mapset': 'MODIS-Africa-4km',
                 'from_date': from_date,
                 'to_date': to_date
                  }
