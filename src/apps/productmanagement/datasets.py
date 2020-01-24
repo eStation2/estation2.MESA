@@ -8,6 +8,7 @@
 from __future__ import absolute_import
 
 import datetime
+import calendar
 import os
 import glob
 
@@ -115,7 +116,13 @@ class Frequency(object):
         elif unit == self.UNIT.MONTH:
             return add_months(date, value)
         elif unit == self.UNIT.DAYS8:
-            return add_days(date, value, 8)
+            # Dates for (modis) 8days stats (MMDD) in leap years follow the non leap year convention
+            # See processing_modis_pp.py where the MMDD 8days dates are hardcoded NON leap year dates.
+            if self.unit == '8days' and self.dateformat == 'MMDD' \
+                    and calendar.isleap(date.year) and add_days(date, value, 9) == datetime.date(date.year, 3, 6):
+                return add_days(date, value, 9)
+            else:
+                return add_days(date, value, 8)
         elif unit == self.UNIT.DAYS16:
             return add_days(date, value, 16)
         elif unit == self.UNIT.DAYS7:

@@ -37,7 +37,7 @@ Ext.define("esapp.view.analysis.userWorkspaceAdmin",{
 
     //height: Ext.getBody().getViewSize().height < 400 ? Ext.getBody().getViewSize().height-10 : 400,
     height: 400,
-    width: 500,
+    width: 550,
     layout: 'fit',
 
     border:false,
@@ -93,7 +93,7 @@ Ext.define("esapp.view.analysis.userWorkspaceAdmin",{
             });
         }
         else {
-            me.width = 500;
+            me.width = 550;
             me.setBind({
                 store: '{userworkspaces}'
             });
@@ -125,7 +125,7 @@ Ext.define("esapp.view.analysis.userWorkspaceAdmin",{
             loadstore: function() {
                 if(me.refworkspaces){
                     if (me.forceStoreLoad || !me.getViewModel().getStore('refworkspaces').getSource().isLoaded() || me.dirtyStore) {
-                        me.getViewModel().getStore('refworkspaces').getSource().proxy.extraParams = {userid: esapp.getUser().userid};
+                        // me.getViewModel().getStore('refworkspaces').getSource().proxy.extraParams = {userid: esapp.getUser().userid};
                         me.getViewModel().getStore('refworkspaces').getSource().load({
                             callback: function (records, options, success) {
                             }
