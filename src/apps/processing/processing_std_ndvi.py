@@ -395,7 +395,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
     if starting_dates_linearx2 is not None:
         starting_files_linearx2 = []
         for my_date in starting_dates_linearx2:
-            starting_files_linearx2.append(input_dir_linearx2 + my_date + in_prod_ident_linearx2)
+            if functions.is_file_exists_in_path(input_dir_linearx2 + my_date + in_prod_ident_linearx2):
+                starting_files_linearx2.append(input_dir_linearx2 + my_date + in_prod_ident_linearx2)
     else:
         starting_files_linearx2 = input_dir_linearx2 + "*" + in_prod_ident_linearx2
 
@@ -427,12 +428,12 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     input_dir_linearx2 = es2_data_dir+ functions.set_path_sub_directory(prod, input_subprod_linearx2, 'Derived', version, mapset)
 
-    if starting_dates_linearx2 is not None:
-        starting_files_linearx2 = []
-        for my_date in starting_dates_linearx2:
-            starting_files_linearx2.append(input_dir_linearx2+my_date+in_prod_ident_linearx2)
-    else:
-        starting_files_linearx2 = input_dir_linearx2+"*"+in_prod_ident_linearx2
+    # if starting_dates_linearx2 is not None:
+    #     starting_files_linearx2 = []
+    #     for my_date in starting_dates_linearx2:
+    #         starting_files_linearx2.append(input_dir_linearx2+my_date+in_prod_ident_linearx2)
+    # else:
+    #     starting_files_linearx2 = input_dir_linearx2+"*"+in_prod_ident_linearx2
 
     #   ---------------------------------------------------------------------
     #   Linearx2 avg x dekad
@@ -820,7 +821,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
 
     @follows(vgt_ndvi_10davg_linearx2)
     @active_if(group_filtered_anomalies, activate_10dperc_linearx2)
-    @transform(starting_files_linearx2, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
+    @transform(starting_files_linearx2_all, formatter(formatter_in), add_inputs(ancillary_input), formatter_out)
     def vgt_ndvi_10dperc_linearx2(input_file, output_file):
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
