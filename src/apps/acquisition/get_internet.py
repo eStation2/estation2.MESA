@@ -994,6 +994,56 @@ def get_file_from_url(remote_url_file, target_dir, target_file=None, userpwd='',
         shutil.rmtree(tmpdir)
 
 
+######################################################################################
+#   wget_file_from_url
+#   Purpose: download and save locally a file
+#   Author: Vijay CHaran, JRC, European Commission
+#   Date: 2020/01/23
+#   Inputs: remote_url_file: full file path
+#           target_file: target file name (by default 'test_output_file')
+#           target_dir: target directory (by default a tmp dir is created)
+#   Output: full pathname is returned (or positive number for error)
+#
+def wget_file_from_url(remote_url_file, target_dir, target_file=None, userpwd='', https_params=''):
+
+    # Create a tmp directory for download
+    tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.es2globals['base_tmp_dir'])
+
+    if target_file is None:
+        target_file='test_output_file'
+
+    target_fullpath=tmpdir+os.sep+target_file
+    target_final=target_dir+os.sep+target_file
+
+    # c = pycurl.Curl()
+
+    try:
+        #outputfile=open(target_fullpath, 'wb')
+        logger.debug('Output File: '+target_fullpath)
+        remote_url_file = remote_url_file.replace('\\','') #Pierluigi
+        wgetcommand = ' wget  --user='+userpwd.split(':')[0]+' --password='+userpwd.split(':')[1]+' --auth-no-challenge=on '+remote_url_file+' -O '+target_fullpath
+        logger.debug('Command for download is: ' + wgetcommand)
+        os.system(wgetcommand)
+
+        #check if the file is downloaded
+        downloaded = functions.is_file_exists_in_path(target_fullpath)
+        # # Check the result (filter server/client errors http://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
+        if not downloaded:
+            # outputfile.close()
+            #os.remove(target_fullpath)
+            raise Exception('WGET Error in downloading the file: %i')
+        else:
+            # outputfile.close()
+            shutil.move(target_fullpath, target_final)
+            return 0
+    except:
+        logger.warning('Output NOT downloaded: %s - error : %i' %(remote_url_file,c.getinfo(pycurl.HTTP_CODE)))
+        return 1
+    finally:
+        shutil.rmtree(tmpdir)
+
+
+
 # ######################################################################################
 # #   get_json_from_url
 # #   Purpose: download and save locally a file
@@ -1199,7 +1249,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                     continue
 
 
-                            elif internet_type == 'http_tmpl':
+                            elif internet_type == 'http_tmpl' or internet_type == 'http_tmpl_modis':
                                 # Create the full filename from a 'template' which contains
                                 try:
                                     current_list = build_list_matching_files_tmpl(str(internet_source.url),
@@ -1497,6 +1547,11 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                                                target_dir=es_constants.ingest_dir,
                                                                                target_file=os.path.basename(os.path.split(filename)[1]),
                                                                                userpwd=str(usr_pwd), https_params=str(internet_source.https_params))
+                                                elif internet_type == 'http_tmpl_modis':
+                                                    result = wget_file_from_url(
+                                                        str(internet_source.url) + os.path.sep + filename,
+                                                        target_dir=es_constants.ingest_dir,
+                                                        target_file=os.path.basename(filename), userpwd=str(usr_pwd), https_params=str(internet_source.https_params))
 
                                                 elif internet_type == 'http_coda_eum':
                                                     download_link = 'https://coda.eumetsat.int/odata/v1/Products(\'{0}\')/$value'.format(os.path.split(filename)[0])
