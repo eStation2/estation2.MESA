@@ -3482,7 +3482,7 @@ def compute_extrapolated_chla_gradient(input_file='', nodata=None, output_file='
 #  Compute opFish indicator#
 ############################
 def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_nodata=None, output_format=None,
-                             output_type=None, options=''):
+                             output_type=None, options='', parameters=None):
     try:
         tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
                                   dir=es_constants.base_tmp_dir)
@@ -3500,13 +3500,36 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         ###########################################
         # ~~~~~OPFIsh   Constants~~~~~~~~~~~~~~~~#
         ###########################################
-        chl_grad_min = 0.00032131  # perc.5th of all species reconstructed OBS by group -- NEW VALUES BY JEON
-        chl_grad_int = 0.021107# linear fit from 0.09 to 1 (minimum mobility of species)
-        chl_feed_min = 0.08  # mgChl/m3 - minimum among species
-        chl_feed_max = 11.0  # perc.98th green MESOZOOPK, perc.99.3th total MESOZOOPK;
-        dc = 0.91  #0.91  # (1-dc = 0.09, it is 0.10 in the Arctic report)
 
-        # Compute Juliean calender date
+        # Parameters is expected to be None, or a dictionary
+        if parameters is not None:
+
+            if 'chl_grad_min' in parameters.keys():
+                chl_grad_min = parameters['chl_grad_min']
+            else:
+                chl_grad_min = 0.00032131   #chl_grad_min = 0.00032131  # perc.5th of all species reconstructed OBS by group -- NEW VALUES BY JEON
+
+            if 'chl_grad_int' in parameters.keys():
+                chl_grad_int = parameters['chl_grad_int']
+            else:
+                chl_grad_int = 0.021107  #chl_grad_int = 0.021107# linear fit from 0.09 to 1 (minimum mobility of species)
+
+            if 'chl_feed_min' in parameters.keys():
+                chl_feed_min = parameters['chl_feed_min']
+            else:
+                chl_feed_min = 0.08 #chl_feed_min = 0.08  # mgChl/m3 - minimum among species
+
+            if 'chl_feed_max' in parameters.keys():
+                chl_feed_max = parameters['chl_feed_max']
+            else:
+                chl_feed_max = 11.0 #chl_feed_max = 11.0  # perc.98th green MESOZOOPK, perc.99.3th total MESOZOOPK;
+
+            if 'dc' in parameters.keys():
+                dc = parameters['dc']
+            else:
+                dc = 0.91  #0.91  # (1-dc = 0.09, it is 0.10 in the Arctic report)
+
+   # Compute Juliean calender date
         year_month_day = functions.get_date_from_path_full(input_file)
         dayOfYear = functions.conv_date_yyyymmdd_2_doy(year_month_day)
 
@@ -3698,7 +3721,7 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         outDrv = None
         outDS = None
         # logger.warning('Writing MetaData not done yet ! To be implemented ...')
-        assign_metadata_processing(input_list, output_file)
+        assign_metadata_processing(input_list, output_file, parameters=parameters)
 
     except:
         logger.warning('Error in compute_opFish_indicator. Remove outputs')
