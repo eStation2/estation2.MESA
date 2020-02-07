@@ -4,7 +4,7 @@ Version: 2.2.0
 Release: 1
 Group: eStation
 License: GPL
-Source: /home/adminuser/rpms/eStation-Layers-%{version}/%{name}-%{version}-%{release}.tgz
+Source: /home/adminuser/ISOs-RPMs/eStation-Layers-%{version}/%{name}-%{version}-%{release}.tgz
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 
 
@@ -19,10 +19,10 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 # Get the sources from the JRC ftp and create .tgz
 
 echo ""
-echo "WARNING: files have to be manually copied into /home/adminuser/rpms/eStation-Layers-%{version}/"
+echo "WARNING: files have to be manually copied into /home/adminuser/ISOs-RPMs/eStation-Layers-%{version}/"
 echo ""
 
-lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/eStation-Layers-%{version}/ /home/adminuser/ISOs-RPMs/eStation-Layers-%{version}/; exit" -u narma:JRCVRw2960 srv-ies-ftp.jrc.it"" 
+#lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/eStation-Layers-%{version}/ /home/adminuser/ISOs-RPMs/eStation-Layers-%{version}/; exit" -u narma:JRCVRw2960 srv-ies-ftp.jrc.it"" 
 cd /home/adminuser/ISOs-RPMs/eStation-Layers-%{version}/
 rm -f %{name}-%{version}-%{release}.rpm
 rm -f %{name}-%{version}-%{release}.tgz
@@ -53,6 +53,6 @@ chown -R analyst:estation /eStation2/layers
 chmod -R 775 /eStation2/layers
 
 # Before uninstall: remove the link and copy all code into a bck dir
-echo "`date +'%Y-%m-%d %H:%M '` Populate analysis.layers table" 
-psql -h localhost -U estation -d estationdb -f /eStation2/layers/insert_%{name}_%{version}.sql >/dev/null 2>&1
+# echo "`date +'%Y-%m-%d %H:%M '` Populate analysis.layers table" 
+# psql -h localhost -U estation -d estationdb -f /eStation2/layers/insert_%{name}_%{version}.sql >/dev/null 2>&1
 

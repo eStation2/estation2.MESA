@@ -1,7 +1,7 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
 Version: 2.2.0
-Release: 9
+Release: 20
 Group: eStation
 License: GPL
 Source: /home/adminuser/ISOs-RPMs/eStation-Apps/%{name}-%{version}-%{release}.tgz
@@ -18,7 +18,7 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 # Sync the git repository from github
 cd /home/adminuser/eStation2.git			# -> TEMP: locally unzippped manually
 # git pull origin main		  			# -> TEMP: locally unzippped manually
-git pull origin dev_2.2.0
+# git pull origin dev_2.2.0				# -> TEMP: locally modified on mesa-build 20.1.2020 - ES2-497
 
 # Create the .tgz
 cd src
@@ -409,9 +409,13 @@ echo "`date +'%Y-%m-%d %H:%M '` Importing JRC Reference workspaces"
 su adminuser -c "/usr/local/src/tas/anaconda/bin/python -c 'import webpy_esapp_helpers; webpy_esapp_helpers.importJRCRefWorkspaces()'"
 
 # Install Anydesk (see ES2-453)
-if [[ ! `yum list installed | grep -i anydesk` ]]; then 
+if [[ ! -f /usr/bin/anydesk ]]; then 
 echo "`date +'%Y-%m-%d %H:%M '` Installing Anydesk 2.9.5"
-sudo yum localinstall -y /var/www/eStation2/lib/anydesk/anydesk-2.9.5-1.el7.x86_64.rpm
+# yum localinstall -y /var/www/eStation2/lib/anydesk/anydesk-2.9.5-1.el7.x86_64.rpm	-> conflict yum lock
+# rpm -ivh /var/www/eStation2/lib/anydesk/anydesk-2.9.5-1.el7.x86_64.rpm			-> conflict yum lock
+cp /var/www/eStation2/lib/anydesk/anydesk-2.9.5-1.el7.x86_64.rpm /home/adminuser/Desktop
+chown adminuser:estation /home/adminuser/Desktop/anydesk-2.9.5-1.el7.x86_64.rpm
+chmod 755 /home/adminuser/Desktop/anydesk-2.9.5-1.el7.x86_64.rpm
 else
 echo "`date +'%Y-%m-%d %H:%M '` Anydesk 2.9.5 already installed"
 fi
@@ -420,7 +424,7 @@ fi
 if [[ ! `crontab -l | grep correct_normalize` ]]; then
 echo "`date +'%Y-%m-%d %H:%M '` Add an entry in crontab for correcting/normalizing permissions"
 crontab -l > /root/my_crontab.txt
-echo '0 */3 * * * /var/www/eStation2/apps/es2system/correct_normalize_permissions.sh >> dev/null' >> /root/my_crontab.txt
+echo '0 0 * * * /var/www/eStation2/apps/es2system/correct_normalize_permissions.sh >> dev/null' >> /root/my_crontab.txt
 crontab /root/my_crontab.txt
 else
 echo "`date +'%Y-%m-%d %H:%M '` The entry in crontab for correcting/normalizing permissions already exists."
