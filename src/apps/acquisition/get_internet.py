@@ -43,6 +43,12 @@ buffer = StringIO.StringIO()
 if not os.path.isdir(es_constants.base_tmp_dir):
     os.makedirs(es_constants.base_tmp_dir)
 
+if not os.path.isdir(es_constants.ingest_dir):
+    os.makedirs(es_constants.ingest_dir)
+
+if not os.path.isdir(es_constants.ingest_error_dir):
+    os.makedirs(es_constants.ingest_error_dir)
+
 #tmpdir = tempfile.mkdtemp(prefix=__name__, dir=es_constants.base_tmp_dir)
 echo_query = False
 user_def_sleep = es_constants.es2globals['poll_frequency']
