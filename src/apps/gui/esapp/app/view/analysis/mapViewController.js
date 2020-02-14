@@ -3028,6 +3028,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
                             style: { color: 'lightblue' },
                             // cls: 'x-menu-no-icon button-gray',
                             width: 200,
+                            hidden:  (esapp.globals['typeinstallation'] == 'jrc_online' ? true : false),
                             handler: function(){
                                 // Open a small modal panel asking to name the layer file
                                 var writer = new ol.format.GeoJSON();
