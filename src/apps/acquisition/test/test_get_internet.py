@@ -908,10 +908,37 @@ class TestGetInternet(unittest.TestCase):
                          'pull_frequency': internet_source.pull_frequency,
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
-                         'start_date':20150401,
-                         'end_date':20150406,
+                         'start_date':20200101,
+                         'end_date':20200122,
                          'frequency_id': internet_source.frequency_id,
-                         'type':internet_source.type}
+                         'type':internet_source.type,
+                         'https_params': internet_source.https_params}
+
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
+
+    def TestRemoteHttp_MODIS_KD490(self):
+
+        internet_id='GSFC:CGI:MODIS:KD490:1D'
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':20200102,
+                         'end_date':20200102,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type,
+                         'https_params': ''}
 
 
         # Check last 90 days (check list length = 9)
@@ -1645,6 +1672,39 @@ class TestGetInternet(unittest.TestCase):
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
 
+
+    def TestRemoteHttp_ARC2(self):
+
+        # Retrieve a list of MODIS burndate file .. check only one present
+        # remote_url='https://ftp.cpc.ncep.noaa.gov/fews/fewsdata/africa/arc2/geotiff/'
+        internet_id='CPC:NOAA:RAIN:ARC2'
+
+        # Direct test !
+        if False:
+            return
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'start_date':-15,
+                         'end_date': -1,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type,
+                         'files_filter_expression':internet_source.files_filter_expression,
+                         'https_params': '',
+        }
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
 
 if __name__ == '__main__':
         unittest.main()
