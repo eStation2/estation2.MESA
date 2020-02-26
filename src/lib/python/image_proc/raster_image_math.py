@@ -55,7 +55,7 @@ import shutil
 # scipy for chla gradient computation
 # TODO: On reference machines it has to be -> from scipy import ndimage ! Not on our development VMs!
 # TODO: Change to  if sys.platform == 'win32':
-if sys.platform != 'win32':
+if sys.platform == 'win32':
     import scipy
 else:
     from scipy import ndimage
@@ -3482,7 +3482,7 @@ def compute_extrapolated_chla_gradient(input_file='', nodata=None, output_file='
 #  Compute opFish indicator#
 ############################
 def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_nodata=None, output_format=None,
-                             output_type=None, options=''):
+                             output_type=None, options='', parameters=None):
     try:
         tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
                                   dir=es_constants.base_tmp_dir)
@@ -3492,43 +3492,44 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         ##############
         #  constants #
         ##############
-        # filter_x = d2dgauss(n1=n_x1,sigma1=sigma_x1 ,n2=n_x2, sigma2=sigma_x2, theta=theta1)
-        filter_x = N.array([[0.3255, 0.0000, -0.3255], [0.5367, 0, -0.5367], [0.3255, -0.0000, -0.3255]])
-        # open Pixel km dx file
-        # pix_km_dx = gdal.Open('/data/processing/exchange/Sentinel-3/gradient/20180721_pix_km_dx_mat_Africa_463.tif',
-        #                       GA_ReadOnly)
+
+        filter_x = N.array([[0.325531532740751, 0.0000,  -0.325531532740751], [0.536710762313292, 0, -0.536710762313292], [0.325531532740751, -0.0000, -0.325531532740751]])
         pix_km_dy_mat = 4.633
-        # filter_y = d2dgauss(n1=n_y1,sigma1=sigma_y1 ,n2=n_y2, sigma2=sigma_y2, theta=theta2)
         filter_y = N.array([[0.3255, 0.5367, 0.3255], [0, 0, 0], [-0.3255, -0.5367, -0.3255]])
 
         ###########################################
         # ~~~~~OPFIsh   Constants~~~~~~~~~~~~~~~~#
         ###########################################
 
-        # % FROM CHL fronts   to         daily          feeding         habitat
-        # For OPFish, here are the updated values for MODIS-Aqua CHL compared to the Arctic report:
-        # chl_grad_min = 0.00026;  # perc.5th of all species reconstructed OBS by group
-        chl_grad_min = 0.00032131;  # perc.5th of all species reconstructed OBS by group -- NEW VALUES BY JEON
-        # # perc.1.2th total MESOZOOPK
-        # # min value among species is
-        # # 0.00022(mesozoo) & 0.00025 (blue shark)
-        # chl_grad_int = 0.009784  # linear fit from 0.09 to 1 (minimum mobility of species)
-        chl_grad_int = 0.019162  # linear fit from 0.09 to 1 (minimum mobility of species)
-        # # 0.017138 from 0.091 to 1 with min=0.00026 prior to MESOZOOPK;
-        # # 0.00623 from 0.3 to 1 with min=0.00025 of blue shark;
-        # # linear fit OLD prior to SKJ Spanish+ small pel. GoL 0.0176;
-        chl_feed_min = 0.08  # mgChl/m3 - minimum among species
-        # # (perc.15 cluster/perc.5 tot. blue shark)
-        # # (perc.1.8 red cluster/perc.0.5 tot. mesozoopk)
-        # chl_feed_max = 12.0  # perc.98th green MESOZOOPK, perc.99.3th total MESOZOOPK;
-        chl_feed_max = 11.0  # perc.98th green MESOZOOPK, perc.99.3th total MESOZOOPK;
-        # # perc.99.8th all species (not by subgroup)
-        # # Approx. limit to eutrophication
+        # Parameters is expected to be None, or a dictionary
+        if parameters is not None:
 
-        # dc = minimum daily habitat level related to predator behaviour (0 to ~0.3)
-        dc = 0.91  # (1-dc = 0.09, it is 0.10 in the Arctic report)
+            if 'chl_grad_min' in parameters.keys():
+                chl_grad_min = parameters['chl_grad_min']
+            else:
+                chl_grad_min = 0.00032131   #chl_grad_min = 0.00032131  # perc.5th of all species reconstructed OBS by group -- NEW VALUES BY JEON
 
-        # Compute Juliean calender date
+            if 'chl_grad_int' in parameters.keys():
+                chl_grad_int = parameters['chl_grad_int']
+            else:
+                chl_grad_int = 0.021107  #chl_grad_int = 0.021107# linear fit from 0.09 to 1 (minimum mobility of species)
+
+            if 'chl_feed_min' in parameters.keys():
+                chl_feed_min = parameters['chl_feed_min']
+            else:
+                chl_feed_min = 0.08 #chl_feed_min = 0.08  # mgChl/m3 - minimum among species
+
+            if 'chl_feed_max' in parameters.keys():
+                chl_feed_max = parameters['chl_feed_max']
+            else:
+                chl_feed_max = 11.0 #chl_feed_max = 11.0  # perc.98th green MESOZOOPK, perc.99.3th total MESOZOOPK;
+
+            if 'dc' in parameters.keys():
+                dc = parameters['dc']
+            else:
+                dc = 0.91  #0.91  # (1-dc = 0.09, it is 0.10 in the Arctic report)
+
+   # Compute Juliean calender date
         year_month_day = functions.get_date_from_path_full(input_file)
         dayOfYear = functions.conv_date_yyyymmdd_2_doy(year_month_day)
 
@@ -3539,6 +3540,9 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         # open chla file
         chla_fileID = gdal.Open(input_file, GA_ReadOnly)
 
+        # create masked file as gdal object based on input dimension
+        masked_fileID = clip_landmask_inputdimension(chla_fileID)
+
         functions.check_output_dir(os.path.dirname(output_file))
 
         # Read info from file, size are equal for all input files eg. sst, par
@@ -3546,13 +3550,19 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         ns = chla_fileID.RasterXSize
         nl = chla_fileID.RasterYSize
 
+        # Array for mask band
+        if masked_fileID is not None:
+            mask_band = masked_fileID.GetRasterBand(1)
+            mask_data = mask_band.ReadAsArray(0, 0, ns, nl).astype(float)
+        else:
+            mask_data = None
+
         dataType = chla_fileID.GetRasterBand(1).DataType
 
         geoTransform = chla_fileID.GetGeoTransform()
         projection = chla_fileID.GetProjection()
         driver_type = chla_fileID.GetDriver().ShortName
 
-        # geoTransform = f1Fid.GetGeoTransform()
         ymin = geoTransform[3]
         pixel_shift_lat = geoTransform[5]
 
@@ -3594,30 +3604,16 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         filtData = N.copy(data_chla)
 
         # Replace NaN values with zeros(for eStation data)
-        # filtData[N.invert(N.isfinite(data_chla))] = 0
-        # Replace NaN values with zeros(for Jean data)
-        filtData[data_chla == nodata] = 0
-        # data_chla[data_chla == nodata] = N.nan
+        filtData[N.invert(N.isfinite(data_chla))] = 0
 
         ifinite = N.isfinite(data_chla)  # ifinite = isfinite(Data)
 
-        # This function applies a square-shape order filter (10 iterations)
-        # followed by a square-shape gaussian filter to the set of data "Data" and
-        # gives the filtered set of data in "FiltData".
-        # The size of the order filter is "SzOrd" and the order is "Perc"
-        # (percentage of the size of the filter. e.g. 50# = median filter).
-        # The size of the gaussian filter is "SzGauss" and the standard deviation
-        # is "SigGauss".
         szOrd = 7
-
         for i in range(10):
-            #  replaces each element in A by the orderth element in the sorted set of neighbors specified by the nonzero elements in domain.
-            # filtData = ordfilt2(filtData, order, szOrd)
             if sys.platform == 'win32':
                 filtData = scipy.ndimage.median_filter(filtData, footprint=N.ones((szOrd, szOrd)))
             else:
                 filtData = ndimage.median_filter(filtData, footprint=N.ones((szOrd, szOrd)))
-            # filtData = scipy.ndimage.generic_filter(filtData,)
             # re-put measured values where there were some.
             filtData[ifinite] = data_chla[ifinite]
 
@@ -3634,48 +3630,30 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         else:
             filtData = ndimage.gaussian_filter(filtData, 2, truncate=1)
 
-            # re-put original measured values on the edges
+        # re-put original measured values on the edges
         ifinite_edge = [data_chla > 0.0] and [
-            N.invert(N.isfinite(filtData))]  # N.invert(N.isfinite(filtData))] and [N.isfinite(data)]
+            N.invert(N.isfinite(filtData))]
         filtData[ifinite_edge] = data_chla[ifinite_edge]
 
         ###########################################
         ##########  FrontProcessing ###############
         ###########################################
         # Compute the Pixel Size in km
-        # X-axis (dlon) gradient by km (!! pix_km_dx varies with latitude!!)
+        pix_km_dx_mat = filtData * N.nan
         for il in range(nl):
             nl_lat_value = ymin + (il * pixel_shift_lat)
             d = abs(pixel_shift_lat)  # 0.008928571428571
-            const_d2km = 12364.35
+            const_d2km = 12363.9869   #12364.35
             area_deg = d * d * math.cos(nl_lat_value / 180 * math.pi)
-            # area_km = area_deg * const_d2km
-            # For opfish approximation
-            # const_d2km = 12364.35
-            # area_km_equator = abs(mapset_info.pixel_shift_lat) * abs(mapset_info.pixel_shift_long) * const_d2km
             area_km = (area_deg * const_d2km) / pix_km_dy_mat
-            # area_km = (area_deg * const_d2km) / 4.58
-            # if (nl_lat_value != 0):
-            pix_km_dx_mat = N.zeros(ns)
-            pix_km_dx_mat.fill(area_km)
+            pix_km_dx_mat[il,:] = area_km
 
-            pix_km_dx_mat.shape = (1, -1)
-            #
-            # outband.WriteArray(N.array(pix_km_dx_mat),0,il)
-
-        # Dx=conv2(data,filterx,'same')./pix_km_dx_mat
-        # Canny filter - 1st Gaussian derivative
-        # from scipy.ndimage.filters import gaussian_filter1d
-        # gauss_x = gaussian_filter1d(filtData, sigma_x1, axis=0, order=1, truncate=1)
         if sys.platform == 'win32':
             gauss_x = scipy.ndimage.convolve(filtData, filter_x)
         else:
             gauss_x = ndimage.convolve(filtData, filter_x)
         canny_x = N.divide(gauss_x, pix_km_dx_mat)
-        # Normalize by the filter size (~6 for Nxy=7) to compute gradient in unit/km
-        # Dx=Dx./sum(sum(abs(filterx)));
         divisor = N.sum(N.absolute(filter_x))  # 2.3754
-        # canny_x = canny_x / N.sum(N.absolute(filter_x))
         canny_x = N.divide(canny_x, divisor)
 
         if sys.platform == 'win32':
@@ -3683,87 +3661,67 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         else:
             gauss_y = ndimage.convolve(filtData, filter_y)
 
-        # canny_y = gaussian_filter1d(filtData, sigma_y1, axis=0, order=1, truncate=1)
         canny_y = N.divide(gauss_y, pix_km_dy_mat)
-        # Write out the full matrix N.array(outData)
-        # outband.WriteArray(canny_y, 0, 0)
-        # data_gradient = chla_gradient
         divisor_y = N.sum(N.absolute(filter_y))
-        # canny_x = canny_x / N.sum(N.absolute(filter_x))
         canny_y = N.divide(canny_y, divisor_y)
 
-        ###GradNorm = sqrt(Dx. * Dx + Dy. * Dy);
         squared_val = (canny_x * canny_x) + (canny_y * canny_y)
         gradNorm = N.sqrt(squared_val)
 
         ###########################################
         ##########  gradCHL2FeedingFit ############
         ###########################################
-        # FeedHab = gradCHL * NaN;
+
         feed_hab = gradNorm * N.nan
-        # FeedHab(log(gradCHL) < log(chl_grad_min.(satCHL)))= 0;
-        # feed_hab_condition = [N.log(gradNorm) < N.log(chl_grad_min)]
         feed_hab_condition = (gradNorm < chl_grad_min)
         feed_hab[feed_hab_condition] = 0
 
         # Slope and intercept of linear fit in natural log
-        # slope = delta_y / delta_x
         delta_y = dc
         delta_x = N.log(chl_grad_int) - N.log(chl_grad_min)
         sl_hab = delta_y / delta_x
-        # in_hab = 1 - sl_hab * log(chl_grad_int.(satCHL));
         # intercept = equation of straight line y = mx+b where m is slope
         in_hab = 1 - sl_hab * N.log(chl_grad_int)
-        # linear_interp = find(log(gradCHL) >= log(chl_grad_min.(satCHL)) & log(gradCHL) <= log(chl_grad_int.(satCHL)));
-        # linear_interp = [N.log(gradNorm) >= N.log(chl_grad_min)] and  [N.log(gradNorm) <= N.log(chl_grad_int)]
         linear_interp = (gradNorm >= chl_grad_min) * (gradNorm <= chl_grad_int)
 
         # linear interp
-        # FeedHab(linear_interp) = sl_hab*log(gradCHL(linear_interp)) + in_hab;
-        # FeedHab(log(gradCHL) >  log(chl_grad_int.(satCHL))) = 1;
         feed_hab[linear_interp] = sl_hab * N.log(gradNorm[linear_interp]) + in_hab
-        # feed_hab[N.log(gradNorm) > N.log(chl_grad_int)] = 1
         feed_hab[gradNorm > chl_grad_int] = 1
 
+        #Force no feeding habitat for these conditions
+        feed_hab[filtData < chl_feed_min] = 0
+        feed_hab[filtData > chl_feed_max] = 0
+        feed_hab[0, :], feed_hab[1, :], feed_hab[2, :], feed_hab[3, :], feed_hab[4, :], feed_hab[5, :], feed_hab[6, :], feed_hab[7, :], feed_hab[8, :], feed_hab[9, :]  =N.nan, N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan
+        feed_hab[-1, :], feed_hab[-3, :], feed_hab[-2, :], feed_hab[-4, :], feed_hab[-5, :],feed_hab[-6, :], feed_hab[-7, :], feed_hab[-8, :], feed_hab[-9, :], feed_hab[-10, :] =N.nan, N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan
+        feed_hab[:, 0], feed_hab[:, 1], feed_hab[:, 2], feed_hab[:, 3],feed_hab[:, 4], feed_hab[:, 5], feed_hab[:, 6], feed_hab[:, 7], feed_hab[:, 8],feed_hab[:, 9]= N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan
+        feed_hab[:, -1], feed_hab[:, -2], feed_hab[:, -3], feed_hab[:, -4], feed_hab[:, -5],feed_hab[:, -6], feed_hab[:, -7], feed_hab[:, -8], feed_hab[:, -9], feed_hab[:, -10]= N.nan, N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan
         ###########################################
         #########  FeedingHabit2OPFish ############
         ###########################################
         for il in range(nl):
 
-            # data = N.ravel(f1Fid.ReadAsArray(0, il, f1Fid.RasterXSize, 1))
             data = feed_hab[il]
-            # data_chla = N.ravel(f2Fid.ReadAsArray(0, il, f2Fid.RasterXSize, 1))
             nl_lat_value = ymin + (il * pixel_shift_lat)
-
             daylength_val = get_daylength(dayOfYear, nl_lat_value)
-            # if nodata is not None:
-            #     nodata=N.zeros(1, dataType) + nodata
-            #     wtp = (data != nodata)
-            # else:
-            wtp = (data >= 0) * (data <= 100)  # N.isfinte(data)
-            # wtp2 = (data_chla >= 0) * (data_chla <= 100)
+            if mask_data is not None:
+                data = data * mask_data[il]
+            wtp = (data >= 0) * (data <= 100)
             opFish = N.zeros(chla_fileID.RasterXSize)
             if output_nodata is not None:
                 opFish = opFish + output_nodata
 
             if wtp.any():
                 opFish[wtp] = data[wtp] * (daylength_val / 24)
-                # opFish[wtp] = ((data[wtp] - chl_grad_min) / (chl_feed_max - chl_feed_min)) * (daylength_val / 24) #* 100
-
             opFish.shape = (1, -1)
-
             outband.WriteArray(opFish, 0, il)
 
-        # # Write out the full matrix N.array(outData)
-        # outband.WriteArray(gradNorm, 0, 0)
         input_list = []
         input_list.append(input_file)
-
         # #   Close outputs
         outDrv = None
         outDS = None
         # logger.warning('Writing MetaData not done yet ! To be implemented ...')
-        # assign_metadata_processing(input_list, output_file)
+        assign_metadata_processing(input_list, output_file, parameters=parameters)
 
     except:
         logger.warning('Error in compute_opFish_indicator. Remove outputs')
@@ -3773,107 +3731,41 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         shutil.move(output_file, output_file_final)
     finally:
         shutil.rmtree(tmpdir)
-# ##########################
-#   Compute median_filter  #
-#     NOT USED             #
-############################
 
-def compute_difference(input_file='', nodata=None, output_file='', output_nodata=None, output_format=None,
-                       output_type=None, options=''):
-    try:
-        # Manage options
-        options_list = [es_constants.ES2_OUTFILE_OPTIONS]
-        options_list.append(options)
+def clip_landmask_inputdimension(input_file_gdalobj):
 
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
-                                  dir=es_constants.base_tmp_dir)
+    landmask_file = es_constants.es2globals['estation2_layers_dir']+os.path.sep+'landmask_Earth_byte.tif'
+    created_file_masked = None
 
-        output_file_final = output_file
-        output_file = tmpdir + os.sep + os.path.basename(output_file)
+    if not os.path.isfile(landmask_file):
+        return None
 
-        # open file
-        data_fileID = gdal.Open(input_file, GA_ReadOnly)
+    ulx, xres, xskew, uly, yskew, yres = input_file_gdalobj.GetGeoTransform()
+    lrx = ulx + (input_file_gdalobj.RasterXSize * xres)
+    lry = uly + (input_file_gdalobj.RasterYSize * yres)
 
-        functions.check_output_dir(os.path.dirname(output_file))
+    d_lon_min = ulx
+    d_lat_min = lry
+    d_lon_max = lrx
+    d_lat_max = uly
 
-        # Read info from file, size are equal for all input files eg. sst, par
-        nb = data_fileID.RasterCount
-        ns = data_fileID.RasterXSize
-        nl = data_fileID.RasterYSize
+    output_file_naming = str(abs(int(d_lon_min)))+str(abs(int(d_lat_min)))+str(abs(int(d_lon_max)))+str(abs(int(d_lat_max)))+ '_masked_landmask_byte.tif'
+    output_masked_tif = es_constants.es2globals['estation2_layers_dir'] + os.path.sep + output_file_naming
 
-        dataType = data_fileID.GetRasterBand(1).DataType
+    #If already exists then just return the file
+    if os.path.isfile(output_masked_tif):
+        created_file_masked = gdal.Open(output_masked_tif, GA_ReadOnly)
+        return created_file_masked
+    command = 'gdalwarp -te {} {} {} {} -tr {} {} -r bilinear {} {}'.format(
+        d_lon_min, d_lat_min, d_lon_max, d_lat_max, abs(xres), abs(yres), landmask_file, output_masked_tif)
 
-        geoTransform = data_fileID.GetGeoTransform()
-        projection = data_fileID.GetProjection()
-        driver_type = data_fileID.GetDriver().ShortName
+    os.system(command)
 
-        # Force output_nodata=input_nodata it the latter is DEF and former UNDEF
-        if output_nodata is None and nodata is not None:
-            output_nodata = nodata
+    if os.path.isfile(output_masked_tif):
+        created_file_masked = gdal.Open(output_masked_tif, GA_ReadOnly)
 
-        # Manage out_type (take the input one as default)
-        if output_type is None:
-            outType = dataType
-        else:
-            outType = ParseType(output_type)
+    return created_file_masked
 
-        # manage out_format (take the input one as default)
-        if output_format is None:
-            outFormat = driver_type
-        else:
-            outFormat = output_format
-
-        # instantiate output
-        outDrv = gdal.GetDriverByName(outFormat)
-        outDS = outDrv.Create(output_file, ns, nl, 1, outType, options_list)
-        outDS.SetGeoTransform(geoTransform)
-        outDS.SetProjection(projection)
-        #
-        # assume only 1 band
-        outband = outDS.GetRasterBand(1)
-        chl_band = data_fileID.GetRasterBand(1)
-
-        data_chla = chl_band.ReadAsArray(0, 0, ns, nl).astype(float)
-
-        # ourresults OPFish_2018_21-07-2018.tif
-        my_result = gdal.Open(
-            '/data/processing/exchange/Sentinel-3/gradient/20180721_clear_check_modis-opfish_Africa4km.tif',
-            GA_ReadOnly)
-        my_result_band = my_result.GetRasterBand(1)
-        my_result_mat = my_result_band.ReadAsArray(0, 0, my_result.RasterXSize, my_result.RasterYSize).astype(float)
-
-        for il in range(nl):
-            data1 = N.ravel(chl_band.ReadAsArray(0, il, data_fileID.RasterXSize, 1))
-            data2 = N.ravel(my_result_band.ReadAsArray(0, il, data_fileID.RasterXSize, 1))
-            # data = feed_hab[il]
-            diff_abs = N.zeros(data_fileID.RasterXSize)
-            wtp = (data1 < 1) * (data1 > -1) * (data2 != -32767)  # N.isfinte(data)
-            diff_abs = N.absolute(data1[wtp] - data2[wtp])
-
-            diff_abs.shape = (1, -1)
-
-            outband.WriteArray(diff_abs, 0, il)
-        # diff_abs = N.absolute(data_chla)
-
-        # Write out the full matrix N.array(outData)
-        # outband.WriteArray(diff_abs, 0, 0)
-        input_list = []
-        input_list.append(input_file)
-
-        # #   Close outputs
-        outDrv = None
-        outDS = None
-        # logger.warning('Writing MetaData not done yet ! To be implemented ...')
-        # assign_metadata_processing(input_list, output_file)
-
-    except:
-        logger.warning('Error in compute_median_filter. Remove outputs')
-        if os.path.isfile(output_file):
-            os.remove(output_file)
-    else:
-        shutil.move(output_file, output_file_final)
-    finally:
-        shutil.rmtree(tmpdir)
 
 # _____________________________
 #   Write metadata to an output file.
@@ -3928,39 +3820,43 @@ def assign_metadata_processing(input_file_list, output_file, parameters=None):
 #   get_daylength
 #   Purpose: From dayOfYear, lat -> daylength(in Hrs)
 #   Author: Vijay Charan Venkatachalam, JRC, European Commission
-#   Date: 2019/02/05
+#   Date: 2020/02/04
 #   Inputs: dayOfYear, lat
 #   Output: daylength
 #   Description: returns daylength
 #
 def get_daylength(dayOfYear, lat):
-    # https://gist.github.com/anttilipp/ed3ab35258c7636d87de6499475301ce
-    """Computes the length of the day (the time between sunrise and
-    sunset) given the day of the year and latitude of the location.
-    Function uses the Brock model for the computations.
-    For more information see, for example,
-    Forsythe et al., "A model comparison for daylength as a
-    function of latitude and day of year", Ecological Modelling,
-    1995.
-    Parameters
-    ----------
-    dayOfYear : int
-        The day of the year. 1 corresponds to 1st of January
-        and 365 to 31st December (on a non-leap year).
-    lat : float
-        Latitude of the location in degrees. Positive values
-        for north and negative for south.
-    Returns
-    -------
-    d : float
-        Daylength in hours.
-    """
-    latInRad = N.deg2rad(lat)
-    declinationOfEarth = 23.45 * N.sin(N.deg2rad(360.0 * (283.0 + dayOfYear) / 365.0))
-    if -N.tan(latInRad) * N.tan(N.deg2rad(declinationOfEarth)) <= -1.0:
-        return 24.0
-    elif -N.tan(latInRad) * N.tan(N.deg2rad(declinationOfEarth)) >= 1.0:
-        return 0.0
-    else:
-        hourAngle = N.rad2deg(N.arccos(-N.tan(latInRad) * N.tan(N.deg2rad(declinationOfEarth))))
-        return 2.0 * hourAngle / 15.0
+    # The below code has been created by transforming the matlab code available in
+    # https://it.mathworks.com/matlabcentral/fileexchange/20390-day-length?focused=3885297&tab=function
+    # This calculates the number of hours (hours) and fraction of the day (b) in #daylight.
+    # Inputs:
+    # Day - day of the year, counted starting with the day of the December solstice in the first year of a Great Year.
+    # Latitude - latitude in degrees, North is positive, South is negative
+    #
+    # Calculations are per Herbert Glarner's formulae which do not take into account refraction, twilight, size of the sun, etc. (http://herbert.gandraxa.com/herbert/lod.asp but be careful about inconsistencies in radians/degrees).
+    #
+    # Copyright (c) 2015, Travis Wiens
+    # All rights reserved.
+    #
+    # Redistribution and use in source and binary forms, with or without
+    # modification, are permitted provided that the following conditions are
+    # met:
+    #
+    #    * Redistributions of source code must retain the above copyright
+    #      notice, this list of conditions and the following disclaimer.
+    #    * Redistributions in binary form must reproduce the above copyright
+    #      notice, this list of conditions and the following disclaimer in
+    #      the documentation and/or other materials provided with the distribution
+    #
+    axis = 23.439 * math.pi / 180
+    j_contant = math.pi / 182.625
+    m = 1- math.tan(lat*math.pi/180) * math.tan(axis * math.cos(j_contant*dayOfYear))
+
+    if m > 2:   #saturate value for artic
+        m = 2
+    if m < 0:
+        m = 0
+
+    b = math.acos(1-m)/math.pi   # fraction of the day the sun is up
+    return b*24  #hours of sunlight
+
