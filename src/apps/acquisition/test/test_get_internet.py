@@ -94,7 +94,7 @@ def get_one_source(internet_source, target_dir=None):
                 # Note that the following list might contain sub-dirs (it reflects full_regex)
                 current_list = get_list_matching_files(str(internet_source['url']), str(usr_pwd), str(internet_source['include_files_expression']), internet_type, end_date=end_date)
 
-            elif internet_type == 'http_tmpl':
+            elif internet_type == 'http_tmpl' or internet_type == 'http_tmpl_modis':
                 # Create the full filename from a 'template' which contains
                 try:
                     current_list = build_list_matching_files_tmpl(str(internet_source['url']),
@@ -361,6 +361,11 @@ def get_one_source(internet_source, target_dir=None):
                                 download_link = 'https://coda.eumetsat.int/odata/v1/Products(\'{0}\')/$value'.format(os.path.split(filename)[0])#os.path.split('asdasdad/dasdasds')[0]
                                 result = get_file_from_url(str(download_link), target_dir=es_constants.ingest_dir,
                                                            target_file=os.path.basename(filename)+'.zip', userpwd=str(usr_pwd), https_params='')
+
+                            elif internet_type == 'http_tmpl_modis':
+                                result = wget_file_from_url(str(internet_source['url']) + os.path.sep + filename,
+                                                           target_dir=es_constants.ingest_dir,
+                                                           target_file=os.path.basename(filename), userpwd=str(usr_pwd), https_params=str(internet_source['https_params']))
                             else:
                                 result = get_file_from_url(str(internet_source['url']) + os.path.sep + filename,
                                                            target_dir=es_constants.ingest_dir,
@@ -1451,7 +1456,7 @@ class TestGetInternet(unittest.TestCase):
 
     def TestLocal_MOTU(self):
 
-        internet_id='MOTU:WAV:TDS'
+        internet_id='CMEMS:MOTU:WAV:L4:SWH'
 
         # Direct test !
         if False:
@@ -1469,8 +1474,8 @@ class TestGetInternet(unittest.TestCase):
                          'pull_frequency': internet_source.pull_frequency,
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
-                         'start_date':20181128,
-                         'end_date': +2,
+                         'start_date':20200125,
+                         'end_date': -1,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type,
                          'files_filter_expression':internet_source.files_filter_expression,
