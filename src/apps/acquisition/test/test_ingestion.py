@@ -705,8 +705,8 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_chirps_tif(self):
 
-        date_fileslist = ['/home/adminuser/Tests/chirps-v2.0.2018.08.3.tif']
-        in_date = '2018.08.3'
+        date_fileslist = ['/data/ingest/test/chirps-v2.0.2016.02.1.tif']
+        in_date = '2016.02.1'
         productcode = 'chirps-dekad'
         productversion = '2.0'
         subproductcode = '10d'
