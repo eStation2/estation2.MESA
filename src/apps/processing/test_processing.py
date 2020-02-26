@@ -872,7 +872,7 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 # test_subprocess_vgt_lai(pipe_run=0, pipe_print=4, touch_files_only=False)
 # test_subprocess_vgt_fcover(pipe_run=3, pipe_print=0, touch_files_only=False)
 # test_subprocess_vgt_fapar(pipe_run=0, pipe_print=4, touch_files_only=False)
-my_proc_std_ndvi(pipe_run=3, pipe_print=0, touch_files_only=False)
+# my_proc_std_ndvi(pipe_run=3, pipe_print=0, touch_files_only=False)
 #my_proc_ndvi_merge(pipe_run=0, pipe_print=3, touch_files_only=False)
 # my_proc_pml_modis_fronts(pipe_run=3, pipe_print=0, touch_files_only=False)
 #my_proc_std_fronts(pipe_run=0, pipe_print=3, touch_files_only=False)
@@ -905,7 +905,7 @@ my_proc_std_ndvi(pipe_run=3, pipe_print=0, touch_files_only=False)
 #my_proc_vgt_dmp(pipe_run=4, pipe_print=0, start_date='19990101', end_date='20171231', touch_files_only=False)
 #my_proc_std_ba(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None, touch_files_only=False)
 #my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=False)
-#test_proc_modis_chla_opfish(pipe_run=3, pipe_print=0, touch_files_only=False)
+test_proc_modis_chla_opfish(pipe_run=3, pipe_print=0, touch_files_only=False)
 #   ---------------------------------------------------------------------
 #   OFF-LINE Tests (on raster-math functions)
 #   ---------------------------------------------------------------------
