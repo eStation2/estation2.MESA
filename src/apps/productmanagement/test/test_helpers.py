@@ -147,7 +147,7 @@ class TestHelpersGap(unittest.TestCase):
                 ]
 
     def test_find_gap_dekad_intervals_no_gap(self):
-        intervals = find_gaps(self.files_dekad, 
+        intervals = find_gaps(self.files_dekad,
             frequency=Frequency(dateformat='YYYYMMDD', value=1,
                 unit=Frequency.UNIT.DEKAD, frequency_type=Frequency.TYPE.EVERY),
             only_intervals=True)
@@ -162,17 +162,17 @@ class TestHelpersGap(unittest.TestCase):
         self.assertEqual(intervals[0][2], INTERVAL_TYPE.PRESENT)
 
     def test_find_gap_dekad_no_gap(self):
-        self.assertEqual([], find_gaps(self.files_dekad, 
+        self.assertEqual([], find_gaps(self.files_dekad,
             frequency=Frequency(dateformat='YYYYMMDD', value=1,
                 unit=Frequency.UNIT.DEKAD, frequency_type=Frequency.TYPE.EVERY)))
 
     def test_find_gap_dekad_no_gap_per(self):
-        self.assertEqual([], find_gaps(self.files_dekad, 
+        self.assertEqual([], find_gaps(self.files_dekad,
             frequency=Frequency(dateformat='YYYYMMDD', value=1,
                 unit=Frequency.UNIT.DEKAD, frequency_type=Frequency.TYPE.PER)))
 
     def test_find_gap_dekad_with_gap(self):
-        gap = find_gaps(self.files_dekad[:10] + self.files_dekad[12:], 
+        gap = find_gaps(self.files_dekad[:10] + self.files_dekad[12:],
             frequency=Frequency(value=1,
                 unit=Frequency.UNIT.DEKAD, frequency_type=Frequency.TYPE.EVERY))
         self.assertEqual(len(gap), 2)
@@ -181,7 +181,7 @@ class TestHelpersGap(unittest.TestCase):
 
     def test_find_gap_dekad_intervals_with_gap(self):
         frequency=Frequency(value=1, unit=Frequency.UNIT.DEKAD, frequency_type=Frequency.TYPE.EVERY)
-        intervals = find_gaps(self.files_dekad[:10] + self.files_dekad[14:], 
+        intervals = find_gaps(self.files_dekad[:10] + self.files_dekad[14:],
             frequency=frequency, only_intervals=True)
         self.assertEqual(len(intervals), 3)
         self.assertEqual(intervals[0][2], INTERVAL_TYPE.PRESENT)
@@ -190,7 +190,7 @@ class TestHelpersGap(unittest.TestCase):
         self.assertEqual(intervals[2][2], INTERVAL_TYPE.PRESENT)
 
     def test_find_gap_dekad_with_gap_per(self):
-        gap = find_gaps(self.files_dekad[:10] + self.files_dekad[12:], 
+        gap = find_gaps(self.files_dekad[:10] + self.files_dekad[12:],
             frequency=Frequency(value=1,
                 unit=Frequency.UNIT.DEKAD, frequency_type=Frequency.TYPE.PER))
         self.assertEqual(len(gap), 2)
@@ -209,13 +209,13 @@ class TestHelpersGap(unittest.TestCase):
             frequency=frequency,
             only_intervals=True)
         self.assertEqual(len(intervals), 5)
-        self.assertEqual(intervals[0][2], INTERVAL_TYPE.PRESENT) 
+        self.assertEqual(intervals[0][2], INTERVAL_TYPE.PRESENT)
         self.assertEqual(intervals[0][0], frequency.extract_date(self.files_day_gap[0]))
         self.assertEqual(intervals[0][1], frequency.extract_date(self.files_day_gap[0]))
-        self.assertEqual(intervals[1][2], INTERVAL_TYPE.MISSING) 
-        self.assertEqual(intervals[2][2], INTERVAL_TYPE.PRESENT) 
-        self.assertEqual(intervals[3][2], INTERVAL_TYPE.MISSING) 
-        self.assertEqual(intervals[4][2], INTERVAL_TYPE.PRESENT) 
+        self.assertEqual(intervals[1][2], INTERVAL_TYPE.MISSING)
+        self.assertEqual(intervals[2][2], INTERVAL_TYPE.PRESENT)
+        self.assertEqual(intervals[3][2], INTERVAL_TYPE.MISSING)
+        self.assertEqual(intervals[4][2], INTERVAL_TYPE.PRESENT)
         self.assertEqual(intervals[4][0], frequency.extract_date(self.files_day_gap[-1]))
         self.assertEqual(intervals[4][1], frequency.extract_date(self.files_day_gap[-1]))
 
@@ -226,12 +226,12 @@ class TestHelpersGap(unittest.TestCase):
         self.assertEqual(len(gap), 19)
 
     def test_find_gap_minutes(self):
-        self.assertEqual([], find_gaps(self.files_15minutes, 
+        self.assertEqual([], find_gaps(self.files_15minutes,
             frequency=Frequency(value=4,
                 unit=Frequency.UNIT.HOUR, frequency_type=Frequency.TYPE.PER)))
 
     def test_find_gap_minutes_with_gap(self):
-        gap = find_gaps(self.files_15minutes[:3] + self.files_15minutes[5:], 
+        gap = find_gaps(self.files_15minutes[:3] + self.files_15minutes[5:],
             frequency=Frequency(value=4,
                 unit=Frequency.UNIT.HOUR, frequency_type=Frequency.TYPE.PER))
         self.assertEqual(len(gap), 2)
@@ -239,12 +239,12 @@ class TestHelpersGap(unittest.TestCase):
         self.assertEqual(gap[1], self.files_15minutes[4])
 
     def test_find_gap_months(self):
-        self.assertEqual([], find_gaps(self.files_months, 
+        self.assertEqual([], find_gaps(self.files_months,
             frequency=Frequency(value=1,
                 unit=Frequency.UNIT.MONTH, frequency_type=Frequency.TYPE.EVERY)))
 
     def test_find_gap_months_per(self):
-        self.assertEqual([], find_gaps(self.files_months, 
+        self.assertEqual([], find_gaps(self.files_months,
             frequency=Frequency(value=1,
                 unit=Frequency.UNIT.MONTH, frequency_type=Frequency.TYPE.PER)))
 
@@ -275,7 +275,17 @@ class TestHelpersGap(unittest.TestCase):
             from_date=self.from_date)
         self.assertEqual(len(gap), 6)
 
+    # find_gaps now converts all dates in date.datetime, so test is done the other way around
     def test_find_gap_wrong_parameters(self):
         self.assertRaises(WrongDateParameter, find_gaps,
-            *([], Frequency(value=1, unit=Frequency.UNIT.HOUR, frequency_type=Frequency.TYPE.EVERY),),
-            **{'to_date': datetime.date(2014, 10, 10)})
+            *([], Frequency(value=1, unit=Frequency.UNIT.DAY, frequency_type=Frequency.TYPE.EVERY),),
+            **{'to_date': datetime.datetime(2014, 10, 10), 'from_date':datetime.datetime(2014, 1, 1)})
+
+
+suite_1 = unittest.TestLoader().loadTestsFromTestCase(TestCasters)
+suite_2 = unittest.TestLoader().loadTestsFromTestCase(TestHelpersDate)
+suite_3 = unittest.TestLoader().loadTestsFromTestCase(TestHelpersGap)
+suite_helpers = unittest.TestSuite([suite_1,suite_2,suite_3])
+
+if __name__ == '__main__':
+    unittest.TextTestRunner(verbosity=2).run(suite_helpers)
