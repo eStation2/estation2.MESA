@@ -20,7 +20,9 @@ BuildRoot: %{_topdir}/BUILD/%{name}
 
 %prep
 # Get the sources from the JRC ftp and create .tgz
-lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/%{name}/ /home/adminuser/rpms/%{name}/; exit" -u narmauser:2016mesa! h05-ftp.jrc.it"" 
+echo "WARNING: all new files have to be copied manually into /home/adminuser/rpms/%{name}/"
+###lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/%{name}/ /home/adminuser/rpms/%{name}/; exit" -u narmauser:2016mesa! h05-ftp.jrc.it"" 
+
 cd /home/adminuser/rpms/%{name}/
 rm -f %{name}.rpm
 tar -cvzf %{name}.tgz *

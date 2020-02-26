@@ -175,9 +175,15 @@ def getStatusPostgreSQL():
         # Get status of postgresql
         command = [es_constants.es2globals['postgresql_executable'], 'status']  # /etc/init.d/postgresql-9.3  on CentOS
         # print command
-        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if sys.platform.startswith('win'):
+            args = ["-N", "postgresql-x64-9.3", "-D", "C:/Program Files/PostgreSQL/9.3/data"]
+            p = subprocess.Popen(command + args, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        else:
+            p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
         out, err = p.communicate()
-        if re.search('online', out) or re.search('en cours', out):      # ToDo: Add Portuguese!
+        # print out
+        if re.search('running', out) or re.search('online', out) or re.search('en cours', out):      # ToDo: Add Portuguese!
             psql_status = True
         else:
             psql_status = False

@@ -1,10 +1,10 @@
 Summary: eStation 2.0 application from JRC
 Name: eStation2-Apps
-Version: 2.1.1
-Release: 8
+Version: 2.2.0
+Release: 20
 Group: eStation
 License: GPL
-Source: /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz
+Source: /home/adminuser/ISOs-RPMs/eStation-Apps/%{name}-%{version}-%{release}.tgz
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 
 # Procedure: the whole eStation2.git repo is synchronized on the local machine (in /home/adminuser/eStation2.git) 
@@ -17,16 +17,18 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 %prep
 # Sync the git repository from github
 cd /home/adminuser/eStation2.git			# -> TEMP: locally unzippped manually
-git pull origin main		  			# -> TEMP: locally unzippped manually
+# git pull origin main		  			# -> TEMP: locally unzippped manually
+# git pull origin dev_2.2.0				# -> TEMP: locally modified on mesa-build 20.1.2020 - ES2-497
+
 # Create the .tgz
 cd src
-tar -cvzf /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz *
+tar -cvzf /home/adminuser/ISOs-RPMs/eStation-Apps/%{name}-%{version}-%{release}.tgz *
 
 # Prepare the files in BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/var/www/eStation2-%{version}
 cd $RPM_BUILD_ROOT
-cp /home/adminuser/rpms/eStation-Apps/%{name}-%{version}-%{release}.tgz ./var/www/eStation2-%{version}
+cp /home/adminuser/ISOs-RPMs/eStation-Apps/%{name}-%{version}-%{release}.tgz ./var/www/eStation2-%{version}
 cd ./var/www/eStation2-%{version}
 tar -xvzf eStation2-Apps-%{version}-%{release}.tgz
 rm eStation2-Apps-%{version}-%{release}.tgz
@@ -34,7 +36,7 @@ rm eStation2-Apps-%{version}-%{release}.tgz
 %clean
 rm -r -f $RPM_BUILD_ROOT
 echo "Renaming/copying the package under /home/adminuser/rpms"
-cp /rpm/rpmbuild/RPMS/x86_64/%{name}-%{version}-%{release}.x86_64.rpm /home/adminuser/rpms/eStation-Apps/mesa2015-%{name}-%{version}-%{release}.x86_64.rpm
+cp /rpm/rpmbuild/RPMS/x86_64/%{name}-%{version}-%{release}.x86_64.rpm /home/adminuser/ISOs-RPMs/eStation-Apps/mesa2015-%{name}-%{version}-%{release}.x86_64.rpm
 
 %files
 /var/www/eStation2-%{version}/*
@@ -55,6 +57,7 @@ exec 2>/var/log/eStation2/%{name}-%{version}-preinst.err
 echo "`date +'%Y-%m-%d %H:%M '` Stopping all services"
 if [[ -d /var/www/eStation2 ]]; then 
 /etc/init.d/tas_all_servicesd stop
+/etc/init.d/tas_estation_apached stop
 fi
 # En preinst pas de script externe inclus dans le RPM car pas encore decompressé
 # Ajout du compte analyst
@@ -116,6 +119,7 @@ mkdir -p -m 775 /eStation2/get_lists/get_internet
 mkdir -p -m 775 /eStation2/get_lists/get_eumetcast
 mkdir -p -m 777 /eStation2/log
 mkdir -p -m 775 /eStation2/db_dump
+mkdir -p -m 775 /eStation2/logos
 mkdir -p -m 775 /eStation2/requests
 mkdir -p -m 775 /eStation2/system
 chown -R analyst:estation /eStation2/
@@ -134,11 +138,17 @@ chown -R analyst:estation /data/
 # Change permissions /var/www (for allowing analyst to change version)
 chmod 777 /var/www
 
-# Change permissions for writing in Desktop
-chown -R adminuser:adminuser /home/adminuser/*
-chmod -R 755 /home/adminuser/Desktop
-chown -R analyst:analyst /home/analyst/*
-chmod -R 755 /home/analyst/Desktop
+# Change permissions for writing in home and Desktop
+if [[ ! -d /home/adminuser/Desktop ]]; then
+mkdir -p /home/adminuser/Desktop
+fi
+if [[ ! -d /home/analyst/Desktop ]]; then
+mkdir -p /home/analyst/Desktop
+fi
+chown -R adminuser:adminuser /home/adminuser
+chmod -R 755 /home/adminuser
+chown -R analyst:analyst /home/analyst
+chmod -R 755 /home/analyst
 
 # Change permissions of the Layers dir (2.0.4) -> it is done in layers-2.0.4
 #echo "`date +'%Y-%m-%d %H:%M '` Change permissions of /eStation2/layers to 775"
@@ -154,22 +164,50 @@ fi
 ln -fs /var/www/eStation2-%{version} /var/www/eStation2
 
 # Change settings of apache for layer size (2.0.4)
-if [[ ${is_an_upgrade} == 1 ]]; then
-echo "`date +'%Y-%m-%d %H:%M '` Change apache config LimitRequestBody to 300Mb"
-apache_config='/usr/local/src/tas/eStation_wsgi_srv/httpd.conf'
-sed -i "s|.*LimitRequestBody.*|LimitRequestBody 314572800|" ${apache_config}
-fi
+# if [[ ${is_an_upgrade} == 1 ]]; then
+# echo "`date +'%Y-%m-%d %H:%M '` Change apache config LimitRequestBody to 300Mb"
+# apache_config='/usr/local/src/tas/eStation_wsgi_srv/httpd.conf'
+# sed -i "s|.*LimitRequestBody.*|LimitRequestBody 314572800|" ${apache_config}
+# fi
 
-# Change settings of apache for pointing to apps/gui/esapp/build/production (2.1.2)
-if [[ ${is_an_upgrade} == 1 ]]; then
+# Change settings of apache for pointing to apps/gui/esapp/build/production (2.2.0)
 echo "`date +'%Y-%m-%d %H:%M '` Change apache config file"
-apache_config='/usr/local/src/tas/eStation_wsgi_srv/httpd.conf'
-mv /usr/local/src/tas/eStation_wsgi_srv/httpd.conf /usr/local/src/tas/eStation_wsgi_srv/httpd_old.conf
+if [[ -f /usr/local/src/tas/eStation_wsgi_srv/httpd.conf ]]; then
+mv /usr/local/src/tas/eStation_wsgi_srv/httpd.conf /usr/local/src/tas/eStation_wsgi_srv/httpd_pre_2.2.0.conf
 cp /var/www/eStation2/config/install/httpd.conf /usr/local/src/tas/eStation_wsgi_srv/
 fi
 
+# Copy the System Settings file (if does not exist)
+src_file='/var/www/eStation2/config/install/system_settings.ini'
+trg_file='/eStation2/settings/system_settings.ini'
+
+if [[ -f  ${trg_file} ]]; then
+    echo "`date +'%Y-%m-%d %H:%M '` System Setting file already exists $trg_file" 
+else
+    cp $src_file $trg_file
+    if [[ $? -eq 0 ]]; then 
+        echo "`date +'%Y-%m-%d %H:%M '` System Setting file $trg_file created" 
+        chown analyst:estation ${trg_file}
+        chmod 775 ${trg_file}
+    else
+        echo "`date +'%Y-%m-%d %H:%M '` ERROR in creating System Setting file $trg_file" 
+    fi
+fi
+
+# Copy logos to /eStation2/logos - directory created above. (2.2.0)
+echo "`date +'%Y-%m-%d %H:%M '` Copy logos to eStation2 - logos directory"
+cp -rf /var/www/eStation2/config/install/logos/* /eStation2/logos
+
+
+# Remove/reset the existing bucardo setup, so that system_bucardo_config() - driven by System service - will recreate the sync adding all tables
+# This is especially important when there are new tables - in either analysis or products - to be added to bucardo-sync
+if [[ ${is_an_upgrade} == 1 ]]; then
+echo "`date +'%Y-%m-%d %H:%M '` Resetting bucardo"
+/var/www/eStation2-%{version}/config/install/bucardo_reset.sh
+echo "`date +'%Y-%m-%d %H:%M '` Bucardo Resetted"
 # Stop Bucardo to prevent sync during DB update - see also ES2-112
 bucardo stop
+fi
 
 # Restart postgresql 
 echo "`date +'%Y-%m-%d %H:%M '` Restart postgresql-9.3"
@@ -238,6 +276,7 @@ trg_file='/eStation2/settings/user_settings.ini'
 
 if [ -f  ${trg_file} ]; then
     echo "`date +'%Y-%m-%d %H:%M '` User Setting file already exist $trg_file"
+    echo "" >> $trg_file
     echo "proxy_host =" >> $trg_file
     echo "proxy_port =" >> $trg_file
     echo "proxy_user =" >> $trg_file
@@ -253,23 +292,6 @@ else
     fi
 fi
 
-# Copy the System Settings file (if does not exist)
-src_file='/var/www/eStation2/config/install/system_settings.ini'
-trg_file='/eStation2/settings/system_settings.ini'
-
-if [[ -f  ${trg_file} ]]; then
-    echo "`date +'%Y-%m-%d %H:%M '` System Setting file already exist $trg_file" 
-else
-    cp $src_file $trg_file
-    if [[ $? -eq 0 ]]; then 
-        echo "`date +'%Y-%m-%d %H:%M '` System Setting file $trg_file created" 
-        chown analyst:estation ${trg_file}
-        chmod 775 ${trg_file}
-    else
-        echo "`date +'%Y-%m-%d %H:%M '` ERROR in creating System Setting file $trg_file" 
-    fi
-fi
-
 # Initialize the bucardo installation
 log_dir="/var/log/bucardo"
 run_dir="/var/run/bucardo"
@@ -282,7 +304,9 @@ else
 	echo "$(date +'%Y-%m-%d %H:%M ') Bucardo package already installed. Continue"
 fi
 # Bucardo logfile and options - see also ES2-112
+if [[ -f /var/log/bucardo/log.bucardo ]]; then
 mv -f /var/log/bucardo/log.bucardo /var/log/bucardo/log.bucardo.bck
+fi
 bucardo set log_level=terse
 bucardo set reason_file='/var/log/bucardo/bucardo.restart.reason'
 # bucardo start # wait eStation2:system service to start it
@@ -315,19 +339,95 @@ sed -i "s|.*active_version.=.*|active_version = %{version}|" /eStation2/settings
 # echo "`date +'%Y-%m-%d %H:%M '` Set again the Thema to $thema"
 
 # Specific to upgrade from 2.1.2 -> set the activated THEMA in the table products.thema
+if [[ ${is_an_upgrade} == 1 ]]; then
 thema=`grep -i thema /eStation2/settings/system_settings.ini | sed 's/thema =//'| sed 's/ //g'`
 psql -U estation -d estationdb -c "UPDATE products.thema SET activated = TRUE WHERE thema_id = '$thema'"
 echo "`date +'%Y-%m-%d %H:%M '` Set the activated Thema to $thema in the table products.thema"
+fi
 
-# Run the patch to install Firefox 52.4.0
+# SNAP Install
+# Check if snap is already installed -> not needed because it will be overwritten **** ->> To be changed !!!
+if [[ -d /usr/local/snap/bin ]]; then 
+	echo "`date +'%Y-%m-%d %H:%M '` SNAP already installed - remove and reinstall full version"
+	rm -Rf /usr/local/snap
+fi
+#sudo chmod 777 /var/www/eStation2-%{version}/lib/snap/esa-snap_sentinel_unix_6_0.sh
+mkdir -p /usr/local/snap
+echo "`date +'%Y-%m-%d %H:%M '` Installing SNAP"
+/var/www/eStation2-%{version}/lib/snap/esa-snap_all_unix_6_0.sh -q -dir "/usr/local/snap/"
+echo "`date +'%Y-%m-%d %H:%M '` SNAP Installed!"
+
+# Create a link for SNAP in the Desktop of adminuser and analyst 
+cp /usr/local/snap/SNAP\ Desktop.desktop /home/adminuser/Desktop
+cp /usr/local/snap/SNAP\ Desktop.desktop /home/analyst/Desktop
+
+
+# Change location of pip in file /usr/local/src/tas/anaconda/bin/pip [ 16.08.19 - remove is_an_upgrade clause] 
+#if [[ ${is_an_upgrade} == 1 ]]; then
+echo "`date +'%Y-%m-%d %H:%M '` Change location of pip in file /usr/local/src/tas/anaconda/bin/pip"
+pip_file='/usr/local/src/tas/anaconda/bin/pip'
+newline='#!/usr/local/src/tas/anaconda/bin/python'
+sed -i "s|#!.*|$newline|" ${pip_file}
+#fi
+
+# Install sentinelsat 
+# Check if sentinelsat is already installed
+if [[ -f /usr/local/src/tas/anaconda/bin/sentinelsat ]]; then 
+	echo "`date +'%Y-%m-%d %H:%M '` sentinelsat already installed"
+else
+	echo "`date +'%Y-%m-%d %H:%M '`Installing sentinelsat"
+	/usr/local/src/tas/anaconda/bin/pip install /var/www/eStation2-%{version}/lib/packages/sentinelsat/sentinelsat-0.13-py2.py3-none-any.whl -f /var/www/eStation2-%{version}/lib/packages/sentinelsat/ --no-index
+fi
+
+# Install motuclient
+# Check if motuclient is already installed
+if [[ -f /usr/local/src/tas/anaconda/bin/motuclient ]]; then 
+	echo "`date +'%Y-%m-%d %H:%M '` motuclient already installed"
+else
+	echo "`date +'%Y-%m-%d %H:%M '`Installing motuclient"
+	/usr/local/src/tas/anaconda/bin/pip install /var/www/eStation2-%{version}/lib/packages/motuclient/motuclient-1.8.2.tar.gz -f ./ --no-index
+fi
+
+# Run the patch to install Firefox 52.4.0 (if not already installed) **** ->> To be changed !!!
 # echo "`date +'%Y-%m-%d %H:%M '` Run Firefox Upgrader"
 # /var/www/eStation2/patches/updater_firefox_52.4.0.dbx
 # echo "`date +'%Y-%m-%d %H:%M '` Firefox version now: `firefox -v | awk '{ print $3 }' 2>> /dev/null`"
 
-# Start the eStation Services 
+# Start the eStation Services (16.08.19 - comment if clause) ->> ??????
 echo "`date +'%Y-%m-%d %H:%M '` Starting all services"
-if [[ ${is_an_upgrade} == 1 ]]; then
+#if [[ ${is_an_upgrade} == 1 ]]; then
 /etc/init.d/tas_all_servicesd start
+/etc/init.d/tas_estation_apached start
+#fi
+# Remove all the .json files so that the GUI will trigger regeneration automatically
+if [[ ${is_an_upgrade} == 1 ]]; then
+rm /tmp/eStation2/*.json
+fi
+
+# Import JRC Reference workspaces
+echo "`date +'%Y-%m-%d %H:%M '` Importing JRC Reference workspaces"
+su adminuser -c "/usr/local/src/tas/anaconda/bin/python -c 'import webpy_esapp_helpers; webpy_esapp_helpers.importJRCRefWorkspaces()'"
+
+# Install Anydesk (see ES2-453)
+if [[ ! -f /usr/bin/anydesk ]]; then 
+echo "`date +'%Y-%m-%d %H:%M '` Installing Anydesk 2.9.5"
+# yum localinstall -y /var/www/eStation2/lib/anydesk/anydesk-2.9.5-1.el7.x86_64.rpm	-> conflict yum lock
+# rpm -ivh /var/www/eStation2/lib/anydesk/anydesk-2.9.5-1.el7.x86_64.rpm			-> conflict yum lock
+cp /var/www/eStation2/lib/anydesk/anydesk-2.9.5-1.el7.x86_64.rpm /home/adminuser/Desktop
+chown adminuser:estation /home/adminuser/Desktop/anydesk-2.9.5-1.el7.x86_64.rpm
+chmod 755 /home/adminuser/Desktop/anydesk-2.9.5-1.el7.x86_64.rpm
+else
+echo "`date +'%Y-%m-%d %H:%M '` Anydesk 2.9.5 already installed"
+fi
+
+# Add an entry in crontab for running correct_normalize permissions (ES2-262)
+if [[ ! `crontab -l | grep correct_normalize` ]]; then
+echo "`date +'%Y-%m-%d %H:%M '` Add an entry in crontab for correcting/normalizing permissions"
+crontab -l > /root/my_crontab.txt
+echo '0 0 * * * /var/www/eStation2/apps/es2system/correct_normalize_permissions.sh >> dev/null' >> /root/my_crontab.txt
+crontab /root/my_crontab.txt
+else
+echo "`date +'%Y-%m-%d %H:%M '` The entry in crontab for correcting/normalizing permissions already exists."
 fi
 
 # Before uninstall: remove the link and copy all code into a bck dir

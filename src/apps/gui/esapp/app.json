@@ -122,112 +122,112 @@
             "path": "app.js",
             "bundle": true
         },{
-            "path": "/lib/js/OL3/build/ol.js",
+            "path": "lib/js/OL3/build/ol.js",
             "remote": true
 //        },{
-//            "path": "/lib/js/OL4.6.5/ol.js",
+//            "path": "lib/js/OL4.6.5/ol.js",
 //            "remote": true
         },{
-            "path": "/lib/js/ol3-layerswitcher-master/src/ol3-layerswitcher.js",
+            "path": "lib/js/ol3-layerswitcher-master/src/ol3-layerswitcher.js",
             "remote": true
         },{
-            "path": "/lib/js/Highstock-5.0.14/code/highstock.js",
+            "path": "lib/js/Highstock-5.0.14/code/highstock.js",
             "remote": true
         },{
-            "path": "/lib/js/Highstock-5.0.14/code/highcharts-more.js",
+            "path": "lib/js/Highstock-5.0.14/code/highcharts-more.js",
             "remote": true
         },{
-            "path": "/lib/js/Highstock-5.0.14/code/modules/heatmap.js",
+            "path": "lib/js/Highstock-5.0.14/code/modules/heatmap.js",
             "remote": true
         },{
-            "path": "/lib/js/Highstock-5.0.14/code/modules/exporting.js",
+            "path": "lib/js/Highstock-5.0.14/code/modules/exporting.js",
             "remote": true
         },{
-            "path": "/lib/js/Highstock-5.0.14/code/modules/offline-exporting.js",
+            "path": "lib/js/Highstock-5.0.14/code/modules/offline-exporting.js",
             "remote": true
         },{
-            "path": "/lib/js/Highstock-5.0.14/code/modules/export-csv-1.1.4.js",
+            "path": "lib/js/Highstock-5.0.14/code/modules/export-csv-1.1.4.js",
             "remote": true
         },{
             // This module, after the dependencies
-            "path": "/lib/js/Highstock-5.0.14/code/modules/highcharts-export-clientside-1.4.3.js",
+            "path": "lib/js/Highstock-5.0.14/code/modules/highcharts-export-clientside-1.4.3.js",
             "remote": true
         },{
-            "path": "/lib/js/html2canvas-0.5.0-alpha1/dist/html2canvas.min.js",
+            "path": "lib/js/html2canvas-0.5.0-alpha1/dist/html2canvas.min.js",
             "remote": true
         },{
-            "path": "/lib/js/ResizeSensor.js",
+            "path": "lib/js/ResizeSensor.js",
             "remote": true
 
 //        },{
 //            "path": "app/CustomVTypes.js",
 //            "includeInBundle": true
 //        },{
-//            "path": "/lib/js/Highstock/js/highstock-all.js",
+//            "path": "lib/js/Highstock/js/highstock-all.js",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/Highstock/js/modules/export-csv.js",
+//            "path": "lib/js/Highstock/js/modules/export-csv.js",
 //            "remote": true
 //        },{
 //            // This module, after the dependencies
-//            "path": "/lib/js/Highstock/js/modules/highcharts-export-clientside.js",
+//            "path": "lib/js/Highstock/js/modules/highcharts-export-clientside.js",
 //            "remote": true
 
         }],
 
 //        },{
-//            "path": "/lib/js/es6-promise.min.js",
+//            "path": "lib/js/es6-promise.min.js",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/js-spark-md5-master/spark-md5.js",
+//            "path": "lib/js/js-spark-md5-master/spark-md5.js",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/Highstock/js/modules/jspdf.min.js",
+//            "path": "lib/js/Highstock/js/modules/jspdf.min.js",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/md5.js",
+//            "path": "lib/js/md5.js",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/dom-to-image-master/dist/dom-to-image.min.js",
+//            "path": "lib/js/dom-to-image-master/dist/dom-to-image.min.js",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/Highstock/js/modules/canvas-tools.src.js",
+//            "path": "lib/js/Highstock/js/modules/canvas-tools.src.js",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/canvg-master/rgbcolor.js",
+//            "path": "lib/js/canvg-master/rgbcolor.js",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/canvg-master/StackBlur.js",
+//            "path": "lib/js/canvg-master/StackBlur.js",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/canvg-master/canvg.js",
+//            "path": "lib/js/canvg-master/canvg.js",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/Highcharts/js/highcharts.js",
+//            "path": "lib/js/Highcharts/js/highcharts.js",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/Ext.ux/extjs-upload-widget-master/lib/upload/"
+//            "path": "lib/js/Ext.ux/extjs-upload-widget-masterlib/upload/"
 //            ,"remote": true
 //        },{
-//            "path": "/lib/js/Ext.ux/AwesomeUploader/Ext.ux.form.FileUploadField.js",
+//            "path": "lib/js/Ext.ux/AwesomeUploader/Ext.ux.form.FileUploadField.js",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/Ext.ux/AwesomeUploader/Ext.ux.XHRUpload.js",
+//            "path": "lib/js/Ext.ux/AwesomeUploader/Ext.ux.XHRUpload.js",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/Ext.ux/AwesomeUploader/swfupload.js",
+//            "path": "lib/js/Ext.ux/AwesomeUploader/swfupload.js",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/Ext.ux/AwesomeUploader/swfupload.swfobject.js",
+//            "path": "lib/js/Ext.ux/AwesomeUploader/swfupload.swfobject.js",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/Ext.ux/AwesomeUploader/Ext.ux.AwesomeUploaderLocalization.js",
+//            "path": "lib/js/Ext.ux/AwesomeUploader/Ext.ux.AwesomeUploaderLocalization.js",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/Ext.ux/AwesomeUploader/Ext.ux.AwesomeUploader.js",
+//            "path": "lib/js/Ext.ux/AwesomeUploader/Ext.ux.AwesomeUploader.js",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/Ext.ux/Ext.ux.StatusBar.js",
+//            "path": "lib/js/Ext.ux/Ext.ux.StatusBar.js",
 //            "remote": true
 //        }
 //        ,{
@@ -272,13 +272,13 @@
                 "path": "resources/css/esapp.css",
                 "update": "full"
             },{
-                "path": "/lib/js/OL3/css/ol.css",
+                "path": "lib/js/OL3/css/ol.css",
                 "remote": true
 //            },{
-//                "path": "/lib/js/OL4.6.5/ol.css",
+//                "path": "lib/js/OL4.6.5/ol.css",
 //                "remote": true
             },{
-                "path": "/lib/js/ol3-layerswitcher-master/src/ol3-layerswitcher.css",
+                "path": "lib/js/ol3-layerswitcher-master/src/ol3-layerswitcher.css",
                 "remote": true
             },{
                 "path": "resources/fonts/font-awesome-4.6.3/css/font-awesome.css"
@@ -286,13 +286,13 @@
         ],
 
 //        },{
-//            "path": "/lib/js/Ext.ux/AwesomeUploader/Ext.ux.form.FileUploadField.css",
+//            "path": "lib/js/Ext.ux/AwesomeUploader/Ext.ux.form.FileUploadField.css",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/Ext.ux/AwesomeUploader/AwesomeUploader.css",
+//            "path": "lib/js/Ext.ux/AwesomeUploader/AwesomeUploader.css",
 //            "remote": true
 //        },{
-//            "path": "/lib/js/Ext.ux/AwesomeUploader/AwesomeUploader Progress Bar.css",
+//            "path": "lib/js/Ext.ux/AwesomeUploader/AwesomeUploader Progress Bar.css",
 //            "remote": true
 //        },{
 //            "path": "resources/fonts/icomoon/style.css"

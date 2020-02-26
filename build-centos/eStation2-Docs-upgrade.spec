@@ -1,10 +1,10 @@
 Summary: eStation 2.0 Documentation
 Name: eStation2-Docs
-Version: 2.1.1
+Version: 2.2.0
 Release: 2
 Group: eStation
 License: GPL
-Source: /home/adminuser/rpms/eStation-Docs/%{name}-%{version}-%{release}.tgz
+Source: /home/adminuser/ISOs-RPMs/eStation-Docs-%{version}/%{name}-%{version}-%{release}.tgz
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 
 
@@ -17,10 +17,11 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 %prep
 # Get the sources from the JRC ftp and create .tgz
 # lftp -e "mirror -Le /ftp/private/narma/eStation_2.0/Packages/eStation-Docs /home/adminuser/rpms/; exit" -u narmauser:JRCkOq7478 srv-ies-ftp.jrc.it"" 
-lftp -c "open -u narmauser,JRCkOq7478 sftp://srv-ies-ftp.jrc.it; mirror -c -L -e  /FTP/pvt/narma/narma/eStation_2.0/Packages/eStation-Docs /home/adminuser/rpms/"
+# lftp -c "open -u narmauser,JRCkOq7478 sftp://srv-ies-ftp.jrc.it; mirror -c -L -e  /FTP/pvt/narma/narma/eStation_2.0/Packages/eStation-Docs /home/adminuser/rpms/"
 
-cd /home/adminuser/rpms/eStation-Docs/
-rm -f %{name}-%{version}-%{release}.rpm
+cd /home/adminuser/ISOs-RPMs/eStation-Docs-%{version}/
+# Modified 2.12.19 -> remove all *.rpm and *tgz
+rm -f *.rpm *.tgz
 tar -cvzf %{name}-%{version}-%{release}.tgz --exclude=*.tgz *
 
 # Prepare the Layers in BUILD_ROOT
@@ -34,8 +35,8 @@ rm %{name}-%{version}-%{release}.tgz
 
 %clean
 rm -r -f $RPM_BUILD_ROOT
-echo "Renaming/copying the package under /home/adminuser/rpms"
-cp /rpm/rpmbuild/RPMS/x86_64/%{name}-%{version}-%{release}.x86_64.rpm /home/adminuser/rpms/eStation-Docs/mesa2015-%{name}-%{version}-%{release}.x86_64.rpm
+echo "Renaming/copying the package under /home/adminuser/ISOs-RPMs"
+cp /rpm/rpmbuild/RPMS/x86_64/%{name}-%{version}-%{release}.x86_64.rpm /home/adminuser/ISOs-RPMs/eStation-Docs-%{version}/mesa2015-%{name}-%{version}-%{release}.x86_64.rpm
 
 %files
 /eStation2/docs/*
