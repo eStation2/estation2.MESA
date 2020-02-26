@@ -53,10 +53,31 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
     input_dir = es2_data_dir+ functions.set_path_sub_directory(prod, starting_sprod, 'Ingest', version, mapset)
 
-    if my_date:
-        starting_files = input_dir+my_date+"*"+in_prod_ident
+    if starting_dates is not None:
+        starting_files = []
+        for my_date in starting_dates:
+            if functions.is_file_exists_in_path(input_dir + my_date + in_prod_ident):  # ES2 450 #+++++++ Check file exists before appending  +++++++++++++++
+                starting_files.append(input_dir+my_date+in_prod_ident)
     else:
-        starting_files = input_dir+"*"+in_prod_ident
+        starting_files=input_dir+"*"+in_prod_ident
+
+    #   ---------------------------------------------------------------------
+    #   1. Define and customize parameters
+    #   ---------------------------------------------------------------------
+
+    parameters = {'chl_grad_min': 0.00032131,  # smaller window detects more fronts
+                  'chl_grad_int': 0.021107,
+                  'chl_feed_min': 0.08,
+                  'chl_feed_max': 11.0,  # Temperature: 0.45 deg (multiply by 100 !!)
+                  'dc': 0.91}
+
+    if prod == 'modis-chla':
+
+        parameters = {'chl_grad_min': 0.00032131,  # smaller window detects more fronts
+                      'chl_grad_int': 0.021107,
+                      'chl_feed_min': 0.08,
+                      'chl_feed_max': 11.0,  # Temperature: 0.45 deg (multiply by 100 !!)
+                      'dc': 0.91}
 
     #   ---------------------------------------------------------------------
     #   Chal Gradient (raster)
@@ -83,7 +104,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         no_data = int(sds_meta.get_nodata_value(input_file))
         output_file = functions.list_to_element(output_file)
         functions.check_output_dir(os.path.dirname(output_file))
-        args = {"input_file": input_file, "output_file": output_file, "nodata": no_data,  "output_format": 'GTIFF', "options": "compress = lzw"}
+        args = {"input_file": input_file, "output_file": output_file, "nodata": no_data,  "output_format": 'GTIFF', "options": "compress = lzw","parameters": parameters}
 
         raster_image_math.compute_opFish_indicator(**args)
         print 'Done with raster'
