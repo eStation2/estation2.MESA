@@ -1,3 +1,9 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
 __author__ = 'analyst'
 #
 #	purpose: Change the nodata value in a file
@@ -74,14 +80,14 @@ def assign_metadata_full(input_dir, productcode, subproductcode, productversion,
 
     # input_dir = return_as_list(input_file)
     files = glob(input_dir + '*')
-    print files
+    print (files)
     for infile in sorted(files):
-        print 'Working on assign_metadata_full : '+infile
+        print ('Working on assign_metadata_full : ' + infile)
         try:
             result = rewrite_metadata(input_dir, productcode, subproductcode, productversion, mapsetcode,
                                       output_directory)
         except:
-            print 'Error in processing file assign_metadata_full : '+infile
+            print ('Error in processing file assign_metadata_full : ' + infile)
     # print 'Working on metadata_single_parameter : ' + input_file
     # try:
     #
@@ -91,14 +97,14 @@ def assign_metadata_full(input_dir, productcode, subproductcode, productversion,
 def assign_metadata_single_parameter(input_dir, parameter_key, parameter_value ):
     # input_dir = return_as_list(input_file)
     files = glob(input_dir + '*.tif')
-    print files
+    print (files)
     for infile in sorted(files):
-        print 'Working on metadata_single_parameter : '+infile
+        print ('Working on metadata_single_parameter : ' + infile)
         try:
             result = rewrite_metadata_single_paramater(infile, parameter_key, parameter_value)
             # result = rewrite_metadata_single_paramater(infile, parameter_key, parameter_value)
         except:
-            print 'Error in processing file metadata_single_parameter : '+infile
+            print ('Error in processing file metadata_single_parameter : ' + infile)
 
 
 if __name__=='__main__':

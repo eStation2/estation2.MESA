@@ -1,6 +1,12 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
 __author__ = "Marco Clerici"
 
-import proc_functions
+from apps.processing import proc_functions
 from multiprocessing import Queue
 #   ---------------------------------------------------------------------
 # vgt-ndvi
@@ -231,7 +237,7 @@ def my_proc_tamsat_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None,
 
     res_queue = None
     proc_lists=processing_std_precip_stats_only(res_queue,**args)
-    print(proc_lists)
+    print (proc_lists)
 
 #   ---------------------------------------------------------------------
 # fewsnet-rfe
@@ -255,7 +261,7 @@ def my_proc_fewsnet_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None
 
     res_queue = None
     proc_lists=processing_std_precip_prods_only(res_queue,**args)
-    print(proc_lists)
+    print (proc_lists)
 
 def my_proc_fewsnet_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False):
 
@@ -277,7 +283,7 @@ def my_proc_fewsnet_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None
 
     res_queue = None
     proc_lists=processing_std_precip_stats_only(res_queue,**args)
-    print(proc_lists)
+    print (proc_lists)
 
 #   ---------------------------------------------------------------------
 # chirps-dekad
@@ -390,7 +396,7 @@ def my_proc_std_lsasaf_et(pipe_run=3, pipe_print=0, start_date=None, end_date=No
 
     res_queue = None
     proc_lists=processing_std_lsasaf_et(res_queue,**args)
-    print(proc_lists)
+    print (proc_lists)
 #   ---------------------------------------------------------------------
 # lsasaf-lst
 #   ---------------------------------------------------------------------
@@ -418,7 +424,7 @@ def my_proc_std_lsasaf_lst(pipe_run=4, pipe_print=0, start_date=None, end_date=N
 
     res_queue = None
     proc_lists=processing_std_lsasaf_lst(res_queue,**args)
-    print(proc_lists)
+    print (proc_lists)
 
 #   ---------------------------------------------------------------------
 # modis-firms
@@ -457,7 +463,7 @@ def my_proc_std_modis_firms(start_date=None, end_date=None, pipe_run=0, pipe_pri
 
     res_queue = None
     proc_lists=processing_std_modis_firms(res_queue,**args)
-    print(proc_lists)
+    print (proc_lists)
 
 # ---------------------------------------------------------------------
 # fewsnet: rain onset
@@ -511,7 +517,7 @@ def  my_proc_std_precip_1day(pipe_run=0, pipe_print=3, start_date=None, end_date
 
     res_queue = None
     proc_lists=processing_std_precip_1day(res_queue,**args)
-    print(proc_lists)
+    print (proc_lists)
 
 #   ---------------------------------------------------------------------
 # arc2-rain SPI
@@ -536,7 +542,7 @@ def my_proc_std_spi_monthly(pipe_run=0, pipe_print=3, start_date=None, end_date=
 
     res_queue = None
     proc_lists=processing_std_spi_monthly(res_queue,**args)
-    print(proc_lists)
+    print (proc_lists)
 
 #   ---------------------------------------------------------------------
 # seas cumulation computation
@@ -609,7 +615,7 @@ def my_proc_msg_mpe(start_date=None, end_date=None, pipe_run=0, pipe_print=3, st
 
     res_queue = None
     proc_lists=processing_std_msg_mpe(res_queue,**args)
-    print(proc_lists)
+    print (proc_lists)
 #
 #   Test Ruffus for completeness bars
 #
@@ -649,7 +655,7 @@ def my_proc_olci_wrr(start_date=None, end_date=None, pipe_run=0, pipe_print=3, s
 
     res_queue = None
     proc_lists=processing_std_olci_wrr(res_queue,**args)
-    print(proc_lists)
+    print (proc_lists)
 
 #   ---------------------------------------------------------------------
 # vgt-dmp
@@ -729,7 +735,7 @@ def test_proc_modis_chla_opfish(pipe_run=0, pipe_print=3, touch_files_only=False
 #
 #     res_queue = None
 #     proc_lists=processing_std_ba_stats_only(res_queue,**args)
-#     print(proc_lists)
+#     print (proc_lists)
 
 #   ---------------------------------------------------------------------
 #    OLCI-WRR: chla gradient

@@ -1,3 +1,9 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
 from unittest import TestCase
 
 __author__ = "Jurriaan van 't Klooster"
@@ -19,7 +25,7 @@ class TestFunctions(TestCase):
         server_address = '10.191.231.90'  # vm19
         server_address = "h05-dev-vm19.ies.jrc.it"
         status_remote_machine = functions.get_remote_system_status(server_address)
-        print status_remote_machine
+        print (status_remote_machine)
         if "mode" in status_remote_machine:
             PC2_mode = status_remote_machine['mode']
             PC2_disk_status = status_remote_machine['disk_status']
@@ -33,15 +39,15 @@ class TestFunctions(TestCase):
             PC2_service_system = status_remote_machine['system_status']
             PC2_system_execution_time = status_remote_machine['system_execution_time']
 
-        print "Done"
+        print ("Done")
 
     def test_get_status_PC1(self):
         status_PC1 = functions.get_status_PC1()
-        print status_PC1
+        print (status_PC1)
 
     def test_internet_connection(self):
         status = functions.internet_on()
-        print status
+        print (status)
 
     def test_manage_netcdf_scaling(self):
 
@@ -49,9 +55,9 @@ class TestFunctions(TestCase):
         sds          = 'NETCDF:/data/ingest/A2016201.L3m_DAY_SST_sst_4km.nc:sst'
         status = functions.save_netcdf_scaling(sds, preproc_file)
         [fact, off] = functions.read_netcdf_scaling(preproc_file)
-        print fact, off
+        print((fact, off))
 
     def test_get_status_All_Services(self):
         services_status = functions.getStatusAllServices()
-        print services_status
+        print (services_status)
 

@@ -1,3 +1,12 @@
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from past.utils import old_div
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats  # , interpolate
@@ -68,8 +77,8 @@ def plot_1o1(data_1, data_2, x_label=None, y_label=None, figure_title=None):
 
         line = slp * xx + itc
 
-        rmsd = np.sqrt(np.nansum(np.square(np.array(data_1).flatten() - np.array(data_2).flatten())) /
-                       np.count_nonzero(~np.isnan((np.array(data_1) - np.array(data_2)))))
+        rmsd = np.sqrt(old_div(np.nansum(np.square(np.array(data_1).flatten() - np.array(data_2).flatten())),
+                       np.count_nonzero(~np.isnan((np.array(data_1) - np.array(data_2))))))
 
         h, x_edges, y_edges = np.histogram2d(x_line, y_line, bins=150)
         h = np.rot90(h)

@@ -1,5 +1,15 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import super
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 import sys, os, time, atexit
 import psutil
 if sys.platform != 'win32':
@@ -41,7 +51,7 @@ class Daemon(object):
             if pid > 0:
                 # exit first parent
                 sys.exit(0)
-        except OSError, e:
+        except OSError as e:
             sys.stderr.write("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
             sys.exit(1)
 
@@ -56,13 +66,12 @@ class Daemon(object):
             if pid > 0:
                 # exit from second parent
                 sys.exit(0)
-        except OSError, e:
+        except OSError as e:
             sys.stderr.write("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
             sys.exit(1)
 
         # Now I am a daemon!
         logger.debug("Daemon created")
-
 
         if(isinstance(sys.stdout, file)):
             # redirect standard file descriptors
@@ -141,13 +150,13 @@ class Daemon(object):
                 if sys.platform != 'win32':
                     os.kill(pid, SIGKILL)
                 time.sleep(0.1)
-        except OSError, err:
+        except OSError as err:
             err = str(err)
             if err.find("No such process") > 0:
                 if os.path.exists(self.pidfile):
                     os.remove(self.pidfile)
             else:
-                print str(err)
+                print (str(err))
                 sys.exit(1)
 
     def restart(self):

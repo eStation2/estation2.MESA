@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 #
 #	purpose: Define the processing chain for 'opfish' processing chains
 #	author:  M.Clerici- Jean-Noel - Vijay Charan Venkatachalam
@@ -5,6 +9,10 @@
 #   descr:	 Generate OPFISH INDICATOR
 #	history: 1.0
 #
+from builtins import open
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
 import os
 import glob
 import tempfile
@@ -107,8 +115,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
         args = {"input_file": input_file, "output_file": output_file, "nodata": no_data,  "output_format": 'GTIFF', "options": "compress = lzw","parameters": parameters}
 
         raster_image_math.compute_opFish_indicator(**args)
-        print 'Done with raster'
-
+        print ('Done with raster')
 
     return proc_lists
 

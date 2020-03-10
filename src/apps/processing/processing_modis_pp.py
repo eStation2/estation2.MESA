@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 #
 #	purpose: Define the primary production processing chain (by using ruffus)
 #	author:  B. Motah [& E. Martial]
@@ -7,6 +11,8 @@
 #
 
 # Source my definitions
+from future import standard_library
+standard_library.install_aliases()
 import os
 import re
 import glob, datetime
@@ -77,7 +83,7 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
     #   ---------------------------------------------------------------------
     #    Parse the arguments and extract the 4 input variables
     #
-    if len(input_products) <> 4:
+    if len(input_products) != 4:
         spec_logger.error('Modis PP computation requires 4 inputs. Exit')
         return 1
 
@@ -136,7 +142,7 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
         spec_logger.error('At least one of 4 expected inputs missing. Exit')
         return 1
 
-    if chla_mapset <> sst_mapset or chla_mapset <> kd490_mapset or chla_mapset <> par_mapset:
+    if chla_mapset != sst_mapset or chla_mapset != kd490_mapset or chla_mapset != par_mapset:
         spec_logger.error('All 4 input mapset must be equals. Exit')
         return 1
 
@@ -293,7 +299,7 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
                              '0423':'0422','0501':'0430','0509':'0508', '0517':'0516', '0525':'0524', '0602':'0601', '0610':'0609', '0618':'0617','0626':'0625','0704':'0703','0712':'0711','0720':'0719','0728':'0727','0805':'0804', '0813':'0812',
                              '0821':'0820', '0829':'0828','0906':'0905','0914':'0913','0922':'0921','0930':'0929','1008':'1007','1016':'1015','1024':'1023','1101':'1031', '1109':'1108', '1117':'1116','1125':'1124', '1203':'1202', '1211':'1210','1219':'1218', '1227':'1226'  }
         # for MMDD_nonleap in MMDD_nonleap_list:
-        for MMDD_nonleap, MMDD_leap in MMDD_nonleap_dict.iteritems():
+        for MMDD_nonleap, MMDD_leap in MMDD_nonleap_dict.items():
             formatter_in_nonleap = es2_data_dir +in_prod_subdir + "*" +MMDD_nonleap + in_prod_ident
             nonleap_files = sorted(glob.glob(formatter_in_nonleap))
             formatter_in_leap = es2_data_dir +in_prod_subdir + "*" +MMDD_leap + in_prod_ident
@@ -358,7 +364,7 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
                              '0423':'0422','0501':'0430','0509':'0508', '0517':'0516', '0525':'0524', '0602':'0601', '0610':'0609', '0618':'0617','0626':'0625','0704':'0703','0712':'0711','0720':'0719','0728':'0727','0805':'0804', '0813':'0812',
                              '0821':'0820', '0829':'0828','0906':'0905','0914':'0913','0922':'0921','0930':'0929','1008':'1007','1016':'1015','1024':'1023','1101':'1031', '1109':'1108', '1117':'1116','1125':'1124', '1203':'1202', '1211':'1210','1219':'1218', '1227':'1226'  }
         # for MMDD_nonleap in MMDD_nonleap_list:
-        for MMDD_nonleap, MMDD_leap in MMDD_nonleap_dict.iteritems():
+        for MMDD_nonleap, MMDD_leap in MMDD_nonleap_dict.items():
             formatter_in_nonleap = es2_data_dir +in_prod_subdir + "*" +MMDD_nonleap + in_prod_ident
             nonleap_files = sorted(glob.glob(formatter_in_nonleap))
             formatter_in_leap = es2_data_dir +in_prod_subdir + "*" +MMDD_leap + in_prod_ident
@@ -418,7 +424,7 @@ def create_pipeline(input_products, output_product, logfile=None, nrt_products=T
                              '0423':'0422','0501':'0430','0509':'0508', '0517':'0516', '0525':'0524', '0602':'0601', '0610':'0609', '0618':'0617','0626':'0625','0704':'0703','0712':'0711','0720':'0719','0728':'0727','0805':'0804', '0813':'0812',
                              '0821':'0820', '0829':'0828','0906':'0905','0914':'0913','0922':'0921','0930':'0929','1008':'1007','1016':'1015','1024':'1023','1101':'1031', '1109':'1108', '1117':'1116','1125':'1124', '1203':'1202', '1211':'1210','1219':'1218', '1227':'1226'  }
         # for MMDD_nonleap in MMDD_nonleap_list:
-        for MMDD_nonleap, MMDD_leap in MMDD_nonleap_dict.iteritems():
+        for MMDD_nonleap, MMDD_leap in MMDD_nonleap_dict.items():
             formatter_in_nonleap = es2_data_dir +in_prod_subdir + "*" +MMDD_nonleap + in_prod_ident
             nonleap_files = sorted(glob.glob(formatter_in_nonleap))
             formatter_in_leap = es2_data_dir +in_prod_subdir + "*" +MMDD_leap + in_prod_ident

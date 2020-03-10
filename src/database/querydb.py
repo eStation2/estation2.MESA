@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 ####################################################################################################################
 #	purpose: Define functions to access and query the postgresql db
 #	author:  Jurriaan van 't Klooster
@@ -5,6 +9,9 @@
 #   descr:	 Functions to access and query the DB using SQLSoup and SQLAlchemy as Database Abstraction Layer and ORM.
 ####################################################################################################################
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import sys
 import traceback
 # import sqlsoup
@@ -1843,7 +1850,7 @@ def update_ingest_subproduct_info(productinfo):
                 "  AND subproductcode = '" + productinfo['orig_subproductcode'] + "' " + \
                 "  AND version = '" + productinfo['version'] + "' "
 
-        # print(query)
+        # print (query)
         db.execute(query)
         db.commit()
 
@@ -2550,7 +2557,7 @@ def deletelegendsteps(legendid):
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         if False:
-            print traceback.format_exc()
+            print (traceback.format_exc())
         # Exit the script and log the error telling what happened.
         logger.error("deletelegendsteps: Database query error!\n -> {}".format(exceptionvalue))
         return False
@@ -2579,7 +2586,7 @@ def createlegend(params):
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         if False:
-            print traceback.format_exc()
+            print (traceback.format_exc())
         # Exit the script and log the error telling what happened.
         logger.error("createlegend: Database query error!\n -> {}".format(exceptionvalue))
         return -1

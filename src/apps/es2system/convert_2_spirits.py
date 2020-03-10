@@ -4,6 +4,14 @@
 #    author:  Marco Clerici
 #    date:    09.09.2015
 
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from builtins import open
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 __author__ = 'clerima'
 
 import os
@@ -71,7 +79,7 @@ def append_to_header_file(header_file, metadata_spirit):
     if os.path.isfile(header_file):
         with open(header_file, "a") as csvfile:
             writer = csv.writer(csvfile, delimiter='=', escapechar='\\', quoting=csv.QUOTE_MINIMAL, quotechar=' ')
-            for key, value in sorted(metadata_spirit.items(), key=operator.itemgetter(0)):
+            for key, value in sorted(list(metadata_spirit.items()), key=operator.itemgetter(0)):
                     writer.writerow([ key, value])
     else:
          logger.error('The header file does not exist : : %s' % header_file)

@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 #
 #	purpose: Find a file with a 'larger' area and clip to the requested one
 #	author:  M. Clerici
@@ -8,6 +12,13 @@
 #               IN: mapset of the requested file
 #
 
+from builtins import round
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from past.builtins import basestring
+from builtins import object
 try:
     from osgeo import gdal
     from osgeo import osr
@@ -65,7 +76,7 @@ sds_metadata = { 'eStation2_es2_version': '',               # 0. eStation 2 vers
 
 }
 
-class SdsMetadata:
+class SdsMetadata(object):
 
     def __init__(self):
 
@@ -108,10 +119,10 @@ class SdsMetadata:
 
         # Check argument ok
         if not isinstance(dataset,gdal.Dataset):
-            print('The argument should be an open GDAL Dataset. Exit')
+            print ('The argument should be an open GDAL Dataset. Exit')
         else:
             # Go through the metadata list and write to sds
-            for key, value in sds_metadata.iteritems():
+            for key, value in sds_metadata.items():
                 # Check length of value
                 if len(str(value)) > 1000:
                     wrt_value=str(value)[0:1000]+' + others ...'
@@ -127,7 +138,7 @@ class SdsMetadata:
 
         # Check the output file exist
         if not os.path.isfile(filepath):
-             print('Output file does not exist %s' % filepath)
+             print ('Output file does not exist %s' % filepath)
         else:
             # Open output file
             sds = gdal.Open(filepath, GA_Update)
@@ -141,17 +152,17 @@ class SdsMetadata:
 
         # Check argument ok
         if not isinstance(dataset,gdal.Dataset):
-            print('The argument should be an open GDAL Dataset. Exit')
+            print ('The argument should be an open GDAL Dataset. Exit')
         else:
 
             # Go through the metadata list and write to sds
-            for key, value in sds_metadata.iteritems():
+            for key, value in sds_metadata.items():
                 try:
                     value = dataset.GetMetadataItem(key)
                     sds_metadata[key] = value
                 except:
                     sds_metadata[key] = 'Not found in file'
-                    print('Error in reading metadata item %s' % key)
+                    print ('Error in reading metadata item %s' % key)
 
     def read_from_file(self, filepath):
     #
@@ -161,7 +172,7 @@ class SdsMetadata:
 
         # Check the file exists
         if not os.path.isfile(filepath):
-            print('Input file does not exist %s' % filepath)
+            print ('Input file does not exist %s' % filepath)
         else:
             # Open it and read metadata
             infile=gdal.Open(filepath)
@@ -193,8 +204,9 @@ class SdsMetadata:
     #   Writes to std output
 
         # Go through the metadata list and write to sds
-        for key, value in sds_metadata.iteritems():
-            print key, value
+        for key, value in sds_metadata.items():
+            print((key, value))
+
 
 def get_all_from_path_dir(dir_name):
 
@@ -290,7 +302,7 @@ def is_larger(candidate_file, trg_mapset):
             and round(available_ymax, 8) >= round(requested_ymax, 8):
         is_larger = True
 
-    # print(is_larger)
+    # print (is_larger)
     # is_larger = True
     # if available_xmin >= requested_xmin or available_xmax <= requested_xmax or available_ymin >= requested_ymin or available_ymax <= requested_ymax:
     #     is_larger = False
@@ -460,13 +472,13 @@ if __name__=="__main__":
     # Check inputs - TO BE COMPLETED !!
 
     if requested_file is None:
-        print('Missing the requested file name. Exit')
+        print ('Missing the requested file name. Exit')
         exit(1)
 
 
     # Check the requested file is there
     if os.path.exists(requested_file):
-        print('Requested file exists, no need to clip. Exit')
+        print ('Requested file exists, no need to clip. Exit')
         exit()
 
     output_mapset = {"description": description,
@@ -487,7 +499,7 @@ if __name__=="__main__":
     if larger_file is not '':
         do_clip(larger_file, clipped_file, output_mapset)
     else:
-        print('ERROR: No any file found. Exit')
+        print ('ERROR: No any file found. Exit')
         exit()
 
-    print('INFO: The clipped file has been generated {0}. Exit.'.format(clipped_file))
+    print ('INFO: The clipped file has been generated {0}. Exit.'.format(clipped_file))

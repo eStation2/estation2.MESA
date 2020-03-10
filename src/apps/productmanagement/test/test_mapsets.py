@@ -7,7 +7,12 @@
 #
 
 from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import print_function
 
+from future import standard_library
+standard_library.install_aliases()
 import unittest
 from ..mapsets import Mapset
 from ..exceptions import NoMapsetFound
@@ -17,17 +22,13 @@ from database import connectdb
 
 class TestMapsets(unittest.TestCase):
     def setUp(self):
-        setattr(querydb, 'db', connectdb.ConnectDB().db)
+        setattr(querydb, 'db', connectdb.ConnectDB(use_sqlite=True).db)
 
     def test_mapset_not_existent(self):
-        kwargs = {'mapset_code':"---mapset---"}
+        kwargs = {'mapset_code':"---prod---"}
         self.assertRaisesRegexp(NoMapsetFound, "(?i).*found.*mapset.*", Mapset, **kwargs)
 
     def test_mapset(self):
-        kwargs = {'mapset_code':"SPOTV-Africa-1km"}
+        kwargs = {'mapset_code':"WGS84_Africa_1km"}
         mapset = Mapset(**kwargs)
         self.assertIsInstance(mapset, Mapset)
-
-suite_mapsets = unittest.TestLoader().loadTestsFromTestCase(TestMapsets)
-if __name__ == '__main__':
-    unittest.TextTestRunner(verbosity=2).run(suite_mapsets)

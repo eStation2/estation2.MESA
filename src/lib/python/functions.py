@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
 #
 #	purpose: Define a library of functions for general purpose operations
 #	author:  M.Clerici
@@ -15,6 +19,15 @@
 #
 
 # Import standard modules
+from builtins import dict
+from builtins import round
+from builtins import open
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
+from past.utils import old_div
 import os
 import math
 import calendar
@@ -29,7 +42,7 @@ import json
 import glob
 import subprocess
 from socket import socket
-import urllib2
+import urllib.request, urllib.parse, urllib.error
 import ast
 import sys
 import numpy as N
@@ -48,6 +61,13 @@ dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'der
 #     def default(self, o):
 #         return o.__dict__
 
+def str_to_bool(s):
+    if s is True or s in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+        return True
+    elif s is True or s in  ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
+        return False
+    else:
+        return False
 
 def is_float(s):
     try:
@@ -66,14 +86,14 @@ def is_int(n):
 
 
 def setThemaOtherPC(server_address, thema):
-    from urllib2 import Request, urlopen, URLError
+    # from urllib import request, error
     thema_is_changed = False
     # Set "/esapp" in factorysettings.ini as webserver_root because on CentOS no /esapp is needed!
     url = "http://" + server_address + es_constants.es2globals['webserver_root'] + "/systemsettings/changethemafromotherpc?thema="+thema
-    req = Request(url)
+    req = request.Request(url)
     try:
-        response = urlopen(req)
-    except URLError as e:
+        response = request.urlopen(req)
+    except error as e:
         if hasattr(e, 'reason'):
             logger.warning('We failed to reach a server to change the thema: %s' % server_address)
             logger.warning('Reason: %s' % e.reason)
@@ -83,7 +103,7 @@ def setThemaOtherPC(server_address, thema):
         return thema_is_changed
     else:
         # everything is fine
-        # response = urllib2.urlopen("http://" + server_address + "/esapp/dashboard/systemstatus")
+        # response = urllib.urlopen("http://" + server_address + "/esapp/dashboard/systemstatus")
         result = response.read()
         thema_is_changed = ast.literal_eval(result)
         response.close()  # best practice to close the file
@@ -91,14 +111,14 @@ def setThemaOtherPC(server_address, thema):
 
 
 def get_status_PC1():
-    from urllib2 import Request, urlopen, URLError
+    # from urllib import request, error
     status_remote_machine = []
     # Set "/esapp" in factorysettings.ini as webserver_root because on CentOS no /esapp is needed!
     url = "http://mesa-pc1:5000/system-data"
-    req = Request(url)
+    req = request.Request(url)
     try:
-        response = urlopen(req)
-    except URLError as e:
+        response = request.urlopen(req)
+    except error as e:
         if hasattr(e, 'reason'):
             logger.warning('We failed to reach a server: %s' % url)
             logger.warning('Reason: %s' % e.reason)
@@ -108,7 +128,7 @@ def get_status_PC1():
         return status_remote_machine
     else:
         # everything is fine
-        # response = urllib2.urlopen("http://" + server_address + "/esapp/dashboard/systemstatus")
+        # response = urllib.urlopen("http://" + server_address + "/esapp/dashboard/systemstatus")
         result = response.read()
         # status_remote_machine = ast.literal_eval(result)
 
@@ -119,14 +139,14 @@ def get_status_PC1():
 
 
 def get_remote_system_status(server_address):
-    from urllib2 import Request, urlopen, URLError
+    # from urllib import request, error
     status_remote_machine = []
     # Set "/esapp" in factorysettings.ini as webserver_root because on CentOS no /esapp is needed!
     url = "http://" + server_address + es_constants.es2globals['webserver_root'] + "/dashboard/systemstatus"
-    req = Request(url)
+    req = request.Request(url)
     try:
-        response = urlopen(req)
-    except URLError as e:
+        response = request.urlopen(req)
+    except error as e:
         if hasattr(e, 'reason'):
             logger.warning('We failed to reach a server: %s' % server_address)
             logger.warning('Reason: %s' % e.reason)
@@ -136,7 +156,7 @@ def get_remote_system_status(server_address):
         return status_remote_machine
     else:
         # everything is fine
-        # response = urllib2.urlopen("http://" + server_address + "/esapp/dashboard/systemstatus")
+        # response = urllib.urlopen("http://" + server_address + "/esapp/dashboard/systemstatus")
         result = response.read()
         status_remote_machine = ast.literal_eval(result)
         response.close()  # best practice to close the file
@@ -314,17 +334,17 @@ def getListVersions():
 
 
 def setSystemSetting(setting=None, value=None):
-    import ConfigParser
+    import configparser
     if setting is not None:
         systemsettingsfilepath = es_constants.es2globals['settings_dir']+'/system_settings.ini'
-        config_systemsettings = ConfigParser.ConfigParser()
+        config_systemsettings = configparser.ConfigParser()
         config_systemsettings.read(['system_settings.ini', systemsettingsfilepath])
 
         if config_systemsettings.has_option('SYSTEM_SETTINGS', setting):
             config_systemsettings.set('SYSTEM_SETTINGS', setting, value)
 
         # Writing our configuration file to 'system_settings.ini' - COMMENTS ARE NOT PRESERVED!
-        with open(systemsettingsfilepath, 'wb') as configfile:
+        with open(systemsettingsfilepath, 'w') as configfile:
             config_systemsettings.write(configfile)
             configfile.close()
         return True
@@ -333,10 +353,10 @@ def setSystemSetting(setting=None, value=None):
 
 
 def setUserSetting(setting=None, value=None):
-    import ConfigParser
+    import configparser
     if setting is not None:
         usersettingsfilepath = es_constants.es2globals['settings_dir']+'/user_settings.ini'
-        config_usersettings = ConfigParser.ConfigParser()
+        config_usersettings = configparser.ConfigParser()
         config_usersettings.read(['user_settings.ini', usersettingsfilepath])
 
         if config_usersettings.has_option('USER_SETTINGS', setting):
@@ -359,7 +379,7 @@ def setUserSetting(setting=None, value=None):
 
 
 def getSystemSettings():
-    import ConfigParser
+    import configparser
 
     thisfiledir = os.path.dirname(os.path.abspath(__file__))
 
@@ -367,7 +387,7 @@ def getSystemSettings():
     if not os.path.isfile(systemsettingsfile):
         systemsettingsfile = os.path.join(thisfiledir, 'config/install/', 'system_settings.ini')
 
-    config_systemsettings = ConfigParser.ConfigParser()
+    config_systemsettings = configparser.ConfigParser()
     config_systemsettings.read([systemsettingsfile])
 
     systemsettings = config_systemsettings.items('SYSTEM_SETTINGS')  # returns a list of tuples
@@ -379,7 +399,7 @@ def getSystemSettings():
 
 
 def getUserSettings():
-    import ConfigParser
+    import configparser
 
     thisfiledir = os.path.dirname(os.path.abspath(__file__))
 
@@ -391,7 +411,7 @@ def getUserSettings():
     if not os.path.isfile(usersettingsfile):
         usersettingsfile = os.path.join(thisfiledir, 'config/install/', 'user_settings.ini')
 
-    config_usersettings = ConfigParser.ConfigParser()
+    config_usersettings = configparser.ConfigParser()
     config_usersettings.read([usersettingsfile])
 
     usersettings = config_usersettings.items('USER_SETTINGS')  # returns a list of tuples
@@ -535,14 +555,14 @@ def _proxy_defined():
 
 
 def _proxy_internet_on():
-    import urllib2
+    import urllib.request, urllib.parse, urllib.error
 
     test_url = 'http://www.google.com'
     # Case 1: proxy
     if _proxy_defined():
         try:
-            proxy = urllib2.ProxyHandler({'http': _proxy_defined()})
-            opener = urllib2.build_opener(proxy)
+            proxy = urllib.ProxyHandler({'http': _proxy_defined()})
+            opener = urllib.build_opener(proxy)
             response = opener.open(test_url)
             return True
         except:
@@ -553,7 +573,7 @@ def _proxy_internet_on():
     # Case 2: no proxy
     else:
         try:
-            response = urllib2.urlopen(test_url, timeout=1)
+            response = urllib.request.urlopen(test_url, timeout=1)
             return True
         except:
             pass
@@ -767,7 +787,7 @@ def conv_date_2_dekad(year_month_day):
             if day == 31:
                 dekad_no = (year - 1980) * 36 + (month - 1) * 3 + 3
             if day != 31:
-                dekad_no = (year - 1980) * 36 + (month - 1) * 3 + (day - 1) / 10 + 1
+                dekad_no = (year - 1980) * 36 + (month - 1) * 3 + old_div((day - 1), 10) + 1
 
     return dekad_no
 
@@ -791,7 +811,7 @@ def conv_date_2_8days(year_month_day):
         dt_first   = datetime.date(int(year_month_day[0:4]),1,1)
         delta = dt_current - dt_first
         delta_days = delta.days
-        period_no = 1 + int(delta_days/8)
+        period_no = 1 + int(old_div(delta_days,8))
 
     return period_no
 
@@ -837,8 +857,8 @@ def conv_dekad_2_date(dekad):
         logger.error('Invalid Dekad Value: %s. Must be >= 1' % dekad)
     else:
         dekad = int(str(dekad)) - 1
-        year = dekad / 36
-        month = (dekad - year * 36) / 3
+        year = old_div(dekad, 36)
+        month = old_div((dekad - year * 36), 3)
         day = dekad - year * 36 - month * 3
         dekad_date = 10000 * (year + 1980) + 100 * (month + 1) + day * 10 + 1
 
@@ -884,7 +904,7 @@ def conv_month_2_date(month):
         logger.error('Invalid Month Value: %s. Must be >= 1 ' % month)
     else:
         month = int(str(month)) - 1
-        year = month / 12
+        year = old_div(month, 12)
         month -= year * 12
         #returns always the first dekad of the month
         month_date = 10000 * (year + 1980) + 100 * (month + 1) + 1
@@ -1086,7 +1106,7 @@ def conv_date_2_quarter(date):
     if is_date_yyyymmdd(date):
         year = str(date[0:4])
         month = str(date[4:6])
-        quarter = ((int(month)-1)/3)*3+1
+        quarter = (old_div((int(month)-1),3))*3+1
         quarter_date = '{0}'.format(year)+'{:02d}'.format(quarter)+'01'
     return str(quarter_date)
 
@@ -1162,7 +1182,7 @@ def get_number_days_month(yyyymmdd):
 def conv_list_2_string(inlist):
     file_string = ''
     try:
-        if isinstance(inlist,basestring):
+        if isinstance(inlist,str):
             file_string+=inlist
         else:
             for ifile in inlist:
@@ -1170,6 +1190,7 @@ def conv_list_2_string(inlist):
     except:
         pass
     return file_string
+
 
 ######################################################################################
 #   conv_list_2_unique_value
@@ -1221,6 +1242,7 @@ def extract_from_date(str_date):
         str_hour=str_date[8:12]
 
     return [str_year, str_month, str_day, str_hour]
+
 
 ######################################################################################
 #   Purpose: Exclude current year from the data list
@@ -1557,7 +1579,7 @@ def get_product_type_from_subdir(subdir):
     # Get info from directory
     tokens = [token for token in subdir.split(os.path.sep) if token]
     product_subdir = tokens[-2]
-    for type, name in dict_subprod_type_2_dir.iteritems():
+    for type, name in list(dict_subprod_type_2_dir.items()):
         if name == product_subdir:
             product_type = type
     return product_type
@@ -1886,7 +1908,7 @@ def sentinel_get_footprint(dir, filename=None):
             footPrintElem = metadataObject.getElementsByTagNameNS(nsSentinelSafe, "footPrint")[0]
             posList = footPrintElem.getElementsByTagNameNS(nsGML, "posList")[0]
 
-            print(posList.firstChild.data)
+            print (posList.firstChild.data)
             footPrintString = posList.firstChild.data
             listFootPrint = footPrintString.split(' ')
 
@@ -1938,9 +1960,9 @@ def modis_latlon_to_hv_tile(latitude, longitude):
     x_val = rad_sphere * math.cos(latitude * pi_val / 180.0) * longitude * pi_val / 180.0
     y_val = rad_sphere * latitude * pi_val / 180.0
     # We subtract -0.5 to have to 'round' below working as a 'integer_part' (as in original algo)
-    h1 = round(x_val / t_size - 0.5) + 18
+    h1 = round(old_div(x_val, t_size) - 0.5) + 18
     # We subtract -0.5 to have to 'round' below working as a 'integer_part' (as in original algo)
-    v1 = 8 - round(y_val / t_size - 0.5)
+    v1 = 8 - round(old_div(y_val, t_size) - 0.5)
 
     return h1, v1
 
@@ -2817,7 +2839,7 @@ def is_date_current_month(year_month_day):
 #                            PROCESSING CHAINS
 ######################################################################################
 
-class ProcLists:
+class ProcLists(object):
 
     def __init__(self):
         self.list_subprods = []
@@ -2878,7 +2900,7 @@ class ProcLists:
     #
     #     return False
     #
-class ProcSubprod:
+class ProcSubprod(object):
     def __init__(self,
                  sprod,
                  group,
@@ -2918,26 +2940,26 @@ class ProcSubprod:
         self.active_depend = active_depend
 
     def print_out(self):
-        print('Subproduct  : {}'.format(self.sprod))
-        print('Group       : {}'.format(self.group))
-        print('Descr. Name : {}'.format(self.descriptive_name))
-        print('Description : {}'.format(self.description))
-        print('Frequency   : {}'.format(self.frequency_id))
-        print('Date Format : {}'.format(self.date_format))
-        print('Scale Factor: {}'.format(self.scale_factor))
-        print('No Data     : {}'.format(self.nodata))
-        print('Unit        : {}'.format(self.unit))
-        print('Data Type   : {}'.format(self.data_type_id))
-        print('Masked      : {}'.format(self.masked))
-        print('TS role     : {}'.format(self.timeseries_role))
-        # print('DisplayIndex: {}'.format(self.display_index))
-        print('Final       : {}'.format(self.final))
-        # print('active_default: {}'.format(self.active_default))
-        print('Active_user : {}'.format(self.active_user))
-        # print('active_depend: {}'.format(self.active_depend))
+        print ('Subproduct  : {}'.format(self.sprod))
+        print ('Group       : {}'.format(self.group))
+        print ('Descr. Name : {}'.format(self.descriptive_name))
+        print ('Description : {}'.format(self.description))
+        print ('Frequency   : {}'.format(self.frequency_id))
+        print ('Date Format : {}'.format(self.date_format))
+        print ('Scale Factor: {}'.format(self.scale_factor))
+        print ('No Data     : {}'.format(self.nodata))
+        print ('Unit        : {}'.format(self.unit))
+        print ('Data Type   : {}'.format(self.data_type_id))
+        print ('Masked      : {}'.format(self.masked))
+        print ('TS role     : {}'.format(self.timeseries_role))
+        # print ('DisplayIndex: {}'.format(self.display_index))
+        print ('Final       : {}'.format(self.final))
+        # print ('active_default: {}'.format(self.active_default))
+        print ('Active_user : {}'.format(self.active_user))
+        # print ('active_depend: {}'.format(self.active_depend))
 
 
-class ProcSubprodGroup:
+class ProcSubprodGroup(object):
     def __init__(self, group, active_default=True):
         self.group = group
         self.active_default=active_default

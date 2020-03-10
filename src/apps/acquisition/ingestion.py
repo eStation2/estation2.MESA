@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
 #
 #	purpose: Define the ingest service
 #	author:  M.Clerici & Jurriaan van't Klooster
@@ -11,6 +15,14 @@
 # from config import es_constants
 
 # import standard modules
+from builtins import open
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import map
+from builtins import str
+from builtins import range
+from past.utils import old_div
 import re
 import tempfile
 import zipfile
@@ -648,7 +660,7 @@ def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files, my_logger):
         # Test the hdf file and read list of datasets
         hdf = gdal.Open(ifile)
         sdsdict = hdf.GetMetadata('SUBDATASETS')
-        sdslist = [sdsdict[k] for k in sdsdict.keys() if '_NAME' in k]
+        sdslist = [sdsdict[k] for k in list(sdsdict.keys()) if '_NAME' in k]
 
         # Loop over datasets and check if they have to be extracted
         for subdataset in sdslist:
@@ -940,7 +952,7 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
         try:
             hdf = gdal.Open(unzipped_file)
             sdsdict = hdf.GetMetadata('SUBDATASETS')
-            sdslist = [sdsdict[k] for k in sdsdict.keys() if '_NAME' in k]
+            sdslist = [sdsdict[k] for k in list(sdsdict.keys()) if '_NAME' in k]
             sdsdict = None
             # Loop over datasets and check if they have to be extracted
             for subdataset in sdslist:
@@ -1381,7 +1393,7 @@ def pre_process_bz2_hdf4(subproducts, tmpdir, input_files, my_logger):
         # Test the hdf file and read list of datasets
         hdf = gdal.Open(my_bunzip2_file)
         sdsdict = hdf.GetMetadata('SUBDATASETS')
-        sdslist = [sdsdict[k] for k in sdsdict.keys() if '_NAME' in k]
+        sdslist = [sdsdict[k] for k in list(sdsdict.keys()) if '_NAME' in k]
 
         # Loop over datasets and extract the one in the list
         if len(sdslist) >= 1:
@@ -1494,7 +1506,7 @@ def pre_process_hdf5_zip(subproducts, tmpdir, input_files, my_logger):
 
         # Manage the case of only 1 dataset (and no METADATA defined - e.g. PROBA-V NDVI v 2.x)
         if (len(sdsdict) > 0):
-            sdslist = [sdsdict[k] for k in sdsdict.keys() if '_NAME' in k]
+            sdslist = [sdsdict[k] for k in list(sdsdict.keys()) if '_NAME' in k]
             # Loop over datasets and extract the one in the list
             for output_sds in sds_to_process:
                 for subdataset in sdslist:
@@ -2164,8 +2176,8 @@ def pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=None):
 
     for ext in  range(len(extensions)):
         extension = extensions[ext]
-        print tmpdir+os.path.sep+"gsod_file"+extension
-        print shp_output_dir+os.path.sep+str(in_date)+shp_prod_ident_noext+extension
+        print (tmpdir + os.path.sep + "gsod_file" + extension)
+        print (shp_output_dir + os.path.sep + str(in_date) + shp_prod_ident_noext + extension)
         shutil.copyfile(tmpdir+os.path.sep+"gsod_file"+extension,\
                         shp_output_dir+os.path.sep+str(in_date)+shp_prod_ident_noext+extension)
 
@@ -2226,7 +2238,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
         if zipped:
             # Unzip the .tar file in 'tmpdir'
             command = 'unzip ' + input_file + ' -d ' + tmpdir + os.path.sep  # ' --strip-components 1'
-            print(command)
+            print (command)
             status = os.system(command)
             # TODO: Change the code to OS independent
             # from zipfile import ZipFile
@@ -2236,7 +2248,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
         else:
             # Unzip the .tar file in 'tmpdir'
             command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep  # ' --strip-components 1'
-            print(command)
+            print (command)
             status = os.system(command)
             # TODO: Change the code to OS independent
             # import tarfile
@@ -2297,7 +2309,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
                 output_reproject_tif = tmpdir_untar_band + os.path.sep + 'reprojected.tif'
 
                 command_reproject = es_constants.gpt_exec+' '+ graph_xml_reproject
-                # print(command_reproject)
+                # print (command_reproject)
                 os.system(command_reproject)
 
                 if os.path.exists(output_reproject_tif):
@@ -2366,7 +2378,7 @@ def pre_process_snap_subset_nc(subproducts, tmpdir, input_files, my_logger, in_d
     #
     #     # Unzip the .tar file in 'tmpdir'
     #     command = 'cp ' + input_file + ' ' + tmpdir + os.path.sep # ' --strip-components 1'
-    #     # print(command)
+    #     # print (command)
     #     status = os.system(command)
     #     # ToDo : check the status or use try/except
 
@@ -2480,7 +2492,7 @@ def pre_process_netcdf_VGT300(subproducts, tmpdir, input_files, my_logger, in_da
     #
     #     # Unzip the .tar file in 'tmpdir'
     #     command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep # ' --strip-components 1'
-    #     # print(command)
+    #     # print (command)
     #     status = os.system(command)
     #     # ToDo : check the status or use try/except
 
@@ -2533,7 +2545,7 @@ def pre_process_netcdf_VGT300(subproducts, tmpdir, input_files, my_logger, in_da
             #     output_reproject_tif = tmpdir_untar_band + os.path.sep + 'reprojected.tif'
             #
             #     command_reproject = es_constants.gpt_exec+' '+ graph_xml_reproject
-            #     # print(command_reproject)
+            #     # print (command_reproject)
             #     os.system(command_reproject)
             #
             #     if os.path.exists(output_reproject_tif):
@@ -2610,7 +2622,7 @@ def pre_process_netcdf_VGT300(subproducts, tmpdir, input_files, my_logger, in_da
 #
 #         # Unzip the .tar file in 'tmpdir'
 #         command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep # ' --strip-components 1'
-#         # print(command)
+#         # print (command)
 #         status = os.system(command)
 #
 #
@@ -2826,7 +2838,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
         if zipped:
             # Unzip the .tar file in 'tmpdir'
             command = 'unzip ' + input_file + ' -d ' + tmpdir + os.path.sep  # ' --strip-components 1'
-            print(command)
+            print (command)
             status = os.system(command)
             # TODO: Change the code to OS independent
             # from zipfile import ZipFile
@@ -2836,7 +2848,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
         else:
             # Unzip the .tar file in 'tmpdir'
             command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep  # ' --strip-components 1'
-            print(command)
+            print (command)
             status = os.system(command)
             # TODO: Change the code to OS independent
             # import tarfile
@@ -2879,7 +2891,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
             output_subset_tif = tmpdir_untar_band + os.path.sep + 'band_subset.tif'
 
             command = es_constants.gpt_exec+' '+ graph_xml_subset
-            print(command)
+            print (command)
             os.system(command)
 
             if os.path.exists(output_subset_tif):
@@ -2890,7 +2902,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
                 output_reproject_tif = tmpdir_untar_band + os.path.sep + 'reprojected.tif'
 
                 command_reproject = es_constants.gpt_exec + ' ' + graph_xml_reproject
-                print(command_reproject)
+                print (command_reproject)
                 os.system(command_reproject)
 
                 if os.path.exists(output_reproject_tif):
@@ -2943,7 +2955,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
 
 
     # command='tar -xvf '+input_file+' -C '+tmpdir+os.path.sep +' --strip-components 1'
-    # print(command)
+    # print (command)
     # status = os.system(command)
     #
     # # Test the overlap of the footprint with the BB of mapset
@@ -4282,7 +4294,7 @@ def mosaic_lsasaf_msg(in_files, output_file, format):
             if data_type_ref is None:
                 data_type_ref = dataType
             elif data_type_ref != dataType:
-                print "Files do not have the same type!"
+                print ("Files do not have the same type!")
                 return 1
 
     # output matrix dimensions
@@ -4311,7 +4323,7 @@ def mosaic_lsasaf_msg(in_files, output_file, format):
                 try:
                     dataOut[initLine + il][initCol + ix] = dataIn[il][ix]
                 except:
-                    print initCol + ix, initLine + il
+                    print((initCol + ix, initLine + il))
 
         accumlines = accumlines + inH.YSize
 
@@ -4404,7 +4416,7 @@ def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in
     # Assign to the output array
     # Option 2: ES2-385 Check if Output rescaling has to be done
     if out_scale_factor != 1 or out_offset != 0:
-        trg_data = (phys_value - out_offset) / out_scale_factor
+        trg_data = old_div((phys_value - out_offset), out_scale_factor)
     else:
         trg_data = phys_value
 

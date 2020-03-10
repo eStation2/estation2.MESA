@@ -1,4 +1,11 @@
 from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import httplib2
 import os, io
 
@@ -48,7 +55,7 @@ def get_credentials():
             credentials = tools.run_flow(flow, store, flags)
         else: # Needed only for compatibility with Python 2.6
             credentials = tools.run(flow, store)
-        print('Storing credentials to ' + credential_path)
+        print ('Storing credentials to ' + credential_path)
     return credentials
 
 def download_file(service, file_id, local_fd):
@@ -66,7 +73,7 @@ def download_file(service, file_id, local_fd):
   done = False
   while done is False:
     status, done = downloader.next_chunk()
-    print("Download %d%%." % int(status.progress() * 100))
+    print ("Download %d%%." % int(status.progress() * 100))
 
 def main():
     """Shows basic usage of the Google Drive API.
@@ -84,7 +91,7 @@ def main():
     results = service.files().list(q="title contains 'JRC_EXPORT_'", maxResults=1000).execute()
     items = results.get('items', [])
     if not items:
-        print('No directory found.')
+        print ('No directory found.')
         return 1
     for jrc_file in items:
 

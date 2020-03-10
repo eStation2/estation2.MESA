@@ -1,3 +1,11 @@
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 __author__ = "Jurriaan van 't Klooster"
 
 import sys
@@ -163,7 +171,7 @@ class BaseTable(object):
             value = self.__dict__[name]
             #if value is None: continue #exclude null values
             try:
-                record[name] = unicode(value)
+                record[name] = str(value)
             except:
                 record[name] = repr(value)
         return record

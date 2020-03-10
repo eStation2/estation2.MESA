@@ -1,3 +1,10 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 _author__ = "Marco Clerici"
 
 import sys
@@ -35,8 +42,7 @@ if command == "restart":
     daemon.restart()
     status = daemon.status()
 
-print "Current status of the IngestArchive Service: %s" % status
-
+print ("Current status of the IngestArchive Service: %s" % status)
 
 # def service_ingest_archive(command='status'):
 #     # Define pid file and create daemon

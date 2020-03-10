@@ -1,6 +1,10 @@
-
 from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 
+from future import standard_library
+standard_library.install_aliases()
 import unittest, time
 import gdal, ogr, osr, os
 from datetime import date
@@ -54,11 +58,11 @@ class TestTS(unittest.TestCase):
         version = "3.0"
         mapsetcode = "TAMSAT-Africa-4km"
 
-        from_date = date(2019, 01, 01)
+        from_date = date(2019, 0o1, 0o1)
         to_date = date(2019, 12, 31)
         date_format = 'YYYYMMDD'
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_westerncape, from_date, to_date, self.aggregate)
-        print list_values
+        print (list_values)
 
 
         self.assertEquals(len(list_values), 36)
@@ -69,14 +73,14 @@ class TestTS(unittest.TestCase):
         subproductcode = "ndv"
         version = "sv2-pv2.1"
         mapsetcode = "SPOTV-Africa-1km"
-        from_date = date(2016, 01, 01)
+        from_date = date(2016, 0o1, 0o1)
         to_date = date(2016, 12, 31)
         date_format = 'YYYYMMDD'
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_test_polygon, from_date, to_date, self.aggregate)
-        print list_values
+        print (list_values)
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_test_polygon, from_date, to_date, self.aggregate)
         # list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_test_point, from_date, to_date, self.aggregate)
-        print list_values
+        print (list_values)
 
         self.assertEquals(len(list_values), 36)
 
@@ -91,7 +95,7 @@ class TestTS(unittest.TestCase):
         subproductcode = "ndv"
         version = "spot-v1"
         mapsetcode = "SPOTV-Africa-1km"
-        from_date = date(2002, 01, 01)
+        from_date = date(2002, 0o1, 0o1)
         to_date = date(2002, 12, 31)
         date_format = 'YYYYMMDD'
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt, from_date, to_date)
@@ -104,7 +108,7 @@ class TestTS(unittest.TestCase):
         subproductcode="10d"
         version="2.0"
         mapsetcode="FEWSNET-Africa-8km"
-        from_date=date(2013,01,01)
+        from_date=date(2013,0o1,0o1)
         to_date=date(2015,12,21)
         date_format = 'YYYYMMDD'
 
@@ -118,7 +122,7 @@ class TestTS(unittest.TestCase):
         version="2.0"
         mapsetcode="FEWSNET-Africa-8km"
         # Test CASE 1
-        from_date=date(2014, 01, 01)
+        from_date=date(2014, 0o1, 0o1)
         to_date=date(2014, 12, 31)
         date_format = 'MMDD'
 
@@ -159,7 +163,7 @@ class TestTS(unittest.TestCase):
         subproductcode="10d"
         version="2.0"
         mapsetcode="FEWSNET-Africa-8km"
-        from_date=date(2013,01,01)
+        from_date=date(2013,0o1,0o1)
         to_date=date(2015,12,21)
 
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_Congo, from_date, to_date)
@@ -171,14 +175,14 @@ class TestTS(unittest.TestCase):
         subproductcode="10davg"
         version="2.0"
         mapsetcode="FEWSNET-Africa-8km"
-        from_date=date(2015,01,01)
-        to_date=date(2015,01,11)
+        from_date=date(2015,0o1,0o1)
+        to_date=date(2015,0o1,11)
         aggregate = {'aggregation_type': 'mean',
                      'aggregation_min': None,
                      'aggregation_max': None}
 
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_Congo, from_date, to_date, aggregate)
-        print list_values
+        print (list_values)
         self.assertEquals(len(list_values), 108)
 
     def test_values_sst(self):
@@ -187,14 +191,14 @@ class TestTS(unittest.TestCase):
         subproductcode="monavg"
         version="v2013.1"
         mapsetcode="MODIS-Africa-4km"
-        from_date=date(2015,01,01)
-        to_date=date(2015,02,11)
+        from_date=date(2015,0o1,0o1)
+        to_date=date(2015,0o2,11)
         aggregate = {'aggregation_type': 'mean',
                      'aggregation_min': None,
                      'aggregation_max': None}
 
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_fish, from_date, to_date, aggregate)
-        print list_values
+        print (list_values)
         self.assertEquals(len(list_values), 108)
 
     def test_values_chirps_10d(self):
@@ -203,8 +207,8 @@ class TestTS(unittest.TestCase):
         subproductcode="10d"
         version="2.0"
         mapsetcode="CHIRP-Africa-5km"
-        from_date=date(2015,01,01)
-        to_date=date(2015,02,21)
+        from_date=date(2015,0o1,0o1)
+        to_date=date(2015,0o2,21)
         # Type can be 'none' -> average
         #             'count' -> number of pixels in min-max range
         #             'percent' -> (number of pixels in min-max range) / (number of valid pixels) * 100
@@ -214,7 +218,7 @@ class TestTS(unittest.TestCase):
                      'aggregation_max': 40.0}
 
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_sa, from_date, to_date, aggregate)
-        print list_values
+        print (list_values)
         self.assertEquals(len(list_values), 36)
 
     def test_chla_values_ES2_105(self):
@@ -224,8 +228,8 @@ class TestTS(unittest.TestCase):
         version="v2013.1"
         mapsetcode="MODIS-Africa-4km"
 
-        from_date=date(2015,01,01)
-        to_date=date(2015,01,11)
+        from_date=date(2015,0o1,0o1)
+        to_date=date(2015,0o1,11)
 
         # Type can be 'none' -> average
         #             'count' -> number of pixels in min-max range
@@ -236,7 +240,7 @@ class TestTS(unittest.TestCase):
                      'aggregation_max': 40.0}
 
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_test_ES2_105, from_date, to_date, aggregate)
-        print list_values
+        print (list_values)
         self.assertEquals(len(list_values), 36)
 
     def test_values_wd_gee(self):
@@ -245,14 +249,14 @@ class TestTS(unittest.TestCase):
         subproductcode="avg"
         version="1.0"
         mapsetcode="WD-GEE-ECOWAS-AVG"
-        from_date=date(2018,01,01)
-        to_date=date(2018,01,01)
+        from_date=date(2018,0o1,0o1)
+        to_date=date(2018,0o1,0o1)
         aggregate = {'aggregation_type': 'surface',
                      'aggregation_min': 1,
                      'aggregation_max': 100}
 
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt, from_date, to_date, aggregate)
-        print(list_values)
+        print (list_values)
 
         self.assertEquals(len(list_values), 1)
 
@@ -262,14 +266,14 @@ class TestTS(unittest.TestCase):
         subproductcode="10d"
         version="2.0"
         mapsetcode="WD-GEE-ECOWAS-AVG"
-        from_date=date(2018,01,01)
-        to_date=date(2018,01,01)
+        from_date=date(2018,0o1,0o1)
+        to_date=date(2018,0o1,0o1)
         aggregate = {'aggregation_type': 'surface',
                      'aggregation_min': 1,
                      'aggregation_max': 100}
 
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt, from_date, to_date, aggregate)
-        print(list_values)
+        print (list_values)
 
         self.assertEquals(len(list_values), 1)
 
@@ -280,7 +284,7 @@ class TestTS(unittest.TestCase):
         subproductcode="10d"
         version="2.0"
         mapsetcode="CHIRP-Africa-5km"
-        from_date=date(2015,01,01)
+        from_date=date(2015,0o1,0o1)
         to_date=date(2015,12,21)
 
         # Type can be 'none'   -> average
@@ -302,7 +306,7 @@ class TestTS(unittest.TestCase):
         # out_queue.put(returnVal=None)
 
         args = [out_queue, productcode, subproductcode, version, mapsetcode, self.wkt, from_date, to_date, aggregate]
-        from_date=date(2016,01,01)
+        from_date=date(2016,0o1,0o1)
         to_date=date(2016,12,21)
         args2= [out_queue, productcode, subproductcode, version, mapsetcode, self.wkt, from_date, to_date, aggregate]
 
@@ -323,8 +327,8 @@ class TestTS(unittest.TestCase):
 
             exec_time = start_time - time.time()
             print ("--- %s seconds ---" % exec_time)
-            print list_values_new
-            print list_values_new2
+            print (list_values_new)
+            print (list_values_new2)
 
         except:
             raise NameError('Error in getTimeseries')

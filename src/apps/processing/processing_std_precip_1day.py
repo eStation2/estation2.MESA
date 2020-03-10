@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 #
 #	purpose: Define a processing chain for cumulating the 1day product to 10day (ARC2)
 #	author:  M.Clerici & Jurriaan van't Klooster
@@ -14,6 +18,11 @@
 #
 
 # Source generic modules
+from builtins import open
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import os
 # import sys
 import glob, datetime
@@ -139,7 +148,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                 if len(file_list) >= expected_days-1:
                     yield (file_list, output_file)
                 else:
-                    print 'Too many missing filed for dekad {0}'.format(my_dekad_str)
+                    print ('Too many missing filed for dekad {0}'.format(my_dekad_str))
 
     @active_if(activate_10dcumul_comput)
     @files(generate_parameters_10dcumul)
@@ -206,7 +215,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                 if len(file_list) >= expected_days-3:
                     yield (file_list, output_file)
                 else:
-                    print 'Too many missing filed for month {0}'.format(month)
+                    print ('Too many missing filed for month {0}'.format(month))
 
     @active_if(activate_1moncum_comput)
     @files(generate_parameters_1moncum)
@@ -282,7 +291,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                     output_file=es_constants.processing_dir+output_subdir_3moncum+os.path.sep+month+'01'+out_prod_ident_3moncum
                     yield (file_list, output_file)
                 else:
-                    print 'Too many missing filed for 3moncum, period until: {0}'.format(month)
+                    print ('Too many missing filed for 3moncum, period until: {0}'.format(month))
 
     @active_if(activate_3moncum_comput)
     @files(generate_parameters_3moncum)
@@ -358,7 +367,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                     output_file=es_constants.processing_dir+output_subdir_6moncum+os.path.sep+month+'01'+out_prod_ident_6moncum
                     yield (file_list, output_file)
                 else:
-                    print 'Too many missing filed for 6moncum, period until: {0}'.format(month)
+                    print ('Too many missing filed for 6moncum, period until: {0}'.format(month))
 
     @active_if(activate_6moncum_comput)
     @files(generate_parameters_6moncum)
@@ -434,7 +443,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                     output_file=es_constants.processing_dir+output_subdir_1yearcum+os.path.sep+month+'01'+out_prod_ident_1yearcum
                     yield (file_list, output_file)
                 else:
-                    print 'Too many missing filed for 1yearcum, period until: {0}'.format(month)
+                    print ('Too many missing filed for 1yearcum, period until: {0}'.format(month))
 
     @active_if(activate_1yearcum_comput)
     @files(generate_parameters_1yearcum)

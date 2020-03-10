@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 #
 #	purpose: Define a class for logging error file to console and file
 #	author:  M.Clerici
@@ -7,20 +11,22 @@
 #			 Maximum length of the file/backup files are also managed. 
 #	history: 1.0 
 #
+from future import standard_library
+standard_library.install_aliases()
 from config import es_constants
 from sys import platform
 
 try:
     import os, stat, glob, logging, logging.handlers
 except ImportError: 
-    print 'Error in importing module ! Exit'
+    print ('Error in importing module ! Exit')
     exit(1)
 
 # Get log_dir
 try:
     log_dir = es_constants.log_dir
 except EnvironmentError:
-    print 'Error - log_dir not defined in es_constants.  Exit'
+    print ('Error - log_dir not defined in es_constants.  Exit')
     exit(1)
 
 

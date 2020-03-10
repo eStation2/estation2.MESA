@@ -1,3 +1,10 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 from unittest import TestCase
 
 __author__ = 'clerima'
@@ -129,7 +136,7 @@ class TestFunctionsPath(TestCase):
 
     def test_get_versions(self):
         versions=getListVersions()
-        print versions
+        print (versions)
 
     def test_get_all_from_filename(self):
 

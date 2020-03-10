@@ -1,3 +1,9 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
 __author__ = 'analyst'
 #
 #	purpose: Change the scl_factor value in a file
@@ -43,10 +49,10 @@ if __name__=='__main__':
     new_scl_factor = 0.01
 
     files = glob(input_dir+'*.tif')
-    print files
+    print (files)
     for infile in sorted(files):
-        print 'Working on file: '+infile
+        print ('Working on file: ' + infile)
         try:
             result = convert_scl_factor_value(infile, old_scl_factor, new_scl_factor)
         except:
-            print 'Error in processing file: '+infile
+            print ('Error in processing file: ' + infile)

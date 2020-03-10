@@ -1,3 +1,13 @@
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import print_function
+from builtins import open
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from past.utils import old_div
 _author__ = "Marco Clerici"
 #
 #	purpose: Define the system service
@@ -507,7 +517,7 @@ def check_delay_time(operation, delay_minutes=None, time=None, write=False):
         else:
             time_latest_execution = info['latest_exec_time']
             current_delta=datetime.datetime.now()-time_latest_execution
-            current_delta_minutes = int(current_delta.seconds/60)
+            current_delta_minutes = int(old_div(current_delta.seconds,60))
             if current_delta_minutes > float(delay_minutes):
                to_be_executed = True
 

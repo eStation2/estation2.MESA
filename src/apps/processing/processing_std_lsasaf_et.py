@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 #
 #	purpose: Define the processing service (by using ruffus)
 #	author:  Olivier Thamba and Maixent Kambi 
@@ -7,6 +11,12 @@
 #
 
 # Source my definitions
+from builtins import open
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
 from config import es_constants
 import os
 import glob
@@ -95,7 +105,7 @@ def create_pipeline(prod, starting_sprod, native_mapset, target_mapset, version,
         dekad_now = functions.conv_date_2_dekad(today_str)
 
         # Generate the list of 30 min time in a day
-        timelist = [datetime.time(h,m).strftime("%H%M") for h,m in itertools.product(xrange(0,24),xrange(0,60,30))]
+        timelist = [datetime.time(h,m).strftime("%H%M") for h,m in itertools.product(range(0,24),range(0,60,30))]
 
         for time in timelist:
             files_for_time = glob.glob(input_dir+os.path.sep+'*'+time+in_prod_ident)

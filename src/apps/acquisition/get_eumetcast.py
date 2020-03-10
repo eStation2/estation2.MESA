@@ -10,8 +10,16 @@
 #
 
 # Import standard modules
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import signal
-import commands
+import subprocess
 import time
 import datetime
 import os
@@ -190,7 +198,7 @@ def get_archives_eumetcast():
             logger_spec.debug("Loop on the found files.")
             for filename in list(listtoprocess):
                  try:
-                    if commands.getstatusoutput("cp " + filename + " " + output_dir + os.sep + os.path.basename(filename))[0] == 0:
+                    if subprocess.getstatusoutput("cp " + filename + " " + output_dir + os.sep + os.path.basename(filename))[0] == 0:
                         logger_spec.info("File %s copied.", filename)
                         processed_list.append(filename)
                         # Update processing info
@@ -223,7 +231,7 @@ def signal_handler(signal, frame):
     functions.dump_obj_to_pickle(processed_list, processed_list_filename)
     functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
-    print 'Exit ' + sys.argv[0]
+    print ('Exit ' + sys.argv[0])
     logger.info("Stopping the service.")
     sys.exit(0)
 
@@ -454,7 +462,7 @@ def loop_eumetcast(dry_run=False):
                                 if os.stat(os.path.join(input_dir, filename)).st_mtime < int(time.time()):
                                     logger_spec.debug("Processing file: "+os.path.basename(filename))
                                     if not dry_run:
-                                        if commands.getstatusoutput("cp " + filename + " " + output_dir + os.sep + os.path.basename(filename))[0] == 0:
+                                        if subprocess.getstatusoutput("cp " + filename + " " + output_dir + os.sep + os.path.basename(filename))[0] == 0:
                                             logger_spec.info("File %s copied.", filename)
                                             processed_list.append(filename)
                                             # Update processing info

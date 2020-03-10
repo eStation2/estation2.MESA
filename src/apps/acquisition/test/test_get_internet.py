@@ -1,4 +1,13 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from past.utils import old_div
 from config import es_constants
 from apps.acquisition.get_internet import *
 from apps.acquisition.get_eumetcast import *
@@ -44,7 +53,7 @@ def get_one_source(internet_source, target_dir=None):
         if processed_info is not None:
             # Check the delay
             current_delta=datetime.datetime.now()-processed_info['time_latest_exec']
-            current_delta_minutes=int(current_delta.seconds/60)
+            current_delta_minutes=int(old_div(current_delta.seconds,60))
             if current_delta_minutes < 0:
                 logger.debug("Still waiting up to %i minute - since latest execution.", 0)
                 execute_trigger = False
@@ -494,7 +503,7 @@ class TestGetInternet(unittest.TestCase):
         internet_type = 'ftp'
 
         list = get_list_matching_files(remote_url, usr_pwd, full_regex,internet_type)
-        print(list)
+        print (list)
         self.assertTrue(file_to_check in list)
 
     #   ---------------------------------------------------------------------------
@@ -511,7 +520,7 @@ class TestGetInternet(unittest.TestCase):
         internet_type = 'sftp'
 
         list = get_list_matching_files(remote_url, usr_pwd, full_regex,internet_type)
-        print(list)
+        print (list)
         self.assertTrue(file_to_check in list)
 
     #   ---------------------------------------------------------------------------
@@ -702,7 +711,7 @@ class TestGetInternet(unittest.TestCase):
         frequency = 'e1day'
 
         files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
-        print files_list
+        print (files_list)
         file_to_check='A2015211.L3m_DAY_SST_sst_4km.nc'
         self.assertTrue(file_to_check in files_list)
 
@@ -719,13 +728,13 @@ class TestGetInternet(unittest.TestCase):
         from_date = '20150707'
         to_date = ''
         files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
-        print files_list[-1]
+        print (files_list[-1])
 
         # Check until yesterday (check output to terminal)
         from_date = '20150707'
         to_date = -1
         files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
-        print files_list[-1]
+        print (files_list[-1])
 
         # Check last 30 days (check list length = 31)
         from_date = -30
@@ -748,7 +757,7 @@ class TestGetInternet(unittest.TestCase):
         frequency = 'e1dekad'
 
         files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
-        print files_list
+        print (files_list)
         file_to_check='2014/A2014001.L3m_DAY_KD490_Kd_490_4km.bz2'
         self.assertTrue(file_to_check in files_list)
 
@@ -763,14 +772,14 @@ class TestGetInternet(unittest.TestCase):
         remote_url='http://earlywarning.usgs.gov/ftp2/raster/rf/a/2014/'
         usr_pwd='anonymous:anonymous'
         c=pycurl.Curl()
-        import StringIO
-        import cStringIO
-        buffer = StringIO.StringIO()
+        import io
+        import io
+        buffer = io.StringIO()
 
         c.setopt(c.URL, remote_url)
         c.setopt(c.WRITEFUNCTION, buffer.write)
         c.perform()
-        print c.getinfo(pycurl.HTTP_CODE)
+        print (c.getinfo(pycurl.HTTP_CODE))
         html = buffer.getvalue()
 
         file_to_check='2015/001/A2015001.L3m_DAY_SST_4.bz2'
@@ -794,8 +803,9 @@ class TestGetInternet(unittest.TestCase):
         files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         files_list = [remote_url+'2015_01/JRC_EXPORT_20160225110837299-0000000000-0000065536']
         get_file_from_url(files_list[0], target_dir, target_file=None, userpwd='', https_params='')
-        print files_list
-   #   ---------------------------------------------------------------------------
+        print (files_list)
+
+    #   ---------------------------------------------------------------------------
     #   Test remote http SPIRITS
     #   ---------------------------------------------------------------------------
     # Original test
@@ -811,7 +821,7 @@ class TestGetInternet(unittest.TestCase):
         frequency = 'e1dekad'
 
         files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
-        print files_list
+        print (files_list)
         file_to_check='ope_africa_rain_20150221.zip'
         self.assertTrue(file_to_check in files_list)
 
@@ -827,12 +837,12 @@ class TestGetInternet(unittest.TestCase):
         from_date = '20150701'
         to_date = ''
         files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
-        print files_list[-1]
+        print (files_list[-1])
 
         # Check until 10 days ago (check output to terminal)
         to_date = -10
         files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
-        print files_list[-1]
+        print (files_list[-1])
 
         # Check last 90 days (check list length = 9)
         from_date = -90

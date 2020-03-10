@@ -1,3 +1,9 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
 _author__ = "Marco Clerici"
 
 
@@ -80,7 +86,7 @@ def reproject_jrc_wbd(input_file):
         sds_meta.write_to_file(out_filepath)
 
     else:
-        print('Output file already exists: %s' % os.path.basename(out_filepath))
+        print ('Output file already exists: %s' % os.path.basename(out_filepath))
 
 if __name__=='__main__':
 

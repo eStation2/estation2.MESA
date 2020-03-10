@@ -6,8 +6,13 @@
 #
 
 from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import print_function
 
 
+from future import standard_library
+standard_library.install_aliases()
 def create_fixtures(from_file, to_file):
     to_ = file(to_file, "w")
     to_.write("BEGIN;\n")

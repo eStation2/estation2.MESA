@@ -1,3 +1,9 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
 __author__ = 'analyst'
 #
 #	purpose: Run the script to copy data from an external disk to /data/processing
@@ -161,7 +167,7 @@ def copy_data_disk(input_dir=None, dry_run=False):
             os.system('mkdir -p '+os.path.dirname(target_file))
             if not os.path.exists(target_file):
                 os.system('cp ' + myfile + ' ' + target_file )
-                print('Copied file: '+target_file)
+                print ('Copied file: '+target_file)
             # break
 
         if prod['regex2'] != '':
@@ -179,7 +185,7 @@ def copy_data_disk(input_dir=None, dry_run=False):
                 os.system('mkdir -p ' + os.path.dirname(target_file))
                 if not os.path.exists(target_file):
                     os.system('cp ' + myfile + ' ' + target_file )
-                    print('Copied file: '+target_file)
+                    print ('Copied file: '+target_file)
                 # break
 
 if __name__=='__main__':

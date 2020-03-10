@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 #
 #	purpose: Compute the rainfall onset
 #	author:  M.Clerici, BDMS Staff
@@ -7,6 +11,10 @@
 #
 
 # Source my definitions
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import os
 import glob
 # Import eStation2 modules
@@ -109,7 +117,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
 
                     # Check at least 1 previous file exist
                     if len(previous_files) < 1:
-                        print('Error Case 1: no any previous file')
+                        print ('Error Case 1: no any previous file')
                     else:
                         # Pass two arguments (t0 and t0-1)
                         input_files = [file_t0, previous_files[0]]
@@ -120,14 +128,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                     error = False
                     # Check 2 previous files exist
                     if len(previous_files) < 2:
-                        print('Error Case 2: a previous file is missing')
+                        print ('Error Case 2: a previous file is missing')
                         error=True
 
                     # Look for previous output
                     previous_outputs = functions.previous_files(output_file)
 
                     if len(previous_outputs) < 1:
-                        print('Error Case 2: the previous output is missing')
+                        print ('Error Case 2: the previous output is missing')
                         error=True
 
                     # Pass four arguments (t0, t0-1, t0-2 and output-1)

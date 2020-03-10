@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 #
 #	purpose: Define the primary production processing chain (by using ruffus)
 #	author:  B. Motah [& E. Martial]
@@ -7,6 +11,8 @@
 #
 
 # Source my definitions
+from future import standard_library
+standard_library.install_aliases()
 import os
 
 # Import eStation2 modules

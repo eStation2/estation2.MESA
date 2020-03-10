@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 #
 #	purpose: Define the processing service (by using ruffus)
 #	author:  M.Clerici & Jurriaan van't Klooster
@@ -16,6 +20,8 @@
 #
 
 # Source my definitions
+from future import standard_library
+standard_library.install_aliases()
 from config import es_constants
 import os
 
@@ -405,7 +411,7 @@ def processing_fewsnet_rfe(pipeline_run_level=0,pipeline_run_touch_only=0, pipel
     create_pipeline(starting_sprod='rfe')
 
     list = pipeline_get_task_names()
-    print list
+    print (list)
     logger.info("Entering routine %s" % 'processing_fewsnet_rfe')
     if pipeline_run_level > 0:
         logger.info("Now calling pipeline_run")

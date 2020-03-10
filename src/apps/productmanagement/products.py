@@ -5,7 +5,14 @@
 # date:  27.10.2014
 
 from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import print_function
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 import os
 import glob
 import tarfile
@@ -75,7 +82,7 @@ class Product(object):
         return _subproducts
 
     def _get_full_subproducts(self, mapset="*"):
-        return tuple(subproduct for subproduct_type in functions.dict_subprod_type_2_dir.values()
+        return tuple(subproduct for subproduct_type in list(functions.dict_subprod_type_2_dir.values())
                                 for subproduct in glob.glob(os.path.join(self._fullpath, mapset, subproduct_type, "*")))
 
     def get_dataset(self, mapset, sub_product_code, from_date=None, to_date=None):
@@ -197,7 +204,7 @@ class Product(object):
                             missing_dates.extend(dataset.get_interval_dates(last_date,
                                 dataset.get_last_date(), first_included=False))
 
-            # print(missing_dates)
+            # print (missing_dates)
             if existing_only:
                 dates_to_add = sorted(set(dates).intersection(set(missing_dates)))
             else:

@@ -1,3 +1,10 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
 from multiprocessing import Pool
 import time
 
@@ -61,6 +68,6 @@ if __name__ == '__main__':
         proc_list = result_queue.get()
 
         for spg in proc_list.list_subprod_groups:
-            print(spg.group)
+            print (spg.group)
     p.join()
 

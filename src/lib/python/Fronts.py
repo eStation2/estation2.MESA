@@ -19,6 +19,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from past.utils import old_div
 import copy
 import os
 import os.path
@@ -64,15 +73,15 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, minTheta, histogramWi
 
         if masks is not None:
             if maskTests is None:
-                print 'If you provide a list of masks, you must also provide a parallel list of mask tests.'
+                print ('If you provide a list of masks, you must also provide a parallel list of mask tests.')
             if maskValues is None:
-                print 'If you provide a list of masks, you must also provide a parallel list of mask values.'
+                print ('If you provide a list of masks, you must also provide a parallel list of mask values.')
 
         if medianFilterWindowSize is not None and medianFilterWindowSize % 2 == 0:
-            print 'The median filter window size must be a positive odd integer greater than or equal to 3.'
+            print ('The median filter window size must be a positive odd integer greater than or equal to 3.')
 
-        if histogramWindowStride > histogramWindowSize:            
-            print 'The histogram stride cannot be larger than the histogram window size.'
+        if histogramWindowStride > histogramWindowSize:
+            print ('The histogram stride cannot be larger than the histogram window size.')
 
         # Import needed modules.
         
@@ -86,9 +95,9 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, minTheta, histogramWi
         # corresponding cell of the caller's image is invalid.
 
         if medianFilterWindowSize is None:
-            bufferSize = (histogramWindowSize + 1) / 2
+            bufferSize = old_div((histogramWindowSize + 1), 2)
         else:
-            bufferSize = max([(medianFilterWindowSize + 1) / 2, (histogramWindowSize + 1) / 2])
+            bufferSize = max([old_div((medianFilterWindowSize + 1), 2), old_div((histogramWindowSize + 1), 2)])
         rows = bufferSize + image.shape[0] + bufferSize
         cols = bufferSize + image.shape[1] + bufferSize
 
@@ -103,37 +112,37 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, minTheta, histogramWi
         # Apply the caller's masks.
 
         if minImageValue is not None:
-            print ' Debug: minImageValue not defined.'
+            print (' Debug: minImageValue not defined.')
             unbufferedMask[:] = numpy.logical_or(unbufferedMask, image < minImageValue)
 
         if maxImageValue is not None:
-            print ' Debug: maxImageValue not defined.'
+            print (' Debug: maxImageValue not defined.')
             unbufferedMask[:] = numpy.logical_or(unbufferedMask, image > maxImageValue)
 
         if masks is not None:
             for i in range(len(masks)):
                 if maskTests[i] == u'equal':
-                    print ' Debug: Masking cells where mask %(mask)i is equal to ',i,'.'
+                    print((' Debug: Masking cells where mask %(mask)i is equal to ', i, '.'))
                     unbufferedMask[:] = numpy.logical_or(unbufferedMask, masks[i] == maskValues[i])
                     
                 elif maskTests[i] == u'notequal':
-                    print ' Debug: Masking cells where mask %(mask)i is not equal to ',i,'.'
+                    print((' Debug: Masking cells where mask %(mask)i is not equal to ', i, '.'))
                     unbufferedMask[:] = numpy.logical_or(unbufferedMask, masks[i] != maskValues[i])
                     
                 elif maskTests[i] == u'greaterthan':
-                    print ' Debug: Masking cells where mask %(mask)i is greater than ',i,'.'
+                    print((' Debug: Masking cells where mask %(mask)i is greater than ', i, '.'))
                     unbufferedMask[:] = numpy.logical_or(unbufferedMask, masks[i] > maskValues[i])
                     
                 elif maskTests[i] == u'lessthan':
-                    print ' Debug: Masking cells where mask %(mask)i is less than ',i,'.'
+                    print((' Debug: Masking cells where mask %(mask)i is less than ', i, '.'))
                     unbufferedMask[:] = numpy.logical_or(unbufferedMask, masks[i] < maskValues[i])
                     
                 elif maskTests[i] == u'anybitstrue':
-                    print ' Debug: Masking cells where mask ',i,'(mask) bitwise-ANDed with ',X,' is not zero.'
+                    print((' Debug: Masking cells where mask ', i, '(mask) bitwise-ANDed with ', X, ' is not zero.'))
                     unbufferedMask[:] = numpy.logical_or(unbufferedMask, numpy.bitwise_and(masks[i], maskValues[i]) != 0)
                     
                 else:
-                    print s,' is not an allowed mask test.'
+                    print((s, ' is not an allowed mask test.'))
 
         # If the caller specified that the edges should wrap, copy the
         # cells from the left edge of the image (and mask) to the
@@ -217,7 +226,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, minTheta, histogramWi
         bufferedWindowStatusCodes = numpy.zeros((rows, cols), dtype='int8')
         bufferedWindowStatusValues = numpy.zeros((rows, cols), dtype='float32')
 
-        print ' Debug: Running histogramming and cohesion algorithm.'
+        print (' Debug: Running histogramming and cohesion algorithm.')
         timeStarted = time.clock()
 
         # If we're only using one thread, invoke the C code directly.
@@ -242,7 +251,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, minTheta, histogramWi
             # The subarrays that are created here are references, not
             # deep copies.
 
-            blockHeight = image.shape[0] / threads
+            blockHeight = old_div(image.shape[0], threads)
             blockHeight = blockHeight - blockHeight % histogramWindowStride
 
             bufferedImageList = []
@@ -288,7 +297,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, minTheta, histogramWi
             for i in range(threads):
                 t = _threading.Thread(name='%i' % i, target=FrontsUtils.CayulaCornillonFronts, args=(bufferedImageList[i], bufferedMaskList[i], bufferedCandidateCountsList[i], bufferedFrontCountsList[i], bufferedWindowStatusCodesList[i], bufferedWindowStatusValuesList[i], bufferSize, histogramWindowSize, histogramWindowStride, minPropNonMaskedCells, minPopProp, minPopMeanDifference, minTheta, minSinglePopCohesion, minGlobalPopCohesion))
                 t.setDaemon(True)
-                print ' Debug: Starting thread %(id)s to process rows %(start)i to %(end)i.'
+                print (' Debug: Starting thread %(id)s to process rows %(start)i to %(end)i.')
                 threadList.append(t)
 
             for i in range(threads):
@@ -298,7 +307,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, minTheta, histogramWi
 
             while len(threadList) > 0:
                 threadList[0].join()
-                print ' Debug: Thread %(id)s exited.'
+                print (' Debug: Thread %(id)s exited.')
                 del threadList[0]
 
             # Aggregate the arrays computed by the threads into the
@@ -314,8 +323,8 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, minTheta, histogramWi
             bufferedFrontCounts[(i+1) * blockHeight : , :] += bufferedFrontCountsList[i+1][:,:]
             bufferedWindowStatusCodes[(i+1) * blockHeight : , :] += bufferedWindowStatusCodesList[i+1][:,:]
             bufferedWindowStatusValues[(i+1) * blockHeight : , :] += bufferedWindowStatusValuesList[i+1][:,:]
-        
-        print ' Debug: Histogram and cohesion algorithm complete. Elapsed time: %f seconds.'
+
+        print (' Debug: Histogram and cohesion algorithm complete. Elapsed time: %f seconds.')
 
         # If the caller specified that the edges should wrap,
         # CandidateCounts and FrontCounts for the the cells on the
@@ -380,8 +389,8 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, minTheta, histogramWi
 #____
 
 def Usage(message):
-    print message
-    print 'Usage:\t Fronts.py -threads nthreads imagename'
+    print (message)
+    print ('Usage:\t Fronts.py -threads nthreads imagename')
     sys.exit(1)
 
 if __name__=="__main__":
@@ -437,17 +446,17 @@ if __name__=="__main__":
 	    ii = ii + 1	
 
     # Load the image from file
-    print 'Load image'
+    print ('Load image')
 
     fid = gdal.Open(inFile, GA_ReadOnly) 
     inband = fid.GetRasterBand(1)
     inData = inband.ReadAsArray(0,0,inband.XSize,inband.YSize)
-    print inData.shape[0]
-    print inData.shape[1]
+    print (inData.shape[0])
+    print (inData.shape[1])
     inDataInt = Numeric.uint16(inData*1000)
     
     # Call FrontDetection Algorithm
-    print 'Call algo'
+    print ('Call algo')
     [uMask, uImage, uCandidateCounts, uFrontCounts,uWindowStatusCodes, uWindowStatusValues] = DetectEdgesInSingleImage(inDataInt,histogramWindowStride,minTheta,histogramWindowSize,minPopProp, minPopMeanDifference,minSinglePopCohesion,minImageValue)
 
     # Write the results to a Geotiff image
@@ -469,8 +478,8 @@ if __name__=="__main__":
 
     # Generate output file for detected fronts uFrontCounts
     #outfile = outdir + date + rid
-    print 'Front file'
-    print outfrontfile
+    print ('Front file')
+    print (outfrontfile)
 
     outDrv = gdal.GetDriverByName(format)
 

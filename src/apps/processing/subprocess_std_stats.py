@@ -1,3 +1,10 @@
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 _author__ = "Vijay Charan Venkatachalam"
 #
 #	purpose: Define the sub processing chains
@@ -22,7 +29,7 @@ from config import es_constants
 
 # Import third-party modules
 
-class SubProcessStatsES2:
+class SubProcessStatsES2(object):
     def __init__(self, prod, starting_sprod, mapset, version, starting_dates=None, proc_lists=None, frequency=None, product_type='Ingest'):
 
         self.prod = prod

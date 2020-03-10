@@ -1,3 +1,11 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 _author__ = "Vijay Charan Venkatachalam"
 #
 #	purpose: Define the sub processing chains
@@ -27,7 +35,7 @@ from config import es_constants
 from ruffus import *
 
 
-class SubProcessProdsES2:
+class SubProcessProdsES2(object):
     def __init__(self, prod, starting_sprod, mapset, version, starting_dates=None, proc_lists=None, frequency=None, product_type='Ingest'):
 
         self.prod = prod
@@ -143,8 +151,7 @@ class SubProcessProdsES2:
                 if len(file_list) >= expected_days-1:
                     yield (file_list, output_file)
                 else:
-                    print 'Too many missing filed for dekad {0}'.format(my_dekad_str)
-
+                    print ('Too many missing filed for dekad {0}'.format(my_dekad_str))
 
     def do_10d_from_1d(self):
         #   ---------------------------------------------------------------------

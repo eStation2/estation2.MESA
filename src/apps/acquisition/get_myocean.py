@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 #
 #	purpose: Define the get my ocean routine
 #	author:  M.Clerici
@@ -11,6 +15,8 @@
 # import StringIO
 # import cStringIO
 # import tempfile
+from future import standard_library
+standard_library.install_aliases()
 import sys
 import os
 # import re
@@ -48,7 +54,7 @@ command='python '+motu_path+' -u '+user+' -p '+pwd+' -m '+mercator_motu_web+ \
         ' -t '+str_day+' -T '+str_day+' '+depth+' '+variables+ \
         ' -o '+out_path+' -f '+out_filename
 
-print(command)
+print (command)
 logger.info('Command is: '+command)
 
 #os.system(command)
