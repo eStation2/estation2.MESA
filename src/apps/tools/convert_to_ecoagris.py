@@ -1,3 +1,7 @@
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import print_function
 
 # purpose:  Generate timeseries values for a list of indicators over all geometries in the given vector layer
 #           and convert these values to ECOAGRIS format (MySQL).
@@ -11,6 +15,14 @@
 # history:  1.0
 #
 
+from builtins import dict
+from builtins import round
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 import os
 # import glob
 import shutil
@@ -328,7 +340,7 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, geom, start_
         [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, start_date, end_date)
 
         # Built a dictionary with filenames/dates
-        dates_to_files_dict = dict(zip(dates_list, list_files))
+        dates_to_files_dict = dict(list(zip(dates_list, list_files)))
 
         # Generate unique list of files
         unique_list = set(list_files)
@@ -358,14 +370,14 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, geom, start_
 
                         # Read polygon extent and round to raster resolution
                         x_min, x_max, y_min, y_max = outLayer.GetExtent()
-                        x_min_round = int((x_min-x_origin)/pixel_size_x)*pixel_size_x+x_origin
-                        x_max_round = (int((x_max-x_origin)/(pixel_size_x))+1)*pixel_size_x+x_origin
-                        y_min_round = (int((y_min-y_origin)/(pixel_size_y))-1)*pixel_size_y+y_origin
-                        y_max_round = int((y_max-y_origin)/(pixel_size_y))*pixel_size_y+y_origin
+                        x_min_round = int(old_div((x_min-x_origin),pixel_size_x))*pixel_size_x+x_origin
+                        x_max_round = (int(old_div((x_max-x_origin),(pixel_size_x)))+1)*pixel_size_x+x_origin
+                        y_min_round = (int(old_div((y_min-y_origin),(pixel_size_y)))-1)*pixel_size_y+y_origin
+                        y_max_round = int(old_div((y_max-y_origin),(pixel_size_y)))*pixel_size_y+y_origin
                     #
                     #     # Create the destination data source
-                        x_res = int(round((x_max_round - x_min_round) / pixel_size_x))
-                        y_res = int(round((y_max_round - y_min_round) / pixel_size_y))
+                        x_res = int(round(old_div((x_max_round - x_min_round), pixel_size_x)))
+                        y_res = int(round(old_div((y_max_round - y_min_round), pixel_size_y)))
                     #
                     #     # Create mask in memory
                         mem_driver = gdal.GetDriverByName('MEM')
@@ -393,8 +405,8 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, geom, start_
                         outLayer = None
 
                     # Read data from input file
-                    x_offset = int((x_min-x_origin)/pixel_size_x)
-                    y_offset = int((y_origin-y_max)/pixel_size_y)
+                    x_offset = int(old_div((x_min-x_origin),pixel_size_x))
+                    y_offset = int(old_div((y_origin-y_max),pixel_size_y))
 
                     band_in = orig_ds.GetRasterBand(1)
                     data = band_in.ReadAsArray(x_offset, y_offset, x_res, y_res)
@@ -422,18 +434,18 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, geom, start_
                             max_val = aggregate['aggregation_max']
 
                             if min_val is not None:
-                                min_val_scaled = (min_val - scale_offset) / scale_factor
+                                min_val_scaled = old_div((min_val - scale_offset), scale_factor)
                                 mxrange = ma.masked_less(mxnodata, min_val_scaled)
 
                                 # See ES2-271
                                 if max_val is not None:
                                     # Scale threshold from physical to digital value
-                                    max_val_scaled = (max_val - scale_offset) / scale_factor
+                                    max_val_scaled = old_div((max_val - scale_offset), scale_factor)
                                     mxrange = ma.masked_greater(mxrange, max_val_scaled)
 
                             elif max_val is not None:
                                 # Scale threshold from physical to digital value
-                                max_val_scaled = (max_val - scale_offset) / scale_factor
+                                max_val_scaled = old_div((max_val - scale_offset), scale_factor)
                                 mxrange = ma.masked_greater(mxnodata, max_val_scaled)
 
                             if aggregate['aggregation_type'] == 'percent':
@@ -444,13 +456,13 @@ def getTimeseries(productcode, subproductcode, version, mapsetcode, geom, start_
                                 # 'surface'
                                 # Estimate 'average' Latitude
                                 y_avg = (y_min + y_max)/2.0
-                                pixelAvgArea = area_km_equator * math.cos(y_avg / 180 * math.pi)
+                                pixelAvgArea = area_km_equator * math.cos(old_div(y_avg, 180) * math.pi)
                                 meanResult = float(mxrange.count()) * pixelAvgArea
                             elif aggregate['aggregation_type'] == 'precip':
                                 # 'surface'
                                 # Estimate 'average' Latitude
                                 y_avg = (y_min + y_max) / 2.0
-                                pixelAvgArea = area_km_equator * math.cos(y_avg / 180 * math.pi)
+                                pixelAvgArea = area_km_equator * math.cos(old_div(y_avg, 180) * math.pi)
                                 n_pixels = mxnodata.count()
                                 avg_precip = mxnodata.mean()
                                 # Result is in km * km * mmm i.e. 1E3 m*m*m -> we divide by 1E3 to get 1E6 m*m*m

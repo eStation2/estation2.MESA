@@ -1,3 +1,9 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
 from unittest import TestCase
 from lib.python.image_proc.find_and_clip_file import *
 
@@ -32,14 +38,14 @@ class TestClip(TestCase):
         output_file = self.output_dir+os.path.basename(requested_file)
 
         if os.path.exists(requested_file):
-            print('Requested file exists, no need to clip. Exit')
+            print ('Requested file exists, no need to clip. Exit')
             exit()
 
         larger_file = do_find_larger(requested_file, output_mapset)
         if larger_file is not '':
             do_clip(larger_file, output_file, output_mapset)
         else:
-            print('ERROR: No any file found. Exit')
+            print ('ERROR: No any file found. Exit')
             exit()
 
         # Copy input file to output dir (for checking)
@@ -66,14 +72,14 @@ class TestClip(TestCase):
         output_file=self.output_dir+os.path.basename(requested_file)
 
         if os.path.exists(requested_file):
-            print('Requested file exists, no need to clip. Exit')
+            print ('Requested file exists, no need to clip. Exit')
             exit()
 
         larger_file = do_find_larger(requested_file, output_mapset)
         if larger_file is not '':
             do_clip(larger_file, output_file, output_mapset)
         else:
-            print('ERROR: No any file found. Exit')
+            print ('ERROR: No any file found. Exit')
             exit()
 
         # Copy input file to output dir (for checking)
@@ -100,14 +106,14 @@ class TestClip(TestCase):
         output_file=self.output_dir+os.path.basename(requested_file)
 
         if os.path.exists(requested_file):
-            print('Requested file exists, no need to clip. Exit')
+            print ('Requested file exists, no need to clip. Exit')
             exit()
 
         larger_file = do_find_larger(requested_file, output_mapset)
         if larger_file is not '':
             do_clip(larger_file, output_file, output_mapset)
         else:
-            print('ERROR: No any file found. Exit')
+            print ('ERROR: No any file found. Exit')
             exit()
 
         # Copy input file to output dir (for checking)

@@ -1,3 +1,10 @@
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from builtins import open
+from future import standard_library
+standard_library.install_aliases()
 starting_files = [("a.1.fastq", "a.2.fastq"),
                   ("b.1.fastq", "b.2.fastq"),
                   ("c.1.fastq", "c.2.fastq")]

@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 #
 #	purpose: Define a processing chain for 'precipitation-like' products (by using ruffus)
 #	author:  M.Clerici & Jurriaan van't Klooster
@@ -7,6 +11,11 @@
 #
 
 # Source generic modules
+from builtins import open
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import os, time, sys
 import tempfile
 import shutil
@@ -17,7 +26,7 @@ from lib.python import functions
 from lib.python.image_proc import raster_image_math
 from lib.python import es_logging as log
 from config import es_constants
-import proc_functions
+from apps.processing import proc_functions
 
 # Import third-party modules
 from ruffus import *

@@ -1,15 +1,22 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import open
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 __author__ = "Bruno Combal - MESA"
 __license__ = "GNU General Public License version 3"
 __date__ = "20 May 2016"
 __version__ = "0.2"
 
 import os, re, sys
-import json
 import requests
 import json
-from urlparse import urljoin
-from HTMLParser import HTMLParser
-from lxml import etree
+from urllib.parse import urljoin
+# from html.parser import HTMLParser
+# from lxml import etree
 import logging
 
 # Make functions silent
@@ -165,7 +172,7 @@ def isRaster(workspace, coverage):
     headers = {'Content-type' : 'application/json'}
     request_url = urljoin(restURL, resource)
     thisRaster = None
-    print request_url
+    print (request_url)
     try:
         thisRaster = requests.get(
             request_url,
@@ -173,7 +180,7 @@ def isRaster(workspace, coverage):
             auth = credential
             )
     except:
-        print 'geoserverREST:isRaster failed.'
+        print ('geoserverREST:isRaster failed.')
         return False
 
     if thisRaster.status_code == requests.codes.ok:
@@ -209,7 +216,7 @@ def registerRaster(workspace, coverageName, filepath, layerName, SLD=None):
         thisCoverage.raise_for_status()
 
     except:
-        print 'Error when creating coverage'
+        print ('Error when creating coverage')
         return True
     else:
         pass
@@ -233,7 +240,7 @@ def registerRaster(workspace, coverageName, filepath, layerName, SLD=None):
         thisLink.raise_for_status()
 
     except:
-        print 'Error when linking file to coverage. Remove Coverage store'
+        print ('Error when linking file to coverage. Remove Coverage store')
         # Remove the Coverage store
         commandString = 'curl -s -u {0}:{1} -X DELETE {2}workspaces/{3}/coveragestores/{4}.html'.format(restLogin, restPassword, restURL, workspace, coverageName)
         response = os.popen(commandString).read()
@@ -280,9 +287,9 @@ def setDefaultStyle(layerName, SLD):
 
 
 if __name__ == "__main__":
-    print "This file is a library"
-    print "install it in your python library path, then use"
-    print "import geoserverREST"
-    print "in your python code"
+    print ("This file is a library")
+    print ("install it in your python library path, then use")
+    print ("import geoserverREST")
+    print ("in your python code")
 
     sys.exit(0)

@@ -1,3 +1,10 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
+from builtins import open
+from future import standard_library
+standard_library.install_aliases()
 __author__ = 'venkavi'
 
 #
@@ -24,7 +31,8 @@ ds=fd['latitude']
 data_read64=np.zeros(ds.shape,dtype=float)
 ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
 latitude=ds.value/1000000.0
-print 'The min/avg/max for latitude in {} are: {}/{}/{}'.format(geo, np.min(latitude),np.mean(latitude),np.max(latitude))
+print ('The min/avg/max for latitude in {} are: {}/{}/{}'.format(geo, np.min(latitude), np.mean(latitude),
+                                                                np.max(latitude)))
 
 output_file = output_dir+'latitude.tif'
 output_driver = gdal.GetDriverByName('GTiff')
@@ -40,7 +48,8 @@ ds=fd['longitude']
 data_read64=np.zeros(ds.shape,dtype=float)
 ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
 longitude=ds.value/1000000.0
-print 'The min/avg/max for longitude in {} are: {}/{}/{}'.format(geo, np.min(longitude),np.mean(longitude),np.max(longitude))
+print ('The min/avg/max for longitude in {} are: {}/{}/{}'.format(geo, np.min(longitude), np.mean(longitude),
+                                                                 np.max(longitude)))
 
 output_file = output_dir+'longitude.tif'
 output_driver = gdal.GetDriverByName('GTiff')
@@ -92,7 +101,7 @@ fd.close()
 # command = 'gdalwarp -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
 #     lon_min, lat_min, lon_max, lat_max, x_size, y_size, input_vrt, output_tif)
 #
-# print(command)
+# print (command)
 # os.system(command)
 
 def geo_ref_s3_data(bandname=None):
@@ -110,8 +119,8 @@ def geo_ref_s3_data(bandname=None):
     data_read64 = np.zeros(ds.shape, dtype=float)
     ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
     reflectance = ds.value
-    print 'The min/avg/max for reflectance in {} are: {}/{}/{}'.format(geo, np.min(reflectance), np.mean(reflectance),
-                                                                       np.max(reflectance))
+    print ('The min/avg/max for reflectance in {} are: {}/{}/{}'.format(geo, np.min(reflectance), np.mean(reflectance),
+                                                                       np.max(reflectance)))
 
     un_proj_filename = bandname_without_ext + '_un_proj.tif'
     output_file = output_dir + un_proj_filename
@@ -139,7 +148,7 @@ def geo_ref_s3_data(bandname=None):
     command = 'gdalwarp -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
         lon_min, lat_min, lon_max, lat_max, x_size, y_size, input_vrt, output_tif)
 
-    print(command)
+    print (command)
     os.system(command)
 
 #gdalwarp -te 47.0 60.0 73.0 65.0 -s_srs "epsg:4326" -tr 0.00892857 0.00892857 -r near -t_srs "+proj=longlat +datum=WGS84" ${output_dir}SA3.vrt ${output_dir}${band}_gdalwarp_tr.tif

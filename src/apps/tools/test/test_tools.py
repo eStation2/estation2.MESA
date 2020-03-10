@@ -1,3 +1,9 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
 from unittest import TestCase
 from apps.tools.convert_to_ecoagris import *
 from lib.python import es_logging as log
@@ -36,13 +42,13 @@ class TestEcoagris(TestCase):
             logger.error('Vector layer file does not exist: %s' % vectorlayer)
 
 
-        print(" \n  Results for Product  : {}".format(ecoagric_record["productcode"]))
-        print("  Results for Version  : {}".format(ecoagric_record["version"]))
-        print("  Results for Sprod    : {}".format(ecoagric_record["subproductcode"]))
-        print("  Results for date     : {}".format(ecoagric_record["product_date"]))
-        print("  Results for RegionLvl: {}".format(ecoagric_record["regionlevel"]))
-        print("  Results for RegionID : {}".format(ecoagric_record["regionid"]))
-        print("  Value is             : {}".format(ecoagric_record["tsvalue"]))
+        print (" \n  Results for Product  : {}".format(ecoagric_record["productcode"]))
+        print ("  Results for Version  : {}".format(ecoagric_record["version"]))
+        print ("  Results for Sprod    : {}".format(ecoagric_record["subproductcode"]))
+        print ("  Results for date     : {}".format(ecoagric_record["product_date"]))
+        print ("  Results for RegionLvl: {}".format(ecoagric_record["regionlevel"]))
+        print ("  Results for RegionID : {}".format(ecoagric_record["regionid"]))
+        print ("  Value is             : {}".format(ecoagric_record["tsvalue"]))
 
         self.assertAlmostEqual(ecoagric_record["tsvalue"],0.65758685521452676)
 
@@ -73,13 +79,13 @@ class TestEcoagris(TestCase):
             logger.error('Vector layer file does not exist: %s' % vectorlayer)
 
 
-        print(" \n  Results for Product  : {}".format(ecoagric_record["productcode"]))
-        print("  Results for Version  : {}".format(ecoagric_record["version"]))
-        print("  Results for Sprod    : {}".format(ecoagric_record["subproductcode"]))
-        print("  Results for date     : {}".format(ecoagric_record["product_date"]))
-        print("  Results for RegionLvl: {}".format(ecoagric_record["regionlevel"]))
-        print("  Results for RegionID : {}".format(ecoagric_record["regionid"]))
-        print("  Value is             : {}".format(ecoagric_record["tsvalue"]))
+        print (" \n  Results for Product  : {}".format(ecoagric_record["productcode"]))
+        print ("  Results for Version  : {}".format(ecoagric_record["version"]))
+        print ("  Results for Sprod    : {}".format(ecoagric_record["subproductcode"]))
+        print ("  Results for date     : {}".format(ecoagric_record["product_date"]))
+        print ("  Results for RegionLvl: {}".format(ecoagric_record["regionlevel"]))
+        print ("  Results for RegionID : {}".format(ecoagric_record["regionid"]))
+        print ("  Value is             : {}".format(ecoagric_record["tsvalue"]))
 
         self.assertAlmostEqual(ecoagric_record["tsvalue"],13.978191148171906)
 
@@ -111,12 +117,12 @@ class TestEcoagris(TestCase):
             logger.error('Vector layer file does not exist: %s' % vectorlayer)
 
 
-        print(" \n  Results for Product  : {}".format(ecoagric_record["productcode"]))
-        print("  Results for Version  : {}".format(ecoagric_record["version"]))
-        print("  Results for Sprod    : {}".format(ecoagric_record["subproductcode"]))
-        print("  Results for date     : {}".format(ecoagric_record["product_date"]))
-        print("  Results for RegionLvl: {}".format(ecoagric_record["regionlevel"]))
-        print("  Results for RegionID : {}".format(ecoagric_record["regionid"]))
-        print("  Value is             : {}".format(ecoagric_record["tsvalue"]))
+        print (" \n  Results for Product  : {}".format(ecoagric_record["productcode"]))
+        print ("  Results for Version  : {}".format(ecoagric_record["version"]))
+        print ("  Results for Sprod    : {}".format(ecoagric_record["subproductcode"]))
+        print ("  Results for date     : {}".format(ecoagric_record["product_date"]))
+        print ("  Results for RegionLvl: {}".format(ecoagric_record["regionlevel"]))
+        print ("  Results for RegionID : {}".format(ecoagric_record["regionid"]))
+        print ("  Value is             : {}".format(ecoagric_record["tsvalue"]))
 
         self.assertAlmostEqual(ecoagric_record["tsvalue"],371.32997537572163)

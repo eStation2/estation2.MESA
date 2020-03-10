@@ -1,3 +1,9 @@
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
 _author__ = "Marco Clerici"
 
 import os, time
@@ -11,7 +17,7 @@ logger = log.my_logger(__name__)
 do_start = True
 dry_run  = False
 service  = False
-only_source = 'GSFC:CGI:MODIS:CHLA:1D' #'THEIA:HYDRO:LEGOS:WATERLEVEL'  # 'JRC:S3A:WRR'
+only_source = None  # 'JRC:S3A:WRR'
 
 # service is always False because this module is used by the windows version or for testing
 # ToDo: The code under the if statement can be deleted, service_get_internet.py is now used by non windows versions

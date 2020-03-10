@@ -5,11 +5,21 @@
 
 # Translation table to assign a different LayerName (e.g. for SADC).
 # Entry is 'product'_'subproduct'
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import unicode_literals
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from past.utils import old_div
 import os
 import xml.etree.cElementTree as ET
 from database import querydb
 from lib.python import functions
-import geoserverREST
+from apps.es2system.GeoPortal import geoserverREST
 import subprocess
 import pipes
 from lib.python import es_logging as log
@@ -49,7 +59,7 @@ def setWorkspaceName(service, product, subproduct, version, mapset, nameType='fu
                "productsubproductmapsetversion":'{0}_{1}_{2}_{3}'.format(product, subproduct, mapset, version.replace('.','_'))
                }
 
-    if nameType in wrkList.keys():
+    if nameType in list(wrkList.keys()):
         return wrkList[nameType]
     else:
         return wrkList["full"]
@@ -179,7 +189,7 @@ def createSLD(product, version, subproduct, output_file=None):
                 b = color_rgb[2]
                 color_html = rgb2html(color_rgb)
 
-                to_value = step.to_step / scale_factor
+                to_value = old_div(step.to_step, scale_factor)
 
                 # Modify steps
                 ColorMap[istep].set('quantity',str(to_value))
@@ -248,7 +258,7 @@ def existsRemote(host, path, user=None):
     else:
         # MC outtext=['file not found','file exists']
         outtext=['file exists','file not found']
-        print 'status={}, {}'.format(status,outtext[status])
+        print ('status={}, {}'.format(status, outtext[status]))
 
     return not(status)
 

@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 #
 #	purpose: Define the get CODA EUM data routine
 #	author:  Vijay Charan
@@ -5,14 +9,16 @@
 #   descr:	 Gets data from CODA EUM
 
 
+from future import standard_library
+standard_library.install_aliases()
 import requests
 # import pycurl
 
 import json
 import os
-import re
-from urlparse import urljoin
-import datetime
+# import re
+# from urlparse import urljoin
+# import datetime
 from lib.python import es_logging as log
 from config import es_constants
 logger = log.my_logger(__name__)
@@ -77,7 +83,7 @@ def coda_getlists(datetime_start=None, motu_client_dic='', template=''):
         list_links
 
     except:
-        print 'Error when creating uuid list'
+        print ('Error when creating uuid list')
         return True
     else:
         return list_links

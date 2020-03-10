@@ -1,3 +1,11 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import open
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 __author__ = 'venkavi'
 
 #
@@ -101,7 +109,7 @@ import time
 # command = 'gdalwarp -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
 #     lon_min, lat_min, lon_max, lat_max, x_size, y_size, input_vrt, output_tif)
 #
-# print(command)
+# print (command)
 # os.system(command)
 
 def pre_process_slstr_sst(subproducts=None, input_file=None, output_dir=None, input_dir=None):
@@ -117,8 +125,8 @@ def pre_process_slstr_sst(subproducts=None, input_file=None, output_dir=None, in
     data_read64 = np.zeros(ds.shape, dtype=float)
     ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
     latitude = ds.value
-    print 'The min/avg/max for latitude in {} are: {}/{}/{}'.format(input_file, np.min(latitude), np.mean(latitude),
-                                                                    np.max(latitude))
+    print ('The min/avg/max for latitude in {} are: {}/{}/{}'.format(input_file, np.min(latitude), np.mean(latitude),
+                                                                    np.max(latitude)))
 
     output_file = output_dir + 'latitude.tif'
     output_driver = gdal.GetDriverByName('GTiff')
@@ -133,8 +141,8 @@ def pre_process_slstr_sst(subproducts=None, input_file=None, output_dir=None, in
     data_read64 = np.zeros(ds.shape, dtype=float)
     ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
     longitude = ds.value
-    print 'The min/avg/max for longitude in {} are: {}/{}/{}'.format(input_file, np.min(longitude), np.mean(longitude),
-                                                                     np.max(longitude))
+    print ('The min/avg/max for longitude in {} are: {}/{}/{}'.format(input_file, np.min(longitude), np.mean(longitude),
+                                                                     np.max(longitude)))
     output_file = output_dir + 'longitude.tif'
     output_driver = gdal.GetDriverByName('GTiff')
     orig_size_x = longitude.shape[1]
@@ -151,8 +159,9 @@ def pre_process_slstr_sst(subproducts=None, input_file=None, output_dir=None, in
         data_read64 = np.zeros(ds.shape, dtype=float)
         ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
         seasurfacetemp = ds.value
-        print 'The min/avg/max for seasurfacetemp in {} are: {}/{}/{}'.format(input_file, np.min(seasurfacetemp), np.mean(seasurfacetemp),
-                                                                           np.max(seasurfacetemp))
+        print ('The min/avg/max for seasurfacetemp in {} are: {}/{}/{}'.format(input_file, np.min(seasurfacetemp),
+                                                                              np.mean(seasurfacetemp),
+                                                                              np.max(seasurfacetemp)))
 
         un_proj_filename = sprod + '_un_proj.tif'
         output_file = output_dir + un_proj_filename
@@ -186,7 +195,7 @@ def pre_process_slstr_sst(subproducts=None, input_file=None, output_dir=None, in
         command = 'gdalwarp -dstnodata "-32768" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
             lon_min, lat_min, lon_max, lat_max, x_size, y_size, input_vrt, output_tif)
 
-        print(command)
+        print (command)
         os.system(command)
 
         fd.close()

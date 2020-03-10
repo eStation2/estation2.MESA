@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 __author__ = "Jurriaan van 't Klooster"
 
 
@@ -25,8 +31,8 @@ class TestQuerydb(TestCase):
         }
 
         userFromDB = querydb.checkUser(user_info)
-        print userFromDB.get('userlevel')
-        print userFromDB
+        print (userFromDB.get('userlevel'))
+        print (userFromDB)
         self.assertEqual(1, 1)
 
 
@@ -36,7 +42,7 @@ class TestQuerydb(TestCase):
 
         product_native = querydb.get_product_native(productcode, version)
         # print product_native
-        print product_native[0]['category_id']
+        print (product_native[0]['category_id'])
         self.assertEqual(1, 1)
 
 
@@ -60,7 +66,7 @@ class TestQuerydb(TestCase):
             "graphtype": 'cumulative'
         }
         result = querydb.update_yaxe(params)
-        print result
+        print (result)
         self.assertEqual(1, 1)
 
 
@@ -70,7 +76,7 @@ class TestQuerydb(TestCase):
                    "version": 'V1.4'}
 
         result = querydb.get_product_timeseries_drawproperties(product, 'jurvtk', 'false', 'xy', '-1', 'default')
-        print result
+        print (result)
         self.assertEqual(1, 1)
 
     # Commented: not working on 14.3.19 (MC)
@@ -87,14 +93,14 @@ class TestQuerydb(TestCase):
         if spirits.__len__() > 0:
             for row in spirits:
                 row_dict = functions.row2dict(row)
-                print row_dict
+                print (row_dict)
 
         self.assertEqual(1, 1)
 
     def test_set_thema(self):
         themaid = 'AGRYHMET'
         themaset = querydb.set_thema(themaid)
-        print themaset
+        print (themaset)
 
         self.assertEqual(True, themaset)
 
@@ -102,9 +108,9 @@ class TestQuerydb(TestCase):
 
         i18n = querydb.get_i18n(lang='fra')
         len = i18n.__len__()
-        print len
+        print (len)
         for label, langtranslation in i18n:
-            print label + ' ' + langtranslation
+            print (label + ' ' + langtranslation)
 
         self.assertEqual(1, 1)
 
@@ -113,7 +119,7 @@ class TestQuerydb(TestCase):
         languages = querydb.get_languages()
         logger.info("Languages active are: %s", languages)
         for language in languages:
-            print language.langcode + ' ' + language.langdescription
+            print (language.langcode + ' ' + language.langdescription)
 
         self.assertEqual(1, 1)
 
@@ -128,7 +134,7 @@ class TestQuerydb(TestCase):
         logger.info("Time series draw properties are: %s", timeseries_yaxes)
         axes = len(timeseries_yaxes)
         for timeseries_product in timeseries_yaxes:
-            print timeseries_product.title
+            print (timeseries_product.title)
 
         self.assertEqual(1, 1)
 
@@ -138,7 +144,7 @@ class TestQuerydb(TestCase):
         timeseries_drawproperties = querydb.get_product_timeseries_drawproperties(product)
         logger.info("Time series draw properties are: %s", timeseries_drawproperties)
         for timeseries_product in timeseries_drawproperties:
-            print timeseries_product.productcode
+            print (timeseries_product.productcode)
 
         self.assertEqual(1, 1)
 
@@ -150,7 +156,7 @@ class TestQuerydb(TestCase):
 
         update_product = querydb.update_product_info(productinfo)
 
-        print update_product
+        print (update_product)
 
     def test_get_eumetcastsources(self):
         eumetcastsources = querydb.get_eumetcastsources()
@@ -172,7 +178,7 @@ class TestQuerydb(TestCase):
                                                                     version='2.0')
         logger.info("Time series products are: %s", timeseries_subproducts)
         for timeseries_product in timeseries_subproducts:
-            print timeseries_product
+            print (timeseries_product)
 
         self.assertEqual(1, 1)
 
@@ -180,7 +186,7 @@ class TestQuerydb(TestCase):
         timeseries_products = querydb.get_timeseries_products()
         logger.info("Time series products are: %s", timeseries_products)
         for timeseries_product in timeseries_products:
-            print timeseries_product
+            print (timeseries_product)
 
         self.assertEqual(1, 1)
 
@@ -188,7 +194,7 @@ class TestQuerydb(TestCase):
         internet_sources = querydb.get_active_internet_sources()
         logger.info("Internet sources are: %s", internet_sources)
         for internet_source in internet_sources:
-            print internet_source.url
+            print (internet_source.url)
 
         self.assertEqual(1, 1)
 
@@ -197,7 +203,7 @@ class TestQuerydb(TestCase):
         eumetcast_sources = querydb.get_eumetcast_sources()
         logger.info("Eumetcast sources are: %s", eumetcast_sources)
         for row in eumetcast_sources:
-            print row
+            print (row)
 
         self.assertEqual(1, 1)
 
@@ -222,7 +228,7 @@ class TestQuerydb(TestCase):
 
         logger.info("Internet source description is: %s", datasource_descr)
         for row in datasource_descr:
-            print row
+            print (row)
 
         self.assertEqual(1, 1)
 
@@ -233,7 +239,7 @@ class TestQuerydb(TestCase):
                                                       version='undefined')
         logger.info("Product sources are: %s", product_sources)
         for row in product_sources:
-            print row
+            print (row)
 
         self.assertEqual(1, 1)
 
@@ -244,7 +250,7 @@ class TestQuerydb(TestCase):
                                                       version='spot-v1')
         logger.info("Product sources are: %s", product_sources)
         for row in product_sources:
-            print row
+            print (row)
 
         self.assertEqual(1, 1)
 
@@ -254,7 +260,7 @@ class TestQuerydb(TestCase):
                                                                 version='undefined')
         logger.info("All ingestions of product are: %s", ingestion_subproduct)
         for row in ingestion_subproduct:
-            print row
+            print (row)
 
         self.assertEqual(1, 1)
 
@@ -263,7 +269,7 @@ class TestQuerydb(TestCase):
         ingestion_product = querydb.get_ingestion_product(allrecs=True)
         logger.info("Active ingestions of product are: %s", ingestion_product)
         for row in ingestion_product:
-            print row
+            print (row)
 
         self.assertEqual(1, 1)
 
@@ -361,7 +367,7 @@ class TestQuerydb(TestCase):
                                                    version='2.0')
         logger.info("Product OUT info: %s", product_out)
         for row in product_out:
-            print row
+            print (row)
 
         self.assertEqual(1, 1)
         self.assertEqual(1, 1)
@@ -373,29 +379,29 @@ class TestQuerydb(TestCase):
         product = querydb.get_products_acquisition(activated=None)
         logger.info("Active products: %s", product)
         for row in product:
-            print row
+            print (row)
 
         product = querydb.get_products_acquisition(activated=False)
         logger.info("Non active products: %s", product)
         for row in product:
-            print row
+            print (row)
 
     def test_get_products(self):
 
         product = querydb.get_products(activated=True)
         logger.info("Active products: %s", product)
         for row in product:
-            print row
+            print (row)
 
         product = querydb.get_products(activated=False)
         logger.info("Non active products: %s", product)
         for row in product:
-            print row
+            print (row)
 
         product = querydb.get_products(masked=False)
         logger.info("Not masked products: %s", product)
         for row in product:
-            print row
+            print (row)
 
         self.assertEqual(1, 1)
 
@@ -413,7 +419,7 @@ class TestQuerydb(TestCase):
         dataacquisitions = querydb.get_dataacquisitions()
         logger.info("All Data Acquisitions: %s", dataacquisitions)
         for row in dataacquisitions:
-            print row
+            print (row)
 
         self.assertEqual(1, 1)
 
@@ -422,7 +428,7 @@ class TestQuerydb(TestCase):
         ingestions = querydb.get_ingestions()
         logger.info("All Ingestions: %s", ingestions)
         for row in ingestions:
-            print row
+            print (row)
 
         self.assertEqual(1, 1)
 
@@ -435,7 +441,7 @@ class TestQuerydb(TestCase):
                 TotSteps = row['totsteps']
                 TotColorLabels = row['totcolorlabels']
                 TotGroupLabels = row['totgrouplabels']
-                print row
+                print (row)
 
         self.assertEqual(1, 1)
 
@@ -445,7 +451,7 @@ class TestQuerydb(TestCase):
         logger.info("Legend info: %s", legend_info)
         if legend_info.__len__() > 0:
             for row in legend_info:
-                print row
+                print (row)
 
         self.assertEqual(1, 1)
 
@@ -455,7 +461,7 @@ class TestQuerydb(TestCase):
         logger.info("Legend info: %s", legend_steps)
         for row in legend_steps:
             color_rgb = row.color_rgb
-            print color_rgb.split(' ')
+            print (color_rgb.split(' '))
 
         self.assertEqual(1, 1)
 
@@ -464,7 +470,7 @@ class TestQuerydb(TestCase):
         product_legends = querydb.get_product_legends(productcode='vgt-ndvi', subproductcode='ndv', version='spot-v1')
         logger.info("Product Legends: %s", product_legends)
         for row in product_legends:
-            print row
+            print (row)
 
         self.assertEqual(1, 1)
 
@@ -473,8 +479,8 @@ class TestQuerydb(TestCase):
         processing_chains = querydb.get_processing_chains()
         logger.info("Processing chains: %s", processing_chains)
         for row in processing_chains:
-            print row.algorithm
-            print row.output_mapsetcode
+            print (row.algorithm)
+            print (row.output_mapsetcode)
 
         self.assertEqual(1, 1)
 
@@ -531,8 +537,8 @@ class TestQuerydb(TestCase):
         for row in processingchain_output_products:
             logger.info("row.productcode: %s", row.productcode)
             logger.info("row.subproductcode: %s", row.subproductcode)
-            print row.productcode
-            print row.subproductcode
+            print (row.productcode)
+            print (row.subproductcode)
 
         self.assertEqual(1, 1)
 
@@ -541,8 +547,8 @@ class TestQuerydb(TestCase):
         processing_chains = querydb.get_active_processing_chains()
         logger.info("Active processing chains: %s", processing_chains)
         for row in processing_chains:
-            print 'ID= '+str(row.process_id)
-            print 'Module:Method= '+row.algorithm + ':'+ row.derivation_method
+            print ('ID= '+str(row.process_id))
+            print ('Module:Method= '+row.algorithm + ':'+ row.derivation_method)
 
 
         self.assertEqual(1, 1)
@@ -553,10 +559,10 @@ class TestQuerydb(TestCase):
         input_products = querydb.get_processing_chain_products(process_id,type='input')
         logger.info("Processing chains id:%s", process_id)
         for row in input_products:
-            print 'Product Code     = '+str(row.productcode)
-            print 'Subproduct Code  = '+str(row.subproductcode)
-            print 'Version          = '+str(row.version)
-            print 'Mapset           = '+str(row.mapsetcode)
+            print ('Product Code     = '+str(row.productcode))
+            print ('Subproduct Code  = '+str(row.subproductcode))
+            print ('Version          = '+str(row.version))
+            print ('Mapset           = '+str(row.mapsetcode))
 
 
         self.assertEqual(1, 1)
@@ -567,10 +573,10 @@ class TestQuerydb(TestCase):
         output_products = querydb.get_processing_chain_products(process_id, type='output')
         logger.info("Processing chains id:%s", process_id)
         for row in output_products:
-            print 'Product Code     = '+str(row.productcode)
-            print 'Subproduct Code  = '+str(row.subproductcode)
-            print 'Version          = '+str(row.version)
-            print 'Mapset           = '+str(row.mapsetcode)
+            print ('Product Code     = '+str(row.productcode))
+            print ('Subproduct Code  = '+str(row.subproductcode))
+            print ('Version          = '+str(row.version))
+            print ('Mapset           = '+str(row.mapsetcode))
 
         self.assertEqual(1, 1)
 

@@ -1,9 +1,22 @@
 #!/usr/bin/python
 
-#if __name__ == '__main__' and __package__ is None:
+# if __name__ == '__main__' and __package__ is None:
 #    from os import sys, path
 #    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import print_function
+from builtins import int
+from builtins import open
+from future import standard_library
+standard_library.install_aliases()
+from builtins import map
+from builtins import chr
+from builtins import str
+from builtins import range
+from builtins import object
 import sys
 import os
 
@@ -18,31 +31,27 @@ import datetime
 import json
 import glob
 import time
-import calendar
-import numpy as NP
 import webpy_esapp_helpers
 
 from config import es_constants
 from database import querydb
 from database import crud
-
 from apps.acquisition import get_eumetcast
-# from apps.acquisition import acquisition
-# from apps.processing import processing      # Comment in WINDOWS version!
 from apps.productmanagement.datasets import Dataset
 from apps.es2system import es2system
-# from apps.productmanagement.datasets import Frequency
 from apps.productmanagement.products import Product
 from apps.analysis import generateLegendHTML
+# from apps.productmanagement.datasets import Frequency
 # from apps.analysis.getTimeseries import (getTimeseries, getFilesList)
-from multiprocessing import (Process, Queue)
+# from multiprocessing import (Process, Queue)
+# from apps.acquisition import acquisition
+# from apps.processing import processing      # Comment in WINDOWS version!
 
 from lib.python import functions
 from lib.python import es_logging as log
 from lib.python import reloadmodules
 
 logger = log.my_logger(__name__)
-
 
 WEBPY_COOKIE_NAME = "webpy_session_id"
 
@@ -221,15 +230,17 @@ urls = (
 
 app = web.application(urls, globals(), autoreload=True)
 application = app.wsgifunc()
+
+
 # session = web.session.Session(app, web.session.DiskStore('../logs/mstmp/webpySessions'))
 
 
-class EsApp:
+class EsApp(object):
     def __init__(self):
         self.lang = "eng"
 
     def GET(self):
-        #return web.ctx
+        # return web.ctx
         getparams = web.input()
         if hasattr(getparams, "lang"):
             # print getparams['lang']
@@ -257,7 +268,7 @@ class EsApp:
         #     return render.index()
 
 
-class Register:
+class Register(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -285,7 +296,7 @@ class Register:
         return createstatus
 
 
-class Users:
+class Users(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -308,12 +319,12 @@ class Users:
 
                 user_info_json = json.dumps(users_dict_all,
                                             ensure_ascii=False,
-                                            encoding='utf-8',
+                                            # encoding='utf-8',
                                             sort_keys=False,
                                             indent=4,
                                             separators=(', ', ': '))
 
-                users_json = '{"success":true, "users":'+ user_info_json + '}'
+                users_json = '{"success":true, "users":' + user_info_json + '}'
             else:
                 users_json = '{"success":true, "message":"No users defined in the DB!"}'
 
@@ -323,7 +334,7 @@ class Users:
         return users_json
 
 
-class Login:
+class Login(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -350,12 +361,12 @@ class Login:
 
                     user_info_json = json.dumps(user_info,
                                                 ensure_ascii=False,
-                                                encoding='utf-8',
+                                                # encoding='utf-8',
                                                 sort_keys=True,
                                                 indent=4,
                                                 separators=(', ', ': '))
                     # print user_info_json
-                    login_json = '{"success":true, "user":'+ user_info_json + '}'
+                    login_json = '{"success":true, "user":' + user_info_json + '}'
                     # print login_json
                 else:
                     login_json = '{"success":false, "error":"Username or password incorrect!"}'
@@ -368,26 +379,27 @@ class Login:
         return login_json
 
 
-class checkECASlogin:
+class checkECASlogin(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
 
     def POST(self):
         import pycurl
-        import StringIO
+        import io
         import xml.etree.ElementTree as ET
         userInfoDict = {}
 
         params = web.input()
 
-        ECAS_ticketPage = 'https://webgate.ec.europa.eu/cas/laxValidate?ticket='+str(params.ticket)+'&userDetails=true&service='+str(params.strCall)
+        ECAS_ticketPage = 'https://webgate.ec.europa.eu/cas/laxValidate?ticket=' + str(
+            params.ticket) + '&userDetails=true&service=' + str(params.strCall)
 
         try:
             c = pycurl.Curl()
             # c.setopt(c.VERBOSE, True)
             c.setopt(pycurl.URL, ECAS_ticketPage)
-            b = StringIO.StringIO()
+            b = io.StringIO()
             c.setopt(pycurl.WRITEFUNCTION, b.write)
             c.perform()
 
@@ -426,7 +438,8 @@ class checkECASlogin:
             try:
                 user_info = {
                     'userid': userInfoDict.get('uid'),
-                    'username': userInfoDict.get('firstName', 'User name') + ' ' + userInfoDict.get('lastName', 'User lastname'),
+                    'username': userInfoDict.get('firstName', 'User name') + ' ' + userInfoDict.get('lastName',
+                                                                                                    'User lastname'),
                     'password': userInfoDict.get('uid'),
                     'userlevel': 2,
                     'email': userInfoDict.get('email', 'User email'),
@@ -447,19 +460,19 @@ class checkECASlogin:
 
                 user_info_json = json.dumps(user_info,
                                             ensure_ascii=False,
-                                            encoding='utf-8',
+                                            # encoding='utf-8',
                                             sort_keys=True,
                                             indent=4,
                                             separators=(', ', ': '))
 
-                login_json = '{"success":true, "user":'+ user_info_json + message + '}'
+                login_json = '{"success":true, "user":' + user_info_json + message + '}'
             except:
                 login_json = '{"success":false, "error":"Error reading login data!"}'
 
         return login_json
 
 
-class GetLogos:
+class GetLogos(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -469,44 +482,47 @@ class GetLogos:
         return logos_json
 
 
-class ImportLogo:
+class ImportLogo(object):
     def __init__(self):
         self.lang = "eng"
 
     def POST(self):
         # getparams = json.loads(web.data())  # get PUT data
-        getparams = web.input() # get POST data
+        getparams = web.input()  # get POST data
 
         logosfiledir = es_constants.es2globals['estation2_logos_dir']
-        if 'logofilename' in getparams: # to check if the file-object is created
+        if 'logofilename' in getparams:  # to check if the file-object is created
             try:
-                filepath=getparams.logofilename.replace('\\','/') # replaces the windows-style slashes with linux ones.
-                filename=filepath.split('/')[-1] # splits the and chooses the last part (the filename with extension)
+                filepath = getparams.logofilename.replace('\\',
+                                                          '/')  # replaces the windows-style slashes with linux ones.
+                filename = filepath.split('/')[-1]  # splits the and chooses the last part (the filename with extension)
 
                 # Separate base from extension
                 base, extension = os.path.splitext(filename)
 
                 # Initial new name
-                new_name = os.path.join(logosfiledir, filename).encode('utf-8')
+                new_name = os.path.join(logosfiledir, filename).encode('utf-8').decode()
                 new_name_final = logosfiledir + '/' + filename
 
                 if not os.path.exists(new_name):  # file does not exist in <layerfiledir>
-                    fout = open(new_name,'w') # creates the file where the uploaded file should be stored
-                    fout.write(getparams.logofile) # .read()  writes the uploaded file to the newly created file.
-                    fout.close() # closes the file, upload complete.
+                    fout = open(new_name, 'w')  # creates the file where the uploaded file should be stored
+                    fout.write(getparams.logofile)  # .read()  writes the uploaded file to the newly created file.
+                    fout.close()  # closes the file, upload complete.
                 else:  # file exists in <logosfiledir>
                     ii = 1
                     while True:
-                        new_name = os.path.join(logosfiledir, base + "_" + str(ii) + extension).encode('utf-8')
+                        new_name = os.path.join(logosfiledir, base + "_" + str(ii) + extension).encode('utf-8').decode()
                         new_name_final = os.path.join(logosfiledir, base + "_" + str(ii) + extension)
                         if not os.path.exists(new_name):
-                            fout = open(new_name,'w') # creates the file where the uploaded file should be stored
-                            fout.write(getparams.logofile) # .read()  writes the uploaded file to the newly created file.
-                            fout.close() # closes the file, upload complete.
+                            fout = open(new_name, 'w')  # creates the file where the uploaded file should be stored
+                            fout.write(
+                                getparams.logofile)  # .read()  writes the uploaded file to the newly created file.
+                            fout.close()  # closes the file, upload complete.
                             break
                         ii += 1
 
-                finalfilename = new_name_final.split('/')[-1] # splits the and chooses the last part (the filename with extension)
+                finalfilename = new_name_final.split('/')[
+                    -1]  # splits the and chooses the last part (the filename with extension)
                 success = True
             except:
                 success = False
@@ -514,14 +530,14 @@ class ImportLogo:
             success = False
 
         if success:
-            status = '{"success":"true", "filename":"'+ finalfilename + '","message":"Logo imported!"}'
+            status = '{"success":"true", "filename":"' + finalfilename + '","message":"Logo imported!"}'
         else:
             status = '{"success":false, "message":"An error occured while importing the logo!"}'
 
         return status
 
 
-class DeleteLogo:
+class DeleteLogo(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -534,7 +550,6 @@ class DeleteLogo:
                 'logo_id': getparams['logo']['logo_id'],
             }
 
-
             if self.crud_db.delete('logos', **logo):
                 status = '{"success":"true", "message":"Logo deleted!"}'
             else:
@@ -546,7 +561,7 @@ class DeleteLogo:
         return status
 
 
-class CreateLogo:
+class CreateLogo(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -560,9 +575,9 @@ class CreateLogo:
                 'logo_filename': getparams['logo']['logo_filename'],
                 'logo_description': getparams['logo']['logo_description'],
                 'active': getparams['logo']['active'],
-                'deletable': getparams['logo']['deletable'],
+                'deletable': functions.str_to_bool(getparams['logo']['deletable']),
                 'defined_by': getparams['logo']['defined_by'],
-                'isdefault': getparams['logo']['isdefault'],
+                'isdefault': functions.str_to_bool(getparams['logo']['isdefault']),
                 'orderindex_defaults': getparams['logo']['orderindex_defaults']
             }
 
@@ -577,7 +592,7 @@ class CreateLogo:
         return status
 
 
-class UpdateLogo:
+class UpdateLogo(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -589,13 +604,12 @@ class UpdateLogo:
                 'logo_id': getparams['logo']['logo_id'],
                 'logo_filename': getparams['logo']['logo_filename'],
                 'logo_description': getparams['logo']['logo_description'],
-                'active': getparams['logo']['active'],
-                'deletable': getparams['logo']['deletable'],
+                'active': functions.str_to_bool(getparams['logo']['active']),
+                'deletable': functions.str_to_bool(getparams['logo']['deletable']),
                 'defined_by': getparams['logo']['defined_by'],
-                'isdefault': getparams['logo']['isdefault'],
+                'isdefault': functions.str_to_bool(getparams['logo']['isdefault']),
                 'orderindex_defaults': getparams['logo']['orderindex_defaults']
             }
-
 
             if self.crud_db.update('logos', logo):
                 updatestatus = '{"success":"true", "message":"Logo updated!"}'
@@ -608,7 +622,7 @@ class UpdateLogo:
         return updatestatus
 
 
-class GetAssignedDatasets:
+class GetAssignedDatasets(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -622,7 +636,7 @@ class GetAssignedDatasets:
         return assigneddatasets_json
 
 
-class UnassignLegend:
+class UnassignLegend(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -631,7 +645,7 @@ class UnassignLegend:
         return webpy_esapp_helpers.UnassignLegend(params)
 
 
-class AssignLegends:
+class AssignLegends(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -640,7 +654,7 @@ class AssignLegends:
         return webpy_esapp_helpers.AssignLegends(params)
 
 
-class copyLegend:
+class copyLegend(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -649,7 +663,7 @@ class copyLegend:
         return webpy_esapp_helpers.copyLegend(params)
 
 
-class DeleteLegend:
+class DeleteLegend(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -658,7 +672,7 @@ class DeleteLegend:
         return webpy_esapp_helpers.DeleteLegend(params)
 
 
-class SaveLegend:
+class SaveLegend(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -667,16 +681,17 @@ class SaveLegend:
         return webpy_esapp_helpers.SaveLegend(params)
 
 
-class ExportLegend:
+class ExportLegend(object):
     def __init__(self):
         self.lang = "eng"
 
     def POST(self):
         params = web.input()
         filename = webpy_esapp_helpers.ExportLegend(params)
-        web.header('Content-Type', 'application/force-download')   # 'application/x-compressed')
+        web.header('Content-Type', 'application/force-download')  # 'application/x-compressed')
         web.header('Content-transfer-encoding', 'binary')
-        web.header('Content-Disposition', 'attachment; filename=' + os.path.basename(filename))  # force browser to show "Save as" dialog.
+        web.header('Content-Disposition',
+                   'attachment; filename=' + os.path.basename(filename))  # force browser to show "Save as" dialog.
         f = open(filename, 'rb')
         while 1:
             buf = f.read(1024 * 8)
@@ -686,7 +701,8 @@ class ExportLegend:
         f.close()
         os.remove(filename)
 
-class GetLegends:
+
+class GetLegends(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -695,7 +711,7 @@ class GetLegends:
         return webpy_esapp_helpers.GetLegends()
 
 
-class GetLegendClasses:
+class GetLegendClasses(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -709,22 +725,24 @@ class GetLegendClasses:
         return legendclasses_json
 
 
-class GetInstallationType:
+class GetInstallationType(object):
     def __init__(self):
         self.lang = "eng"
 
     def POST(self):
-        #return web.ctx
+        # return web.ctx
         getparams = web.input()
         systemsettings = functions.getSystemSettings()
 
-        typeinstallation_json = '{"success":"true", "typeinstallation":"'+systemsettings['type_installation'].lower() + \
-                                '", "role":"'+systemsettings['role'].lower() + '", "mode":"'+systemsettings['mode'].lower()+'"}'
+        typeinstallation_json = '{"success":"true", "typeinstallation":"' + systemsettings[
+            'type_installation'].lower() + \
+                                '", "role":"' + systemsettings['role'].lower() + '", "mode":"' + systemsettings[
+                                    'mode'].lower() + '"}'
 
         return typeinstallation_json
 
 
-class GetTimeseries:
+class GetTimeseries(object):
 
     def __init__(self):
         self.lang = "eng"
@@ -735,7 +753,7 @@ class GetTimeseries:
         return webpy_esapp_helpers.getGraphTimeseries(params)
 
 
-class TimeseriesProducts:
+class TimeseriesProducts(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -747,7 +765,7 @@ class TimeseriesProducts:
         return webpy_esapp_helpers.getTimeseriesProducts(force)
 
 
-class getUserWorkspaces:
+class getUserWorkspaces(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -756,7 +774,7 @@ class getUserWorkspaces:
         return webpy_esapp_helpers.getUserWorkspaces(params)
 
 
-class getRefWorkspaces:
+class getRefWorkspaces(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -765,7 +783,7 @@ class getRefWorkspaces:
         return webpy_esapp_helpers.getRefWorkspaces(params)
 
 
-class exportWorkspaces:
+class exportWorkspaces(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -773,35 +791,42 @@ class exportWorkspaces:
         params = web.input()
         workspaces_dict_all = []
 
-        # print(params)
+        # print (params)
         if hasattr(params, "workspaces"):
-            # print(params['workspaces'])
+            # print (params['workspaces'])
             workspaces = json.loads(params['workspaces'])
 
-            # print(isinstance(workspaces, dict))
-            # print(type(workspaces))
+            # print (isinstance(workspaces, dict))
+            # print (type(workspaces))
             for workspace in workspaces:
-                workspace['maps'] = webpy_esapp_helpers.getWorkspaceMaps(workspace['workspaceid'], workspace['userid'], True)
-                workspace['graphs'] = webpy_esapp_helpers.getWorkspaceGraphs(workspace['workspaceid'], workspace['userid'], True)
+                workspace['maps'] = webpy_esapp_helpers.getWorkspaceMaps(workspace['workspaceid'], workspace['userid'],
+                                                                         True)
+                workspace['graphs'] = webpy_esapp_helpers.getWorkspaceGraphs(workspace['workspaceid'],
+                                                                             workspace['userid'], True)
                 workspace['userid'] = ''
 
                 workspaces_dict_all.append(workspace)
 
-            workspaces_json = json.dumps(workspaces_dict_all, ensure_ascii=True, encoding='utf-8',
-                                         sort_keys=True, indent=4, separators=(', ', ': '))
+            workspaces_json = json.dumps(workspaces_dict_all,
+                                         ensure_ascii=True,
+                                         # encoding='utf-8',
+                                         sort_keys=True,
+                                         indent=4,
+                                         separators=(', ', ': '))
 
             workspaces_json = '{"workspaces":' + workspaces_json + '}'
-            # print(workspaces_json)
+            # print (workspaces_json)
 
             filename = 'exported_workspaces.json'
-            with open(es_constants.es2globals['base_tmp_dir']+filename, 'w+') as f:
+            with open(es_constants.es2globals['base_tmp_dir'] + filename, 'w+') as f:
                 f.write(workspaces_json)
             f.close()
 
-            web.header('Content-Type', 'text/html')   # 'application/x-compressed'  'application/force-download'
+            web.header('Content-Type', 'text/html')  # 'application/x-compressed'  'application/force-download'
             web.header('Content-transfer-encoding', 'binary')
-            web.header('Content-Disposition', 'attachment; filename=' + filename)  # force browser to show "Save as" dialog.
-            f = open(es_constants.es2globals['base_tmp_dir']+filename, 'rb')
+            web.header('Content-Disposition',
+                       'attachment; filename=' + filename)  # force browser to show "Save as" dialog.
+            f = open(es_constants.es2globals['base_tmp_dir'] + filename, 'rb')
             while 1:
                 buf = f.read(1024 * 8)
                 if not buf:
@@ -810,7 +835,7 @@ class exportWorkspaces:
             f.close()
 
 
-class importWorkspaces:
+class importWorkspaces(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -819,7 +844,7 @@ class importWorkspaces:
         return webpy_esapp_helpers.importWorkspaces(params)
 
 
-class getWorkspaceMapsAndGraphs:
+class getWorkspaceMapsAndGraphs(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -828,7 +853,7 @@ class getWorkspaceMapsAndGraphs:
         return webpy_esapp_helpers.getWorkspaceMapsAndGraphs(params)
 
 
-class SaveWorkspacePin:
+class SaveWorkspacePin(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -837,7 +862,7 @@ class SaveWorkspacePin:
         return webpy_esapp_helpers.saveWorkspacePin(params)
 
 
-class SaveWorkspaceName:
+class SaveWorkspaceName(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -846,7 +871,7 @@ class SaveWorkspaceName:
         return webpy_esapp_helpers.saveWorkspaceName(params)
 
 
-class saveWorkspaceInDefaultWS:
+class saveWorkspaceInDefaultWS(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -856,7 +881,7 @@ class saveWorkspaceInDefaultWS:
         return webpy_esapp_helpers.saveWorkspaceInDefaultWS(params)
 
 
-class SaveWorkspace:
+class SaveWorkspace(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -865,7 +890,7 @@ class SaveWorkspace:
         return webpy_esapp_helpers.saveWorkspace(params)
 
 
-class DeleteWorkspace:
+class DeleteWorkspace(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -892,7 +917,7 @@ class DeleteWorkspace:
         return status
 
 
-class GetMapTemplates:
+class GetMapTemplates(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -901,7 +926,7 @@ class GetMapTemplates:
         return webpy_esapp_helpers.getMapTemplates(params)
 
 
-class DeleteMapTemplate:
+class DeleteMapTemplate(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -919,7 +944,7 @@ class DeleteMapTemplate:
                 'userid': params['usermaptemplate']['userid'],
                 'workspaceid': defaultworkspaceid,
                 'map_tpl_id': params['usermaptemplate']['map_tpl_id']
-             }
+            }
 
             if self.crud_db.delete('user_map_templates', **maptemplatePK):
                 status = '{"success":"true", "message":"Map Template deleted!"}'
@@ -932,7 +957,7 @@ class DeleteMapTemplate:
         return status
 
 
-class __DeleteMapTemplate:
+class __DeleteMapTemplate(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -940,11 +965,11 @@ class __DeleteMapTemplate:
     def DELETE(self):
         getparams = json.loads(web.data())  # get PUT data
         # getparams = web.input() # get POST data
-        if 'usermaptemplate' in getparams:      # hasattr(getparams, "layer")
+        if 'usermaptemplate' in getparams:  # hasattr(getparams, "layer")
             maptemplatePK = {
                 'userid': getparams['usermaptemplate']['userid'],
                 'templatename': getparams['usermaptemplate']['templatename'],
-             }
+            }
 
             if self.crud_db.delete('map_templates', **maptemplatePK):
                 status = '{"success":"true", "message":"Map Template deleted!"}'
@@ -957,7 +982,7 @@ class __DeleteMapTemplate:
         return status
 
 
-class SaveMapTemplate:
+class SaveMapTemplate(object):
     def __init__(self):
         self.lang = "eng"
         # self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -967,7 +992,7 @@ class SaveMapTemplate:
         return webpy_esapp_helpers.saveMapTemplate(params)
 
 
-class __SaveMapTemplate:
+class __SaveMapTemplate(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -1029,7 +1054,7 @@ class __SaveMapTemplate:
         return createstatus
 
 
-class getGraphTemplates:
+class getGraphTemplates(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1038,7 +1063,7 @@ class getGraphTemplates:
         return webpy_esapp_helpers.getGraphTemplates(params)
 
 
-class DeleteGraphTemplate:
+class DeleteGraphTemplate(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -1056,7 +1081,7 @@ class DeleteGraphTemplate:
                 'userid': params['usergraphtemplate']['userid'],
                 'workspaceid': defaultworkspaceid,
                 'graph_tpl_id': params['usergraphtemplate']['graph_tpl_id'],
-             }
+            }
 
             if self.crud_db.delete('user_graph_templates', **graphtemplatePK):
                 status = '{"success":"true", "message":"Graph template deleted!"}'
@@ -1069,7 +1094,7 @@ class DeleteGraphTemplate:
         return status
 
 
-class saveGraphTemplate:
+class saveGraphTemplate(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1078,7 +1103,7 @@ class saveGraphTemplate:
         return webpy_esapp_helpers.saveGraphTemplate(params)
 
 
-class UpdateYaxe:
+class UpdateYaxe(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1098,7 +1123,7 @@ class UpdateYaxe:
         return yaxeproperties_json
 
 
-class GetTimeseriesDrawProperties:
+class GetTimeseriesDrawProperties(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1107,7 +1132,7 @@ class GetTimeseriesDrawProperties:
         return webpy_esapp_helpers.getTimeseriesDrawProperties(params)
 
 
-class CreateTimeseriesDrawProperties:
+class CreateTimeseriesDrawProperties(object):
     def __init__(self):
         self.lang = "eng"
         # self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -1117,7 +1142,7 @@ class CreateTimeseriesDrawProperties:
         return webpy_esapp_helpers.createTimeseriesDrawProperties(params)
 
 
-class UpdateTimeseriesDrawProperties:
+class UpdateTimeseriesDrawProperties(object):
     def __init__(self):
         self.lang = "eng"
         # self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -1127,7 +1152,7 @@ class UpdateTimeseriesDrawProperties:
         return webpy_esapp_helpers.updateTimeseriesDrawProperties(params)
 
 
-class GetGraphProperties:
+class GetGraphProperties(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1136,20 +1161,20 @@ class GetGraphProperties:
         return webpy_esapp_helpers.getGraphProperties(params)
 
 
-class UpdateGraphProperties:
+class UpdateGraphProperties(object):
     def __init__(self):
         self.lang = "eng"
         # self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
 
     def PUT(self):
         params = json.loads(web.data())  # get PUT data
-        extraparams = web.input()        # get userid, graph_tpl_id, graph_tpl_name and isTemplate parameters from GET data
+        extraparams = web.input()  # get userid, graph_tpl_id, graph_tpl_name and isTemplate parameters from GET data
         # params['graphproperty']['userid'] = extraparams.userid
         # params['graphproperty']['graph_tpl_name'] = extraparams.graph_tpl_name
         return webpy_esapp_helpers.updateGraphProperties(params, extraparams)
 
 
-class GetHelpFile:
+class GetHelpFile(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1183,10 +1208,12 @@ class GetHelpFile:
             contenttype = 'text/html'
             content_disposition_type = 'inline;'
 
-        web.header('Content-Type', contenttype)   # 'text/html'   'application/x-compressed'  'application/force-download' 'application/pdf'
+        web.header('Content-Type',
+                   contenttype)  # 'text/html'   'application/x-compressed'  'application/force-download' 'application/pdf'
         web.header('Content-transfer-encoding', 'binary')
         # web.header('Content-Disposition', 'attachment; filename=' + getparams['file'])  # force browser to autodownload or show "Save as" dialog.
-        web.header('Content-Disposition', content_disposition_type + ' filename= "' + getparams['file'] + '"')  # force browser to show "Save as" dialog.
+        web.header('Content-Disposition', content_disposition_type + ' filename= "' + getparams[
+            'file'] + '"')  # force browser to show "Save as" dialog.
 
         f = open(docfile, 'rb')
         while 1:
@@ -1197,7 +1224,7 @@ class GetHelpFile:
         f.close()
 
 
-class GetHelp:
+class GetHelp(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1220,7 +1247,7 @@ class GetHelp:
         else:
             lang_dir = 'EN/'
 
-        jsonfile = docs_dir+lang_dir + getparams['type'] + '_data_'+getparams['lang']+'.json'
+        jsonfile = docs_dir + lang_dir + getparams['type'] + '_data_' + getparams['lang'] + '.json'
 
         # print jsonfile
 
@@ -1230,7 +1257,7 @@ class GetHelp:
             jsonfile.close()
         else:
             docs_dir = es_constants.es2globals['base_dir'] + '/apps/help/userdocs/'
-            jsonfile = docs_dir+lang_dir + getparams['type'] + '_data_'+getparams['lang']+'.json'
+            jsonfile = docs_dir + lang_dir + getparams['type'] + '_data_' + getparams['lang'] + '.json'
             if os.path.isfile(jsonfile):
                 jsonfile = open(jsonfile, 'r')
                 filecontent_json = jsonfile.read()
@@ -1241,7 +1268,7 @@ class GetHelp:
         return filecontent_json
 
 
-class GetRequest:
+class GetRequest(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1276,19 +1303,19 @@ class GetRequest:
                                               high_frequency=int(getparams['high_frequency'])
                                               )
             request_json = json.dumps(request,
-                                   ensure_ascii=False,
-                                   sort_keys=True,
-                                   indent=4,
-                                   separators=(', ', ': '))
+                                      ensure_ascii=False,
+                                      sort_keys=True,
+                                      indent=4,
+                                      separators=(', ', ': '))
 
-            request_json = '{"success":"true", "request":'+request_json+'}'
+            request_json = '{"success":"true", "request":' + request_json + '}'
         else:
             request_json = '{"success":false, "error":"No parameters passed for request!"}'
 
         return request_json
 
 
-class getRequestsList:
+class getRequestsList(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1297,7 +1324,7 @@ class getRequestsList:
         return response_json
 
 
-class runPauseRequest:
+class runPauseRequest(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1310,7 +1337,7 @@ class runPauseRequest:
             else:
                 response_json = webpy_esapp_helpers.restartRequestJob(requestid)
         else:
-            response = {"success":False, "error":"No request info passed!"}
+            response = {"success": False, "error": "No request info passed!"}
             response_json = json.dumps(response,
                                        ensure_ascii=False,
                                        sort_keys=True,
@@ -1320,7 +1347,7 @@ class runPauseRequest:
         return response_json
 
 
-class createRequestJob:
+class createRequestJob(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1334,7 +1361,7 @@ class createRequestJob:
         return response_json
 
 
-class deleteRequestJob:
+class deleteRequestJob(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1349,7 +1376,7 @@ class deleteRequestJob:
         return response_json
 
 
-class SaveRequest:
+class SaveRequest(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1370,13 +1397,15 @@ class SaveRequest:
                 productcode = getparams['productcode']
                 version = getparams['version']
                 mapsetcode = getparams['mapsetcode']
-                requestfilename = getparams['productcode'] + '_' + getparams['version'] + '_' + getparams['mapsetcode'] + '_all_enabled_datasets'
+                requestfilename = getparams['productcode'] + '_' + getparams['version'] + '_' + getparams[
+                    'mapsetcode'] + '_all_enabled_datasets'
             elif getparams['level'] == 'dataset':
                 productcode = getparams['productcode']
                 version = getparams['version']
                 mapsetcode = getparams['mapsetcode']
                 subproductcode = getparams['subproductcode']
-                requestfilename = getparams['productcode'] + '_' + getparams['version'] + '_' + getparams['mapsetcode'] + '_' + getparams['subproductcode']
+                requestfilename = getparams['productcode'] + '_' + getparams['version'] + '_' + getparams[
+                    'mapsetcode'] + '_' + getparams['subproductcode']
 
             request = requests.create_request(productcode,
                                               version,
@@ -1387,23 +1416,24 @@ class SaveRequest:
                                               high_frequency=int(getparams['high_frequency'])
                                               )
             request_json = json.dumps(request,
-                                   ensure_ascii=False,
-                                   sort_keys=True,
-                                   indent=4,
-                                   separators=(', ', ': '))
+                                      ensure_ascii=False,
+                                      sort_keys=True,
+                                      indent=4,
+                                      separators=(', ', ': '))
 
             ts = time.time()
             st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H%M')
 
             requestfilename = requestfilename + '_' + st + '.req'
-            with open(es_constants.es2globals['requests_dir']+requestfilename, 'w+') as f:
+            with open(es_constants.es2globals['requests_dir'] + requestfilename, 'w+') as f:
                 f.write(request_json)
             f.close()
 
-            web.header('Content-Type', 'text/html')   # 'application/x-compressed'  'application/force-download'
+            web.header('Content-Type', 'text/html')  # 'application/x-compressed'  'application/force-download'
             web.header('Content-transfer-encoding', 'binary')
-            web.header('Content-Disposition', 'attachment; filename=' + requestfilename)  # force browser to show "Save as" dialog.
-            f = open(es_constants.es2globals['requests_dir']+requestfilename, 'rb')
+            web.header('Content-Disposition',
+                       'attachment; filename=' + requestfilename)  # force browser to show "Save as" dialog.
+            f = open(es_constants.es2globals['requests_dir'] + requestfilename, 'rb')
             while 1:
                 buf = f.read(1024 * 8)
                 if not buf:
@@ -1412,7 +1442,7 @@ class SaveRequest:
             f.close()
 
 
-class GetProjections:
+class GetProjections(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1427,15 +1457,15 @@ class GetProjections:
                 projections_dict_all.append(row_dict)
 
                 projections_json = json.dumps(projections_dict_all,
-                                         ensure_ascii=False,
-                                         encoding='utf-8',
-                                         sort_keys=True,
-                                         indent=4,
-                                         separators=(', ', ': '))
+                                              ensure_ascii=False,
+                                              # encoding='utf-8',
+                                              sort_keys=True,
+                                              indent=4,
+                                              separators=(', ', ': '))
 
-                projections_json = '{"success":"true", "total":'\
-                                   + str(projections.__len__())\
-                                   + ',"projections":'+projections_json+'}'
+                projections_json = '{"success":"true", "total":' \
+                                   + str(projections.__len__()) \
+                                   + ',"projections":' + projections_json + '}'
 
         else:
             projections_json = '{"success":false, "error":"No Projections defined!"}'
@@ -1443,7 +1473,7 @@ class GetProjections:
         return projections_json
 
 
-class GetResolutions:
+class GetResolutions(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1458,15 +1488,15 @@ class GetResolutions:
                 resolutions_dict_all.append(row_dict)
 
                 resolutions_json = json.dumps(resolutions_dict_all,
-                                         ensure_ascii=False,
-                                         encoding='utf-8',
-                                         sort_keys=True,
-                                         indent=4,
-                                         separators=(', ', ': '))
+                                              ensure_ascii=False,
+                                              # encoding='utf-8',
+                                              sort_keys=True,
+                                              indent=4,
+                                              separators=(', ', ': '))
 
-                resolutions_json = '{"success":"true", "total":'\
-                                   + str(resolutions.__len__())\
-                                   + ',"resolutions":'+resolutions_json+'}'
+                resolutions_json = '{"success":"true", "total":' \
+                                   + str(resolutions.__len__()) \
+                                   + ',"resolutions":' + resolutions_json + '}'
 
         else:
             resolutions_json = '{"success":false, "error":"No resolutions defined!"}'
@@ -1474,7 +1504,7 @@ class GetResolutions:
         return resolutions_json
 
 
-class GetPredefinedBboxes:
+class GetPredefinedBboxes(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1490,14 +1520,14 @@ class GetPredefinedBboxes:
 
                 bboxes_json = json.dumps(bboxes_dict_all,
                                          ensure_ascii=False,
-                                         encoding='utf-8',
+                                         # encoding='utf-8',
                                          sort_keys=True,
                                          indent=4,
                                          separators=(', ', ': '))
 
-                bboxes_json = '{"success":"true", "total":'\
-                                   + str(bboxes.__len__())\
-                                   + ',"bboxes":'+bboxes_json+'}'
+                bboxes_json = '{"success":"true", "total":' \
+                              + str(bboxes.__len__()) \
+                              + ',"bboxes":' + bboxes_json + '}'
 
         else:
             bboxes_json = '{"success":false, "error":"No predefined bounding boxes defined!"}'
@@ -1505,7 +1535,7 @@ class GetPredefinedBboxes:
         return bboxes_json
 
 
-class GetCategories:
+class GetCategories(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1521,20 +1551,20 @@ class GetCategories:
             for row in categories:
                 row_dict = functions.row2dict(row)
                 categories_dict = {'category_id': row_dict['category_id'],
-                                  'descriptive_name': row_dict['descriptive_name']}
+                                   'descriptive_name': row_dict['descriptive_name']}
 
                 categories_dict_all.append(categories_dict)
 
             categories_json = json.dumps(categories_dict_all,
                                          ensure_ascii=False,
-                                         encoding='utf-8',
+                                         # encoding='utf-8',
                                          sort_keys=True,
                                          indent=4,
                                          separators=(', ', ': '))
 
-            categories_json = '{"success":"true", "total":'\
-                                   + str(categories.__len__())\
-                                   + ',"categories":'+categories_json+'}'
+            categories_json = '{"success":"true", "total":' \
+                              + str(categories.__len__()) \
+                              + ',"categories":' + categories_json + '}'
 
         else:
             categories_json = '{"success":false, "error":"No Categories defined!"}'
@@ -1542,7 +1572,7 @@ class GetCategories:
         return categories_json
 
 
-class GetFrequencies:
+class GetFrequencies(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1558,15 +1588,15 @@ class GetFrequencies:
                 frequencies_dict_all.append(row_dict)
 
             frequencies_json = json.dumps(frequencies_dict_all,
-                                         ensure_ascii=False,
-                                         encoding='utf-8',
-                                         sort_keys=True,
-                                         indent=4,
-                                         separators=(', ', ': '))
+                                          ensure_ascii=False,
+                                          # encoding='utf-8',
+                                          sort_keys=True,
+                                          indent=4,
+                                          separators=(', ', ': '))
 
-            frequencies_json = '{"success":"true", "total":'\
-                                   + str(frequencies.__len__())\
-                                   + ',"frequencies":'+frequencies_json+'}'
+            frequencies_json = '{"success":"true", "total":' \
+                               + str(frequencies.__len__()) \
+                               + ',"frequencies":' + frequencies_json + '}'
 
         else:
             frequencies_json = '{"success":false, "error":"No Frequencies defined!"}'
@@ -1574,7 +1604,7 @@ class GetFrequencies:
         return frequencies_json
 
 
-class GetDateFormats:
+class GetDateFormats(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1589,15 +1619,15 @@ class GetDateFormats:
                 dateformats_dict_all.append(row_dict)
 
             dateformats_json = json.dumps(dateformats_dict_all,
-                                         ensure_ascii=False,
-                                         encoding='utf-8',
-                                         sort_keys=True,
-                                         indent=4,
-                                         separators=(', ', ': '))
+                                          ensure_ascii=False,
+                                          # encoding='utf-8',
+                                          sort_keys=True,
+                                          indent=4,
+                                          separators=(', ', ': '))
 
-            dateformats_json = '{"success":"true", "total":'\
-                                   + str(dateformats.__len__())\
-                                   + ',"dateformats":'+dateformats_json+'}'
+            dateformats_json = '{"success":"true", "total":' \
+                               + str(dateformats.__len__()) \
+                               + ',"dateformats":' + dateformats_json + '}'
 
         else:
             dateformats_json = '{"success":false, "error":"No Date Formats defined!"}'
@@ -1605,7 +1635,7 @@ class GetDateFormats:
         return dateformats_json
 
 
-class GetDataTypes:
+class GetDataTypes(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1620,15 +1650,15 @@ class GetDataTypes:
                 datatypes_dict_all.append(row_dict)
 
             datatypes_json = json.dumps(datatypes_dict_all,
-                                         ensure_ascii=False,
-                                         encoding='utf-8',
-                                         sort_keys=True,
-                                         indent=4,
-                                         separators=(', ', ': '))
+                                        ensure_ascii=False,
+                                        # encoding='utf-8',
+                                        sort_keys=True,
+                                        indent=4,
+                                        separators=(', ', ': '))
 
-            datatypes_json = '{"success":"true", "total":'\
-                                   + str(datatypes.__len__())\
-                                   + ',"datatypes":'+datatypes_json+'}'
+            datatypes_json = '{"success":"true", "total":' \
+                             + str(datatypes.__len__()) \
+                             + ',"datatypes":' + datatypes_json + '}'
 
         else:
             datatypes_json = '{"success":false, "error":"No Data Types defined!"}'
@@ -1636,7 +1666,7 @@ class GetDataTypes:
         return datatypes_json
 
 
-class AssignInternetSource:
+class AssignInternetSource(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -1666,7 +1696,7 @@ class AssignInternetSource:
         return insertstatus
 
 
-class AssignEumetcastSource:
+class AssignEumetcastSource(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -1697,7 +1727,7 @@ class AssignEumetcastSource:
         return insertstatus
 
 
-class UnassignProductDataSource:
+class UnassignProductDataSource(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -1721,7 +1751,7 @@ class UnassignProductDataSource:
         return unassignstatus
 
 
-class GetEumetcastSources:
+class GetEumetcastSources(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -1763,15 +1793,15 @@ class GetEumetcastSources:
                 eumetcastsources_dict_all.append(eumetcastsource)
 
             eumetcastsources_json = json.dumps(eumetcastsources_dict_all,
-                                              ensure_ascii=False,
-                                              encoding='utf-8',
-                                              sort_keys=True,
-                                              indent=4,
-                                              separators=(', ', ': '))
+                                               ensure_ascii=False,
+                                               # encoding='utf-8',
+                                               sort_keys=True,
+                                               indent=4,
+                                               separators=(', ', ': '))
 
-            eumetcastsources_json = '{"success":"true", "total":'\
-                                   + str(eumetcastsources.__len__())\
-                                   + ',"eumetcastsources":'+eumetcastsources_json+'}'
+            eumetcastsources_json = '{"success":"true", "total":' \
+                                    + str(eumetcastsources.__len__()) \
+                                    + ',"eumetcastsources":' + eumetcastsources_json + '}'
 
         else:
             eumetcastsources_json = '{"success":false, "error":"No Internet Sources defined!"}'
@@ -1779,7 +1809,7 @@ class GetEumetcastSources:
         return eumetcastsources_json
 
 
-class UpdateEumetcastSource:
+class UpdateEumetcastSource(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -1826,22 +1856,22 @@ class UpdateEumetcastSource:
                                    }
 
             datasourcedescrinfo = {'datasource_descr_id': getparams['eumetcastsources']['eumetcast_id'],
-                                  'format_type': getparams['eumetcastsources']['format_type'],
-                                  'file_extension': getparams['eumetcastsources']['file_extension'],
-                                  'delimiter': getparams['eumetcastsources']['delimiter'],
-                                  'date_format': getparams['eumetcastsources']['date_format'],
-                                  'date_position': getparams['eumetcastsources']['date_position'],
-                                  'product_identifier': getparams['eumetcastsources']['product_identifier'],
-                                  'prod_id_position': prod_id_position,
-                                  'prod_id_length': prod_id_length,
-                                  'area_type': getparams['eumetcastsources']['area_type'],
-                                  'area_position': getparams['eumetcastsources']['area_position'],
-                                  'area_length': area_length,
-                                  'preproc_type': getparams['eumetcastsources']['preproc_type'],
-                                  'product_release': getparams['eumetcastsources']['product_release'],
-                                  'release_position': getparams['eumetcastsources']['release_position'],
-                                  'release_length': release_length,
-                                  'native_mapset': getparams['eumetcastsources']['native_mapset']}
+                                   'format_type': getparams['eumetcastsources']['format_type'],
+                                   'file_extension': getparams['eumetcastsources']['file_extension'],
+                                   'delimiter': getparams['eumetcastsources']['delimiter'],
+                                   'date_format': getparams['eumetcastsources']['date_format'],
+                                   'date_position': getparams['eumetcastsources']['date_position'],
+                                   'product_identifier': getparams['eumetcastsources']['product_identifier'],
+                                   'prod_id_position': prod_id_position,
+                                   'prod_id_length': prod_id_length,
+                                   'area_type': getparams['eumetcastsources']['area_type'],
+                                   'area_position': getparams['eumetcastsources']['area_position'],
+                                   'area_length': area_length,
+                                   'preproc_type': getparams['eumetcastsources']['preproc_type'],
+                                   'product_release': getparams['eumetcastsources']['product_release'],
+                                   'release_position': getparams['eumetcastsources']['release_position'],
+                                   'release_length': release_length,
+                                   'native_mapset': getparams['eumetcastsources']['native_mapset']}
 
             if getparams['eumetcastsources']['eumetcast_id'] != getparams['eumetcastsources']['orig_eumetcast_id']:
                 eumetcastsourceinfo['orig_eumetcast_id'] = getparams['eumetcastsources']['orig_eumetcast_id']
@@ -1869,7 +1899,7 @@ class UpdateEumetcastSource:
         return updatestatus
 
 
-class CreateEumetcastSource:
+class CreateEumetcastSource(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -1917,22 +1947,22 @@ class CreateEumetcastSource:
                                    }
 
             datasourcedescrinfo = {'datasource_descr_id': getparams['eumetcastsources']['internet_id'],
-                                  'format_type': getparams['eumetcastsources']['format_type'],
-                                  'file_extension': getparams['eumetcastsources']['file_extension'],
-                                  'delimiter': getparams['eumetcastsources']['delimiter'],
-                                  'date_format': getparams['eumetcastsources']['date_format'],
-                                  'date_position': getparams['eumetcastsources']['date_position'],
-                                  'product_identifier': getparams['eumetcastsources']['product_identifier'],
-                                  'prod_id_position': prod_id_position,
-                                  'prod_id_length': prod_id_length,
-                                  'area_type': getparams['eumetcastsources']['area_type'],
-                                  'area_position': getparams['eumetcastsources']['area_position'],
-                                  'area_length': area_length,
-                                  'preproc_type': getparams['eumetcastsources']['preproc_type'],
-                                  'product_release': getparams['eumetcastsources']['product_release'],
-                                  'release_position': getparams['eumetcastsources']['release_position'],
-                                  'release_length': release_length,
-                                  'native_mapset': getparams['eumetcastsources']['native_mapset']}
+                                   'format_type': getparams['eumetcastsources']['format_type'],
+                                   'file_extension': getparams['eumetcastsources']['file_extension'],
+                                   'delimiter': getparams['eumetcastsources']['delimiter'],
+                                   'date_format': getparams['eumetcastsources']['date_format'],
+                                   'date_position': getparams['eumetcastsources']['date_position'],
+                                   'product_identifier': getparams['eumetcastsources']['product_identifier'],
+                                   'prod_id_position': prod_id_position,
+                                   'prod_id_length': prod_id_length,
+                                   'area_type': getparams['eumetcastsources']['area_type'],
+                                   'area_position': getparams['eumetcastsources']['area_position'],
+                                   'area_length': area_length,
+                                   'preproc_type': getparams['eumetcastsources']['preproc_type'],
+                                   'product_release': getparams['eumetcastsources']['product_release'],
+                                   'release_position': getparams['eumetcastsources']['release_position'],
+                                   'release_length': release_length,
+                                   'native_mapset': getparams['eumetcastsources']['native_mapset']}
 
             if self.crud_db.create('eumetcast_source', eumetcastsourceinfo):
                 if self.crud_db.create('datasource_description', datasourcedescrinfo):
@@ -1948,7 +1978,7 @@ class CreateEumetcastSource:
         return createstatus
 
 
-class DeleteEumetcastSource:
+class DeleteEumetcastSource(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -1975,7 +2005,7 @@ class DeleteEumetcastSource:
         return deletetatus
 
 
-class GetInternetSources:
+class GetInternetSources(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -2072,14 +2102,14 @@ class GetInternetSources:
 
             internetsources_json = json.dumps(internetsources_dict_all,
                                               ensure_ascii=False,
-                                              encoding='utf-8',
+                                              # encoding='utf-8',
                                               sort_keys=True,
                                               indent=4,
                                               separators=(', ', ': '))
 
-            internetsources_json = '{"success":"true", "total":'\
-                                   + str(internetsources.__len__())\
-                                   + ',"internetsources":'+internetsources_json+'}'
+            internetsources_json = '{"success":"true", "total":' \
+                                   + str(internetsources.__len__()) \
+                                   + ',"internetsources":' + internetsources_json + '}'
 
         else:
             internetsources_json = '{"success":false, "error":"No Internet Sources defined!"}'
@@ -2087,7 +2117,7 @@ class GetInternetSources:
         return internetsources_json
 
 
-class UpdateInternetSource:
+class UpdateInternetSource(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -2159,24 +2189,22 @@ class UpdateInternetSource:
                                   'datasource_descr_id': getparams['internetsources']['internet_id']}
 
             datasourcedescrinfo = {'datasource_descr_id': getparams['internetsources']['internet_id'],
-                                  'format_type': getparams['internetsources']['format_type'],
-                                  'file_extension': getparams['internetsources']['file_extension'],
-                                  'delimiter': getparams['internetsources']['delimiter'],
-                                  'date_format': getparams['internetsources']['date_format'],
-                                  'date_position': getparams['internetsources']['date_position'],
-                                  'product_identifier': getparams['internetsources']['product_identifier'],
-                                  'prod_id_position': prod_id_position,
-                                  'prod_id_length': prod_id_length,
-                                  'area_type': getparams['internetsources']['area_type'],
-                                  'area_position': getparams['internetsources']['area_position'],
-                                  'area_length': area_length,
-                                  'preproc_type': getparams['internetsources']['preproc_type'],
-                                  'product_release': getparams['internetsources']['product_release'],
-                                  'release_position': getparams['internetsources']['release_position'],
-                                  'release_length': release_length,
-                                  'native_mapset': getparams['internetsources']['native_mapset']}
-
-
+                                   'format_type': getparams['internetsources']['format_type'],
+                                   'file_extension': getparams['internetsources']['file_extension'],
+                                   'delimiter': getparams['internetsources']['delimiter'],
+                                   'date_format': getparams['internetsources']['date_format'],
+                                   'date_position': getparams['internetsources']['date_position'],
+                                   'product_identifier': getparams['internetsources']['product_identifier'],
+                                   'prod_id_position': prod_id_position,
+                                   'prod_id_length': prod_id_length,
+                                   'area_type': getparams['internetsources']['area_type'],
+                                   'area_position': getparams['internetsources']['area_position'],
+                                   'area_length': area_length,
+                                   'preproc_type': getparams['internetsources']['preproc_type'],
+                                   'product_release': getparams['internetsources']['product_release'],
+                                   'release_position': getparams['internetsources']['release_position'],
+                                   'release_length': release_length,
+                                   'native_mapset': getparams['internetsources']['native_mapset']}
 
             if getparams['internetsources']['internet_id'] != getparams['internetsources']['orig_internet_id']:
                 internetsourceinfo['orig_internet_id'] = getparams['internetsources']['orig_internet_id']
@@ -2204,7 +2232,7 @@ class UpdateInternetSource:
         return updatestatus
 
 
-class CreateInternetSource:
+class CreateInternetSource(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -2276,22 +2304,22 @@ class CreateInternetSource:
                                   'datasource_descr_id': getparams['internetsources']['internet_id']}
 
             datasourcedescrinfo = {'datasource_descr_id': getparams['internetsources']['internet_id'],
-                                  'format_type': getparams['internetsources']['format_type'],
-                                  'file_extension': getparams['internetsources']['file_extension'],
-                                  'delimiter': getparams['internetsources']['delimiter'],
-                                  'date_format': getparams['internetsources']['date_format'],
-                                  'date_position': getparams['internetsources']['date_position'],
-                                  'product_identifier': getparams['internetsources']['product_identifier'],
-                                  'prod_id_position': prod_id_position,
-                                  'prod_id_length': prod_id_length,
-                                  'area_type': getparams['internetsources']['area_type'],
-                                  'area_position': getparams['internetsources']['area_position'],
-                                  'area_length': area_length,
-                                  'preproc_type': getparams['internetsources']['preproc_type'],
-                                  'product_release': getparams['internetsources']['product_release'],
-                                  'release_position': getparams['internetsources']['release_position'],
-                                  'release_length': release_length,
-                                  'native_mapset': getparams['internetsources']['native_mapset']}
+                                   'format_type': getparams['internetsources']['format_type'],
+                                   'file_extension': getparams['internetsources']['file_extension'],
+                                   'delimiter': getparams['internetsources']['delimiter'],
+                                   'date_format': getparams['internetsources']['date_format'],
+                                   'date_position': getparams['internetsources']['date_position'],
+                                   'product_identifier': getparams['internetsources']['product_identifier'],
+                                   'prod_id_position': prod_id_position,
+                                   'prod_id_length': prod_id_length,
+                                   'area_type': getparams['internetsources']['area_type'],
+                                   'area_position': getparams['internetsources']['area_position'],
+                                   'area_length': area_length,
+                                   'preproc_type': getparams['internetsources']['preproc_type'],
+                                   'product_release': getparams['internetsources']['product_release'],
+                                   'release_position': getparams['internetsources']['release_position'],
+                                   'release_length': release_length,
+                                   'native_mapset': getparams['internetsources']['native_mapset']}
 
             if self.crud_db.create('internet_source', internetsourceinfo):
                 if self.crud_db.create('datasource_description', datasourcedescrinfo):
@@ -2307,7 +2335,7 @@ class CreateInternetSource:
         return createstatus
 
 
-class DeleteInternetSource:
+class DeleteInternetSource(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -2334,7 +2362,7 @@ class DeleteInternetSource:
         return deletetatus
 
 
-class GetSystemStatus:
+class GetSystemStatus(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -2357,7 +2385,7 @@ class GetSystemStatus:
         return status_local_machine
 
 
-class GetDashboard:
+class GetDashboard(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -2367,7 +2395,7 @@ class GetDashboard:
         PC1_connection = False
         PC23_connection = False
 
-        PC2_mode = ''   # 'nominal' 'recovery'
+        PC2_mode = ''  # 'nominal' 'recovery'
         PC2_disk_status = True
         PC2_version = ''
         PC2_DBAutoSync = None
@@ -2380,7 +2408,7 @@ class GetDashboard:
         PC2_service_processing = None
         PC2_service_system = None
 
-        PC3_mode = ''   # 'nominal' 'recovery'
+        PC3_mode = ''  # 'nominal' 'recovery'
         PC3_version = ''
         PC3_disk_status = True
         PC3_DBAutoSync = None
@@ -2631,17 +2659,17 @@ class GetDashboard:
         # print dashboard_dict
         dashboard_json = json.dumps(dashboard_dict,
                                     ensure_ascii=False,
-                                    encoding='utf-8',
+                                    # encoding='utf-8',
                                     sort_keys=True,
                                     indent=4,
                                     separators=(', ', ': '))
 
-        dashboard_json = '{"success":"true", "dashboard":'+dashboard_json + '}'
+        dashboard_json = '{"success":"true", "dashboard":' + dashboard_json + '}'
 
         return dashboard_json
 
 
-class SetDataAutoSync:
+class SetDataAutoSync(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -2662,7 +2690,7 @@ class SetDataAutoSync:
         return result_json
 
 
-class SetDBAutoSync:
+class SetDBAutoSync(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -2683,7 +2711,7 @@ class SetDBAutoSync:
         return result_json
 
 
-class GetI18n:
+class GetI18n(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -2705,14 +2733,14 @@ class GetI18n:
 
             translations_json = json.dumps(translations_dict_all,
                                            ensure_ascii=False,
-                                           encoding='utf-8',
+                                           # encoding='utf-8',
                                            sort_keys=True,
                                            indent=4,
                                            separators=(', ', ': '))
 
-            translations_json = '{"success":"true", "total":'\
-                                + str(i18n.__len__())\
-                                + ',"translations":'+translations_json+'}'
+            translations_json = '{"success":"true", "total":' \
+                                + str(i18n.__len__()) \
+                                + ',"translations":' + translations_json + '}'
 
         else:
             translations_json = '{"success":false, "error":"No translations defined!"}'
@@ -2720,7 +2748,7 @@ class GetI18n:
         return translations_json
 
 
-class AddIngestMapset:
+class AddIngestMapset(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -2769,7 +2797,7 @@ class AddIngestMapset:
         return insertstatus
 
 
-class DisableIngestMapset:
+class DisableIngestMapset(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -2795,7 +2823,7 @@ class DisableIngestMapset:
         return deletestatus
 
 
-class GetMapsetsForIngest:
+class GetMapsetsForIngest(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -2803,7 +2831,8 @@ class GetMapsetsForIngest:
         getparams = web.input()
 
         mapsets_dict_all = []
-        mapsets = querydb.get_mapsets_for_ingest(productcode=getparams['productcode'], version=getparams['version'], subproductcode=getparams['subproductcode'])
+        mapsets = querydb.get_mapsets_for_ingest(productcode=getparams['productcode'], version=getparams['version'],
+                                                 subproductcode=getparams['subproductcode'])
 
         if hasattr(mapsets, "__len__") and mapsets.__len__() > 0:
             for mapset in mapsets:
@@ -2811,15 +2840,15 @@ class GetMapsetsForIngest:
                 mapsets_dict_all.append(mapset_dict)
 
             mapsets_json = json.dumps(mapsets_dict_all,
-                                   ensure_ascii=False,
-                                   encoding='utf-8',
-                                   sort_keys=True,
-                                   indent=4,
-                                   separators=(', ', ': '))
+                                      ensure_ascii=False,
+                                      # encoding='utf-8',
+                                      sort_keys=True,
+                                      indent=4,
+                                      separators=(', ', ': '))
 
-            mapsets_json = '{"success":"true", "total":'\
-                                  + str(mapsets.__len__())\
-                                  + ',"mapsets":'+mapsets_json+'}'
+            mapsets_json = '{"success":"true", "total":' \
+                           + str(mapsets.__len__()) \
+                           + ',"mapsets":' + mapsets_json + '}'
 
         else:
             mapsets_json = '{"success":false, "error":"No Mapsets defined!"}'
@@ -2827,7 +2856,7 @@ class GetMapsetsForIngest:
         return mapsets_json
 
 
-class GetMapsets:
+class GetMapsets(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -2839,20 +2868,20 @@ class GetMapsets:
 
         if hasattr(mapsets, "__len__") and mapsets.__len__() > 0:
             for mapset in mapsets:
-                # print(mapset)
+                # print (mapset)
                 mapset_dict = functions.row2dict(mapset)
                 mapsets_dict_all.append(mapset_dict)
 
             mapsets_json = json.dumps(mapsets_dict_all,
-                                   ensure_ascii=False,
-                                   encoding='utf-8',
-                                   sort_keys=True,
-                                   indent=4,
-                                   separators=(', ', ': '))
+                                      ensure_ascii=False,
+                                      # encoding='utf-8',
+                                      sort_keys=True,
+                                      indent=4,
+                                      separators=(', ', ': '))
 
-            mapsets_json = '{"success":"true", "total":'\
-                                  + str(mapsets.__len__())\
-                                  + ',"mapsets":'+mapsets_json+'}'
+            mapsets_json = '{"success":"true", "total":' \
+                           + str(mapsets.__len__()) \
+                           + ',"mapsets":' + mapsets_json + '}'
 
         else:
             mapsets_json = '{"success":false, "error":"No Mapsets defined!"}'
@@ -2860,7 +2889,7 @@ class GetMapsets:
         return mapsets_json
 
 
-class CreateMapset:
+class CreateMapset(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -2870,7 +2899,7 @@ class CreateMapset:
         if 'mapsets' in getparams:
 
             bboxcode = getparams['mapsets']['bboxcode']
-            if bboxcode ==  None:
+            if bboxcode == None:
                 bboxcode = getparams['mapsets']['mapsetcode']
 
             bboxinfo = { 'bboxcode': bboxcode,
@@ -2880,7 +2909,7 @@ class CreateMapset:
                          'upper_left_lat': getparams['mapsets']['upper_left_lat'],
                          'lower_right_long': getparams['mapsets']['lower_right_long'],
                          'lower_right_lat': getparams['mapsets']['lower_right_lat'],
-                         'predefined': getparams['mapsets']['predefined']
+                         'predefined': functions.str_to_bool(getparams['mapsets']['predefined'])
                        }
 
             bbox_pk = {
@@ -2917,7 +2946,7 @@ class CreateMapset:
                            'pixel_size_x': getparams['mapsets']['pixel_size_x'],
                            'pixel_size_y': getparams['mapsets']['pixel_size_y'],
                            'footprint_image': getparams['mapsets']['footprint_image'],
-                           'center_of_pixel': getparams['mapsets']['center_of_pixel'],
+                           'center_of_pixel': functions.str_to_bool(getparams['mapsets']['center_of_pixel']),
                            }
 
             if bboxexists:
@@ -2932,7 +2961,7 @@ class CreateMapset:
         return createstatus
 
 
-class UpdateMapset:
+class UpdateMapset(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -2942,7 +2971,7 @@ class UpdateMapset:
         if 'mapsets' in getparams:
 
             bboxcode = getparams['mapsets']['bboxcode']
-            if bboxcode ==  None:
+            if bboxcode == None:
                 bboxcode = getparams['mapsets']['mapsetcode']
 
             bboxinfo = { 'bboxcode': bboxcode,
@@ -2952,7 +2981,7 @@ class UpdateMapset:
                          'upper_left_lat': getparams['mapsets']['upper_left_lat'],
                          'lower_right_long': getparams['mapsets']['lower_right_long'],
                          'lower_right_lat': getparams['mapsets']['lower_right_lat'],
-                         'predefined': getparams['mapsets']['predefined']
+                         'predefined': functions.str_to_bool(getparams['mapsets']['predefined'])
                        }
 
             bbox_pk = {
@@ -2989,7 +3018,7 @@ class UpdateMapset:
                            'pixel_size_x': getparams['mapsets']['pixel_size_x'],
                            'pixel_size_y': getparams['mapsets']['pixel_size_y'],
                            'footprint_image': getparams['mapsets']['footprint_image'],
-                           'center_of_pixel': getparams['mapsets']['center_of_pixel'],
+                           'center_of_pixel': functions.str_to_bool(getparams['mapsets']['center_of_pixel']),
                            }
 
             if bboxexists:
@@ -3005,7 +3034,7 @@ class UpdateMapset:
         return createstatus
 
 
-class DeleteMapset:
+class DeleteMapset(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -3028,7 +3057,7 @@ class DeleteMapset:
         return deletetatus
 
 
-class GetLanguages:
+class GetLanguages(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -3055,14 +3084,14 @@ class GetLanguages:
 
             lang_json = json.dumps(languages_dict_all,
                                    ensure_ascii=False,
-                                   encoding='utf-8',
+                                   # encoding='utf-8',
                                    sort_keys=True,
                                    indent=4,
                                    separators=(', ', ': '))
 
-            languages_json = '{"success":"true", "total":'\
-                                  + str(languages.__len__())\
-                                  + ',"languages":'+lang_json+'}'
+            languages_json = '{"success":"true", "total":' \
+                             + str(languages.__len__()) \
+                             + ',"languages":' + lang_json + '}'
 
         else:
             languages_json = '{"success":false, "error":"No languages defined!"}'
@@ -3070,7 +3099,7 @@ class GetLanguages:
         return languages_json
 
 
-class GetTimeLine:
+class GetTimeLine(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -3118,13 +3147,13 @@ class GetTimeLine:
                                    indent=4,
                                    separators=(', ', ': '))
 
-        timeline_json = '{"success":"true", "total":' + str(timeline.__len__()) + ',"timeline":'+timeline_json+'}'
+        timeline_json = '{"success":"true", "total":' + str(timeline.__len__()) + ',"timeline":' + timeline_json + '}'
 
         # print timeline_json
         return timeline_json
 
 
-class GetAllColorSchemes:
+class GetAllColorSchemes(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -3133,7 +3162,7 @@ class GetAllColorSchemes:
         return webpy_esapp_helpers.getAllColorSchemes()
 
 
-class GetProductColorSchemes:
+class GetProductColorSchemes(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -3182,7 +3211,7 @@ class GetProductColorSchemes:
                     r = color_rgb[0]
                     g = color_rgb[1]
                     b = color_rgb[2]
-                    color_html = 'rgb('+r+','+g+','+b+')'
+                    color_html = 'rgb(' + r + ',' + g + ',' + b + ')'
                     colorschemeHTML = colorschemeHTML + \
                                       "<td height=15 style='padding:0; margin:0; background-color: " + \
                                       color_html + ";'></td>"
@@ -3207,14 +3236,15 @@ class GetProductColorSchemes:
                                       indent=4,
                                       separators=(', ', ': '))
 
-            colorschemes = '{"success":"true", "total":' + str(product_legends.__len__()) + ',"legends":'+legends_json+'}'
+            colorschemes = '{"success":"true", "total":' + str(
+                product_legends.__len__()) + ',"legends":' + legends_json + '}'
         else:
             colorschemes = '{"success":"true", "message":"No legends defined for this product!"}'
 
         return colorschemes
 
 
-class ProductNavigatorDataSets:
+class ProductNavigatorDataSets(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -3226,7 +3256,7 @@ class ProductNavigatorDataSets:
         return webpy_esapp_helpers.getProductNavigatorDataSets(force)
 
 
-class GetLogFile:
+class GetLogFile(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -3238,36 +3268,39 @@ class GetLogFile:
                 getparams['data_source_id'] = getparams['data_source_id'].replace(':', '_')
 
             if getparams['gettype'] == 'EUMETCAST':
-                logfilename = es_constants.es2globals['log_dir']+'apps.get_eumetcast.' + getparams['data_source_id'] + '.log'
+                logfilename = es_constants.es2globals['log_dir'] + 'apps.get_eumetcast.' + getparams[
+                    'data_source_id'] + '.log'
             else:
-                logfilename = es_constants.es2globals['log_dir']+'apps.get_internet.' + getparams['data_source_id'] + '.log'
+                logfilename = es_constants.es2globals['log_dir'] + 'apps.get_internet.' + getparams[
+                    'data_source_id'] + '.log'
         elif getparams['logtype'] == 'ingest':
-            logfilename = es_constants.es2globals['log_dir']+'apps.ingestion.' + getparams['productcode'] + '.' + getparams['version'] + '.log'
+            logfilename = es_constants.es2globals['log_dir'] + 'apps.ingestion.' + getparams['productcode'] + '.' + \
+                          getparams['version'] + '.log'
         elif getparams['logtype'] == 'processing':
             # apps.processing.ID=6_PROD=tamsat-rfe_METHOD=std_precip_prods_only_ALGO=std_precip.log
-            logfilename = es_constants.es2globals['log_dir']+'apps.processing.' \
-                                        + 'ID=' + getparams['process_id'] + '_' \
-                                        + 'PROD=' + getparams['productcode'] + '_' \
-                                        + 'METHOD=' + getparams['derivation_method'] + '_' \
-                                        + 'ALGO=' + getparams['algorithm'] + '.log'
+            logfilename = es_constants.es2globals['log_dir'] + 'apps.processing.' \
+                          + 'ID=' + getparams['process_id'] + '_' \
+                          + 'PROD=' + getparams['productcode'] + '_' \
+                          + 'METHOD=' + getparams['derivation_method'] + '_' \
+                          + 'ALGO=' + getparams['algorithm'] + '.log'
         elif getparams['logtype'] == 'service':
             if getparams['service'] == 'eumetcast':
-                logfilename = es_constants.es2globals['log_dir']+'apps.acquisition.get_eumetcast.log'
+                logfilename = es_constants.es2globals['log_dir'] + 'apps.acquisition.get_eumetcast.log'
             if getparams['service'] == 'internet':
-                logfilename = es_constants.es2globals['log_dir']+'apps.acquisition.get_internet.log'
+                logfilename = es_constants.es2globals['log_dir'] + 'apps.acquisition.get_internet.log'
             if getparams['service'] == 'ingest':
-                logfilename = es_constants.es2globals['log_dir']+'apps.acquisition.ingestion.log'
+                logfilename = es_constants.es2globals['log_dir'] + 'apps.acquisition.ingestion.log'
             if getparams['service'] == 'processing':
-                logfilename = es_constants.es2globals['log_dir']+'apps.processing.processing.log'
+                logfilename = es_constants.es2globals['log_dir'] + 'apps.processing.processing.log'
             if getparams['service'] == 'system':
-                logfilename = es_constants.es2globals['log_dir']+'apps.es2system.es2system.log'
+                logfilename = es_constants.es2globals['log_dir'] + 'apps.es2system.es2system.log'
             if getparams['service'] == 'dbsync':
                 logfilename = '/var/log/bucardo/log.bucardo'
             if getparams['service'] == 'datasync':
                 # logfilename = '/var/log/rsyncd.log'
-                logfilename = es_constants.es2globals['log_dir']+'rsync.log'
+                logfilename = es_constants.es2globals['log_dir'] + 'rsync.log'
             if getparams['service'] == 'ingestarchive':
-                logfilename = es_constants.es2globals['log_dir']+'apps.es2system.ingest_archive.log'
+                logfilename = es_constants.es2globals['log_dir'] + 'apps.es2system.ingest_archive.log'
                 # logfilename = es_constants.es2globals['log_dir']+'apps.tools.ingest_historical_archives.log'
 
         # logfilepath = es_constants.es2globals['log_dir']+logfilename
@@ -3307,12 +3340,12 @@ class GetLogFile:
                                          separators=(', ', ': '))
 
         # logfile_json = '{"success":"true", "filename":\'' + logfilename + '\',"logfilecontent":\''+logfilecontent+'\'}'
-        logfile_json = '{"success":"true","filename":"' + logfilename + '","logfilecontent":"'+logfilecontent+'"}'
+        logfile_json = '{"success":"true","filename":"' + logfilename + '","logfilecontent":"' + logfilecontent + '"}'
 
         return logfile_json
 
 
-class setIngestArchives:
+class setIngestArchives(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -3335,7 +3368,7 @@ class setIngestArchives:
         return result_json
 
 
-class ChangeRole:
+class ChangeRole(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -3358,7 +3391,7 @@ class ChangeRole:
         return changerole_json
 
 
-class ChangeMode:
+class ChangeMode(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -3472,7 +3505,7 @@ class ChangeMode:
                 # Specific transition actions
                 if This_PC_mode == 'recovery' and newmode == 'nominal':
                     source = es_constants.es2globals['processing_dir']
-                    target = IP_other_PC+'::products'+es_constants.es2globals['processing_dir']
+                    target = IP_other_PC + '::products' + es_constants.es2globals['processing_dir']
 
                     statusdatasync = es2system.system_data_sync(source, target)
 
@@ -3484,9 +3517,9 @@ class ChangeMode:
                 reloadmodules.reloadallmodules()
                 # Reloading the settings does not work well so set manually
 
-                changemode_json = '{"success":"true", "message":"'+message+'"}'
+                changemode_json = '{"success":"true", "message":"' + message + '"}'
             else:
-                changemode_json = '{"success":false, "message":"'+message+'"}'
+                changemode_json = '{"success":false, "message":"' + message + '"}'
 
         else:
             changemode_json = '{"success":false, "error":"No mode given!"}'
@@ -3494,7 +3527,7 @@ class ChangeMode:
         return changemode_json
 
 
-class GetAvailableVersions:
+class GetAvailableVersions(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -3504,19 +3537,19 @@ class GetAvailableVersions:
         versions_dict = functions.getListVersions()
         versions_json = json.dumps(versions_dict,
                                    ensure_ascii=False,
-                                   encoding='utf-8',
+                                   # encoding='utf-8',
                                    sort_keys=True,
                                    indent=4,
                                    separators=(', ', ': '))
 
-        versions_json = '{"success":"true", "versions":'+versions_json+'}'
+        versions_json = '{"success":"true", "versions":' + versions_json + '}'
 
         # versions_json = '{"success":false, "error":"No versions available!"}'
 
         return versions_json
 
 
-class ChangeVersion:
+class ChangeVersion(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -3534,7 +3567,7 @@ class ChangeVersion:
                     if os.path.islink(base):
                         os.unlink(base)
                         # print base+"-"+getparams['version']
-                        os.symlink(base+"-"+getparams['version'], base)
+                        os.symlink(base + "-" + getparams['version'], base)
                         changeversion_json = '{"success":"true", "message":"Version changed!"}'
                     elif os.path.isdir(base):
                         changeversion_json = '{"success":"false", "message":"The base is a directory and should be a symbolic link!"}'
@@ -3552,7 +3585,7 @@ class ChangeVersion:
         return changeversion_json
 
 
-class GetThemas:
+class GetThemas(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -3568,7 +3601,7 @@ class GetThemas:
 
             themas_json = json.dumps(themas_dict_all,
                                      ensure_ascii=False,
-                                     encoding='utf-8',
+                                     # encoding='utf-8',
                                      sort_keys=True,
                                      indent=4,
                                      separators=(', ', ': '))
@@ -3581,7 +3614,7 @@ class GetThemas:
         return themas_json
 
 
-class ChangeThema:
+class ChangeThema(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -3595,7 +3628,7 @@ class ChangeThema:
         return changethema_json
 
 
-class ChangeThemaFromOtherPC:
+class ChangeThemaFromOtherPC(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -3618,7 +3651,7 @@ class ChangeThemaFromOtherPC:
         return changethema
 
 
-class ChangeLogLevel:
+class ChangeLogLevel(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -3640,7 +3673,7 @@ class ChangeLogLevel:
         return changethema_json
 
 
-class GetLayers:
+class GetLayers(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -3653,47 +3686,47 @@ class GetLayers:
                 # row_dict = functions.row2dict(row)
                 row_dict = row
 
-                layer = { 'layerid': row_dict['layerid'],
-                          'layerlevel': row_dict['layerlevel'],
-                          'layername': row_dict['layername'],
-                          'description': row_dict['description'],
-                          'filename': row_dict['filename'],
-                          'layerorderidx': row_dict['layerorderidx'],
-                          'layertype': row_dict['layertype'],
-                          'polygon_outlinecolor': row_dict['polygon_outlinecolor'],
-                          'polygon_outlinewidth': row_dict['polygon_outlinewidth'],
-                          'polygon_fillcolor': row_dict['polygon_fillcolor'],
-                          'polygon_fillopacity': row_dict['polygon_fillopacity'],
-                          'feature_display_column': row_dict['feature_display_column'],
-                          'feature_highlight_outlinecolor': row_dict['feature_highlight_outlinecolor'],
-                          'feature_highlight_outlinewidth': row_dict['feature_highlight_outlinewidth'],
-                          'feature_highlight_fillcolor': row_dict['feature_highlight_fillcolor'],
-                          'feature_highlight_fillopacity': row_dict['feature_highlight_fillopacity'],
-                          'feature_selected_outlinecolor': row_dict['feature_selected_outlinecolor'],
-                          'feature_selected_outlinewidth': row_dict['feature_selected_outlinewidth'],
-                          'enabled': row_dict['enabled'],
-                          'deletable': row_dict['deletable'],
-                          'background_legend_image_filename': row_dict['background_legend_image_filename'],
-                          'projection': row_dict['projection'],
-                          'submenu': row_dict['submenu'],
-                          'menu': row_dict['menu'],
-                          'defined_by': row_dict['defined_by'],
-                          'open_in_mapview': row_dict['open_in_mapview'],
-                          'provider': row_dict['provider']
-                        }
+                layer = {'layerid': row_dict['layerid'],
+                         'layerlevel': row_dict['layerlevel'],
+                         'layername': row_dict['layername'],
+                         'description': row_dict['description'],
+                         'filename': row_dict['filename'],
+                         'layerorderidx': row_dict['layerorderidx'],
+                         'layertype': row_dict['layertype'],
+                         'polygon_outlinecolor': row_dict['polygon_outlinecolor'],
+                         'polygon_outlinewidth': row_dict['polygon_outlinewidth'],
+                         'polygon_fillcolor': row_dict['polygon_fillcolor'],
+                         'polygon_fillopacity': row_dict['polygon_fillopacity'],
+                         'feature_display_column': row_dict['feature_display_column'],
+                         'feature_highlight_outlinecolor': row_dict['feature_highlight_outlinecolor'],
+                         'feature_highlight_outlinewidth': row_dict['feature_highlight_outlinewidth'],
+                         'feature_highlight_fillcolor': row_dict['feature_highlight_fillcolor'],
+                         'feature_highlight_fillopacity': row_dict['feature_highlight_fillopacity'],
+                         'feature_selected_outlinecolor': row_dict['feature_selected_outlinecolor'],
+                         'feature_selected_outlinewidth': row_dict['feature_selected_outlinewidth'],
+                         'enabled': row_dict['enabled'],
+                         'deletable': row_dict['deletable'],
+                         'background_legend_image_filename': row_dict['background_legend_image_filename'],
+                         'projection': row_dict['projection'],
+                         'submenu': row_dict['submenu'],
+                         'menu': row_dict['menu'],
+                         'defined_by': row_dict['defined_by'],
+                         'open_in_mapview': row_dict['open_in_mapview'],
+                         'provider': row_dict['provider']
+                         }
 
                 layers_dict_all.append(layer)
 
             layers_json = json.dumps(layers_dict_all,
-                                              ensure_ascii=False,
-                                              encoding='utf-8',
-                                              sort_keys=True,
-                                              indent=4,
-                                              separators=(', ', ': '))
+                                     ensure_ascii=False,
+                                     # encoding='utf-8',
+                                     sort_keys=True,
+                                     indent=4,
+                                     separators=(', ', ': '))
 
-            layers_json = '{"success":"true", "total":'\
-                                   + str(layers.__len__())\
-                                   + ',"layers":'+layers_json+'}'
+            layers_json = '{"success":"true", "total":' \
+                          + str(layers.__len__()) \
+                          + ',"layers":' + layers_json + '}'
 
         else:
             layers_json = '{"success":false, "error":"No Layers defined!"}'
@@ -3701,12 +3734,12 @@ class GetLayers:
         return layers_json
 
 
-class GetServerLayerFileList:
+class GetServerLayerFileList(object):
     def __init__(self):
         self.lang = "eng"
 
     def GET(self):
-        layerfiledir = es_constants.es2globals['estation2_layers_dir']   # '/eStation2/layers/'
+        layerfiledir = es_constants.es2globals['estation2_layers_dir']  # '/eStation2/layers/'
         layers_json = ''
         layerfiles_dict = []
         pattern = ""
@@ -3718,24 +3751,24 @@ class GetServerLayerFileList:
             for filename in files:
                 if filename[-7:] in alist_filter and pattern in filename:
                     # print os.path.join(root,filename).replace(layerfiledir, "")
-                    layerfile = {'layerfilename': os.path.join(root,filename).replace(layerfiledir, ""),
-                                 'filesize': os.path.getsize(os.path.join(root,filename))}
+                    layerfile = {'layerfilename': os.path.join(root, filename).replace(layerfiledir, ""),
+                                 'filesize': os.path.getsize(os.path.join(root, filename))}
                     layerfiles_dict.append(layerfile)
 
             layers_json = json.dumps(layerfiles_dict,
                                      ensure_ascii=False,
-                                     encoding='utf-8',
+                                     # encoding='utf-8',
                                      sort_keys=True,
                                      indent=4,
                                      separators=(', ', ': '))
 
-            layerfiles_json = '{"success":"true",'\
-                                   + '"layerfiles":'+layers_json+'}'
+            layerfiles_json = '{"success":"true",' \
+                              + '"layerfiles":' + layers_json + '}'
 
         return layerfiles_json
 
 
-class SaveDrawnVectorLayer:
+class SaveDrawnVectorLayer(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -3745,10 +3778,12 @@ class SaveDrawnVectorLayer:
 
         # layerfiledir = '/eStation2/layers/' # change this to the directory you want to store the file in.
         layerfiledir = es_constants.es2globals['estation2_layers_dir']
-        if 'layerfilename' in getparams: # to check if the file-object is created
+        if 'layerfilename' in getparams:  # to check if the file-object is created
             try:
-                filename=getparams.layerfilename.replace('\\','/') # replaces the windows-style slashes with linux ones.
-                filename=filename.split('/')[-1] # splits the filepath and chooses the last part (the filename with extension)
+                filename = getparams.layerfilename.replace('\\',
+                                                           '/')  # replaces the windows-style slashes with linux ones.
+                filename = filename.split('/')[
+                    -1]  # splits the filepath and chooses the last part (the filename with extension)
                 filename = filename.replace(' ', '_')
                 filename += '.geojson'
 
@@ -3756,26 +3791,29 @@ class SaveDrawnVectorLayer:
                 base, extension = os.path.splitext(filename)
 
                 # Initial new name
-                new_name = os.path.join(layerfiledir, filename).encode('utf-8')
+                new_name = os.path.join(layerfiledir, filename).encode('utf-8').decode()
                 new_name_final = os.path.join(layerfiledir, filename)
 
                 if not os.path.exists(new_name):  # file does not exist in <layerfiledir>
-                    fout = open(new_name,'w') # creates the file where the uploaded file should be stored
-                    fout.write(getparams.drawnlayerfeaturesGEOSON) # .read()  writes the uploaded file to the newly created file.
-                    fout.close() # closes the file, upload complete.
+                    fout = open(new_name, 'w')  # creates the file where the uploaded file should be stored
+                    fout.write(
+                        getparams.drawnlayerfeaturesGEOSON)  # .read()  writes the uploaded file to the newly created file.
+                    fout.close()  # closes the file, upload complete.
                 else:  # file exists in <layerfiledir>
                     ii = 1
                     while True:
-                        new_name = os.path.join(layerfiledir, base + "_" + str(ii) + extension).encode('utf-8')
+                        new_name = os.path.join(layerfiledir, base + "_" + str(ii) + extension).encode('utf-8').decode()
                         new_name_final = os.path.join(layerfiledir, base + "_" + str(ii) + extension)
                         if not os.path.exists(new_name):
-                            fout = open(new_name,'w') # creates the file where the uploaded file should be stored
-                            fout.write(getparams.drawnlayerfeaturesGEOSON) # .read()  writes the uploaded file to the newly created file.
-                            fout.close() # closes the file, upload complete.
+                            fout = open(new_name, 'w')  # creates the file where the uploaded file should be stored
+                            fout.write(
+                                getparams.drawnlayerfeaturesGEOSON)  # .read()  writes the uploaded file to the newly created file.
+                            fout.close()  # closes the file, upload complete.
                             break
                         ii += 1
 
-                finalfilename = new_name_final.split('/')[-1] # splits the and chooses the last part (the filename with extension)
+                finalfilename = new_name_final.split('/')[
+                    -1]  # splits the and chooses the last part (the filename with extension)
                 success = True
             except:
                 success = False
@@ -3784,41 +3822,40 @@ class SaveDrawnVectorLayer:
 
         if success:
             layerdrawprobs = {
-                                # 'layerid': getparams['layer']['layerid'],
-                                # 'layerlevel': getparams['layer']['layerlevel'],
-                                'layername': getparams.layerfilename,
-                                'description': '',
-                                'filename': finalfilename,
-                                'layerorderidx': 1,
-                                'layertype': 'polygon',
-                                'polygon_outlinecolor': '#0000FF',
-                                'polygon_outlinewidth': 1,
-                                'polygon_fillcolor': 'Transparent',
-                                # 'polygon_fillopacity': '',
-                                'feature_display_column': 'NAME',
-                                'feature_highlight_fillcolor': '#FF9900',
-                                'feature_highlight_fillopacity': 10,
-                                'feature_highlight_outlinecolor': '#33CCCC',
-                                'feature_highlight_outlinewidth': 2,
-                                'feature_selected_outlinecolor': '#FF0000',
-                                'feature_selected_outlinewidth': 2,
-                                'enabled': True,
-                                'deletable': True,
-                                'background_legend_image_filename': '',
-                                # 'projection': '',
-                                'submenu': 'User defined',
-                                'menu': 'other',
-                                'defined_by': 'USER',
-                                # 'open_in_mapview': '',
-                                'provider': 'User'}
-
+                # 'layerid': getparams['layer']['layerid'],
+                # 'layerlevel': getparams['layer']['layerlevel'],
+                'layername': getparams.layerfilename,
+                'description': '',
+                'filename': finalfilename,
+                'layerorderidx': 1,
+                'layertype': 'polygon',
+                'polygon_outlinecolor': '#0000FF',
+                'polygon_outlinewidth': 1,
+                'polygon_fillcolor': 'Transparent',
+                # 'polygon_fillopacity': '',
+                'feature_display_column': 'NAME',
+                'feature_highlight_fillcolor': '#FF9900',
+                'feature_highlight_fillopacity': 10,
+                'feature_highlight_outlinecolor': '#33CCCC',
+                'feature_highlight_outlinewidth': 2,
+                'feature_selected_outlinecolor': '#FF0000',
+                'feature_selected_outlinewidth': 2,
+                'enabled': True,
+                'deletable': True,
+                'background_legend_image_filename': '',
+                # 'projection': '',
+                'submenu': 'User defined',
+                'menu': 'other',
+                'defined_by': 'USER',
+                # 'open_in_mapview': '',
+                'provider': 'User'}
 
             if self.crud_db.create('layers', layerdrawprobs):
-                newlayer = self.crud_db.read('layers', filename = finalfilename)
+                newlayer = self.crud_db.read('layers', filename=finalfilename)
                 for layer in newlayer:
                     layerid = layer['layerid']
 
-                status = '{"success":true, "layerid":'+layerid+', "layerfilename": "'+finalfilename+'", "message":"Layer created!"}'
+                status = '{"success":true, "layerid":' + layerid + ', "layerfilename": "' + finalfilename + '", "message":"Layer created!"}'
             else:
                 status = '{"success":false, "message":"An error occured while saving the settings in the database for the drawn layer!"}'
 
@@ -3840,7 +3877,7 @@ class SaveDrawnVectorLayer:
         return status
 
 
-class DownloadVectorLayer:
+class DownloadVectorLayer(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -3850,7 +3887,7 @@ class DownloadVectorLayer:
             status = '{"success":false, "message":"No layer filename given!"}'
             # return status
         else:
-            layerfilename = getparams['layerfilename'].encode('utf-8')
+            layerfilename = getparams['layerfilename'].encode('utf-8').decode()
             layerfiledir = es_constants.es2globals['estation2_layers_dir']
             if os.path.exists(layerfiledir + '/' + layerfilename):
                 web.header('Content-Type', 'text/html')  # 'application/x-compressed'  'application/force-download'
@@ -3868,45 +3905,48 @@ class DownloadVectorLayer:
                 status = '{"success":false, "message":"Layer file not found!"}'
 
 
-class ImportLayer:
+class ImportLayer(object):
     def __init__(self):
         self.lang = "eng"
 
     def POST(self):
         # getparams = json.loads(web.data())  # get PUT data
-        getparams = web.input() # get POST data
+        getparams = web.input()  # get POST data
 
         # layerfiledir = '/eStation2/layers/' # change this to the directory you want to store the file in.
         layerfiledir = es_constants.es2globals['estation2_layers_dir']
-        if 'layerfilename' in getparams: # to check if the file-object is created
+        if 'layerfilename' in getparams:  # to check if the file-object is created
             try:
-                filepath=getparams.layerfilename.replace('\\','/') # replaces the windows-style slashes with linux ones.
-                filename=filepath.split('/')[-1] # splits the and chooses the last part (the filename with extension)
+                filepath = getparams.layerfilename.replace('\\',
+                                                           '/')  # replaces the windows-style slashes with linux ones.
+                filename = filepath.split('/')[-1]  # splits the and chooses the last part (the filename with extension)
 
                 # Separate base from extension
                 base, extension = os.path.splitext(filename)
 
                 # Initial new name
-                new_name = os.path.join(layerfiledir, filename).encode('utf-8')
+                new_name = os.path.join(layerfiledir, filename).encode('utf-8').decode()
                 new_name_final = layerfiledir + '/' + filename
 
                 if not os.path.exists(new_name):  # file does not exist in <layerfiledir>
-                    fout = open(new_name,'w') # creates the file where the uploaded file should be stored
-                    fout.write(getparams.layerfile) # .read()  writes the uploaded file to the newly created file.
-                    fout.close() # closes the file, upload complete.
+                    fout = open(new_name, 'w')  # creates the file where the uploaded file should be stored
+                    fout.write(getparams.layerfile)  # .read()  writes the uploaded file to the newly created file.
+                    fout.close()  # closes the file, upload complete.
                 else:  # file exists in <layerfiledir>
                     ii = 1
                     while True:
-                        new_name = os.path.join(layerfiledir, base + "_" + str(ii) + extension).encode('utf-8')
+                        new_name = os.path.join(layerfiledir, base + "_" + str(ii) + extension).encode('utf-8').decode()
                         new_name_final = os.path.join(layerfiledir, base + "_" + str(ii) + extension)
                         if not os.path.exists(new_name):
-                            fout = open(new_name,'w') # creates the file where the uploaded file should be stored
-                            fout.write(getparams.layerfile) # .read()  writes the uploaded file to the newly created file.
-                            fout.close() # closes the file, upload complete.
+                            fout = open(new_name, 'w')  # creates the file where the uploaded file should be stored
+                            fout.write(
+                                getparams.layerfile)  # .read()  writes the uploaded file to the newly created file.
+                            fout.close()  # closes the file, upload complete.
                             break
                         ii += 1
 
-                finalfilename = new_name_final.split('/')[-1] # splits the and chooses the last part (the filename with extension)
+                finalfilename = new_name_final.split('/')[
+                    -1]  # splits the and chooses the last part (the filename with extension)
                 success = True
             except:
                 success = False
@@ -3914,14 +3954,14 @@ class ImportLayer:
             success = False
 
         if success:
-            status = '{"success":"true", "filename":"'+ finalfilename + '","message":"Layer imported!"}'
+            status = '{"success":"true", "filename":"' + finalfilename + '","message":"Layer imported!"}'
         else:
             status = '{"success":false, "message":"An error occured while importing the layer!"}'
 
         return status
 
 
-class DeleteLayer:
+class DeleteLayer(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -3929,11 +3969,10 @@ class DeleteLayer:
     def DELETE(self):
         getparams = json.loads(web.data())  # get PUT data
         # getparams = web.input() # get POST data
-        if 'layer' in getparams:      # hasattr(getparams, "layer")
+        if 'layer' in getparams:  # hasattr(getparams, "layer")
             layerdrawprobs = {
-                                'layerid': getparams['layer']['layerid'],
-                             }
-
+                'layerid': getparams['layer']['layerid'],
+            }
 
             if self.crud_db.delete('layers', **layerdrawprobs):
                 status = '{"success":"true", "message":"Layer deleted!"}'
@@ -3946,7 +3985,7 @@ class DeleteLayer:
         return status
 
 
-class CreateLayer:
+class CreateLayer(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -3954,7 +3993,7 @@ class CreateLayer:
     def POST(self):
         getparams = json.loads(web.data())  # get PUT data
         # getparams = web.input() # get POST data
-        if 'layer' in getparams:      # hasattr(getparams, "layer")
+        if 'layer' in getparams:  # hasattr(getparams, "layer")
             layerdrawprobs = {
                                 # 'layerid': getparams['layer']['layerid'],
                                 # 'layerlevel': getparams['layer']['layerlevel'],
@@ -3974,16 +4013,15 @@ class CreateLayer:
                                 'feature_highlight_outlinewidth': getparams['layer']['feature_highlight_outlinewidth'],
                                 'feature_selected_outlinecolor': getparams['layer']['feature_selected_outlinecolor'],
                                 'feature_selected_outlinewidth': getparams['layer']['feature_selected_outlinewidth'],
-                                'enabled': getparams['layer']['enabled'],
+                                'enabled': functions.str_to_bool(getparams['layer']['enabled']),
                                 'deletable': True,
                                 'background_legend_image_filename': '',
                                 # 'projection': getparams['layer']['projection'],
                                 'submenu': getparams['layer']['submenu'],
                                 'menu': getparams['layer']['menu'],
                                 'defined_by': 'USER',
-                                # 'open_in_mapview': getparams['layer']['open_in_mapview'],
+                                # 'open_in_mapview': functions.str_to_bool(getparams['layer']['open_in_mapview']),
                                 'provider': getparams['layer']['provider'] }
-
 
             if self.crud_db.create('layers', layerdrawprobs):
                 status = '{"success":"true", "message":"Layer created!"}'
@@ -3996,7 +4034,7 @@ class CreateLayer:
         return status
 
 
-class UpdateLayer:
+class UpdateLayer(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
@@ -4022,16 +4060,15 @@ class UpdateLayer:
                                 'feature_highlight_outlinewidth': getparams['layer']['feature_highlight_outlinewidth'],
                                 'feature_selected_outlinecolor': getparams['layer']['feature_selected_outlinecolor'],
                                 'feature_selected_outlinewidth': getparams['layer']['feature_selected_outlinewidth'],
-                                'enabled': getparams['layer']['enabled'],
-                                # 'deletable': getparams['layer']['deletable'],
+                                'enabled': functions.str_to_bool(getparams['layer']['enabled']),
+                                # 'deletable': functions.str_to_bool(getparams['layer']['deletable']),
                                 # 'background_legend_image_filename': getparams['layer']['background_legend_image_filename'],
                                 # 'projection': getparams['layer']['projection'],
                                 'submenu': getparams['layer']['submenu'],
                                 'menu': getparams['layer']['menu'],
                                 'defined_by': getparams['layer']['defined_by'],
-                                'open_in_mapview': getparams['layer']['open_in_mapview'],
+                                'open_in_mapview': functions.str_to_bool(getparams['layer']['open_in_mapview']),
                                 'provider': getparams['layer']['provider'] }
-
 
             if self.crud_db.update('layers', layerdrawprobs):
                 updatestatus = '{"success":"true", "message":"Layer updated!"}'
@@ -4044,14 +4081,14 @@ class UpdateLayer:
         return updatestatus
 
 
-class GetVectorLayer:
+class GetVectorLayer(object):
     def __init__(self):
         self.lang = "eng"
 
     def GET(self):
         getparams = web.input()
         filename = getparams['file']
-        layerfilepath = es_constants.estation2_layers_dir + os.path.sep + filename.encode('utf-8')
+        layerfilepath = es_constants.estation2_layers_dir + os.path.sep + filename.encode('utf-8').decode()
         # if isFile(layerfilepath):
         layerfile = open(layerfilepath, 'r')
         layerfilecontent = layerfile.read()
@@ -4060,16 +4097,17 @@ class GetVectorLayer:
         return layerfilecontent
 
 
-class SystemReport:
+class SystemReport(object):
     def __init__(self):
         self.lang = "eng"
 
     def POST(self):
 
         filename = es2system.system_create_report()
-        web.header('Content-Type', 'application/force-download')   # 'application/x-compressed')
+        web.header('Content-Type', 'application/force-download')  # 'application/x-compressed')
         web.header('Content-transfer-encoding', 'binary')
-        web.header('Content-Disposition', 'attachment; filename=' + os.path.basename(filename))  # force browser to show "Save as" dialog.
+        web.header('Content-Disposition',
+                   'attachment; filename=' + os.path.basename(filename))  # force browser to show "Save as" dialog.
         f = open(filename, 'rb')
         while 1:
             buf = f.read(1024 * 8)
@@ -4080,16 +4118,17 @@ class SystemReport:
         os.remove(filename)
 
 
-class InstallReport:
+class InstallReport(object):
     def __init__(self):
         self.lang = "eng"
 
     def POST(self):
 
         filename = es2system.system_install_report()
-        web.header('Content-Type', 'application/force-download')   # 'application/x-compressed')
+        web.header('Content-Type', 'application/force-download')  # 'application/x-compressed')
         web.header('Content-transfer-encoding', 'binary')
-        web.header('Content-Disposition', 'attachment; filename=' + os.path.basename(filename))  # force browser to show "Save as" dialog.
+        web.header('Content-Disposition',
+                   'attachment; filename=' + os.path.basename(filename))  # force browser to show "Save as" dialog.
         f = open(filename, 'rb')
         while 1:
             buf = f.read(1024 * 8)
@@ -4100,7 +4139,7 @@ class InstallReport:
         os.remove(filename)
 
 
-class ResetUserSettings:
+class ResetUserSettings(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4114,7 +4153,7 @@ class ResetUserSettings:
         return updatestatus
 
 
-class UpdateUserSettings:
+class UpdateUserSettings(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4129,12 +4168,12 @@ class UpdateUserSettings:
         return updatestatus
 
 
-class UserSettings:
+class UserSettings(object):
     def __init__(self):
         self.lang = "eng"
 
     def GET(self):
-        import ConfigParser
+        import configparser
 
         systemsettings = functions.getSystemSettings()
 
@@ -4146,11 +4185,11 @@ class UserSettings:
         else:
             factory_settings_filename = 'factory_settings_windows.ini'
 
-        config_usersettings = ConfigParser.ConfigParser()
+        config_usersettings = configparser.ConfigParser()
         config_usersettings.read(['user_settings.ini',
-                                  es_constants.es2globals['settings_dir']+'/user_settings.ini'])
+                                  es_constants.es2globals['settings_dir'] + '/user_settings.ini'])
 
-        config_factorysettings = ConfigParser.ConfigParser()
+        config_factorysettings = configparser.ConfigParser()
         config_factorysettings.read([factory_settings_filename,
                                      es_constants.es2globals['config_dir'] + '/' + factory_settings_filename])
 
@@ -4160,8 +4199,7 @@ class UserSettings:
             if value is not None and value != "":
                 settings[setting] = value
             else:
-                settings[setting] = config_factorysettings.get('FACTORY_SETTINGS', setting, 0)
-
+                settings[setting] = config_factorysettings.get('FACTORY_SETTINGS', setting)
 
         settings['id'] = 0
         # settings['ip_pc1'] = systemsettings['ip_pc1']
@@ -4183,19 +4221,18 @@ class UserSettings:
                                    indent=4,
                                    separators=(', ', ': '))
 
-        settings_json = '{"success":"true", "systemsettings":'+settings_json+'}'
+        settings_json = '{"success":"true", "systemsettings":' + settings_json + '}'
 
-        #systemsettings_json = '{"success":false, "error":"No ingestions defined!"}'
+        # systemsettings_json = '{"success":false, "error":"No ingestions defined!"}'
 
         return settings_json
 
 
-class IPSettings:
+class IPSettings(object):
     def __init__(self):
         self.lang = "eng"
 
     def GET(self):
-
         settings = {}
         systemsettings = functions.getSystemSettings()
         settings['id'] = 0
@@ -4214,23 +4251,23 @@ class IPSettings:
                                    indent=4,
                                    separators=(', ', ': '))
 
-        settings_json = '{"success":"true", "ipsettings":'+settings_json+'}'
+        settings_json = '{"success":"true", "ipsettings":' + settings_json + '}'
 
-        #systemsettings_json = '{"success":false, "error":"No ingestions defined!"}'
+        # systemsettings_json = '{"success":false, "error":"No ingestions defined!"}'
 
         return settings_json
 
 
-class UpdateIPSettings:
+class UpdateIPSettings(object):
     def __init__(self):
         self.lang = "eng"
 
     def PUT(self):
-        import ConfigParser
+        import configparser
 
-        systemsettingsfilepath = es_constants.es2globals['settings_dir']+'/system_settings.ini'
+        systemsettingsfilepath = es_constants.es2globals['settings_dir'] + '/system_settings.ini'
         # usersettingsfilepath = '/eStation2/settings/system_settings.ini'
-        config_systemsettings = ConfigParser.ConfigParser()
+        config_systemsettings = configparser.ConfigParser()
         config_systemsettings.read(['system_settings.ini', systemsettingsfilepath])
 
         getparams = json.loads(web.data())
@@ -4244,7 +4281,7 @@ class UpdateIPSettings:
 
         # Call bash script to set IP address of local machine!
         sudo_psw = 'mesadmin'
-        command = es_constants.es2globals['base_dir']+'/apps/es2system/network_config_1.0.sh ' + \
+        command = es_constants.es2globals['base_dir'] + '/apps/es2system/network_config_1.0.sh ' + \
                   getparams['ipsettings']['ip_pc1'] + ' ' + \
                   getparams['ipsettings']['ip_pc2'] + ' ' + \
                   getparams['ipsettings']['ip_pc3'] + ' ' + \
@@ -4261,7 +4298,7 @@ class UpdateIPSettings:
         return updatestatus
 
 
-class IngestArchive:
+class IngestArchive(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4270,7 +4307,7 @@ class IngestArchive:
         return webpy_esapp_helpers.IngestArchive(getparams)
 
 
-class GetProductLayer:
+class GetProductLayer(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4304,7 +4341,7 @@ class GetProductLayer:
         os.remove(filename_png)
 
 
-class GetBackgroundLayer:
+class GetBackgroundLayer(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4320,15 +4357,15 @@ class GetBackgroundLayer:
         # projlib = "/usr/share/proj/"
         projlib = es_constants.proj4_lib_dir
         # errorfile = es_constants.apps_dir+"/analysis/ms_tmp/ms_errors.log"
-        errorfile = es_constants.log_dir+"/mapserver_error.log"
+        errorfile = es_constants.log_dir + "/mapserver_error.log"
 
         # imagepath = es_constants.apps_dir+"/analysis/ms_tmp/"
 
         owsrequest = mapscript.OWSRequest()
 
         inputparams = web.input()
-        for k, v in inputparams.iteritems():
-            #print k + ':' + v
+        for k, v in inputparams.items():
+            # print k + ':' + v
             owsrequest.setParameter(k.upper(), v)
 
         owsrequest.setParameter("LAYERS", getparams['layername'])
@@ -4341,24 +4378,24 @@ class GetBackgroundLayer:
         outputformat_png = mapscript.outputFormatObj('GD/PNG', 'png')
         outputformat_png.setOption("INTERLACE", "OFF")
         backgroundlayer.appendOutputFormat(outputformat_png)
-        #outputformat_gd = mapscript.outputFormatObj('GD/GIF', 'gif')
-        #backgroundlayer.appendOutputFormat(outputformat_gd)
+        # outputformat_gd = mapscript.outputFormatObj('GD/GIF', 'gif')
+        # backgroundlayer.appendOutputFormat(outputformat_gd)
         backgroundlayer.selectOutputFormat('png')
         backgroundlayer.debug = mapscript.MS_TRUE
         backgroundlayer.status = mapscript.MS_ON
         backgroundlayer.units = mapscript.MS_DD
 
-        coords = map(float, inputparams.BBOX.split(","))
+        coords = list(map(float, inputparams.BBOX.split(",")))
         llx = coords[0]
         lly = coords[1]
         urx = coords[2]
         ury = coords[3]
-        backgroundlayer.setExtent(llx, lly, urx, ury)   # -26, -35, 60, 38
+        backgroundlayer.setExtent(llx, lly, urx, ury)  # -26, -35, 60, 38
 
         # epsg must be in lowercase because in unix/linux systems the proj filenames are lowercase!
-        #epsg = "+init=epsg:3857"
-        #epsg = "+init=" + inputparams.CRS.lower()   # CRS = "EPSG:4326"
-        epsg = inputparams.CRS.lower()   # CRS = "EPSG:4326"
+        # epsg = "+init=epsg:3857"
+        # epsg = "+init=" + inputparams.CRS.lower()   # CRS = "EPSG:4326"
+        epsg = inputparams.CRS.lower()  # CRS = "EPSG:4326"
         backgroundlayer.setProjection(epsg)
 
         w = int(inputparams.WIDTH)
@@ -4370,18 +4407,18 @@ class GetBackgroundLayer:
         backgroundlayer.setMetaData("WMS_SRS", inputparams.CRS.lower())
         # backgroundlayer.setMetaData("WMS_SRS", "epsg:3857")
         backgroundlayer.setMetaData("WMS_ABSTRACT", "A Web Map Service returning eStation2 background layers.")
-        backgroundlayer.setMetaData("WMS_ENABLE_REQUEST", "*")   # necessary!!
+        backgroundlayer.setMetaData("WMS_ENABLE_REQUEST", "*")  # necessary!!
 
         layer = mapscript.layerObj(backgroundlayer)
         layer.name = getparams['layername']
         layer.type = mapscript.MS_LAYER_RASTER
-        layer.status = mapscript.MS_ON     # MS_DEFAULT
+        layer.status = mapscript.MS_ON  # MS_DEFAULT
         layer.data = filename
         # layer.setProjection("+init=epsg:4326")
         layer.setProjection("epsg:4326")
         layer.dump = mapscript.MS_TRUE
 
-        result_map_file = es_constants.apps_dir+'/analysis/Backgroundlayer_result.map'
+        result_map_file = es_constants.apps_dir + '/analysis/Backgroundlayer_result.map'
         if os.path.isfile(result_map_file):
             os.remove(result_map_file)
         # backgroundlayer.save(result_map_file)
@@ -4390,13 +4427,13 @@ class GetBackgroundLayer:
         contents = backgroundlayer.OWSDispatch(owsrequest)
         content_type = mapscript.msIO_stripStdoutBufferContentType()
         content = mapscript.msIO_getStdoutBufferBytes()
-        #web.header = "Content-Type","%s; charset=utf-8"%content_type
+        # web.header = "Content-Type","%s; charset=utf-8"%content_type
         web.header('Content-type', 'image/png')
-        #web.header('Content-transfer-encoding', 'binary')
+        # web.header('Content-transfer-encoding', 'binary')
         return content
 
 
-class Processing:
+class Processing(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4408,16 +4445,16 @@ class Processing:
         return webpy_esapp_helpers.getProcessing(force)
 
 
-class UpdateProcessing:
+class UpdateProcessing(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
 
     def PUT(self):
         getparams = json.loads(web.data())  # get PUT data
-        if 'processes' in getparams:      # hasattr(getparams, "processes")
+        if 'processes' in getparams:  # hasattr(getparams, "processes")
             processinfo = {'process_id': getparams['processes']['process_id'],
-                           'activated': getparams['processes']['process_activated']}
+                           'activated': functions.str_to_bool(getparams['processes']['process_activated'])}
 
             if self.crud_db.update('processing', processinfo):
                 updatestatus = '{"success":"true", "message":"Process updated!"}'
@@ -4431,7 +4468,7 @@ class UpdateProcessing:
 
     def POST(self):
         getparams = json.loads(web.data())  # get PUT data
-        if 'processoutputproduct' in getparams:    # hasattr(getparams, "processoutputproduct")
+        if 'processoutputproduct' in getparams:  # hasattr(getparams, "processoutputproduct")
             for outputproduct in getparams['processoutputproduct']:
                 if 'subactivated' in outputproduct:
                     processproductinfo = {'process_id': outputproduct['process_id'],
@@ -4439,7 +4476,7 @@ class UpdateProcessing:
                                           'subproductcode': outputproduct['subproductcode'],
                                           'version': outputproduct['version'],
                                           'mapsetcode': outputproduct['mapsetcode'],
-                                          'activated': outputproduct['subactivated']}
+                                          'activated': functions.str_to_bool(outputproduct['subactivated'])}
 
                     if self.crud_db.update('process_product', processproductinfo):
                         updatestatus = '{"success":"true", "message":"Process output product updated!"}'
@@ -4452,7 +4489,7 @@ class UpdateProcessing:
         return updatestatus
 
 
-class DataSets:
+class DataSets(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4464,7 +4501,7 @@ class DataSets:
         return webpy_esapp_helpers.getDataSets(force)
 
 
-class CheckStatusAllServices:
+class CheckStatusAllServices(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4486,7 +4523,7 @@ class CheckStatusAllServices:
         return servicesstatus_json
 
 
-class ExecuteServiceTask:
+class ExecuteServiceTask(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4504,7 +4541,7 @@ class ExecuteServiceTask:
         return servicesstatus_json
 
 
-class UpdateProductInfo:
+class UpdateProductInfo(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4516,7 +4553,7 @@ class UpdateProductInfo:
             'orig_productcode': getparams['orig_productcode'],
             'orig_version': getparams['orig_version'],
             'productcode': getparams['productcode'],
-            'subproductcode': getparams['productcode']+'_native',
+            'subproductcode': getparams['productcode'] + '_native',
             'version': getparams['version'],
             'provider': getparams['provider'].replace("'", "''"),
             'descriptive_name': getparams['prod_descriptive_name'].replace("'", "''"),
@@ -4536,7 +4573,7 @@ class UpdateProductInfo:
         return updatestatus
 
 
-class CreateProduct:
+class CreateProduct(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -4549,11 +4586,11 @@ class CreateProduct:
             version = getparams['version']
 
         productinfo = {'productcode': getparams['productcode'],
-                       'subproductcode': getparams['productcode']+'_native',
+                       'subproductcode': getparams['productcode'] + '_native',
                        'version': version,
                        'product_type': 'Native',
                        'defined_by': getparams['defined_by'],
-                       'activated': getparams['activated'],
+                       'activated': functions.str_to_bool(getparams['activated']),
                        'provider': getparams['provider'].replace("'", "''"),
                        'descriptive_name': getparams['prod_descriptive_name'].replace("'", "''"),
                        'description': getparams['description'].strip(u'\u200b').replace("'", "''"),
@@ -4561,7 +4598,7 @@ class CreateProduct:
                        'frequency_id': 'undefined',
                        'date_format': 'undefined',
                        'data_type_id': 'undefined',
-                       'masked': 'f'
+                       'masked': False
                        }
 
         if self.crud_db.create('product', productinfo):
@@ -4572,7 +4609,7 @@ class CreateProduct:
         return createstatus
 
 
-class UpdateProduct:
+class UpdateProduct(object):
     def __init__(self):
         self.lang = "eng"
         # self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -4587,24 +4624,27 @@ class UpdateProduct:
         #                'activated': getparams['products']['activated']}
         # if self.crud_db.update('product', productinfo):
 
-        updatestatus = webpy_esapp_helpers.UpdateProduct(productcode=getparams['products']['productcode'], version=getparams['products']['version'], activate=getparams['products']['activated'])
+        updatestatus = webpy_esapp_helpers.UpdateProduct(productcode=getparams['products']['productcode'],
+                                                         version=getparams['products']['version'],
+                                                         activate=getparams['products']['activated'])
 
         return updatestatus
 
 
-class DeleteProduct:
+class DeleteProduct(object):
     def __init__(self):
         self.lang = "eng"
 
     def DELETE(self):
         getparams = json.loads(web.data())
 
-        deletestatus = webpy_esapp_helpers.DeleteProduct(productcode=getparams['products']['productcode'], version=getparams['products']['version'])
+        deletestatus = webpy_esapp_helpers.DeleteProduct(productcode=getparams['products']['productcode'],
+                                                         version=getparams['products']['version'])
 
         return deletestatus
 
 
-class UpdateDataAcquisition:
+class UpdateDataAcquisition(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -4616,23 +4656,27 @@ class UpdateDataAcquisition:
                                'version': getparams['dataacquisitions']['version'],
                                'data_source_id': getparams['dataacquisitions']['data_source_id'],
                                'defined_by': getparams['dataacquisitions']['defined_by'],
-                               'activated': getparams['dataacquisitions']['activated'],
-                               'store_original_data': getparams['dataacquisitions']['store_original_data']}
+                               'activated': functions.str_to_bool(getparams['dataacquisitions']['activated']),
+                               'store_original_data': functions.str_to_bool(getparams['dataacquisitions']['store_original_data'])}
 
         # ToDO: distinguish upodate of activated and store_original_data! Different queries?
         if self.crud_db.update('product_acquisition_data_source', dataacquisitioninfo):
             if getparams['dataacquisitions']['store_original_data']:
-                message = '<b>Activated</b> Store Native for data source <b>' + getparams['dataacquisitions']['data_source_id'] + '</b></br>' + \
+                message = '<b>Activated</b> Store Native for data source <b>' + getparams['dataacquisitions'][
+                    'data_source_id'] + '</b></br>' + \
                           ' for productcode: <b>' + getparams['dataacquisitions']['productcode'] + '</b>'
             elif not getparams['dataacquisitions']['store_original_data']:
-                message = '<b>Deactivated</b> Store Native for data source <b>' + getparams['dataacquisitions']['data_source_id'] + '</b></br>' + \
+                message = '<b>Deactivated</b> Store Native for data source <b>' + getparams['dataacquisitions'][
+                    'data_source_id'] + '</b></br>' + \
                           ' for productcode: <b>' + getparams['dataacquisitions']['productcode'] + '</b>'
 
             if getparams['dataacquisitions']['activated']:
-                message = '<b>Activated</b> data source <b>' + getparams['dataacquisitions']['data_source_id'] + '</b></br>' + \
+                message = '<b>Activated</b> data source <b>' + getparams['dataacquisitions'][
+                    'data_source_id'] + '</b></br>' + \
                           ' for productcode: <b>' + getparams['dataacquisitions']['productcode'] + '</b>'
             elif not getparams['dataacquisitions']['activated']:
-                message = '<b>Deactivated</b> data source <b>' + getparams['dataacquisitions']['data_source_id'] + '</b></br>' + \
+                message = '<b>Deactivated</b> data source <b>' + getparams['dataacquisitions'][
+                    'data_source_id'] + '</b></br>' + \
                           ' for productcode: <b>' + getparams['dataacquisitions']['productcode'] + '</b>'
 
             updatestatus = '{"success":"true", "message":"' + message + '"}'
@@ -4642,7 +4686,7 @@ class UpdateDataAcquisition:
         return updatestatus
 
 
-class UpdateIngestion:
+class UpdateIngestion(object):
     def __init__(self):
         self.lang = "eng"
         self.crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
@@ -4655,17 +4699,19 @@ class UpdateIngestion:
                          'version': getparams['ingestions']['version'],
                          'mapsetcode': getparams['ingestions']['mapsetcode'],
                          'defined_by': getparams['ingestions']['defined_by'],
-                         'activated': getparams['ingestions']['activated']}
+                         'activated': functions.str_to_bool(getparams['ingestions']['activated'])}
 
         if self.crud_db.update('ingestion', ingestioninfo):
             message = 'Ingestion for: </br>' + \
-                      'Productcode: <b>' + getparams['ingestions']['productcode'] + '</b></br>'\
-                      'Mapsetcode: <b>' + getparams['ingestions']['mapsetcode'] + '</b></br>'\
-                      'Subproductcode: <b>' + getparams['ingestions']['subproductcode'] + '</b>'
+                      'Productcode: <b>' + getparams['ingestions']['productcode'] + '</b></br>' \
+                                                                                    'Mapsetcode: <b>' + \
+                      getparams['ingestions']['mapsetcode'] + '</b></br>' \
+                                                              'Subproductcode: <b>' + getparams['ingestions'][
+                          'subproductcode'] + '</b>'
             if getparams['ingestions']['activated']:
                 message = '<b>Activated</b> ' + message
             else:
-                message = '<b>Deactivated</b> '  + message
+                message = '<b>Deactivated</b> ' + message
             updatestatus = '{"success":"true", "message":"' + message + '"}'
         else:
             updatestatus = '{"success":false, "message":"An error occured while updating the Ingestion!"}'
@@ -4673,7 +4719,7 @@ class UpdateIngestion:
         return updatestatus
 
 
-class Ingestion:
+class Ingestion(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4685,7 +4731,7 @@ class Ingestion:
         return webpy_esapp_helpers.getIngestion(force)
 
 
-class getIngestSubProducts:
+class getIngestSubProducts(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4695,7 +4741,7 @@ class getIngestSubProducts:
         return webpy_esapp_helpers.getIngestSubProducts()
 
 
-class CreateIngestSubProduct:
+class CreateIngestSubProduct(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4706,7 +4752,7 @@ class CreateIngestSubProduct:
         return createstatus
 
 
-class UpdateIngestSubProduct:
+class UpdateIngestSubProduct(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4718,7 +4764,7 @@ class UpdateIngestSubProduct:
         return updatestatus
 
 
-class DeleteIngestSubProduct:
+class DeleteIngestSubProduct(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4730,7 +4776,7 @@ class DeleteIngestSubProduct:
         return deletestatus
 
 
-class getSubDatasourceDescriptions:
+class getSubDatasourceDescriptions(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4739,7 +4785,7 @@ class getSubDatasourceDescriptions:
         return webpy_esapp_helpers.getSubDatasourceDescriptions()
 
 
-class CreateSubDatasourceDescription:
+class CreateSubDatasourceDescription(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4749,7 +4795,7 @@ class CreateSubDatasourceDescription:
         return webpy_esapp_helpers.CreateSubDatasourceDescription(params)
 
 
-class UpdateSubDatasourceDescription:
+class UpdateSubDatasourceDescription(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4759,7 +4805,7 @@ class UpdateSubDatasourceDescription:
         return webpy_esapp_helpers.UpdateSubDatasourceDescription(params)
 
 
-class DeleteSubDatasourceDescription:
+class DeleteSubDatasourceDescription(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4769,7 +4815,7 @@ class DeleteSubDatasourceDescription:
         return webpy_esapp_helpers.DeleteSubDatasourceDescription(params)
 
 
-class DataAcquisition:
+class DataAcquisition(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4788,7 +4834,7 @@ class DataAcquisition:
                 # the acquisition was active of a specific eumetcast id
                 acq_dates = get_eumetcast.get_eumetcast_info(row.data_source_id)
                 if acq_dates:
-                    for key in acq_dates.keys():
+                    for key in list(acq_dates.keys()):
                         # acq_info += '"%s": "%s", ' % (key, acq_dates[key])
                         if isinstance(acq_dates[key], datetime.date):
                             datetostring = acq_dates[key].strftime("%y-%m-%d %H:%M")
@@ -4796,9 +4842,9 @@ class DataAcquisition:
                         else:
                             acq_dict[key] = acq_dates[key]
                 else:
-                    acq_dict['time_latest_copy'] = ''   # datetime.datetime.now().strftime("%y-%m-%d %H:%M")
-                    acq_dict['time_latest_exec'] = ''   # datetime.datetime.now().strftime("%y-%m-%d %H:%M")
-                    acq_dict['length_proc_list'] = ''   # datetime.datetime.now().strftime("%y-%m-%d %H:%M")
+                    acq_dict['time_latest_copy'] = ''  # datetime.datetime.now().strftime("%y-%m-%d %H:%M")
+                    acq_dict['time_latest_exec'] = ''  # datetime.datetime.now().strftime("%y-%m-%d %H:%M")
+                    acq_dict['length_proc_list'] = ''  # datetime.datetime.now().strftime("%y-%m-%d %H:%M")
 
                 acq_dict_all.append(acq_dict)
                 acq_json = json.dumps(acq_dict_all,
@@ -4806,16 +4852,16 @@ class DataAcquisition:
                                       sort_keys=True,
                                       indent=4,
                                       separators=(', ', ': '))
-                dataacquisitions_json = '{"success":"true", "total":'\
-                                        + str(dataacquisitions.__len__())\
-                                        + ',"dataacquisitions":'+acq_json+'}'
+                dataacquisitions_json = '{"success":"true", "total":' \
+                                        + str(dataacquisitions.__len__()) \
+                                        + ',"dataacquisitions":' + acq_json + '}'
         else:
             dataacquisitions_json = '{"success":false, "error":"No data acquisitions defined!"}'
 
         return dataacquisitions_json
 
 
-class ProductAcquisition:
+class ProductAcquisition(object):
     def __init__(self):
         self.lang = "eng"
 
@@ -4830,7 +4876,7 @@ class ProductAcquisition:
         #     products = querydb.get_products_acquisition()
         # products = querydb.get_products(activated=getparams.activated)
         products_json = functions.tojson(products)
-        products_json = '{"success":"true", "total":'+str(products.__len__())+',"products":['+products_json+']}'
+        products_json = '{"success":"true", "total":' + str(products.__len__()) + ',"products":[' + products_json + ']}'
         return products_json
 
 

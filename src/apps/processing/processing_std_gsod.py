@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 #
 #	purpose: Compute the GSOD 1d interpolated product and 10d cumulation
 #	author:  M.Clerici, BDMS Staff
@@ -7,6 +11,9 @@
 #
 
 # Source my definitions
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import os
 import glob
 import datetime
@@ -132,14 +139,14 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                 # + ' -ts ' + outsize \
 
         try:
-            print command
+            print (command)
             os.system(command)
         except:
             pass
         try:
             shutil.rmtree(tmpdir)
         except:
-            print('Error in removing temporary directory. Continue')
+            print ('Error in removing temporary directory. Continue')
             raise NameError('Error in removing tmpdir')
 
     #   ---------------------------------------------------------------------
@@ -197,7 +204,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                 if len(file_list) >= expected_days-1:
                     yield (file_list, output_file)
                 else:
-                    print 'Too many missing files for dekad {0}'.format(my_dekad_str)
+                    print ('Too many missing files for dekad {0}'.format(my_dekad_str))
 
     @active_if(activate_10d_gRf_comput)
     @files(generate_parameters_10dmeas)

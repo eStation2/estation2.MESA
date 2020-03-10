@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 #
 #	purpose: To incorporate all the JEODPP request and download methods here
 #	author:  Vijay Charan
@@ -5,6 +9,10 @@
 #   descr:	 Gets data from JEODPP
 
 
+from builtins import open
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import requests
 # import pycurl
 
@@ -81,11 +89,11 @@ def get_download_links(dates, wkt,max_clouds, frequency, product_type):
     # max_clouds = parameters.get('max_clouds')
 
     for date in dates:
-        import urllib
+        import urllib.request, urllib.parse, urllib.error
         # &lat=43.5&lon=12.25&datemin=2019-08-01&datemax=2019-09-01
         #template_filled = 'products/query?wkt=' + str(wkt).encode() + '&max_clouds=' + str(max_clouds) + '&start=' + str(date.date()) + '&stop=' + str(frequency.next_date(date).date())  # + '&format=' + format + '&user=' + username + '&pwd=' + password
         template_object = {'wkt': str(wkt), 'max_clouds': str(max_clouds), 'start':str(date.date()), 'stop':str(frequency.next_date(date).date()), 'product_type':product_type }
-        template_filled = 'products/query?'+ urllib.urlencode(template_object)
+        template_filled = 'products/query?'+ urllib.parse.urlencode(template_object)
         list_download_links.append(template_filled)
 
     return list_download_links
@@ -246,7 +254,7 @@ def http_post_request_jeodpp(remote_url_file, userpwd='', https_params=''):
         }
 
         r = requests.post(url=remote_url_file, headers=headers )
-        # print(r.content)
+        # print (r.content)
 
         # Check the result (filter server/client errors http://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
         if r.status_code >= 400:

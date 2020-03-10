@@ -15,6 +15,16 @@
 # import tempfile
 # import pprint
 
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from builtins import open
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import map
 import os
 import tarfile
 import shutil
@@ -68,7 +78,7 @@ def get_from_date(frequency_id, dateformat):
         today = datetime.date.today()
         # for decad always start on the 1st of the month (here the 1st of january of the current year)
         first_day_of_year = str(today.year) + '-01-01'
-        year, month, day = map(int, first_day_of_year.split("-"))
+        year, month, day = list(map(int, first_day_of_year.split("-")))
         first_day_of_year = datetime.date(year, month, day)
         from_date = first_day_of_year - relativedelta(years=years_back)
 
@@ -83,7 +93,7 @@ def get_from_date(frequency_id, dateformat):
         today = datetime.date.today()
         # for decad always start on the 1st of the month (here the 1st of january of the current year)
         first_day_of_year = str(today.year) + '-01-01'
-        year, month, day = map(int, first_day_of_year.split("-"))
+        year, month, day = list(map(int, first_day_of_year.split("-")))
         first_day_of_year = datetime.date(year, month, day)
         from_date = first_day_of_year - relativedelta(years=years_back)
     else:
@@ -513,7 +523,7 @@ def create_archive_from_request(request_file):
                 shutil.copyfileobj(open(decompress_file,'rb'),target)
                 shutil.copyfileobj(open(archive_name,'rb'),target)
                 target.close()
-                os.chmod(self_extracting_name,0775)
+                os.chmod(self_extracting_name, 775)
                 # Increase the counter
                 incresing_number+=1
 
@@ -584,7 +594,7 @@ def create_archive_vars(productcode, version, mapsetcode, subproductcode, from_d
         shutil.copyfileobj(open(decompress_file,'rb'),target)
         shutil.copyfileobj(open(archive_name,'rb'),target)
         target.close()
-        os.chmod(self_extracting_name,0775)
+        os.chmod(self_extracting_name, 775)
         # Increase the counter
         incresing_number+=1
 

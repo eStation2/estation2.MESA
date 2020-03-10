@@ -5,7 +5,19 @@ s2reader reads and processes Sentinel-2 L1C SAFE archives.
 This module implements an easy abstraction to the SAFE data format used by the
 Sentinel 2 misson of the European Space Agency (ESA)
 """
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import print_function
 
+from builtins import int
+from builtins import dict
+from future import standard_library
+standard_library.install_aliases()
+from builtins import next
+from builtins import str
+from past.utils import old_div
+from builtins import object
 import os
 import pyproj
 import numpy as np
@@ -259,14 +271,14 @@ class SentinelGranule(object):
             root = self._metadata.getroot()
         return {
             k: v
-            for k, v in root.nsmap.iteritems()
+            for k, v in root.nsmap.items()
             if k
         }
 
     @cached_property
     def srid(self):
         """Return EPSG code."""
-        tile_geocoding = self._metadata.iter("Tile_Geocoding").next()
+        tile_geocoding = next(self._metadata.iter("Tile_Geocoding"))
         return tile_geocoding.findtext("HORIZONTAL_CS_CODE")
 
     @cached_property
@@ -321,7 +333,7 @@ class SentinelGranule(object):
     def footprint(self):
         """Find and return footprint as Shapely Polygon."""
         # Check whether product or granule footprint needs to be calculated.
-        tile_geocoding = self._metadata.iter("Tile_Geocoding").next()
+        tile_geocoding = next(self._metadata.iter("Tile_Geocoding"))
         resolution = 10
         searchstring = ".//*[@resolution='%s']" % resolution
         size, geoposition = tile_geocoding.findall(searchstring)
@@ -380,8 +392,8 @@ class SentinelGranule(object):
                 granule_basepath = os.path.dirname(
                     self.dataset.product_metadata_path
                 )
-        product_org = self.dataset._product_metadata.iter(
-            "Product_Organisation").next()
+        product_org = next(self.dataset._product_metadata.iter(
+            "Product_Organisation"))
         granule_item = [
             g
             for g in chain(*[gl for gl in product_org.iter("Granule_List")])
@@ -436,7 +448,7 @@ class SentinelGranule(object):
         interior_str = str(
             "eop:extentOf/gml:Polygon/gml:interior/gml:LinearRing/gml:posList"
         )
-        for item in self._metadata.iter("Pixel_Level_QI").next():
+        for item in next(self._metadata.iter("Pixel_Level_QI")):
             if item.attrib.get("type") == mask_type:
                 gml = os.path.join(
                     self.granule_path, "QI_DATA", os.path.basename(item.text)
@@ -445,7 +457,7 @@ class SentinelGranule(object):
             root = fromstring(self.dataset._zipfile.read(gml))
         else:
             root = parse(gml).getroot()
-        nsmap = {k: v for k, v in root.nsmap.iteritems() if k}
+        nsmap = {k: v for k, v in root.nsmap.items() if k}
         try:
             for mask_member in root.iterfind(
                     "eop:maskMembers", namespaces=nsmap):
@@ -585,7 +597,7 @@ def _polygon_from_coords(coords, fix_geom=False, swap=True, dims=2):
     - fix_geom: automatically fix geometry
     """
     assert len(coords) % dims == 0
-    number_of_points = len(coords)/dims
+    number_of_points = old_div(len(coords),dims)
     coords_as_array = np.array(coords)
     reshaped = coords_as_array.reshape(number_of_points, dims)
     points = [

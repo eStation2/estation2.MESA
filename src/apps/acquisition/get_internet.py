@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
 #
 #        purpose: Define the get_internet service
 #        author:  M.Clerici
@@ -9,11 +13,17 @@
 #                               - apply to ftp when a proxy exists (e.g. JRC server)
 #
 # Import standard modules
+from builtins import open
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from past.utils import old_div
 import pycurl
 import certifi  # Pierluigi
 import signal
-import StringIO
-import cStringIO
+import io
+# import cStringIO
 import tempfile
 import sys
 import os
@@ -39,7 +49,7 @@ logger = log.my_logger(__name__)
 
 #   General definitions
 c = pycurl.Curl()
-buffer = StringIO.StringIO()
+buffer = io.StringIO()
 if not os.path.isdir(es_constants.base_tmp_dir):
     os.makedirs(es_constants.base_tmp_dir)
 
@@ -74,7 +84,7 @@ def signal_handler(signal, frame):
     functions.dump_obj_to_pickle(processed_list, processed_list_filename)
     functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
-    print 'Exit ' + sys.argv[0]
+    print ('Exit ' + sys.argv[0])
     logger.warning("Get Internet service is stopped.")
     sys.exit(0)
 
@@ -91,7 +101,7 @@ def signal_handler(signal, frame):
 def get_list_current_subdirs_ftp(remote_url, usr_pwd):
 
     d = pycurl.Curl()
-    response = cStringIO.StringIO()
+    response = io.StringIO()
     d.setopt(pycurl.URL, remote_url)
     if usr_pwd != ':':
         d.setopt(pycurl.USERPWD, usr_pwd)
@@ -130,7 +140,7 @@ def get_list_current_subdirs_http(remote_url, usr_pwd, internet_type, path=None)
         pattern = '<A HREF=.*?>(.*?)</A>'
 
     d = pycurl.Curl()
-    response = cStringIO.StringIO()
+    response = io.StringIO()
     d.setopt(pycurl.URL, remote_url+path)
     d.setopt(pycurl.USERPWD, usr_pwd)
     d.setopt(pycurl.FOLLOWLOCATION, 1)
@@ -176,7 +186,7 @@ def get_list_matching_files(remote_url, usr_pwd, full_regex, internet_type, my_l
         
     # Manage end_date
     if end_date is not None:
-        if isinstance(end_date,int) or isinstance(end_date,long):
+        if isinstance(end_date,int) or isinstance(end_date,int):
             if (end_date < 0):
                 try:
                     sorted_list = sorted(list_matches)
@@ -277,7 +287,7 @@ def build_list_matching_files_tmpl(base_url, template, from_date, to_date, frequ
             datetime_start=datetime.datetime.strptime(str(from_date),'%Y%m%d')
         else:
             # If it is a negative number, subtract from current date
-            if isinstance(from_date,int) or isinstance(from_date,long):
+            if isinstance(from_date,int) or isinstance(from_date,int):
                 if from_date < 0:
                     datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
             else:
@@ -291,7 +301,7 @@ def build_list_matching_files_tmpl(base_url, template, from_date, to_date, frequ
         if functions.is_date_yyyymmdd(str(to_date), silent=True):
             datetime_end=datetime.datetime.strptime(str(to_date),'%Y%m%d')
         # If it is a negative number, subtract from current date
-        elif isinstance(to_date,int) or isinstance(to_date,long):
+        elif isinstance(to_date,int) or isinstance(to_date,int):
             if to_date < 0:
                 datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
         else:
@@ -353,7 +363,7 @@ def build_list_matching_files_tmpl_vito(base_url, template, from_date, to_date, 
             datetime_start=datetime.datetime.strptime(str(from_date),'%Y%m%d')
         else:
             # If it is a negative number, subtract from current date
-            if isinstance(from_date,int) or isinstance(from_date,long):
+            if isinstance(from_date,int) or isinstance(from_date,int):
                 if from_date < 0:
                     datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
             else:
@@ -367,7 +377,7 @@ def build_list_matching_files_tmpl_vito(base_url, template, from_date, to_date, 
         if functions.is_date_yyyymmdd(str(to_date), silent=True):
             datetime_end=datetime.datetime.strptime(str(to_date),'%Y%m%d')
         # If it is a negative number, subtract from current date
-        elif isinstance(to_date,int) or isinstance(to_date,long):
+        elif isinstance(to_date,int) or isinstance(to_date,int):
             if to_date < 0:
                 datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
         else:
@@ -435,7 +445,7 @@ def build_list_matching_files_tmpl_theia(base_url, template, from_date, to_date,
             datetime_start=datetime.datetime.strptime(str(from_date),'%Y%m%d')
         else:
             # If it is a negative number, subtract from current date
-            if isinstance(from_date,int) or isinstance(from_date,long):
+            if isinstance(from_date,int) or isinstance(from_date,int):
                 if from_date < 0:
                     datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
             else:
@@ -449,7 +459,7 @@ def build_list_matching_files_tmpl_theia(base_url, template, from_date, to_date,
         if functions.is_date_yyyymmdd(str(to_date), silent=True):
             datetime_end=datetime.datetime.strptime(str(to_date),'%Y%m%d')
         # If it is a negative number, subtract from current date
-        elif isinstance(to_date,int) or isinstance(to_date,long):
+        elif isinstance(to_date,int) or isinstance(to_date,int):
             if to_date < 0:
                 datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
         else:
@@ -518,7 +528,7 @@ def build_list_matching_files_jeodpp(base_url, template, from_date, to_date, fre
             datetime_start=datetime.datetime.strptime(str(from_date),'%Y%m%d')
         else:
             # If it is a negative number, subtract from current date
-            if isinstance(from_date,int) or isinstance(from_date,long):
+            if isinstance(from_date,int) or isinstance(from_date,int):
                 if from_date < 0:
                     datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
             else:
@@ -532,7 +542,7 @@ def build_list_matching_files_jeodpp(base_url, template, from_date, to_date, fre
         if functions.is_date_yyyymmdd(str(to_date), silent=True):
             datetime_end=datetime.datetime.strptime(str(to_date),'%Y%m%d')
         # If it is a negative number, subtract from current date
-        elif isinstance(to_date,int) or isinstance(to_date,long):
+        elif isinstance(to_date,int) or isinstance(to_date,int):
             if to_date < 0:
                 datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
         else:
@@ -587,7 +597,7 @@ def build_list_matching_files_ftp_tmpl(base_url, template, from_date, to_date, f
             datetime_start=datetime.datetime.strptime(str(from_date),'%Y%m%d')
         else:
             # If it is a negative number, subtract from current date
-            if isinstance(from_date,int) or isinstance(from_date,long):
+            if isinstance(from_date,int) or isinstance(from_date,int):
                 if from_date < 0:
                     datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
             else:
@@ -601,7 +611,7 @@ def build_list_matching_files_ftp_tmpl(base_url, template, from_date, to_date, f
         if functions.is_date_yyyymmdd(str(to_date), silent=True):
             datetime_end=datetime.datetime.strptime(str(to_date),'%Y%m%d')
         # If it is a negative number, subtract from current date
-        elif isinstance(to_date,int) or isinstance(to_date,long):
+        elif isinstance(to_date,int) or isinstance(to_date,int):
             if to_date < 0:
                 datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
         else:
@@ -748,7 +758,7 @@ def build_list_matching_files_motu(base_url, template, from_date, to_date, frequ
             datetime_start=datetime.datetime.strptime(str(from_date),'%Y%m%d')
         else:
             # If it is a negative number, subtract from current date
-            if isinstance(from_date,int) or isinstance(from_date,long):
+            if isinstance(from_date,int) or isinstance(from_date,int):
                 if from_date < 0:
                     datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
             else:
@@ -762,7 +772,7 @@ def build_list_matching_files_motu(base_url, template, from_date, to_date, frequ
         if functions.is_date_yyyymmdd(str(to_date), silent=True):
             datetime_end=datetime.datetime.strptime(str(to_date),'%Y%m%d')
         # If it is a negative number, subtract from current date
-        elif isinstance(to_date,int) or isinstance(to_date,long):
+        elif isinstance(to_date,int) or isinstance(to_date,int):
             if to_date < 0:
                 datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
             elif to_date > 0:
@@ -817,7 +827,7 @@ def build_list_matching_files_eum_http(base_url, template, from_date, to_date, f
             datetime_start=datetime.datetime.strptime(str(from_date),'%Y%m%d')
         else:
             # If it is a negative number, subtract from current date
-            if isinstance(from_date,int) or isinstance(from_date,long):
+            if isinstance(from_date,int) or isinstance(from_date,int):
                 if from_date < 0:
                     datetime_start=datetime.datetime.today() - datetime.timedelta(days=-from_date)
             else:
@@ -831,7 +841,7 @@ def build_list_matching_files_eum_http(base_url, template, from_date, to_date, f
         if functions.is_date_yyyymmdd(str(to_date), silent=True):
             datetime_end=datetime.datetime.strptime(str(to_date),'%Y%m%d')
         # If it is a negative number, subtract from current date
-        elif isinstance(to_date,int) or isinstance(to_date,long):
+        elif isinstance(to_date,int) or isinstance(to_date,int):
             if to_date < 0:
                 datetime_end=datetime.datetime.today() - datetime.timedelta(days=-to_date)
             elif to_date > 0:
@@ -1190,7 +1200,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                         if processed_info is not None:
                             # Check the delay
                             current_delta=datetime.datetime.now()-processed_info['time_latest_exec']
-                            current_delta_minutes=int(current_delta.seconds/60)
+                            current_delta_minutes=int(old_div(current_delta.seconds,60))
                             if current_delta_minutes < delay_time_source_minutes:
                                 logger.debug("Still waiting up to %i minute - since latest execution.", delay_time_source_minutes)
                                 execute_trigger = False

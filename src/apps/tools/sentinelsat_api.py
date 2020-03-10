@@ -1,3 +1,9 @@
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
 from sentinelsat import SentinelAPI, read_geojson, geojson_to_wkt
 from datetime import date
 from lib.python import es_logging as log
@@ -42,7 +48,7 @@ def sentinelsat_getlists(base_url, template, datetime_start, datetime_end):
                                  platformname=platformname)
 
         list_links = []
-        for value in products.itervalues():
+        for value in products.values():
             link = value.get("uuid")
             list_links.append(link)
 

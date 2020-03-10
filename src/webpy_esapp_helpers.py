@@ -1,11 +1,27 @@
 #!/usr/bin/python
 
-#if __name__ == '__main__' and __package__ is None:
+# if __name__ == '__main__' and __package__ is None:
 #    from os import sys, path
 #    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import print_function
+from builtins import open
+from builtins import round
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import map
+from builtins import str
+from past.utils import old_div
 import sys
 import os
+
+# TODO: This turns of caching, remove!!!
+# import sys
+# sys.dont_write_bytecode = True
 
 os.umask(0000)
 
@@ -21,12 +37,13 @@ import time
 import calendar
 import numpy as NP
 import base64
-import ConfigParser
+import configparser
 import subprocess
 from subprocess import *
 from multiprocessing import *
 
 import matplotlib as mpl
+
 mpl.use('Agg')
 mpl.rcParams['savefig.pad_inches'] = 0
 
@@ -39,7 +56,7 @@ from database import crud
 
 from apps.acquisition import get_eumetcast
 from apps.acquisition import acquisition
-from apps.processing import processing      # Comment in WINDOWS version!
+from apps.processing import processing  # Comment in WINDOWS version!
 from apps.productmanagement.datasets import Dataset
 from apps.es2system import es2system
 from apps.productmanagement.datasets import Frequency
@@ -55,7 +72,6 @@ from lib.python import es_logging as log
 
 logger = log.my_logger(__name__)
 
-
 WEBPY_COOKIE_NAME = "webpy_session_id"
 
 
@@ -64,7 +80,7 @@ def GetLogos():
     logos = querydb.get_logos()
     if hasattr(logos, "__len__") and logos.__len__() > 0:
         for logo in logos:
-            logofilepath = es_constants.estation2_logos_dir + os.path.sep + logo['logo_filename'].encode('utf-8')
+            logofilepath = es_constants.estation2_logos_dir + os.path.sep + logo['logo_filename'].encode('utf-8').decode()
             if os.path.exists(logofilepath):
                 logofile = open(logofilepath, 'rb')
                 logofilecontent = logofile.read()
@@ -77,7 +93,7 @@ def GetLogos():
                     mime = 'jpeg'
                 elif file_extension == '.gif':
                     mime = 'gif'
-                src = "data:image/"+mime+";base64," + encoded
+                src = "data:image/" + mime + ";base64," + encoded.decode()
             else:
                 src = ''
 
@@ -99,7 +115,7 @@ def GetLogos():
 
         logos_json = json.dumps(logos_dict_all,
                                 ensure_ascii=False,
-                                encoding='utf-8',
+                                # encoding='utf-8',
                                 sort_keys=True,
                                 indent=4,
                                 separators=(', ', ': '))
@@ -310,7 +326,7 @@ def ResetUserSettings():
     usersettingsinifile = es_constants.es2globals['settings_dir'] + '/user_settings.ini'
     # usersettingsinifile = '/eStation2/settings/user_settings.ini'
 
-    config_usersettings = ConfigParser.ConfigParser()
+    config_usersettings = configparser.ConfigParser()
     config_usersettings.read(['user_settings.ini', usersettingsinifile])
 
     for option in config_usersettings.options('USER_SETTINGS'):
@@ -341,7 +357,6 @@ def ResetUserSettings():
 
 
 def UpdateUserSettings(params):
-
     systemsettings = functions.getSystemSettings()
 
     if sys.platform != 'win32':
@@ -352,22 +367,25 @@ def UpdateUserSettings(params):
     else:
         factory_settings_filename = 'factory_settings_windows.ini'
 
-    config_factorysettings = ConfigParser.ConfigParser()
+    config_factorysettings = configparser.ConfigParser()
     config_factorysettings.read([factory_settings_filename,
                                  es_constants.es2globals['config_dir'] + '/' + factory_settings_filename])
 
     usersettingsfilepath = es_constants.es2globals['settings_dir'] + '/user_settings.ini'
     # usersettingsfilepath = '/eStation2/settings/user_settings.ini'
-    config_usersettings = ConfigParser.ConfigParser()
+    config_usersettings = configparser.ConfigParser()
     config_usersettings.read(['user_settings.ini', usersettingsfilepath])
 
     for setting in params['systemsettings']:
         if setting in ('data_dir', 'ingest_dir', 'static_data_dir', 'archive_dir', 'eumetcast_files_dir',
-                       'get_eumetcast_output_dir', 'get_internet_output_dir', 'proxy_host', 'proxy_port', 'proxy_user', 'proxy_userpwd'):
+                       'get_eumetcast_output_dir', 'get_internet_output_dir', 'proxy_host', 'proxy_port', 'proxy_user',
+                       'proxy_userpwd'):
             if setting == 'data_dir' and (
-                    (( config_usersettings.get('USER_SETTINGS', setting, 0) == '' and params['systemsettings'][setting] != config_factorysettings.get('FACTORY_SETTINGS', setting, 0))
-                    or (config_usersettings.get('USER_SETTINGS', setting, 0) != '' and params['systemsettings'][setting] != config_usersettings.get('USER_SETTINGS', setting, 0)
-                    ))):
+                    ((config_usersettings.get('USER_SETTINGS', setting, 0) == '' and params['systemsettings'][
+                        setting] != config_factorysettings.get('FACTORY_SETTINGS', setting, 0))
+                     or (config_usersettings.get('USER_SETTINGS', setting, 0) != '' and params['systemsettings'][
+                                setting] != config_usersettings.get('USER_SETTINGS', setting, 0)
+                     ))):
                 # The data_dir has been changed, delete all completeness_bars
                 completeness_bars_dir = es_constants.base_local_dir + os.path.sep + 'completeness_bars/'
                 for the_file in os.listdir(completeness_bars_dir):
@@ -376,7 +394,7 @@ def UpdateUserSettings(params):
                         if os.path.isfile(file_path):
                             os.unlink(file_path)
                     except Exception as e:
-                        logger.error('UpdateUserSettings - could not delete completeness_bars file: ' + e )
+                        logger.error('UpdateUserSettings - could not delete completeness_bars file: ' + e)
 
             if config_factorysettings.has_option('FACTORY_SETTINGS', setting) \
                     and config_factorysettings.get('FACTORY_SETTINGS', setting, 0) == params['systemsettings'][setting]:
@@ -466,7 +484,7 @@ def statusRequestJob(requestid):
     subproductcode = ''
 
     requestinfo = requestid.split('_')
-    level = requestinfo[len(requestinfo)-1]
+    level = requestinfo[len(requestinfo) - 1]
     productcode = requestinfo[0]
     version = requestinfo[1]
     if level == 'mapset':
@@ -478,9 +496,9 @@ def statusRequestJob(requestid):
     if requestid != '':
         p1_jobid = requestid
         p2_action = 'status'
-        p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing/'     #
+        p3_datapath = es_constants.es2globals['processing_dir']  # '/eStation2/mydata/processing/'     #
         p4_jobspath = es_constants.es2globals['request_jobs_dir']
-        p5_requestfile = ''     # mandatory but empty for status action
+        p5_requestfile = ''  # mandatory but empty for status action
 
         db_product_info = querydb.get_product_native(productcode=productcode, version=version)
         descriptive_name = ''
@@ -509,7 +527,8 @@ def statusRequestJob(requestid):
                     ]
 
             if sys.platform.startswith('win'):
-                job = Popen(['java', '-jar'] + args, shell=True, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                job = Popen(['java', '-jar'] + args, shell=True, stdin=None, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
             else:
                 job = Popen(['java', '-jar'] + args, stdout=PIPE, stderr=STDOUT)  # .pid
 
@@ -517,12 +536,12 @@ def statusRequestJob(requestid):
 
             status = statusresult[0].split(';')
             if status[0] == 'Error':
-                jobstatus = 'error'  #status[2]
+                jobstatus = 'error'  # status[2]
                 datestatus = status[1]
                 totfiles = None
                 totok = None
                 totko = None
-            elif len(status)>=3:
+            elif len(status) >= 3:
                 jobstatus = status[0].split(':')[0]
                 datestatus = status[1]
                 totfiles = status[2].split(':')[1]
@@ -546,7 +565,7 @@ def statusRequestJob(requestid):
             message = 'Error getting the status of the request: ' + requestid
         # finally:
         #     job.terminate()
-            # job.kill()
+        # job.kill()
 
     response = {'requestid': requestid,
                 'prod_descriptive_name': descriptive_name,
@@ -555,7 +574,7 @@ def statusRequestJob(requestid):
                 'mapsetcode': mapsetcode,
                 'subproductcode': subproductcode,
                 'level': level,
-                'status': jobstatus,     # 'Running' 'Paused' 'Finished' 'Stopped'
+                'status': jobstatus,  # 'Running' 'Paused' 'Finished' 'Stopped'
                 'totfiles': totfiles,
                 'totok': totok,
                 'totko': totko,
@@ -575,7 +594,7 @@ def pauseRequestJob(requestid):
         requestfilename = requestid + '.req'
         p1_jobid = requestid
         p2_action = 'pause'
-        p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing'    #
+        p3_datapath = es_constants.es2globals['processing_dir']  # '/eStation2/mydata/processing'    #
         p4_jobspath = es_constants.es2globals['request_jobs_dir']
         p5_requestfile = es_constants.es2globals['requests_dir'] + os.path.sep + requestfilename
         try:
@@ -645,7 +664,7 @@ def restartRequestJob(requestid):
     if requestid != '':
         p1_jobid = requestid
         p2_action = 'restart'
-        p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing'  #
+        p3_datapath = es_constants.es2globals['processing_dir']  # '/eStation2/mydata/processing'  #
         p4_jobspath = es_constants.es2globals['request_jobs_dir']
         p5_requestfile = es_constants.es2globals['requests_dir'] + os.path.sep + requestfilename
         try:
@@ -722,12 +741,13 @@ def deleteRequestJob(requestid):
     if requestid != '':
         p1_jobid = requestid
         p2_action = 'stop'
-        p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing' #
+        p3_datapath = es_constants.es2globals['processing_dir']  # '/eStation2/mydata/processing' #
         p4_jobspath = es_constants.es2globals['request_jobs_dir']
         p5_requestfile = ''
         try:
             jobstatus = statusRequestJob(requestid)
-            if jobstatus['status'].lower() in ['finished', 'stopped', 'error']:  # 'finished', 'stopped', 'error', 'running'
+            if jobstatus['status'].lower() in ['finished', 'stopped',
+                                               'error']:  # 'finished', 'stopped', 'error', 'running'
                 success = True
                 message = 'Request deleted: ' + requestid
                 deleteJobDir(requestid)
@@ -801,7 +821,7 @@ def createRequestJob(params):
     functions.check_output_dir(es_constants.es2globals['request_jobs_dir'])
     # TODO: set permissions to 777 on request_jobs_dir
 
-    if "level" in params:   # hasattr(params, "level"):
+    if "level" in params:  # hasattr(params, "level"):
         if params['level'] == 'product':
             productcode = params['productcode']
             version = params['version']
@@ -828,7 +848,7 @@ def createRequestJob(params):
         # and is still running.
         if os.path.isdir(es_constants.es2globals['request_jobs_dir'] + os.path.sep + requestid):
             jobstatus = statusRequestJob(requestid)
-            if jobstatus['status'].lower() in ['finished', 'stopped']:     # 'finished', 'stopped', 'error', 'running'
+            if jobstatus['status'].lower() in ['finished', 'stopped']:  # 'finished', 'stopped', 'error', 'running'
                 message = 'Request already exists and has finished. Existing request is deleted. New request created.'
                 createnewrequest = True
                 deleteJobDir(requestid)
@@ -863,7 +883,7 @@ def createRequestJob(params):
 
             p1_jobid = requestid
             p2_action = 'start'
-            p3_datapath = es_constants.es2globals['processing_dir']     # '/eStation2/mydata/processing'    #
+            p3_datapath = es_constants.es2globals['processing_dir']  # '/eStation2/mydata/processing'    #
             p4_jobspath = es_constants.es2globals['request_jobs_dir']
             p5_requestfile = es_constants.es2globals['requests_dir'] + os.path.sep + requestfilename
 
@@ -889,7 +909,8 @@ def createRequestJob(params):
                         ]
 
             if sys.platform.startswith('win'):
-                job = Popen(['java', '-jar'] + args, shell=True, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                job = Popen(['java', '-jar'] + args, shell=True, stdin=None, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
             else:
                 job = Popen(['nohup', 'java', '-jar'] + args,
                             # close_fds=True,
@@ -1080,7 +1101,7 @@ def execServiceTaskWin(getparams):
 
     if getparams.service == 'eumetcast':
         command = 'NET START | find "estation2 - eumetcast"'
-        status = os.system(command) # is 0 if success
+        status = os.system(command)  # is 0 if success
         if not status:
             status = True
         else:
@@ -1110,7 +1131,7 @@ def execServiceTaskWin(getparams):
 
     if getparams.service == 'internet':
         command = 'NET START | find "estation2 - get internet"'
-        status = os.system(command) # is 0 if success
+        status = os.system(command)  # is 0 if success
         if not status:
             status = True
         else:
@@ -1136,7 +1157,7 @@ def execServiceTaskWin(getparams):
 
     if getparams.service == 'ingest':
         command = 'NET START | find "estation2 - ingestion"'
-        status = os.system(command) # is 0 if success
+        status = os.system(command)  # is 0 if success
         if not status:
             status = True
         else:
@@ -1163,7 +1184,7 @@ def execServiceTaskWin(getparams):
 
     if getparams.service == 'processing':
         command = 'NET START | find "estation2 - processing"'
-        status = os.system(command) # is 0 if success
+        status = os.system(command)  # is 0 if success
         if not status:
             status = True
         else:
@@ -1190,7 +1211,7 @@ def execServiceTaskWin(getparams):
 
     if getparams.service == 'system':
         command = 'NET START | find "estation2 - es2system"'
-        status = os.system(command) # is 0 if success
+        status = os.system(command)  # is 0 if success
         if not status:
             status = True
         else:
@@ -1435,7 +1456,7 @@ def getWorkspaceGraphs(workspaceid, userid, withwkt=False):
                             }
 
                     yAxes.append(yAxe)
-            # print(yAxes)
+            # print (yAxes)
             params = {
                 'userid': row_dict['userid'],
                 'graph_tpl_id': graph_tpl_id,
@@ -1445,7 +1466,6 @@ def getWorkspaceGraphs(workspaceid, userid, withwkt=False):
             graphproperties = []
             if hasattr(graphDrawProps, "__len__") and graphDrawProps.__len__() > 0:
                 for row in graphDrawProps:
-
                     graphproperty = {'graph_tpl_id': graph_tpl_id,
                                      'graph_type': row['graph_type'],
                                      'graph_width': row['graph_width'],
@@ -1464,7 +1484,7 @@ def getWorkspaceGraphs(workspaceid, userid, withwkt=False):
                                      }
 
                     graphproperties.append(graphproperty)
-            # print(graphproperties)
+            # print (graphproperties)
 
             graphTSDrawProps = querydb.get_graph_tsdrawprops(row_dict['graph_tpl_id'])
             tsdrawprops = []
@@ -1483,7 +1503,7 @@ def getWorkspaceGraphs(workspaceid, userid, withwkt=False):
                              }
 
                     tsdrawprops.append(props)
-            # print(tsdrawprops)
+            # print (tsdrawprops)
 
             graph = {
                 'userid': row_dict['userid'],
@@ -1520,28 +1540,31 @@ def getWorkspaceGraphs(workspaceid, userid, withwkt=False):
 
 
 def getWorkspaceMapsAndGraphs(params):
-
     if 'workspaceid' in params:
-            maps = getWorkspaceMaps(params['workspaceid'], params['userid'], True)
-            graphs = getWorkspaceGraphs(params['workspaceid'], params['userid'], True)
+        maps = getWorkspaceMaps(params['workspaceid'], params['userid'], True)
+        graphs = getWorkspaceGraphs(params['workspaceid'], params['userid'], True)
 
-            workspace = {
-                'userid': params['userid'],
-                'workspaceid': params['workspaceid'],
-                'workspacename': params['workspacename'],
-                'pinned': params['pinned'],
-                'showindefault': params['showindefault'],
-                'shownewgraph': params['shownewgraph'],
-                'showbackgroundlayer': params['showbackgroundlayer'],
-                'isrefworkspace': params['isrefworkspace'],
-                'maps': maps,
-                'graphs': graphs
-            }
+        workspace = {
+            'userid': params['userid'],
+            'workspaceid': params['workspaceid'],
+            'workspacename': params['workspacename'],
+            'pinned': params['pinned'],
+            'showindefault': params['showindefault'],
+            'shownewgraph': params['shownewgraph'],
+            'showbackgroundlayer': params['showbackgroundlayer'],
+            'isrefworkspace': params['isrefworkspace'],
+            'maps': maps,
+            'graphs': graphs
+        }
 
-            workspace_json = json.dumps(workspace, ensure_ascii=False, encoding='utf-8',
-                                         sort_keys=True, indent=4, separators=(', ', ': '))
+        workspace_json = json.dumps(workspace,
+                                    ensure_ascii=False,
+                                    # encoding='utf-8',
+                                    sort_keys=True,
+                                    indent=4,
+                                    separators=(', ', ': '))
 
-            workspace_json = '{"success":"true","workspace":' + workspace_json + '}'
+        workspace_json = '{"success":"true","workspace":' + workspace_json + '}'
 
     else:
         workspace_json = '{"success":false, "error":"Workspaceid not given!"}'
@@ -1574,8 +1597,12 @@ def getUserWorkspaces(params):
 
                 workspaces_dict_all.append(workspace)
 
-            workspaces_json = json.dumps(workspaces_dict_all, ensure_ascii=False, encoding='utf-8',
-                                         sort_keys=True, indent=4, separators=(', ', ': '))
+            workspaces_json = json.dumps(workspaces_dict_all,
+                                         ensure_ascii=False,
+                                         # encoding='utf-8',
+                                         sort_keys=True,
+                                         indent=4,
+                                         separators=(', ', ': '))
 
             workspaces_json = '{"success":"true", "total":' \
                               + str(userworkspaces.__len__()) \
@@ -1616,8 +1643,10 @@ def getRefWorkspaces(params):
 
             workspaces_dict_all.append(workspace)
 
-        workspaces_json = json.dumps(workspaces_dict_all, ensure_ascii=False, encoding='utf-8',
-                                     separators=(',', ': '))    # sort_keys=True, indent=4,
+        workspaces_json = json.dumps(workspaces_dict_all,
+                                     ensure_ascii=False,
+                                     # encoding='utf-8',
+                                     separators=(',', ': '))  # sort_keys=True, indent=4,
 
         workspaces_json = '{"success":"true", "total":' \
                           + str(userworkspaces.__len__()) \
@@ -1644,7 +1673,7 @@ def saveWorkspaceGraphs(wsgraphs, workspaceid):
             # 'graph_tpl_id': wsgraph['graph_tpl_id'],
             'parent_tpl_id': wsgraph['parent_tpl_id'],
             'graph_tpl_name': wsgraph['graph_tpl_name'],
-            'istemplate': wsgraph['istemplate'],
+            'istemplate': functions.str_to_bool(wsgraph['istemplate']),
             'graphviewposition': wsgraph['graphviewposition'],
             'graphviewsize': wsgraph['graphviewsize'],
             'graph_type': wsgraph['graph_type'],
@@ -1661,8 +1690,8 @@ def saveWorkspaceGraphs(wsgraphs, workspaceid):
             'disclaimerobjcontent': wsgraph['disclaimerobjcontent'],
             'logosobjposition': wsgraph['logosobjposition'],
             'logosobjcontent': wsgraph['logosobjcontent'],
-            'showobjects': wsgraph['showobjects'],
-            'showtoolbar': wsgraph['showtoolbar']
+            'showobjects': functions.str_to_bool(wsgraph['showobjects']),
+            'showtoolbar': functions.str_to_bool(wsgraph['showtoolbar'])
         }
 
         if type(wsgraph['graphproperties']) is list:
@@ -1693,6 +1722,7 @@ def saveWorkspaceGraphs(wsgraphs, workspaceid):
                     yaxe['min'] = None
                 if yaxe['max'] == '':
                     yaxe['max'] = None
+                yaxe['opposite'] = functions.str_to_bool(yaxe['opposite'])
                 crud_db.create('user_graph_tpl_yaxes', yaxe)
 
             for tsdrawprop in tsdrawprops:
@@ -1736,7 +1766,7 @@ def saveWorkspaceMaps(wsmaps, workspaceid):
             # 'map_tpl_id': None,
             'parent_tpl_id': wsmap['parent_tpl_id'],
             'map_tpl_name': wsmap['map_tpl_name'],
-            'istemplate': wsmap['istemplate'],
+            'istemplate': functions.str_to_bool(wsmap['istemplate']),
             'mapviewposition': str(wsmap['mapviewposition']),
             'mapviewsize': wsmap['mapviewsize'],
             'productcode': productcode,
@@ -1747,22 +1777,22 @@ def saveWorkspaceMaps(wsmaps, workspaceid):
             'legendid': legendid,
             'legendlayout': wsmap['legendlayout'],
             'legendobjposition': wsmap['legendobjposition'],
-            'showlegend': wsmap['showlegend'],
+            'showlegend': functions.str_to_bool(wsmap['showlegend']),
             'titleobjposition': wsmap['titleobjposition'],
             'titleobjcontent': wsmap['titleobjcontent'],
             'disclaimerobjposition': wsmap['disclaimerobjposition'],
             'disclaimerobjcontent': wsmap['disclaimerobjcontent'],
             'logosobjposition': wsmap['logosobjposition'],
             'logosobjcontent': wsmap['logosobjcontent'],
-            'showobjects': wsmap['showobjects'],
-            'showtoolbar': wsmap['showtoolbar'],
-            'showgraticule': wsmap['showgraticule'],
-            'showtimeline': wsmap['showtimeline'],
+            'showobjects': functions.str_to_bool(wsmap['showobjects']),
+            'showtoolbar': functions.str_to_bool(wsmap['showtoolbar']),
+            'showgraticule': functions.str_to_bool(wsmap['showgraticule']),
+            'showtimeline': functions.str_to_bool(wsmap['showtimeline']),
             'scalelineobjposition': wsmap['scalelineobjposition'],
             'vectorlayers': wsmap['vectorlayers'],
-            'outmask': wsmap['outmask'],
+            'outmask': functions.str_to_bool(wsmap['outmask']),
             'outmaskfeature': wsmap['outmaskfeature'],
-            'auto_open': wsmap['auto_open'],
+            'auto_open': functions.str_to_bool(wsmap['auto_open']),
             'zoomextent': wsmap['zoomextent'],
             'mapsize': wsmap['mapsize'],
             'mapcenter': wsmap['mapcenter']
@@ -1782,9 +1812,9 @@ def saveWorkspace(params):
         workspace = {
             'userid': params['userid'],
             'workspacename': params['workspacename'],
-            'pinned': params['pinned'],
-            'shownewgraph': 'true',
-            'showbackgroundlayer': 'false'
+            'pinned': functions.str_to_bool(params['pinned']),
+            'shownewgraph': True,
+            'showbackgroundlayer': False
         }
 
         if type(params['maps']) is list:
@@ -1797,7 +1827,7 @@ def saveWorkspace(params):
         else:
             wsgraphs = json.loads(params['graphs'])
 
-        # print(wsgraphs)
+        # print (wsgraphs)
 
         # If new user workspace, create new user workspace and get its workspaceid
         #   Insert all open/passed maps and graphs in the new workspace
@@ -1810,7 +1840,8 @@ def saveWorkspace(params):
                 saveWorkspaceMaps(wsmaps, newworkspaceid)
                 saveWorkspaceGraphs(wsgraphs, newworkspaceid)
 
-                createstatus = '{"success":true, "message":"Workspace created!", "workspaceid": ' + str(newworkspaceid) + '}'
+                createstatus = '{"success":true, "message":"Workspace created!", "workspaceid": ' + str(
+                    newworkspaceid) + '}'
             else:
                 createstatus = '{"success":false, "message":"Error creating the new Workspace!"}'
         # Else, it is an existing user workspace, update workspace settings
@@ -1828,7 +1859,8 @@ def saveWorkspace(params):
                 if crud_db.delete('user_graph_templates', **workspaceinfo):
                     saveWorkspaceGraphs(wsgraphs, params['workspaceid'])
 
-                createstatus = '{"success":true, "message":"Workspace updated!", "workspaceid": ' + str(params['workspaceid']) + '}'
+                createstatus = '{"success":true, "message":"Workspace updated!", "workspaceid": ' + str(
+                    params['workspaceid']) + '}'
 
     else:
         createstatus = '{"success":false, "message":"No Workspace data given!"}'
@@ -1839,7 +1871,7 @@ def saveWorkspace(params):
 def importWorkspaces(params):
     if 'importfilename' in params:
         try:
-            # print(params.userid)
+            # print (params.userid)
 
             filename = params.importfilename + '.json'
             with open(es_constants.es2globals['base_tmp_dir'] + filename, 'w+') as f:
@@ -1861,7 +1893,7 @@ def importWorkspaces(params):
                 for wsgraph in workspace['graphs']:
                     wsgraph['userid'] = params.userid
 
-                # print(workspace)
+                # print (workspace)
                 saveWorkspace(workspace)
 
             success = True
@@ -1920,7 +1952,7 @@ def saveWorkspacePin(params):
         workspace = {
             'userid': params['userid'],
             'workspacename': params['workspacename'],
-            'pinned': params['pinned']
+            'pinned': functions.str_to_bool(params['pinned'])
         }
 
         if params['isNewWorkspace'] == 'true':
@@ -1929,13 +1961,15 @@ def saveWorkspacePin(params):
                 for row in createdWorkspace:
                     newworkspaceid = row['lastworkspaceid']
 
-                createstatus = '{"success":true, "message":"Workspace created on pin setting change!", "workspaceid": ' + str(newworkspaceid) + '}'
+                createstatus = '{"success":true, "message":"Workspace created on pin setting change!", "workspaceid": ' + str(
+                    newworkspaceid) + '}'
             else:
                 createstatus = '{"success":false, "message":"Error creating the new Workspace on pin setting change!"}'
         else:
             workspace['workspaceid'] = int(params['workspaceid'])
             if crud_db.update('user_workspaces', workspace):
-                createstatus = '{"success":true, "message":"Workspace pin setting changed!", "workspaceid": ' + str(params['workspaceid']) + '}'
+                createstatus = '{"success":true, "message":"Workspace pin setting changed!", "workspaceid": ' + str(
+                    params['workspaceid']) + '}'
 
     else:
         createstatus = '{"success":false, "message":"No user data given when changing the workspace pin setting!"}'
@@ -1960,13 +1994,15 @@ def saveWorkspaceName(params):
                 for row in createdWorkspace:
                     newworkspaceid = row['lastworkspaceid']
 
-                createstatus = '{"success":true, "message":"Workspace created when changing the workspace name!", "workspaceid": ' + str(newworkspaceid) + '}'
+                createstatus = '{"success":true, "message":"Workspace created when changing the workspace name!", "workspaceid": ' + str(
+                    newworkspaceid) + '}'
             else:
                 createstatus = '{"success":false, "message":"Error creating the new Workspace when changing the workspace name!"}'
         else:
             workspace['workspaceid'] = int(params['workspaceid'])
             if crud_db.update('user_workspaces', workspace):
-                createstatus = '{"success":true, "message":"Workspace name updated!", "workspaceid": ' + str(params['workspaceid']) + '}'
+                createstatus = '{"success":true, "message":"Workspace name updated!", "workspaceid": ' + str(
+                    params['workspaceid']) + '}'
 
     else:
         createstatus = '{"success":false, "message":"No user data given when changing the workspace name!"}'
@@ -1984,11 +2020,12 @@ def saveWorkspaceInDefaultWS(params):
             'userid': params['userid'],
             'workspaceid': int(params['workspaceid']),
             'workspacename': params['workspacename'],
-            'showindefault': params['showindefault']
+            'showindefault': functions.str_to_bool(params['showindefault'])
         }
 
         if crud_db.update('user_workspaces', workspace):
-            createstatus = '{"success":true, "message":"Workspace In Default WS setting changed!", "workspaceid": ' + str(params['workspaceid']) + '}'
+            createstatus = '{"success":true, "message":"Workspace In Default WS setting changed!", "workspaceid": ' + str(
+                params['workspaceid']) + '}'
         else:
             createstatus = '{"success":false, "message":"Error updating the Workspace on In Default WS setting!"}'
 
@@ -2048,7 +2085,7 @@ def getMapTemplates(params):
 
             maptemplates_json = json.dumps(maptemplate_dict_all,
                                            ensure_ascii=False,
-                                           encoding='utf-8',
+                                           # encoding='utf-8',
                                            sort_keys=True,
                                            indent=4,
                                            separators=(', ', ': '))
@@ -2088,7 +2125,7 @@ def saveMapTemplate(params):
             'workspaceid': defaultworkspaceid,
             # 'map_tpl_id': None,
             'map_tpl_name': params['map_tpl_name'],
-            'istemplate': params['istemplate'],
+            'istemplate': functions.str_to_bool(params['istemplate']),
             'mapviewposition': params['mapviewposition'],
             'mapviewsize': params['mapviewsize'],
             'productcode': params['productcode'],
@@ -2099,7 +2136,7 @@ def saveMapTemplate(params):
             'legendid': legendid,
             'legendlayout': params['legendlayout'],
             'legendobjposition': params['legendobjposition'],
-            'showlegend': params['showlegend'],
+            'showlegend': functions.str_to_bool(params['showlegend']),
             'titleobjposition': params['titleobjposition'],
             'titleobjcontent': params['titleobjcontent'],
             'disclaimerobjposition': params['disclaimerobjposition'],
@@ -2107,14 +2144,14 @@ def saveMapTemplate(params):
             'logosobjposition': params['logosobjposition'],
             'logosobjcontent': params['logosobjcontent'],
             'scalelineobjposition': params['scalelineobjposition'],
-            'showobjects': params['showobjects'],
-            'showtoolbar': params['showtoolbar'],
-            'showgraticule': params['showgraticule'],
-            'showtimeline': params['showtimeline'],
+            'showobjects': functions.str_to_bool(params['showobjects']),
+            'showtoolbar': functions.str_to_bool(params['showtoolbar']),
+            'showgraticule': functions.str_to_bool(params['showgraticule']),
+            'showtimeline': functions.str_to_bool(params['showtimeline']),
             'vectorlayers': params['vectorlayers'],
-            'outmask': params['outmask'],
+            'outmask': functions.str_to_bool(params['outmask']),
             'outmaskfeature': params['outmaskfeature'],
-            'auto_open': params['auto_open'],
+            'auto_open': functions.str_to_bool(params['auto_open']),
             'zoomextent': params['zoomextent'],
             'mapsize': params['mapsize'],
             'mapcenter': params['mapcenter']
@@ -2134,7 +2171,8 @@ def saveMapTemplate(params):
                 # mapTemplate['map_tpl_id'] = createdMapTpl[0]['map_tpl_id']
                 # mapTemplate['parent_tpl_id'] = createdMapTpl[0]['map_tpl_id']
                 crud_db.update('user_map_templates', updateMapTemplate)
-                createstatus = '{"success":true, "message":"Map Template created!", "map_tpl_id": ' + str(createdMapTpl[0]['map_tpl_id']) + '}'
+                createstatus = '{"success":true, "message":"Map Template created!", "map_tpl_id": ' + str(
+                    createdMapTpl[0]['map_tpl_id']) + '}'
             else:
                 createstatus = '{"success":false, "message":"Error saving the Map Template!"}'
         else:
@@ -2188,11 +2226,11 @@ def getGraphTemplates(params):
                 graphtemplate_dict_all.append(graphTemplate)
 
             graphtemplates_json = json.dumps(graphtemplate_dict_all,
-                                           ensure_ascii=False,
-                                           encoding='utf-8',
-                                           sort_keys=True,
-                                           indent=4,
-                                           separators=(', ', ': '))
+                                             ensure_ascii=False,
+                                             # encoding='utf-8',
+                                             sort_keys=True,
+                                             indent=4,
+                                             separators=(', ', ': '))
 
             graphtemplates_json = '{"success":"true", "total":' \
                                   + str(usergraphtemplates.__len__()) \
@@ -2244,11 +2282,11 @@ def __getGraphTemplates(params):
                 graphtemplate_dict_all.append(graphTemplate)
 
             graphtemplates_json = json.dumps(graphtemplate_dict_all,
-                                           ensure_ascii=False,
-                                           encoding='utf-8',
-                                           sort_keys=True,
-                                           indent=4,
-                                           separators=(', ', ': '))
+                                             ensure_ascii=False,
+                                             # encoding='utf-8',
+                                             sort_keys=True,
+                                             indent=4,
+                                             separators=(', ', ': '))
 
             graphtemplates_json = '{"success":"true", "total":' \
                                   + str(usergraphtemplates.__len__()) \
@@ -2282,7 +2320,7 @@ def saveGraphTemplate(params):
             'workspaceid': defaultworkspaceid,
             # 'graph_tpl_id': params['graph_tpl_id'],
             'graph_tpl_name': params['graph_tpl_name'],
-            'istemplate': params['istemplate'],
+            'istemplate': functions.str_to_bool(params['istemplate']),
             'graphviewposition': params['graphviewposition'],
             'graphviewsize': params['graphviewsize'],
             'graph_type': params['graph_type'],
@@ -2299,8 +2337,8 @@ def saveGraphTemplate(params):
             'disclaimerobjcontent': params['disclaimerobjcontent'],
             'logosobjposition': params['logosobjposition'],
             'logosobjcontent': params['logosobjcontent'],
-            'showobjects': params['showobjects'],
-            'showtoolbar': params['showtoolbar']
+            'showobjects': functions.str_to_bool(params['showobjects']),
+            'showtoolbar': functions.str_to_bool(params['showtoolbar'])
         }
 
         graphproperties = json.loads(params['graphproperties'])
@@ -2331,13 +2369,15 @@ def saveGraphTemplate(params):
                         yaxe['min'] = None
                     if yaxe['max'] == '':
                         yaxe['max'] = None
+                    yaxe['opposite'] = functions.str_to_bool(yaxe['opposite'])
                     crud_db.create('user_graph_tpl_yaxes', yaxe)
 
                 for tsdrawprop in tsdrawprops:
                     tsdrawprop['graph_tpl_id'] = createdGraphTpl[0]['graph_tpl_id']
                     crud_db.create('user_graph_tpl_timeseries_drawproperties', tsdrawprop)
 
-                createstatus = '{"success":true, "message":"Graph Template created!", "graph_tpl_id": ' + str(createdGraphTpl[0]['graph_tpl_id']) + '}'
+                createstatus = '{"success":true, "message":"Graph Template created!", "graph_tpl_id": ' + str(
+                    createdGraphTpl[0]['graph_tpl_id']) + '}'
             else:
                 createstatus = '{"success":false, "message":"Error creating the Graph Template!"}'
         else:
@@ -2358,6 +2398,7 @@ def saveGraphTemplate(params):
                         yaxe['min'] = None
                     if yaxe['max'] == '':
                         yaxe['max'] = None
+                    yaxe['opposite'] = functions.str_to_bool(yaxe['opposite'])
                     crud_db.create('user_graph_tpl_yaxes', yaxe)
 
                 crud_db.delete('user_graph_tpl_timeseries_drawproperties', **{'graph_tpl_id': params['parent_tpl_id']})
@@ -2991,11 +3032,13 @@ def matrixTimeseries(params):
         if passedtsdrawprops is not None:
             for passedtsdrawprop in passedtsdrawprops:
                 if passedtsdrawprop['productcode'] == product['productcode'] and \
-                   passedtsdrawprop['subproductcode'] == product['subproductcode'] and \
-                   passedtsdrawprop['version'] == product['version']:
+                        passedtsdrawprop['subproductcode'] == product['subproductcode'] and \
+                        passedtsdrawprop['version'] == product['version']:
                     ts_drawprops = passedtsdrawprop
         else:
-            product_ts_drawproperties = querydb.get_product_timeseries_drawproperties(product, userid, istemplate, graphtype, graph_tpl_id, graph_tpl_name)
+            product_ts_drawproperties = querydb.get_product_timeseries_drawproperties(product, userid, istemplate,
+                                                                                      graphtype, graph_tpl_id,
+                                                                                      graph_tpl_name)
             for ts_drawprop in product_ts_drawproperties:
                 ts_drawprops = ts_drawprop
 
@@ -3010,7 +3053,7 @@ def matrixTimeseries(params):
             y = 0
 
             xAxesYear = yearsToCompare[-1]
-            for year in yearsToCompare:    # Handle Leap year date 29 February. If exists in data then change the year of all data to the leap year.
+            for year in yearsToCompare:  # Handle Leap year date 29 February. If exists in data then change the year of all data to the leap year.
                 if calendar.isleap(year):
                     xAxesYear = year
 
@@ -3022,10 +3065,11 @@ def matrixTimeseries(params):
                     from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
                     to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
                     if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
-                        to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+                        to_date = datetime.date(int(year) + 1, int(tsToSeason[:2]), int(tsToSeason[3:]))
                         overTwoYears = True
 
-                list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+                list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
+                                            aggregate)
 
                 if len(list_values) > 0 and not data_available:
                     data_available = True
@@ -3046,7 +3090,7 @@ def matrixTimeseries(params):
                     date = datetime.date(xAxesYear, val['date'].month, val['date'].day)
 
                     valdate = functions.unix_time_millis(date)
-                    value.append(valdate)    # Date for xAxe
+                    value.append(valdate)  # Date for xAxe
                     # if overTwoYears:
                     #     value.append(str(year) + '-' + str(year+1))  # Year for yAxe
                     # else:
@@ -3122,7 +3166,7 @@ def matrixTimeseries(params):
         else:
             min = legend_steps[0].from_step
 
-        max = legend_steps[legend_steps.__len__()-1].to_step
+        max = legend_steps[legend_steps.__len__() - 1].to_step
 
         stops = []
         colors = []
@@ -3136,7 +3180,7 @@ def matrixTimeseries(params):
             from_step = step.from_step
             to_step = step.to_step
 
-            colorRGB = map(int, (color.strip() for color in step.color_rgb.split(" ") if color.strip()))
+            colorRGB = list(map(int, (color.strip() for color in step.color_rgb.split(" ") if color.strip())))
             colorHex = functions.rgb2html(colorRGB)
 
             if step_type == 'logarithmic':
@@ -3171,7 +3215,7 @@ def matrixTimeseries(params):
                 if step.color_label is not None and step.color_label.strip() != '':
                     # stop.append(round(to_step / max, roundTo))
                     # stop.append(round((from_step-min)/(max-min), roundTo))
-                    stop.append(round(rownr/float(legend_steps.__len__()), roundTo))
+                    stop.append(round(rownr / float(legend_steps.__len__()), roundTo))
                     # stop.append(round(rownr * firstStep, 3))
                     # stop.append(round(rownr/max, 2))
                     stop.append(colorHex)
@@ -3194,7 +3238,7 @@ def matrixTimeseries(params):
 
     if colorramp:
         if minimizeSteps:
-            tickPixelInterval = int(legend_steps.__len__()/len(stops))
+            tickPixelInterval = int(old_div(legend_steps.__len__(), len(stops)))
             # tickInterval = legend_steps.__len__()
         else:
             tickPixelInterval = 72
@@ -3224,7 +3268,7 @@ def matrixTimeseries(params):
             # 'gridLineColor': 'white',
             # 'minorTickInterval': 0.1,
             # 'minorGridLineColor': 'white',
-            'type': step_type   # 'logarithmic'  'linear'  #
+            'type': step_type  # 'logarithmic'  'linear'  #
         }
     else:
         colorAxis = {
@@ -3260,7 +3304,8 @@ def matrixTimeseries(params):
                     'aggregation_max': passedyaxe['aggregation_max']}
             yaxes.append(yaxe)
     else:
-        timeseries_yaxes = querydb.get_timeseries_yaxes(requestedtimeseries, userid, istemplate, graphtype, graph_tpl_id, graph_tpl_name)
+        timeseries_yaxes = querydb.get_timeseries_yaxes(requestedtimeseries, userid, istemplate, graphtype,
+                                                        graph_tpl_id, graph_tpl_name)
         for yaxe in timeseries_yaxes:
             # min = yearsToCompare[0]    # yaxe.min
             # max = yearsToCompare[-1]    # yaxe.max
@@ -3361,11 +3406,13 @@ def rankTimeseries(params):
         if passedtsdrawprops is not None:
             for passedtsdrawprop in passedtsdrawprops:
                 if passedtsdrawprop['productcode'] == product['productcode'] and \
-                   passedtsdrawprop['subproductcode'] == product['subproductcode'] and \
-                   passedtsdrawprop['version'] == product['version']:
+                        passedtsdrawprop['subproductcode'] == product['subproductcode'] and \
+                        passedtsdrawprop['version'] == product['version']:
                     ts_drawprops = passedtsdrawprop
         else:
-            product_ts_drawproperties = querydb.get_product_timeseries_drawproperties(product, userid, istemplate, graphtype, graph_tpl_id, graph_tpl_name)
+            product_ts_drawproperties = querydb.get_product_timeseries_drawproperties(product, userid, istemplate,
+                                                                                      graphtype, graph_tpl_id,
+                                                                                      graph_tpl_name)
             for ts_drawprop in product_ts_drawproperties:
                 ts_drawprops = ts_drawprop
 
@@ -3386,9 +3433,10 @@ def rankTimeseries(params):
                     from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
                     to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
                     if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
-                        to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+                        to_date = datetime.date(int(year) + 1, int(tsToSeason[:2]), int(tsToSeason[3:]))
 
-                list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+                list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
+                                            aggregate)
 
                 if len(list_values) > 0:
                     data_available = True
@@ -3400,22 +3448,22 @@ def rankTimeseries(params):
 
                 yearDataRanking = {
                     'name': str(year),
-                    'color': tscolor,   # '#0065a2',
+                    'color': tscolor,  # '#0065a2',
                     'y': cumulatedValue
                 }
                 dataRanking.append(yearDataRanking)
 
                 yearDataZScore = {
                     'name': str(year),
-                    'color': tscolor,   # '#0065a2',
+                    'color': tscolor,  # '#0065a2',
                     'y': cumulatedValue
                 }
                 dataZScore.append(yearDataZScore)
                 yearDataZScoreForAVGSTD.append(cumulatedValue)
 
-            dataRanking = sorted(dataRanking, key=lambda k:k['name'], reverse=True)
+            dataRanking = sorted(dataRanking, key=lambda k: k['name'], reverse=True)
             dataRanking[0]['color'] = '#ff0000'
-            dataRanking = sorted(dataRanking, key=lambda k:k['y'], reverse=False)
+            dataRanking = sorted(dataRanking, key=lambda k: k['y'], reverse=False)
 
             emptyDataRanking = {
                 'name': '',
@@ -3431,7 +3479,7 @@ def rankTimeseries(params):
             zScoreAVG = NP.mean(yearDataZScoreForAVGSTD)
             zScoreSTD = NP.std(yearDataZScoreForAVGSTD)
             for yearData in dataZScore:
-                zScoreValue = (yearData['y']-zScoreAVG)/zScoreSTD
+                zScoreValue = old_div((yearData['y'] - zScoreAVG), zScoreSTD)
                 yearData['y'] = zScoreValue
                 if zScoreValue < 0:
                     yearData['color'] = '#ff0000'
@@ -3473,7 +3521,8 @@ def rankTimeseries(params):
         for passedyaxe in passedyaxes:
             min = None
             max = None
-            yaxe = {'id': passedyaxe['id'], 'title': passedyaxe['title'], 'title_color': passedyaxe['title_color'].replace("  ", " "),
+            yaxe = {'id': passedyaxe['id'], 'title': passedyaxe['title'],
+                    'title_color': passedyaxe['title_color'].replace("  ", " "),
                     'title_font_size': passedyaxe['title_font_size'],
                     'unit': passedyaxe['unit'], 'unit_orig': passedyaxe['unit_orig'],
                     'opposite': passedyaxe['opposite'],
@@ -3484,10 +3533,11 @@ def rankTimeseries(params):
                     'aggregation_max': passedyaxe['aggregation_max']}
             yaxes.append(yaxe)
     else:
-        timeseries_yaxes = querydb.get_timeseries_yaxes(requestedtimeseries, userid, istemplate, graphtype, graph_tpl_id, graph_tpl_name)
+        timeseries_yaxes = querydb.get_timeseries_yaxes(requestedtimeseries, userid, istemplate, graphtype,
+                                                        graph_tpl_id, graph_tpl_name)
         for yaxe in timeseries_yaxes:
-            min = None    # yaxe.min
-            max = None    # yaxe.max
+            min = None  # yaxe.min
+            max = None  # yaxe.max
 
             yaxe = {'id': yaxe.yaxe_id,
                     'title': yaxe.title, 'title_color': yaxe.title_color.replace("  ", " "),
@@ -3553,7 +3603,7 @@ def classicTimeseries(params):
                 from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
                 to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
                 if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
-                    to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+                    to_date = datetime.date(int(year) + 1, int(tsToSeason[:2]), int(tsToSeason[3:]))
 
     elif yearsToCompare != '':
         yearsToCompare = json.loads(yearsToCompare)
@@ -3569,7 +3619,7 @@ def classicTimeseries(params):
                 from_date = datetime.date(int(params['yearTS']), int(tsFromSeason[:2]), int(tsFromSeason[3:]))
                 to_date = datetime.date(int(params['yearTS']), int(tsToSeason[:2]), int(tsToSeason[3:]))
                 if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
-                    to_date = datetime.date(int(params['yearTS'])+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+                    to_date = datetime.date(int(params['yearTS']) + 1, int(tsToSeason[:2]), int(tsToSeason[3:]))
             else:
                 from_date = datetime.date(int(params['yearTS']), int(tsFromSeason[:2]), int(tsFromSeason[3:]))
                 to_date = datetime.date(int(params['yearTS']), 12, 31)
@@ -3627,8 +3677,8 @@ def classicTimeseries(params):
         if passedtsdrawprops is not None:
             for passedtsdrawprop in passedtsdrawprops:
                 if passedtsdrawprop['productcode'] == product['productcode'] and \
-                   passedtsdrawprop['subproductcode'] == product['subproductcode'] and \
-                   passedtsdrawprop['version'] == product['version']:
+                        passedtsdrawprop['subproductcode'] == product['subproductcode'] and \
+                        passedtsdrawprop['version'] == product['version']:
                     ts_drawprops = passedtsdrawprop
         else:
             product_ts_drawproperties = querydb.get_product_timeseries_drawproperties(product, userid, istemplate,
@@ -3636,7 +3686,6 @@ def classicTimeseries(params):
                                                                                       graph_tpl_name)
             for ts_drawprop in product_ts_drawproperties:
                 ts_drawprops = ts_drawprop
-
 
         if date_format == 'MMDD' and len(yearsToCompare) > 1:
             year = yearsToCompare[0]
@@ -3648,7 +3697,7 @@ def classicTimeseries(params):
                 from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
                 to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
                 if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
-                    to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+                    to_date = datetime.date(int(year) + 1, int(tsToSeason[:2]), int(tsToSeason[3:]))
 
             # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, from_date, to_date)
             # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate, mapset_info, product_info, list_files, dates_list]
@@ -3656,7 +3705,8 @@ def classicTimeseries(params):
             # p.start()
             # p.join()
             # list_values = self.out_queue.get()
-            list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+            list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
+                                        aggregate)
             # print list_values
             # list_values = sorted(list_values, key=lambda k:k['date'], reverse=True)
 
@@ -3683,7 +3733,7 @@ def classicTimeseries(params):
                       'yAxis': productcode + ' - ' + version,
                       'data': data,
                       'visible': True,
-                      'cumulative': cumulative,     # timeserie['cumulative'],
+                      'cumulative': cumulative,  # timeserie['cumulative'],
                       'difference': timeserie['difference'],
                       'reference': timeserie['reference']
                       }
@@ -3697,13 +3747,13 @@ def classicTimeseries(params):
                       'yAxis': ts_drawprops['yaxe_id'],
                       'data': data,
                       'visible': True,
-                      'cumulative': cumulative,     # timeserie['cumulative'],
+                      'cumulative': cumulative,  # timeserie['cumulative'],
                       'difference': timeserie['difference'],
                       'reference': timeserie['reference']
                       }
             timeseries.append(ts)
 
-        elif len(yearsToCompare) > 1:     # yearsToCompare != '' or
+        elif len(yearsToCompare) > 1:  # yearsToCompare != '' or
             # yearsToCompare = json.loads(yearsToCompare)
             colorAdd = 0
             colorSubstract = 0
@@ -3716,11 +3766,11 @@ def classicTimeseries(params):
                     from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
                     to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
                     if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
-                        to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+                        to_date = datetime.date(int(year) + 1, int(tsToSeason[:2]), int(tsToSeason[3:]))
 
-                if ts_drawprops['color'][0] == '#':        # Transform HTML HEX color code to RGB
+                if ts_drawprops['color'][0] == '#':  # Transform HTML HEX color code to RGB
                     h = ts_drawprops['color'].lstrip('#')
-                    rgb = tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+                    rgb = tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
                     rgb = list(rgb)
                 else:
                     if functions.isValidRGB(ts_drawprops['color'].replace("  ", " ")):
@@ -3729,10 +3779,10 @@ def classicTimeseries(params):
                         # RGB value stored in the database is not correct so define as default value BLACK.
                         rgb = "0 0 0".split(' ')
 
-                rgb = map(int, rgb)
-                rgb[-1] = rgb[-1]+colorAdd
-                rgb[-2] = rgb[-2]+colorAdd
-                rgb[-3] = rgb[-3]-colorSubstract
+                rgb = list(map(int, rgb))
+                rgb[-1] = rgb[-1] + colorAdd
+                rgb[-2] = rgb[-2] + colorAdd
+                rgb[-3] = rgb[-3] - colorSubstract
                 tsColor = ' '.join([str(i) for i in rgb])
                 colorAdd += 65
                 colorSubstract += 50
@@ -3744,7 +3794,8 @@ def classicTimeseries(params):
                 # p.join()
                 # list_values = self.out_queue.get()
                 # self.out_queue.empty()
-                list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+                list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
+                                            aggregate)
 
                 data = []
                 for val in list_values:
@@ -3769,7 +3820,7 @@ def classicTimeseries(params):
                           'yAxis': productcode + ' - ' + version,
                           'data': data,
                           'visible': True,
-                          'cumulative': cumulative,     # timeserie['cumulative'],
+                          'cumulative': cumulative,  # timeserie['cumulative'],
                           'difference': timeserie['difference'],
                           'reference': timeserie['reference']
                           }
@@ -3783,7 +3834,7 @@ def classicTimeseries(params):
                           'yAxis': ts_drawprops['yaxe_id'],
                           'data': data,
                           'visible': True,
-                          'cumulative': cumulative,     # timeserie['cumulative'],
+                          'cumulative': cumulative,  # timeserie['cumulative'],
                           'difference': timeserie['difference'],
                           'reference': timeserie['reference']
                           }
@@ -3801,7 +3852,8 @@ def classicTimeseries(params):
                 if to_date > datetime.date.today():
                     to_date = datetime.date.today()
 
-            list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+            list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
+                                        aggregate)
 
             data = []
             for val in list_values:
@@ -3825,7 +3877,7 @@ def classicTimeseries(params):
                       'color': '#000000',
                       'yAxis': productcode + ' - ' + version,
                       'data': data,
-                      'cumulative': cumulative,     # timeserie['cumulative'],
+                      'cumulative': cumulative,  # timeserie['cumulative'],
                       'difference': timeserie['difference'],
                       'reference': timeserie['reference']
                       }
@@ -3837,7 +3889,7 @@ def classicTimeseries(params):
                       'color': ts_drawprops['color'].replace("  ", " "),
                       'yAxis': ts_drawprops['yaxe_id'],
                       'data': data,
-                      'cumulative': cumulative,     # timeserie['cumulative'],
+                      'cumulative': cumulative,  # timeserie['cumulative'],
                       'difference': timeserie['difference'],
                       'reference': timeserie['reference']
                       }
@@ -3864,7 +3916,8 @@ def classicTimeseries(params):
                     'aggregation_max': passedyaxe['aggregation_max']}
             yaxes.append(yaxe)
     else:
-        timeseries_yaxes = querydb.get_timeseries_yaxes(requestedtimeseries, userid, istemplate, graphtype, graph_tpl_id, graph_tpl_name)
+        timeseries_yaxes = querydb.get_timeseries_yaxes(requestedtimeseries, userid, istemplate, graphtype,
+                                                        graph_tpl_id, graph_tpl_name)
         # axes = len(timeseries_yaxes)
         # count = 0
         for yaxe in timeseries_yaxes:
@@ -3922,7 +3975,7 @@ def __classicTimeseries(params):
     data_available = False
     cumulative = False
     if params.graphtype == 'cumulative':
-         cumulative = True
+        cumulative = True
 
     # if isinstance(yearsToCompare, basestring):  # One year passed but is not a list so make it a list.
     #     # yearsToCompare = list(yearsToCompare)
@@ -3937,14 +3990,14 @@ def __classicTimeseries(params):
                 from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
                 to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
                 if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
-                    to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+                    to_date = datetime.date(int(year) + 1, int(tsToSeason[:2]), int(tsToSeason[3:]))
 
     elif yearsToCompare != '':
         yearsToCompare = json.loads(yearsToCompare)
         showYearInTicks = False
         if len(yearsToCompare) == 1:
             for year in yearsToCompare:
-                from_date = datetime.date(int(year), 01, 01)
+                from_date = datetime.date(int(year), 1, 1)
                 to_date = datetime.date(int(year), 12, 31)
 
     elif params.yearTS != '':
@@ -3953,19 +4006,18 @@ def __classicTimeseries(params):
                 from_date = datetime.date(int(params.yearTS), int(tsFromSeason[:2]), int(tsFromSeason[3:]))
                 to_date = datetime.date(int(params.yearTS), int(tsToSeason[:2]), int(tsToSeason[3:]))
                 if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
-                    to_date = datetime.date(int(params.yearTS)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+                    to_date = datetime.date(int(params.yearTS) + 1, int(tsToSeason[:2]), int(tsToSeason[3:]))
             else:
                 from_date = datetime.date(int(params.yearTS), int(tsFromSeason[:2]), int(tsFromSeason[3:]))
                 to_date = datetime.date(int(params.yearTS), 12, 31)
         else:
-            from_date = datetime.date(int(params.yearTS), 01, 01)
+            from_date = datetime.date(int(params.yearTS), 1, 1)
             to_date = datetime.date(int(params.yearTS), 12, 31)
         showYearInTicks = False
 
     elif tsFromPeriod != '' and tsToPeriod != '':
         from_date = datetime.datetime.strptime(tsFromPeriod, '%Y-%m-%d').date()
         to_date = datetime.datetime.strptime(tsToPeriod, '%Y-%m-%d').date()
-
 
     cum_yaxe = []
     timeseries = []
@@ -3981,14 +4033,14 @@ def __classicTimeseries(params):
                    "version": version}
 
         # Set defaults in case no entry exists in the DB
-        aggregate = { 'aggregation_type': 'mean',
-                      'aggregation_min': None,
-                      'aggregation_max': None }
+        aggregate = {'aggregation_type': 'mean',
+                     'aggregation_min': None,
+                     'aggregation_max': None}
         timeseries_drawproperties = querydb.get_product_timeseries_drawproperties(product)
         for ts_drawprops in timeseries_drawproperties:
-            aggregate = { 'aggregation_type': ts_drawprops.aggregation_type,
-                          'aggregation_min': ts_drawprops.aggregation_min,
-                          'aggregation_max': ts_drawprops.aggregation_max}
+            aggregate = {'aggregation_type': ts_drawprops.aggregation_type,
+                         'aggregation_min': ts_drawprops.aggregation_min,
+                         'aggregation_max': ts_drawprops.aggregation_max}
 
             # if timeserie['cumulative']:
             if cumulative:
@@ -4002,14 +4054,14 @@ def __classicTimeseries(params):
         if date_format == 'MMDD' and len(yearsToCompare) > 1:
             year = yearsToCompare[0]
             showYearInTicks = False
-            from_date = datetime.date(year, 01, 01)
+            from_date = datetime.date(year, 1, 1)
             to_date = datetime.date(year, 12, 31)
 
             if tsFromSeason != '' and tsToSeason != '':
                 from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
                 to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
                 if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
-                    to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+                    to_date = datetime.date(int(year) + 1, int(tsToSeason[:2]), int(tsToSeason[3:]))
 
             # [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format, from_date, to_date)
             # args = [self.out_queue, productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate, mapset_info, product_info, list_files, dates_list]
@@ -4017,7 +4069,8 @@ def __classicTimeseries(params):
             # p.start()
             # p.join()
             # list_values = self.out_queue.get()
-            list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+            list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
+                                        aggregate)
 
             data = []
             for val in list_values:
@@ -4041,7 +4094,7 @@ def __classicTimeseries(params):
                   'yAxis': productcode + ' - ' + version,
                   'data': data,
                   'visible': True,
-                  'cumulative': cumulative,     # timeserie['cumulative'],
+                  'cumulative': cumulative,  # timeserie['cumulative'],
                   'difference': timeserie['difference'],
                   'reference': timeserie['reference']
                   }
@@ -4056,30 +4109,30 @@ def __classicTimeseries(params):
                       'yAxis': ts_drawprops.yaxes_id,
                       'data': data,
                       'visible': True,
-                      'cumulative': cumulative,     # timeserie['cumulative'],
+                      'cumulative': cumulative,  # timeserie['cumulative'],
                       'difference': timeserie['difference'],
                       'reference': timeserie['reference']
                       }
             timeseries.append(ts)
 
-        elif len(yearsToCompare) > 1:     # yearsToCompare != '' or
+        elif len(yearsToCompare) > 1:  # yearsToCompare != '' or
             # yearsToCompare = json.loads(yearsToCompare)
             colorAdd = 0
             colorSubstract = 0
             for year in yearsToCompare:
                 showYearInTicks = False
-                from_date = datetime.date(int(year), 01, 01)
+                from_date = datetime.date(int(year), 1, 1)
                 to_date = datetime.date(int(year), 12, 31)
 
                 if tsFromSeason != '' and tsToSeason != '':
                     from_date = datetime.date(int(year), int(tsFromSeason[:2]), int(tsFromSeason[3:]))  # year month day
                     to_date = datetime.date(int(year), int(tsToSeason[:2]), int(tsToSeason[3:]))
                     if int(tsToSeason[:2]) < int(tsFromSeason[:2]):  # season over 2 years
-                        to_date = datetime.date(int(year)+1, int(tsToSeason[:2]), int(tsToSeason[3:]))
+                        to_date = datetime.date(int(year) + 1, int(tsToSeason[:2]), int(tsToSeason[3:]))
 
-                if ts_drawprops.color[0] == '#':        # Transform HTML HEX color code to RGB
+                if ts_drawprops.color[0] == '#':  # Transform HTML HEX color code to RGB
                     h = ts_drawprops.color.lstrip('#')
-                    rgb = tuple(int(h[i:i+2], 16) for i in (0, 2 ,4))
+                    rgb = tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
                     rgb = list(rgb)
                 else:
                     # print ts_drawprops.color
@@ -4090,10 +4143,10 @@ def __classicTimeseries(params):
                         # RGB value stored in the database is not correct so define as default value BLACK.
                         rgb = "0 0 0".split(' ')
                 # print rgb
-                rgb = map(int,rgb)
-                rgb[-1] = rgb[-1]+colorAdd
-                rgb[-2] = rgb[-2]+colorAdd
-                rgb[-3] = rgb[-3]-colorSubstract
+                rgb = list(map(int, rgb))
+                rgb[-1] = rgb[-1] + colorAdd
+                rgb[-2] = rgb[-2] + colorAdd
+                rgb[-3] = rgb[-3] - colorSubstract
                 tsColor = ' '.join([str(i) for i in rgb])
                 colorAdd += 65
                 colorSubstract += 50
@@ -4105,7 +4158,8 @@ def __classicTimeseries(params):
                 # p.join()
                 # list_values = self.out_queue.get()
                 # self.out_queue.empty()
-                list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+                list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
+                                            aggregate)
 
                 data = []
                 for val in list_values:
@@ -4129,7 +4183,7 @@ def __classicTimeseries(params):
                       'yAxis': productcode + ' - ' + version,
                       'data': data,
                       'visible': True,
-                      'cumulative': cumulative,     # timeserie['cumulative'],
+                      'cumulative': cumulative,  # timeserie['cumulative'],
                       'difference': timeserie['difference'],
                       'reference': timeserie['reference']
                       }
@@ -4143,7 +4197,7 @@ def __classicTimeseries(params):
                           'yAxis': ts_drawprops.yaxes_id,
                           'data': data,
                           'visible': True,
-                          'cumulative': cumulative,     # timeserie['cumulative'],
+                          'cumulative': cumulative,  # timeserie['cumulative'],
                           'difference': timeserie['difference'],
                           'reference': timeserie['reference']
                           }
@@ -4156,7 +4210,8 @@ def __classicTimeseries(params):
             # p.start()
             # p.join()
             # list_values = self.out_queue.get()
-            list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date, aggregate)
+            list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, wkt, from_date, to_date,
+                                        aggregate)
 
             data = []
             for val in list_values:
@@ -4179,7 +4234,7 @@ def __classicTimeseries(params):
                   'color': '#000000',
                   'yAxis': productcode + ' - ' + version,
                   'data': data,
-                  'cumulative': cumulative,     # timeserie['cumulative'],
+                  'cumulative': cumulative,  # timeserie['cumulative'],
                   'difference': timeserie['difference'],
                   'reference': timeserie['reference']
                   }
@@ -4192,12 +4247,11 @@ def __classicTimeseries(params):
                       'color': ts_drawprops.color.replace("  ", " "),
                       'yAxis': ts_drawprops.yaxes_id,
                       'data': data,
-                      'cumulative': cumulative,     # timeserie['cumulative'],
+                      'cumulative': cumulative,  # timeserie['cumulative'],
                       'difference': timeserie['difference'],
                       'reference': timeserie['reference']
                       }
             timeseries.append(ts)
-
 
     yaxes = []
     count = 0
@@ -4222,11 +4276,11 @@ def __classicTimeseries(params):
         else:
             min = yaxe.min
             max = yaxe.max
-        yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'title_color': yaxe.title_color.replace("  ", " "), 'unit': yaxe.unit, 'opposite': yaxe.opposite,
-                'min': min, 'max': max, 'aggregation_type': yaxe.aggregation_type, 'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max}
+        yaxe = {'id': yaxe.yaxes_id, 'title': yaxe.title, 'title_color': yaxe.title_color.replace("  ", " "),
+                'unit': yaxe.unit, 'opposite': yaxe.opposite,
+                'min': min, 'max': max, 'aggregation_type': yaxe.aggregation_type,
+                'aggregation_min': yaxe.aggregation_min, 'aggregation_max': yaxe.aggregation_max}
         yaxes.append(yaxe)
-
-
 
     ts_json = {"data_available": data_available,
                "showYearInTicks": showYearInTicks,
@@ -4328,7 +4382,7 @@ def getGraphProperties(params):
 
         graphproperties_json = json.dumps(graphproperties_dict_all,
                                           ensure_ascii=False,
-                                          encoding='utf-8',
+                                          # encoding='utf-8',
                                           sort_keys=True,
                                           indent=4,
                                           separators=(', ', ': '))
@@ -4376,7 +4430,7 @@ def __getChartProperties(params):
 
         chartproperties_json = json.dumps(chartproperties_dict_all,
                                           ensure_ascii=False,
-                                          encoding='utf-8',
+                                          # encoding='utf-8',
                                           sort_keys=True,
                                           indent=4,
                                           separators=(', ', ': '))
@@ -4472,7 +4526,7 @@ def getTimeseriesDrawProperties(params):
 
         tsdrawproperties_json = json.dumps(tsdrawproperties_dict_all,
                                            ensure_ascii=False,
-                                           encoding='utf-8',
+                                           # encoding='utf-8',
                                            sort_keys=True,
                                            indent=4,
                                            separators=(', ', ': '))
@@ -4521,7 +4575,7 @@ def __getTimeseriesDrawProperties():
 
         tsdrawproperties_json = json.dumps(tsdrawproperties_dict_all,
                                            ensure_ascii=False,
-                                           encoding='utf-8',
+                                           # encoding='utf-8',
                                            sort_keys=True,
                                            indent=4,
                                            separators=(', ', ': '))
@@ -4578,7 +4632,7 @@ def getProductLayer(getparams):
     date_format = dataset._db_product.date_format
 
     if frequency_id == 'e1day' and date_format == 'YYYYMMDD':
-        regex = dataset.fullpath + filedate+'*'+'.tif'
+        regex = dataset.fullpath + filedate + '*' + '.tif'
         filename = glob.glob(regex)
         if len(filename) > 0:
             productfile = filename[0]
@@ -4639,15 +4693,15 @@ def getProductLayer(getparams):
     #     # except:
     #     #     print 'errorrrrrrrrr!!!!!!'
     #
-    #web.header('Content-type', 'image/png')
-    #web.header('Content-transfer-encoding', 'binary')
-    #buf = StringIO.StringIO()
-    #mapscript.msIO_installStdoutToBuffer()
-    #map = mapserver.getmap()
+    # web.header('Content-type', 'image/png')
+    # web.header('Content-transfer-encoding', 'binary')
+    # buf = StringIO.StringIO()
+    # mapscript.msIO_installStdoutToBuffer()
+    # map = mapserver.getmap()
     ##map.save to a file fname.png
     ##web.header('Content-Disposition', 'attachment; filename="fname.png"')
-    #contents = buf.getvalue()
-    #return contents
+    # contents = buf.getvalue()
+    # return contents
 
     # #logger.debug("MapServer: Installing stdout to buffer.")
     # mapscript.msIO_installStdoutToBuffer()
@@ -4664,12 +4718,11 @@ def getProductLayer(getparams):
     #
     # #owsrequest.setParameter(k.upper(), v)
 
-
     # projlib = "/usr/share/proj/"
 
     projlib = es_constants.proj4_lib_dir
     # errorfile = es_constants.apps_dir+"/analysis/ms_tmp/ms_errors.log"
-    errorfile = es_constants.log_dir+"/mapserver_error.log"
+    errorfile = es_constants.log_dir + "/mapserver_error.log"
     # imagepath = es_constants.apps_dir+"/analysis/ms_tmp/"
 
     inputparams = getparams
@@ -4705,19 +4758,19 @@ def getProductLayer(getparams):
     productmap.status = mapscript.MS_ON
     productmap.units = mapscript.MS_DD
 
-    coords = map(float, inputparams['BBOX'].split(","))
+    coords = list(map(float, inputparams['BBOX'].split(",")))
     lly = coords[0]
     llx = coords[1]
     ury = coords[2]
     urx = coords[3]
-    productmap.setExtent(llx, lly, urx, ury)   # -26, -35, 60, 38
+    productmap.setExtent(llx, lly, urx, ury)  # -26, -35, 60, 38
     # productmap.setExtent(lly, llx, ury, urx)   # -26, -35, 60, 38
     # print llx, lly, urx, ury
 
     # epsg must be in lowercase because in unix/linux systems the proj filenames are lowercase!
     # epsg = "+init=epsg:3857"
     # epsg = "+init=" + inputparams.CRS.lower()   # CRS = "EPSG:4326"
-    epsg = inputparams['CRS'].lower()   # CRS = "EPSG:4326"
+    epsg = inputparams['CRS'].lower()  # CRS = "EPSG:4326"
     productmap.setProjection(epsg)
 
     w = int(inputparams['WIDTH'])
@@ -4729,7 +4782,7 @@ def getProductLayer(getparams):
     productmap.setMetaData("WMS_SRS", inputparams['CRS'].lower())
     # productmap.setMetaData("WMS_SRS", "epsg:3857")
     productmap.setMetaData("WMS_ABSTRACT", "A Web Map Service returning eStation2 raster layers.")
-    productmap.setMetaData("WMS_ENABLE_REQUEST", "*")   # necessary!!
+    productmap.setMetaData("WMS_ENABLE_REQUEST", "*")  # necessary!!
 
     product_info = querydb.get_product_out_info(productcode=inputparams['productcode'],
                                                 subproductcode=inputparams['subproductcode'],
@@ -4743,28 +4796,31 @@ def getProductLayer(getparams):
     legend_info = querydb.get_legend_info(legendid=inputparams['legendid'])
     if hasattr(legend_info, "__len__") and legend_info.__len__() > 0:
         for row in legend_info:
-            totwidth = float((row.totwidth - scale_offset)/scale_factor)
-            minstep = float((row.min_value - scale_offset)/scale_factor)    # int(row.min_value*scale_factor+scale_offset)
-            maxstep = float((row.max_value - scale_offset)/scale_factor)    # int(row.max_value*scale_factor+scale_offset)
-            minstepwidth = float((row.minstepwidth - scale_offset)/scale_factor)
-            maxstepwidth = float((row.maxstepwidth - scale_offset)/scale_factor)
-            realminstep = float((row.realminstep - scale_offset)/scale_factor)
-            realmaxstep = float((row.realmaxstep - scale_offset)/scale_factor)
+            totwidth = float(old_div((row.totwidth - scale_offset), scale_factor))
+            minstep = float(
+                old_div((row.min_value - scale_offset), scale_factor))  # int(row.min_value*scale_factor+scale_offset)
+            maxstep = float(
+                old_div((row.max_value - scale_offset), scale_factor))  # int(row.max_value*scale_factor+scale_offset)
+            minstepwidth = float(old_div((row.minstepwidth - scale_offset), scale_factor))
+            maxstepwidth = float(old_div((row.maxstepwidth - scale_offset), scale_factor))
+            realminstep = float(old_div((row.realminstep - scale_offset), scale_factor))
+            realmaxstep = float(old_div((row.realmaxstep - scale_offset), scale_factor))
             totsteps = row.totsteps
             step_type = row.step_type
 
-        processing_scale = 'SCALE='+str(minstep)+','+str(maxstep)  # min(legend_step.from_step) max(legend_step.to_step) example: 'SCALE=-7000,10000'
+        processing_scale = 'SCALE=' + str(minstep) + ',' + str(
+            maxstep)  # min(legend_step.from_step) max(legend_step.to_step) example: 'SCALE=-7000,10000'
 
         if step_type == 'logarithmic':
             minbuckets = 32  # 256
             maxbuckets = 256  # 5000
         else:
-            minbuckets = 32    # 256
-            maxbuckets = 1024   # 5000
+            minbuckets = 32  # 256
+            maxbuckets = 1024  # 5000
 
         num_buckets = maxbuckets
         if minstepwidth > 0:
-            num_buckets = round(totwidth / minstepwidth, 0)
+            num_buckets = round(old_div(totwidth, minstepwidth), 0)
 
         if num_buckets < minbuckets:
             num_buckets = minbuckets
@@ -4773,16 +4829,16 @@ def getProductLayer(getparams):
 
         processing_buckets = ''
         if num_buckets > 0:
-            processing_buckets = 'SCALE_BUCKETS='+str(num_buckets)
+            processing_buckets = 'SCALE_BUCKETS=' + str(num_buckets)
 
         processing_novalue = ''
         if nodata is not None and minstep <= nodata < maxstep:
-            processing_novalue = 'NODATA='+str(nodata)
+            processing_novalue = 'NODATA=' + str(nodata)
 
         layer = mapscript.layerObj(productmap)
         layer.name = filenamenoextention
         layer.type = mapscript.MS_LAYER_RASTER
-        layer.status = mapscript.MS_ON     # MS_DEFAULT
+        layer.status = mapscript.MS_ON  # MS_DEFAULT
         layer.data = productfile
         layer.units = mapscript.MS_METERS
         # layer.setProjection("+init=epsg:4326")
@@ -4808,19 +4864,19 @@ def getProductLayer(getparams):
             stepcount = 0
             for step in legend_steps:
                 stepcount += 1
-                min_step = float((step.from_step - scale_offset)/scale_factor)
-                max_step = float((step.to_step - scale_offset)/scale_factor)
+                min_step = float(old_div((step.from_step - scale_offset), scale_factor))
+                max_step = float(old_div((step.to_step - scale_offset), scale_factor))
                 # min_step = float(step.from_step)
                 # max_step = float(step.to_step)
-                colors = map(int, (color.strip() for color in step.color_rgb.split(" ") if color.strip()))
+                colors = list(map(int, (color.strip() for color in step.color_rgb.split(" ") if color.strip())))
 
-                if stepcount == legend_steps.__len__():    # For the last step use <= max_step
-                    expression_string = '([pixel] >= '+str(min_step)+' and [pixel] <= '+str(max_step)+')'
+                if stepcount == legend_steps.__len__():  # For the last step use <= max_step
+                    expression_string = '([pixel] >= ' + str(min_step) + ' and [pixel] <= ' + str(max_step) + ')'
                 else:
-                    expression_string = '([pixel] >= '+str(min_step)+' and [pixel] < '+str(max_step)+')'
+                    expression_string = '([pixel] >= ' + str(min_step) + ' and [pixel] < ' + str(max_step) + ')'
                 # define class object and style
                 layerclass = mapscript.classObj(layer)
-                layerclass.name = layer.name+'_'+str(stepcount)
+                layerclass.name = layer.name + '_' + str(stepcount)
                 layerclass.setExpression(expression_string)
                 style = mapscript.styleObj(layerclass)
                 style.color.setRGB(colors[0], colors[1], colors[2])
@@ -4831,7 +4887,8 @@ def getProductLayer(getparams):
     # productmap.save(result_map_file)
 
     image = productmap.draw()
-    filename_png = es_constants.base_tmp_dir+'/'+filenamenoextention+str(llx)+'_'+str(lly)+'_'+str(urx)+'_'+str(ury)+'.jpg'
+    filename_png = es_constants.base_tmp_dir + '/' + filenamenoextention + str(llx) + '_' + str(lly) + '_' + str(
+        urx) + '_' + str(ury) + '.jpg'
     image.save(filename_png)
 
     return filename_png
@@ -4873,18 +4930,19 @@ def GetAssignedDatasets(legendid):
                                      'default_legend': row_dict['default_legend'],
                                      'descriptive_name': row_dict['descriptive_name'],
                                      'description': row_dict['description']
-                                    }
+                                     }
 
             assigned_datasets_dict_all.append(assigned_dataset_dict)
 
         assigned_datasets_json = json.dumps(assigned_datasets_dict_all,
                                             ensure_ascii=False,
-                                            encoding='utf-8',
+                                            # encoding='utf-8',
                                             sort_keys=True,
                                             indent=4,
                                             separators=(', ', ': '))
 
-        assigned_datasets_json = '{"success":true, "total":' + str(legend_assigned_datasets.__len__()) + ',"assigneddatasets":' + assigned_datasets_json + '}'
+        assigned_datasets_json = '{"success":true, "total":' + str(
+            legend_assigned_datasets.__len__()) + ',"assigneddatasets":' + assigned_datasets_json + '}'
 
     else:
         assigned_datasets_json = '{"success":true, "message":"No products assigned!"}'
@@ -4947,13 +5005,13 @@ def AssignLegends(params):
 
 
 def copyLegend(params):
-
     if 'legendid' in params:
         newlegendname = params['legend_descriptive_name'] + ' - copy'
         newlegendid = querydb.copylegend(legendid=params['legendid'], legend_descriptive_name=newlegendname)
 
         if newlegendid != -1:
-            message = '{"success":true, "legendid": ' + str(newlegendid) + ', "legend_descriptive_name": "' + newlegendname + '","message":"Legend copied!"}'
+            message = '{"success":true, "legendid": ' + str(
+                newlegendid) + ', "legend_descriptive_name": "' + newlegendname + '","message":"Legend copied!"}'
         else:
             message = '{"success":false, "message":"Error copying the legend!"}'
     else:
@@ -4971,7 +5029,8 @@ def DeleteLegend(params):
         }
 
         if crud_db.delete('legend', **legend):
-            message = '{"success":true, "legendid": ' + str(params['legend']['legendid']) + ',"message":"Legend deleted!"}'
+            message = '{"success":true, "legendid": ' + str(
+                params['legend']['legendid']) + ',"message":"Legend deleted!"}'
         else:
             message = '{"success":false, "message":"Error deleting the legend!"}'
     else:
@@ -5047,7 +5106,7 @@ def ExportLegend(params):
     legendname = legendname.replace(',', '_')
     legendname = legendname.replace('  ', '_')
     legendname = legendname.replace(' ', '_')
-    output_filename = es_constants.base_tmp_dir+os.path.sep+legendname+'.txt'
+    output_filename = es_constants.base_tmp_dir + os.path.sep + legendname + '.txt'
 
     legend_steps = querydb.export_legend_steps(legendid=legendid)
 
@@ -5083,13 +5142,14 @@ def GetLegendClasses(legendid):
             legendsteps_dict_all.append(legendstep_dict)
 
         legendsteps_json = json.dumps(legendsteps_dict_all,
-                                 ensure_ascii=False,
-                                 encoding='utf-8',
-                                 sort_keys=True,
-                                 indent=4,
-                                 separators=(', ', ': '))
+                                      ensure_ascii=False,
+                                      # encoding='utf-8',
+                                      sort_keys=True,
+                                      indent=4,
+                                      separators=(', ', ': '))
 
-        legendsteps_json = '{"success":"true", "total":' + str(legend_steps.__len__()) + ',"legendclasses":' + legendsteps_json + '}'
+        legendsteps_json = '{"success":"true", "total":' + str(
+            legend_steps.__len__()) + ',"legendclasses":' + legendsteps_json + '}'
 
     else:
         legendsteps_json = '{"success":false, "error":"No Legends defined!"}'
@@ -5120,7 +5180,7 @@ def GetLegends():
             legendname = legendname.replace('</DIV>', ' ')
 
             # colorschemeHTML = '<table cellspacing=0 cellpadding=0 width=100%><tr><th colspan='+str(len(legend_steps))+'>'+legendname+'</th></tr><tr>'
-            colorschemeHTML = legendname+'<table cellspacing=0 cellpadding=0 width=100%><tr>'
+            colorschemeHTML = legendname + '<table cellspacing=0 cellpadding=0 width=100%><tr>'
 
             for step in legend_steps:
                 # convert step['color_rgb'] from RGB to html color
@@ -5129,7 +5189,7 @@ def GetLegends():
                 r = color_rgb[0]
                 g = color_rgb[1]
                 b = color_rgb[2]
-                color_html = 'rgb('+r+','+g+','+b+')'
+                color_html = 'rgb(' + r + ',' + g + ',' + b + ')'
                 colorschemeHTML += "<td height=15 style='padding:0; margin:0; background-color: " + color_html + ";'></td>"
             colorschemeHTML += '</tr></table>'
 
@@ -5146,11 +5206,11 @@ def GetLegends():
             legends_dict_all.append(legend_dict)
 
         legends_json = json.dumps(legends_dict_all,
-                                 ensure_ascii=False,
-                                 encoding='utf-8',
-                                 sort_keys=True,
-                                 indent=4,
-                                 separators=(', ', ': '))
+                                  ensure_ascii=False,
+                                  # encoding='utf-8',
+                                  sort_keys=True,
+                                  indent=4,
+                                  separators=(', ', ': '))
 
         legends_json = '{"success":"true", "total":' + str(legends.__len__()) + ',"legends":' + legends_json + '}'
 
@@ -5180,7 +5240,7 @@ def getAllColorSchemes():
                     pass
         else:
             try:
-                with open(colorschemes_file) as text_file:
+                with open(colorschemes_file, "rb") as text_file:
                     colorschemes_json = text_file.read()
             except IOError:
                 colorschemes_json = ColorSchemes().encode('utf-8')
@@ -5192,7 +5252,7 @@ def getAllColorSchemes():
     else:
         colorschemes_json = ColorSchemes().encode('utf-8')
         try:
-            with open(colorschemes_file, "w") as text_file:
+            with open(colorschemes_file, "wb") as text_file:
                 text_file.write(colorschemes_json)
         except IOError:
             try:
@@ -5200,7 +5260,7 @@ def getAllColorSchemes():
             except OSError:
                 pass
 
-    # colorschemes_json = ColorSchemes().encode('utf-8')
+    # colorschemes_json = ColorSchemes().encode('utf-8').decode()
     return colorschemes_json
 
 
@@ -5227,7 +5287,7 @@ def ColorSchemes():
                 r = color_rgb[0]
                 g = color_rgb[1]
                 b = color_rgb[2]
-                color_html = 'rgb('+r+','+g+','+b+')'
+                color_html = 'rgb(' + r + ',' + g + ',' + b + ')'
                 colorschemeHTML = colorschemeHTML + \
                                   "<td height=15 style='padding:0; margin:0; background-color: " + \
                                   color_html + ";'></td>"
@@ -5250,7 +5310,7 @@ def ColorSchemes():
                                   indent=4,
                                   separators=(', ', ': '))
 
-        colorschemes = '{"success":"true", "total":' + str(all_legends.__len__()) + ',"legends":'+legends_json+'}'
+        colorschemes = '{"success":"true", "total":' + str(all_legends.__len__()) + ',"legends":' + legends_json + '}'
     else:
         colorschemes = '{"success":"true", "message":"No legends defined!"}'
 
@@ -5261,7 +5321,7 @@ def getProductNavigatorDataSets(force):
     # import time
     datasetsinfo_file = es_constants.base_tmp_dir + os.path.sep + 'product_navigator_datasets_info.json'
     if force:
-        dataset_json = ProductNavigatorDataSets().encode('utf-8')
+        dataset_json = ProductNavigatorDataSets().encode('utf-8').decode()
         try:
             with open(datasetsinfo_file, "w") as text_file:
                 text_file.write(dataset_json)
@@ -5277,7 +5337,7 @@ def getProductNavigatorDataSets(force):
         lastmodfified = os.path.getmtime(datasetsinfo_file)
         lastmodfifieddatetime = datetime.datetime.fromtimestamp(lastmodfified)  # .strftime('%Y-%m-%d %H:%M:%S')
         if lastmodfifieddatetime < datetime.datetime.now() - datetime.timedelta(hours=3):  # seconds=5
-            dataset_json = ProductNavigatorDataSets().encode('utf-8')
+            dataset_json = ProductNavigatorDataSets().encode('utf-8').decode()
             try:
                 with open(datasetsinfo_file, "w") as text_file:
                     text_file.write(dataset_json)
@@ -5291,14 +5351,14 @@ def getProductNavigatorDataSets(force):
                 with open(datasetsinfo_file) as text_file:
                     dataset_json = text_file.read()
             except IOError:
-                dataset_json = ProductNavigatorDataSets().encode('utf-8')
+                dataset_json = ProductNavigatorDataSets().encode('utf-8').decode()
                 try:
                     os.remove(datasetsinfo_file)  # remove file and recreate next call
                 except OSError:
                     pass
 
     else:
-        dataset_json = ProductNavigatorDataSets().encode('utf-8')
+        dataset_json = ProductNavigatorDataSets().encode('utf-8').decode()
         try:
             with open(datasetsinfo_file, "w") as text_file:
                 text_file.write(dataset_json)
@@ -5343,7 +5403,7 @@ def ProductNavigatorDataSets():
                             dataset_info = querydb.get_subproduct(productcode=productcode,
                                                                   version=version,
                                                                   subproductcode=subproductcode,
-                                                                  masked=True)   # -> TRUE means only NOT masked sprods
+                                                                  masked=True)  # -> TRUE means only NOT masked sprods
 
                             if dataset_info is not None:
                                 dataset_dict = functions.row2dict(dataset_info)
@@ -5366,9 +5426,9 @@ def ProductNavigatorDataSets():
                                indent=4,
                                separators=(', ', ': '))
 
-        dataset_json = '{"success":"true", "total":'\
-                              + str(db_products.__len__())\
-                              + ',"products":'+prod_json+'}'
+        dataset_json = '{"success":"true", "total":' \
+                       + str(db_products.__len__()) \
+                       + ',"products":' + prod_json + '}'
 
     else:
         dataset_json = '{"success":false, "error":"No data sets defined!"}'
@@ -5380,7 +5440,7 @@ def getDataSets(force):
     # import time
     datasetsinfo_file = es_constants.base_tmp_dir + os.path.sep + 'datasets_info.json'
     if force:
-        datamanagement_json = DataSets().encode('utf-8')
+        datamanagement_json = DataSets().encode('utf-8').decode()
         try:
             with open(datasetsinfo_file, "w") as text_file:
                 text_file.write(datamanagement_json)
@@ -5396,7 +5456,7 @@ def getDataSets(force):
         lastmodfified = os.path.getmtime(datasetsinfo_file)
         lastmodfifieddatetime = datetime.datetime.fromtimestamp(lastmodfified)  # .strftime('%Y-%m-%d %H:%M:%S')
         if lastmodfifieddatetime < datetime.datetime.now() - datetime.timedelta(hours=3):  # seconds=5
-            datamanagement_json = DataSets().encode('utf-8')
+            datamanagement_json = DataSets().encode('utf-8').decode()
             try:
                 with open(datasetsinfo_file, "w") as text_file:
                     text_file.write(datamanagement_json)
@@ -5410,14 +5470,14 @@ def getDataSets(force):
                 with open(datasetsinfo_file) as text_file:
                     datamanagement_json = text_file.read()
             except IOError:
-                datamanagement_json = DataSets().encode('utf-8')
+                datamanagement_json = DataSets().encode('utf-8').decode()
                 try:
                     os.remove(datasetsinfo_file)  # remove file and recreate next call
                 except OSError:
                     pass
 
     else:
-        datamanagement_json = DataSets().encode('utf-8')
+        datamanagement_json = DataSets().encode('utf-8').decode()
         try:
             with open(datasetsinfo_file, "w") as text_file:
                 text_file.write(datamanagement_json)
@@ -5464,7 +5524,7 @@ def DataSets():
                     if mapset_info != [] and hasattr(mapset_info, "__len__") and mapset_info.__len__() > 0:
                         # for mapsetinfo in mapset_info:
                         #     mapset_dict = functions.row2dict(mapsetinfo)
-                            # print mapset_dict
+                        # print mapset_dict
                         mapset_info['productcode'] = productcode
                         mapset_info['version'] = version
                         # else:
@@ -5541,12 +5601,13 @@ def DataSets():
 
                                     if systemsettings['type_installation'].lower() == 'jrc_online':
                                         # completeness = dataset.get_dataset_normalized_info()
-                                        dataset_dict['datasetcompleteness'] = ''    # completeness['datasetcompleteness']
+                                        dataset_dict['datasetcompleteness'] = ''  # completeness['datasetcompleteness']
                                         dataset_dict['datasetcompletenessimage'] = ''
                                     else:
                                         completeness = getDatasetCompleteness(dataset, True)
                                         dataset_dict['datasetcompleteness'] = completeness['datasetcompleteness']
-                                        dataset_dict['datasetcompletenessimage'] = completeness['datasetcompletenessimage']
+                                        dataset_dict['datasetcompletenessimage'] = completeness[
+                                            'datasetcompletenessimage']
 
                                     # dataset_dict['datasetcompletenessimage'] = createDatasetCompletenessImage(completeness, dataset_info.frequency_id)
                                     dataset_dict['nodisplay'] = 'false'
@@ -5582,7 +5643,7 @@ def DataSets():
 def getDatasetCompleteness(dataset, fordatamanagement):
     completeness_dict = {}
     output_dir = es_constants.base_local_dir + os.path.sep + 'completeness_bars/'
-    functions.check_output_dir(output_dir)      # if not exists output_dir -> create output_dir
+    functions.check_output_dir(output_dir)  # if not exists output_dir -> create output_dir
 
     prod_ident = functions.set_path_filename_no_date(dataset._db_product.productcode,
                                                      dataset._db_product.subproductcode,
@@ -5666,10 +5727,10 @@ def createDatasetCompletenessImage(datasetcompleteness, frequency_id, completene
                         top=0.9,
                         wspace=0,
                         hspace=0)  # Set padding around graph to create space for lables
-    ax.set_ylim(0, 4)   # set the min and max of the yaxe to regulate the height of the horizonal bar
+    ax.set_ylim(0, 4)  # set the min and max of the yaxe to regulate the height of the horizonal bar
     ax.set_xlim(0, 100)  # set the min and max of the xaxe to regulate the width of the horizonal bar
 
-    for attr, value in datasetcompleteness.iteritems():
+    for attr, value in datasetcompleteness.items():
         if attr == 'missingfiles':
             missingfiles = value
         if attr == 'totfiles':
@@ -5755,7 +5816,7 @@ def createDatasetCompletenessImage(datasetcompleteness, frequency_id, completene
     # plt.close('all')
 
     encoded = base64.b64encode(open(completeness_file_png, "rb").read())
-    datasetcompletenessimage = "data:image/png;base64," + encoded
+    datasetcompletenessimage = "data:image/png;base64," + encoded.decode()
 
     # buf = StringIO.StringIO()
     # plt.savefig(buf, format='png', bbox_inches=0, pad_inches=0)
@@ -5770,7 +5831,7 @@ def getTimeseriesProducts(force):
     timeseriesproducts_file = es_constants.base_tmp_dir + os.path.sep + 'timeseries_products.json'
 
     if force:
-        timeseriesproducts_json = TimeseriesProducts().encode('utf-8')
+        timeseriesproducts_json = TimeseriesProducts().encode('utf-8').decode()
         try:
             with open(timeseriesproducts_file, "w") as text_file:
                 text_file.write(timeseriesproducts_json)
@@ -5786,7 +5847,7 @@ def getTimeseriesProducts(force):
         lastmodfified = os.path.getmtime(timeseriesproducts_file)
         lastmodfifieddatetime = datetime.datetime.fromtimestamp(lastmodfified)  # .strftime('%Y-%m-%d %H:%M:%S')
         if lastmodfifieddatetime < datetime.datetime.now() - datetime.timedelta(hours=3):  # seconds=5  hours
-            timeseriesproducts_json = TimeseriesProducts().encode('utf-8')
+            timeseriesproducts_json = TimeseriesProducts().encode('utf-8').decode()
             try:
                 with open(timeseriesproducts_file, "w") as text_file:
                     text_file.write(timeseriesproducts_json)
@@ -5800,14 +5861,14 @@ def getTimeseriesProducts(force):
                 with open(timeseriesproducts_file) as text_file:
                     timeseriesproducts_json = text_file.read()
             except IOError:
-                timeseriesproducts_json = TimeseriesProducts().encode('utf-8')
+                timeseriesproducts_json = TimeseriesProducts().encode('utf-8').decode()
                 try:
                     os.remove(timeseriesproducts_file)  # remove file and recreate next call
                 except OSError:
                     pass
 
     else:
-        timeseriesproducts_json = TimeseriesProducts().encode('utf-8')
+        timeseriesproducts_json = TimeseriesProducts().encode('utf-8').decode()
         try:
             with open(timeseriesproducts_file, "w") as text_file:
                 text_file.write(timeseriesproducts_json)
@@ -5890,7 +5951,6 @@ def TimeseriesProducts():
                         # tot_get_dataset = t4-t3
                         # print 'after getting dataset info: ' + str(tot_get_dataset)
 
-
                         # t5 = time.time()
                         # print 'before getting years: ' + str(t5)
 
@@ -5950,7 +6010,8 @@ def TimeseriesProducts():
                                 dataset_dict['display_index'] = dataset_record['display_index']
                                 dataset_dict['mapsetcode'] = mapset_info['mapsetcode']
                                 dataset_dict['mapset_name'] = mapset_info['descriptive_name']
-                                dataset_dict['group_product_descriptive_name'] = prod_record['group_product_descriptive_name']
+                                dataset_dict['group_product_descriptive_name'] = prod_record[
+                                    'group_product_descriptive_name']
                                 dataset_dict['product_descriptive_name'] = dataset_record['descriptive_name']
                                 dataset_dict['product_description'] = dataset_record['description']
                                 dataset_dict['frequency_id'] = dataset_record['frequency_id']
@@ -6202,7 +6263,7 @@ def getIngestion(force):
     # import time
     ingestioninfo_file = es_constants.base_tmp_dir + os.path.sep + 'ingestion_info.json'
     if force:
-        ingestions_json = Ingestion().encode('utf-8')
+        ingestions_json = Ingestion().encode('utf-8').decode()
         try:
             with open(ingestioninfo_file, "w") as text_file:
                 text_file.write(ingestions_json)
@@ -6222,7 +6283,7 @@ def getIngestion(force):
         lastmodfified = os.path.getmtime(ingestioninfo_file)
         lastmodfifieddatetime = datetime.datetime.fromtimestamp(lastmodfified)  # .strftime('%Y-%m-%d %H:%M:%S')
         if lastmodfifieddatetime < datetime.datetime.now() - datetime.timedelta(hours=3):  # seconds=5
-            ingestions_json = Ingestion().encode('utf-8')
+            ingestions_json = Ingestion().encode('utf-8').decode()
             try:
                 with open(ingestioninfo_file, "w") as text_file:
                     text_file.write(ingestions_json)
@@ -6240,7 +6301,7 @@ def getIngestion(force):
                     ingestions_json = text_file.read()
                 # logger.info("getIngestion: writing ingestion_info.json!")
             except IOError:
-                ingestions_json = Ingestion().encode('utf-8')
+                ingestions_json = Ingestion().encode('utf-8').decode()
                 try:
                     logger.error("getIngestion: Error writing ingestion_info.json!\n -> {}".format(IOError))
                     os.remove(ingestioninfo_file)  # remove file and recreate next call
@@ -6249,7 +6310,7 @@ def getIngestion(force):
                     pass
 
     else:
-        ingestions_json = Ingestion().encode('utf-8')
+        ingestions_json = Ingestion().encode('utf-8').decode()
         try:
             with open(ingestioninfo_file, "w") as text_file:
                 text_file.write(ingestions_json)
@@ -6367,7 +6428,8 @@ def getIngestSubProducts():
     ingestsubproducts = querydb.get_ingestsubproducts()
 
     ingestsubproducts_json = functions.tojson(ingestsubproducts)
-    ingestsubproducts_json = '{"success":"true", "total":' + str(ingestsubproducts.__len__()) + ',"ingestsubproducts":[' + ingestsubproducts_json + ']}'
+    ingestsubproducts_json = '{"success":"true", "total":' + str(
+        ingestsubproducts.__len__()) + ',"ingestsubproducts":[' + ingestsubproducts_json + ']}'
     return ingestsubproducts_json
 
 
@@ -6384,7 +6446,7 @@ def CreateIngestSubProduct(params):
                    'subproductcode': params['subproductcode'],
                    'category_id': params['category_id'],
                    'product_type': 'Ingest',
-                   'activated': 'f',
+                   'activated': False,
                    'provider': params['provider'].replace("'", "''"),
                    'descriptive_name': params['descriptive_name'].replace("'", "''"),
                    'description': params['description'].strip(u'\u200b').replace("'", "''"),
@@ -6396,7 +6458,7 @@ def CreateIngestSubProduct(params):
                    'scale_offset': params['scale_offset'] if functions.is_float(params['scale_offset']) else None,
                    'nodata': params['nodata'] if functions.is_int(params['nodata']) else None,
                    'mask_min': params['mask_min'] if functions.is_float(params['mask_min']) else None,
-                   'mask_max':  params['mask_max'] if functions.is_float(params['mask_max']) else None,
+                   'mask_max': params['mask_max'] if functions.is_float(params['mask_max']) else None,
                    'unit': params['unit'],
                    'masked': params['masked'],
                    'timeseries_role': params['timeseries_role'],
@@ -6435,13 +6497,13 @@ def UpdateIngestSubProduct(params):
                    'scale_offset': params['scale_offset'] if functions.is_float(params['scale_offset']) else 'NULL',
                    'nodata': params['nodata'] if functions.is_int(params['nodata']) else 'NULL',
                    'mask_min': params['mask_min'] if functions.is_float(params['mask_min']) else 'NULL',
-                   'mask_max':  params['mask_max'] if functions.is_float(params['mask_max']) else 'NULL',
+                   'mask_max': params['mask_max'] if functions.is_float(params['mask_max']) else 'NULL',
                    'unit': params['unit'],
                    'masked': params['masked'],
                    'timeseries_role': params['timeseries_role'],
                    'display_index': params['display_index'] if params['display_index'].isdigit() else 'NULL'
                    }
-    # print(productinfo)
+    # print (productinfo)
     productupdated = querydb.update_ingest_subproduct_info(productinfo)
 
     if productupdated:
@@ -6464,7 +6526,8 @@ def DeleteIngestSubProduct(params):
         }
 
         if crud_db.delete('product', **ingest_sub_product):
-            deletestatus = '{"success":true, "productcode": "' + params['productcode'] + '", "version": "' + params['version'] + '",' + \
+            deletestatus = '{"success":true, "productcode": "' + params['productcode'] + '", "version": "' + params[
+                'version'] + '",' + \
                            ' "subproductcode": "' + params['subproductcode'] + '", ' + \
                            ' "message":"Ingest Sub Product deleted!"}'
         else:
@@ -6479,7 +6542,8 @@ def getSubDatasourceDescriptions():
     subdatasource_descriptions = querydb.get_active_subdatasource_descriptions()
 
     subdatasource_descriptions_json = functions.tojson(subdatasource_descriptions)
-    subdatasource_descriptions_json = '{"success":"true", "total":' + str(subdatasource_descriptions.__len__()) + ',"subdatasourcedescription":[' + subdatasource_descriptions_json + ']}'
+    subdatasource_descriptions_json = '{"success":"true", "total":' + str(
+        subdatasource_descriptions.__len__()) + ',"subdatasourcedescription":[' + subdatasource_descriptions_json + ']}'
     return subdatasource_descriptions_json
 
 
@@ -6585,7 +6649,7 @@ def getProcessing(force):
     # force = True
     processinginfo_file = es_constants.base_tmp_dir + os.path.sep + 'processing_info.json'
     if force:
-        processing_chains_json = Processing().encode('utf-8')
+        processing_chains_json = Processing().encode('utf-8').decode()
         try:
             with open(processinginfo_file, "w") as text_file:
                 text_file.write(processing_chains_json)
@@ -6603,7 +6667,7 @@ def getProcessing(force):
         lastmodfified = os.path.getmtime(processinginfo_file)
         lastmodfifieddatetime = datetime.datetime.fromtimestamp(lastmodfified)  # .strftime('%Y-%m-%d %H:%M:%S')
         if lastmodfifieddatetime < datetime.datetime.now() - datetime.timedelta(hours=3):  # seconds=5
-            processing_chains_json = Processing().encode('utf-8')
+            processing_chains_json = Processing().encode('utf-8').decode()
             try:
                 with open(processinginfo_file, "w") as text_file:
                     text_file.write(processing_chains_json)
@@ -6620,7 +6684,7 @@ def getProcessing(force):
                     processing_chains_json = text_file.read()
                     # processing_chains_json = json.loads(processing_chains_json)
             except IOError:
-                processing_chains_json = Processing().encode('utf-8')
+                processing_chains_json = Processing().encode('utf-8').decode()
                 try:
                     os.remove(processinginfo_file)  # remove file and recreate next call
                 except OSError:
@@ -6629,7 +6693,7 @@ def getProcessing(force):
                 text_file.close()
 
     else:
-        processing_chains_json = Processing().encode('utf-8')
+        processing_chains_json = Processing().encode('utf-8').decode()
         try:
             with open(processinginfo_file, "w") as text_file:
                 text_file.write(processing_chains_json)

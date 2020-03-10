@@ -1,3 +1,11 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import open
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 _author__ = "Marco Clerici"
 
 
@@ -66,7 +74,7 @@ class TestIngestion(unittest.TestCase):
 
         # Execute the ogr2ogr command
         command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
-        #print('['+command+']')
+        #print ('['+command+']')
         os.system(command)
 
         # Convert from shapefile to rasterfile
@@ -75,7 +83,7 @@ class TestIngestion(unittest.TestCase):
                   + ' -co "compress=LZW" -of GTiff -ot Byte '     \
                   +file_shp+' '+file_tif
 
-        #print('['+command+']')
+        #print ('['+command+']')
         os.system(command)
 
     def test_ingest_modis_firms_nasa_6(self):
@@ -116,7 +124,7 @@ class TestIngestion(unittest.TestCase):
 
         # Execute the ogr2ogr command
         command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
-        #print('['+command+']')
+        #print ('['+command+']')
         os.system(command)
 
         # Convert from shapefile to rasterfile
@@ -125,7 +133,7 @@ class TestIngestion(unittest.TestCase):
                   + ' -co "compress=LZW" -of GTiff -ot Byte '     \
                   +file_shp+' '+file_tif
 
-        #print('['+command+']')
+        #print ('['+command+']')
         os.system(command)
 
     def test_ingest_modis_sst_netcdf(self):
@@ -705,8 +713,8 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_chirps_tif(self):
 
-        date_fileslist = ['/data/ingest/test/chirps-v2.0.2016.02.1.tif']
-        in_date = '2016.02.1'
+        date_fileslist = ['/home/adminuser/Tests/chirps-v2.0.2018.08.3.tif']
+        in_date = '2018.08.3'
         productcode = 'chirps-dekad'
         productversion = '2.0'
         subproductcode = '10d'
@@ -1313,7 +1321,7 @@ class TestIngestion(unittest.TestCase):
         # sdslist = in_ds.GetSubDatasets()
         # in_ds = gdal.Open('HDF5:'+file+'://NDVI')
         ingestion.write_ds_to_geotiff(hdf, outputfile)
-        print sdsdict
+        print (sdsdict)
         #
         #
         # date_fileslist = glob.glob('/data/native/DISK_MSG_MPE/MSG3*201609301200*gz')

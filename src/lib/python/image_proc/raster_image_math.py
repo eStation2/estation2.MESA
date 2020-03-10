@@ -1,3 +1,13 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from past.utils import old_div
 __author__ = 'clerima'
 #
 #	purpose: Define a set of simple mathematical functions for processing raster images
@@ -46,7 +56,7 @@ from osgeo import gdal, osr
 import numpy as N
 import copy
 import os, re, os.path, time, sys
-import pymorph
+# import pymorph
 import tempfile
 import shutil
 # Jur: not working in windows version. Conflict with scipy version 1.1.0 and its ndimage functionality.
@@ -55,10 +65,10 @@ import shutil
 # scipy for chla gradient computation
 # TODO: On reference machines it has to be -> from scipy import ndimage ! Not on our development VMs!
 # TODO: Change to  if sys.platform == 'win32':
-if sys.platform == 'win32':
-    import scipy
-else:
-    from scipy import ndimage
+# if sys.platform == 'win32':
+#     import scipy
+# else:
+#     from scipy import ndimage
 
 logger = log.my_logger(__name__)
 
@@ -127,8 +137,8 @@ def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata
             stdDs.SetGeoTransform(geotransform)
 
         # pre-open input files
-        rangenl = range(nl)
-        rangeFile = range(len(input_list))
+        rangenl = list(range(nl))
+        rangeFile = list(range(len(input_list)))
         fid = []
         for ifid in rangeFile:
             fid.append(gdal.Open(input_list[ifid], GA_ReadOnly))
@@ -175,7 +185,7 @@ def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata
                 wnz = (counter != 0)
                 outData = N.zeros(ns)
                 if wnz.any():
-                    outData[wnz] = avgData[wnz] / (counter[wnz])
+                    outData[wnz] = old_div(avgData[wnz], (counter[wnz]))
 
                 if output_nodata != None:
                     wzz = (counter == 0)
@@ -186,7 +196,7 @@ def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata
                 if output_stddev != None:
                     outDataStd = N.zeros(ns)
                     if wnz.any():
-                        outDataStd[wnz] = N.sqrt(stdData[wnz] / (counter[wnz]) - N.multiply(outData[wnz], outData[wnz]))
+                        outDataStd[wnz] = N.sqrt(old_div(stdData[wnz], (counter[wnz])) - N.multiply(outData[wnz], outData[wnz]))
                     if output_nodata != None:
                         wzz = (counter == 0)
                         if wzz.any():
@@ -297,8 +307,8 @@ def do_stddev_image(input_file='', avg_file='', input_nodata=None, output_nodata
         for ii in range(len(input_file)):
             fid.append(gdal.Open(input_file[ii], GA_ReadOnly))
         # pre-open input files
-        rangenl = range(nl)
-        rangeFile = range(len(input_file))
+        rangenl = list(range(nl))
+        rangeFile = list(range(len(input_file)))
 
         # Loop over bands
         for ib in range(nb):
@@ -347,7 +357,7 @@ def do_stddev_image(input_file='', avg_file='', input_nodata=None, output_nodata
                 outDataStd = N.zeros(ns)
                 outDataStd_2 = N.zeros(ns)
                 if wnz.any():
-                    outDataStd_2[wnz] = stdData[wnz]/(counter[wnz])
+                    outDataStd_2[wnz] = old_div(stdData[wnz],(counter[wnz]))
                     neg_val = (outDataStd < 0.0)
                     if neg_val.any():
                         logger.error('Unconsistent results. Check AVG is up-to-date. Continue')
@@ -1173,7 +1183,7 @@ def do_make_vci(input_file='', min_file='', max_file='', output_file='', input_n
                 vci = vci + output_nodata
 
             if wtp.any():
-                vci[wtp] = 100.0 * (1.0 * data[wtp] - 1.0 * minVal[wtp]) / (1.0 * maxVal[wtp] - 1.0 * minVal[wtp])
+                vci[wtp] = old_div(100.0 * (1.0 * data[wtp] - 1.0 * minVal[wtp]), (1.0 * maxVal[wtp] - 1.0 * minVal[wtp]))
 
             vci = vci.round()
             vci.shape = (1, -1)
@@ -1265,8 +1275,8 @@ def do_make_baresoil(input_file='', avg_file='', min_file='', max_file='', outpu
         if os.path.exists(input_file):
             input_nodata = float(sds_meta.get_nodata_value(input_file))
             [scaling_factor, scaling_offset] = sds_meta.get_scaling_values(input_file)
-            ndvi_max_dn = (ndvi_max - scaling_offset) / scaling_factor
-            delta_ndvi_max_dn = (delta_ndvi_max - scaling_offset) / scaling_factor
+            ndvi_max_dn = old_div((ndvi_max - scaling_offset), scaling_factor)
+            delta_ndvi_max_dn = old_div((delta_ndvi_max - scaling_offset), scaling_factor)
 
         else:
             logger.info('Test file not existing: do not assign metadata')
@@ -1530,8 +1540,8 @@ def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=
         #     smDs.SetGeoTransform(geotransform)
 
         # pre-open the files
-        rangenl = range(nl)
-        rangeFile = range(len(input_file))
+        rangenl = list(range(nl))
+        rangeFile = list(range(len(input_file)))
         fid = []
         for ifid in rangeFile:
             fid.append(gdal.Open(input_file[ifid], GA_ReadOnly))
@@ -1695,7 +1705,7 @@ def do_compute_perc_diff_vs_avg(input_file='', avg_file='', output_file='', inpu
                 diff = diff + output_nodata
 
             if wtp.any():
-                diff[wtp] = 100.0 * (1.0 * data[wtp] - 1.0 * avgVal[wtp]) / (1.0 * avgVal[wtp])
+                diff[wtp] = old_div(100.0 * (1.0 * data[wtp] - 1.0 * avgVal[wtp]), (1.0 * avgVal[wtp]))
 
             diff = diff.round()
             diff.shape = (1, -1)
@@ -1810,7 +1820,7 @@ def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_fil
             if valid.any():
 
                 # calculating f ratio  F using (0.66125 * Eo)/(Eo + 4.1)
-                F_ratio[valid] = (0.66125 * data_par[valid]) / (data_par[valid] + 4.1)
+                F_ratio[valid] = old_div((0.66125 * data_par[valid]), (data_par[valid] + 4.1))
 
                 # Add a test on SST > 28.5 (see bug ES2-49)
                 high_temp = (data_sst_rescal > 28.5)
@@ -1884,15 +1894,15 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
 
     if masks is not None:
         if maskTests is None:
-            print 'If you provide a list of masks, you must also provide a parallel list of mask tests.'
+            print ('If you provide a list of masks, you must also provide a parallel list of mask tests.')
         if maskValues is None:
-            print 'If you provide a list of masks, you must also provide a parallel list of mask values.'
+            print ('If you provide a list of masks, you must also provide a parallel list of mask values.')
 
     if medianFilterWindowSize is not None and medianFilterWindowSize % 2 == 0:
-        print 'The median filter window size must be a positive odd integer greater than or equal to 3.'
+        print ('The median filter window size must be a positive odd integer greater than or equal to 3.')
 
     if histogramWindowStride > histogramWindowSize:
-        print 'The histogram stride cannot be larger than the histogram window size.'
+        print ('The histogram stride cannot be larger than the histogram window size.')
 
     # Import needed modules.
 
@@ -1906,9 +1916,9 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
     # corresponding cell of the caller's image is invalid.
 
     if medianFilterWindowSize is None:
-        bufferSize = (histogramWindowSize + 1) / 2
+        bufferSize = old_div((histogramWindowSize + 1), 2)
     else:
-        bufferSize = max([(medianFilterWindowSize + 1) / 2, (histogramWindowSize + 1) / 2])
+        bufferSize = max([old_div((medianFilterWindowSize + 1), 2), old_div((histogramWindowSize + 1), 2)])
     rows = bufferSize + image.shape[0] + bufferSize
     cols = bufferSize + image.shape[1] + bufferSize
 
@@ -1923,37 +1933,37 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
     # Apply the caller's masks.
 
     if minImageValue is not None:
-        print ' Debug: minImageValue is defined.'
+        print (' Debug: minImageValue is defined.')
         unbufferedMask[:] = numpy.logical_or(unbufferedMask, image < minImageValue)
 
     if maxImageValue is not None:
-        print ' Debug: maxImageValue is defined.'
+        print (' Debug: maxImageValue is defined.')
         unbufferedMask[:] = numpy.logical_or(unbufferedMask, image > maxImageValue)
 
     if masks is not None:
         for i in range(len(masks)):
             if maskTests[i] == u'equal':
-                print ' Debug: Masking cells where mask %(mask)i is equal to ', i, '.'
+                print((' Debug: Masking cells where mask %(mask)i is equal to ', i, '.'))
                 unbufferedMask[:] = numpy.logical_or(unbufferedMask, masks[i] == maskValues[i])
 
             elif maskTests[i] == u'notequal':
-                print ' Debug: Masking cells where mask %(mask)i is not equal to ', i, '.'
+                print((' Debug: Masking cells where mask %(mask)i is not equal to ', i, '.'))
                 unbufferedMask[:] = numpy.logical_or(unbufferedMask, masks[i] != maskValues[i])
 
             elif maskTests[i] == u'greaterthan':
-                print ' Debug: Masking cells where mask %(mask)i is greater than ', i, '.'
+                print((' Debug: Masking cells where mask %(mask)i is greater than ', i, '.'))
                 unbufferedMask[:] = numpy.logical_or(unbufferedMask, masks[i] > maskValues[i])
 
             elif maskTests[i] == u'lessthan':
-                print ' Debug: Masking cells where mask %(mask)i is less than ', i, '.'
+                print((' Debug: Masking cells where mask %(mask)i is less than ', i, '.'))
                 unbufferedMask[:] = numpy.logical_or(unbufferedMask, masks[i] < maskValues[i])
 
             elif maskTests[i] == u'anybitstrue':
-                print ' Debug: Masking cells where mask ', i, '(mask) bitwise-ANDed with ', X, ' is not zero.'
+                print((' Debug: Masking cells where mask ', i, '(mask) bitwise-ANDed with ', X, ' is not zero.'))
                 unbufferedMask[:] = numpy.logical_or(unbufferedMask, numpy.bitwise_and(masks[i], maskValues[i]) != 0)
 
             else:
-                print ' is not an allowed mask test.'
+                print (' is not an allowed mask test.')
 
     # If the caller specified that the edges should wrap, copy the
     # cells from the left edge of the image (and mask) to the
@@ -2049,7 +2059,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
     bufferedWindowStatusCodes = numpy.zeros((rows, cols), dtype='int8')
     bufferedWindowStatusValues = numpy.zeros((rows, cols), dtype='float32')
 
-    print ' Debug: Running histogramming and cohesion algorithm.'
+    print (' Debug: Running histogramming and cohesion algorithm.')
     timeStarted = time.time()
 
     # If we're only using one thread, invoke the C code directly.
@@ -2077,7 +2087,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
         # The subarrays that are created here are references, not
         # deep copies.
 
-        blockHeight = image.shape[0] / threads
+        blockHeight = old_div(image.shape[0], threads)
         blockHeight = blockHeight - blockHeight % histogramWindowStride
 
         bufferedImageList = []
@@ -2129,7 +2139,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
             histogramWindowStride, minPropNonMaskedCells, minPopProp, minPopMeanDifference, minTheta,
             minSinglePopCohesion, minGlobalPopCohesion))
             t.setDaemon(True)
-            print ' Debug: Starting thread %(id)s to process rows %(start)i to %(end)i.'
+            print (' Debug: Starting thread %(id)s to process rows %(start)i to %(end)i.')
             threadList.append(t)
 
         for i in range(threads):
@@ -2139,7 +2149,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
 
         while len(threadList) > 0:
             threadList[0].join()
-            print ' Debug: Thread %(id)s exited.'
+            print (' Debug: Thread %(id)s exited.')
             del threadList[0]
 
         # Aggregate the arrays computed by the threads into the
@@ -2244,38 +2254,38 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
         # Parameters is expected to be None, or a dictionary
         if parameters is not None:
 
-            if 'histogramWindowStride' in parameters.keys():
+            if 'histogramWindowStride' in list(parameters.keys()):
                 histogramWindowStride = parameters['histogramWindowStride']
             else:
                 histogramWindowStride = None
 
-            if 'minTheta' in parameters.keys():
+            if 'minTheta' in list(parameters.keys()):
                 minTheta = parameters['minTheta']
             else:
                 minTheta = None
-            if 'minPopProp' in parameters.keys():
+            if 'minPopProp' in list(parameters.keys()):
                 minPopProp = parameters['minPopProp']
             else:
                 minPopProp = None
-            if 'minPopMeanDifference' in parameters.keys():
+            if 'minPopMeanDifference' in list(parameters.keys()):
                 minPopMeanDifference = parameters['minPopMeanDifference']
             else:
                 minPopMeanDifference = None
-            if 'minSinglePopCohesion' in parameters.keys():
+            if 'minSinglePopCohesion' in list(parameters.keys()):
                 minSinglePopCohesion = parameters['minSinglePopCohesion']
             else:
                 minSinglePopCohesion = None
-            if 'histogramWindowSize' in parameters.keys():
+            if 'histogramWindowSize' in list(parameters.keys()):
                 histogramWindowSize = parameters['histogramWindowSize']
             else:
                 histogramWindowSize = None
-            if 'minImageValue' in parameters.keys():
+            if 'minImageValue' in list(parameters.keys()):
                 minImageValue = parameters['minImageValue']
             else:
                 minImageValue = None
 
             minThreshold = 1
-            if 'minThreshold' in parameters.keys():
+            if 'minThreshold' in list(parameters.keys()):
                 if parameters['minThreshold'] is not None:
                     minThreshold = parameters['minThreshold']
 
@@ -2468,9 +2478,9 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
                 correct = data
                 if wtp.any():
                     slope1 = N.zeros(data.shape)
-                    slope1[wtp] = (data[wtp] - data_m1[wtp]) / abs(data_m1[wtp])
+                    slope1[wtp] = old_div((data[wtp] - data_m1[wtp]), abs(data_m1[wtp]))
                     slope2 = N.zeros(data.shape)
-                    slope2[wtp] = (data_p1[wtp] - data[wtp]) / abs(data_p1[wtp])
+                    slope2[wtp] = old_div((data_p1[wtp] - data[wtp]), abs(data_p1[wtp]))
                     wtc = (slope1 < -threshold) * (slope2 > threshold)
 
                     if wtc.any():
@@ -2530,7 +2540,7 @@ def do_rain_onset(input_file='', output_file='', input_nodata=None, output_nodat
         geoTransform = fid_t0.GetGeoTransform()
         projection = fid_t0.GetProjection()
         driver_type = fid_t0.GetDriver().ShortName
-        rangenl = range(nl)
+        rangenl = list(range(nl))
 
         # Try and assign input_nodata if it is UNDEF
         if input_nodata is None:
@@ -2890,7 +2900,7 @@ def create_surface_area_raster(input_file=None, output_file='', output_format=No
             nl_lat_value = ymin + (il * pixel_shift_lat)
             d = abs(pixel_shift_lat)  # 0.008928571428571
             const_d2km = 12364.35
-            area_deg = d * d * math.cos(nl_lat_value / 180 * math.pi)
+            area_deg = d * d * math.cos(old_div(nl_lat_value, 180) * math.pi)
             area_km = area_deg * const_d2km
 
             # if (nl_lat_value != 0):
@@ -3409,12 +3419,12 @@ def compute_extrapolated_chla_gradient(input_file='', nodata=None, output_file='
             nl_lat_value = ymin + (il * pixel_shift_lat)
             d = abs(pixel_shift_lat)  # 0.008928571428571
             const_d2km = 12364.35
-            area_deg = d * d * math.cos(nl_lat_value / 180 * math.pi)
+            area_deg = d * d * math.cos(old_div(nl_lat_value, 180) * math.pi)
             # area_km = area_deg * const_d2km
             # For opfish approximation
             # const_d2km = 12364.35
             # area_km_equator = abs(mapset_info.pixel_shift_lat) * abs(mapset_info.pixel_shift_long) * const_d2km
-            area_km = (area_deg * const_d2km) / pix_km_dy_mat
+            area_km = old_div((area_deg * const_d2km), pix_km_dy_mat)
             # area_km = (area_deg * const_d2km) / 4.58
             # if (nl_lat_value != 0):
             pix_km_dx_mat = N.zeros(ns)
@@ -3504,27 +3514,27 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         # Parameters is expected to be None, or a dictionary
         if parameters is not None:
 
-            if 'chl_grad_min' in parameters.keys():
+            if 'chl_grad_min' in list(parameters.keys()):
                 chl_grad_min = parameters['chl_grad_min']
             else:
                 chl_grad_min = 0.00032131   #chl_grad_min = 0.00032131  # perc.5th of all species reconstructed OBS by group -- NEW VALUES BY JEON
 
-            if 'chl_grad_int' in parameters.keys():
+            if 'chl_grad_int' in list(parameters.keys()):
                 chl_grad_int = parameters['chl_grad_int']
             else:
                 chl_grad_int = 0.021107  #chl_grad_int = 0.021107# linear fit from 0.09 to 1 (minimum mobility of species)
 
-            if 'chl_feed_min' in parameters.keys():
+            if 'chl_feed_min' in list(parameters.keys()):
                 chl_feed_min = parameters['chl_feed_min']
             else:
                 chl_feed_min = 0.08 #chl_feed_min = 0.08  # mgChl/m3 - minimum among species
 
-            if 'chl_feed_max' in parameters.keys():
+            if 'chl_feed_max' in list(parameters.keys()):
                 chl_feed_max = parameters['chl_feed_max']
             else:
                 chl_feed_max = 11.0 #chl_feed_max = 11.0  # perc.98th green MESOZOOPK, perc.99.3th total MESOZOOPK;
 
-            if 'dc' in parameters.keys():
+            if 'dc' in list(parameters.keys()):
                 dc = parameters['dc']
             else:
                 dc = 0.91  #0.91  # (1-dc = 0.09, it is 0.10 in the Arctic report)
@@ -3644,8 +3654,8 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
             nl_lat_value = ymin + (il * pixel_shift_lat)
             d = abs(pixel_shift_lat)  # 0.008928571428571
             const_d2km = 12363.9869   #12364.35
-            area_deg = d * d * math.cos(nl_lat_value / 180 * math.pi)
-            area_km = (area_deg * const_d2km) / pix_km_dy_mat
+            area_deg = d * d * math.cos(old_div(nl_lat_value, 180) * math.pi)
+            area_km = old_div((area_deg * const_d2km), pix_km_dy_mat)
             pix_km_dx_mat[il,:] = area_km
 
         if sys.platform == 'win32':
@@ -3679,7 +3689,7 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         # Slope and intercept of linear fit in natural log
         delta_y = dc
         delta_x = N.log(chl_grad_int) - N.log(chl_grad_min)
-        sl_hab = delta_y / delta_x
+        sl_hab = old_div(delta_y, delta_x)
         # intercept = equation of straight line y = mx+b where m is slope
         in_hab = 1 - sl_hab * N.log(chl_grad_int)
         linear_interp = (gradNorm >= chl_grad_min) * (gradNorm <= chl_grad_int)
@@ -3711,7 +3721,7 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
                 opFish = opFish + output_nodata
 
             if wtp.any():
-                opFish[wtp] = data[wtp] * (daylength_val / 24)
+                opFish[wtp] = data[wtp] * (old_div(daylength_val, 24))
             opFish.shape = (1, -1)
             outband.WriteArray(opFish, 0, il)
 
@@ -3848,15 +3858,15 @@ def get_daylength(dayOfYear, lat):
     #      notice, this list of conditions and the following disclaimer in
     #      the documentation and/or other materials provided with the distribution
     #
-    axis = 23.439 * math.pi / 180
+    axis = old_div(23.439 * math.pi, 180)
     j_contant = math.pi / 182.625
-    m = 1- math.tan(lat*math.pi/180) * math.tan(axis * math.cos(j_contant*dayOfYear))
+    m = 1- math.tan(old_div(lat*math.pi,180)) * math.tan(axis * math.cos(j_contant*dayOfYear))
 
     if m > 2:   #saturate value for artic
         m = 2
     if m < 0:
         m = 0
 
-    b = math.acos(1-m)/math.pi   # fraction of the day the sun is up
+    b = old_div(math.acos(1-m),math.pi)   # fraction of the day the sun is up
     return b*24  #hours of sunlight
 

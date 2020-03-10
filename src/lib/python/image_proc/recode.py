@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
 #
 #	purpose: Define the all functions for processing raster datasets (previously in ~/PS/bin/*py)
 #	author:  M. Clerici
@@ -21,15 +25,20 @@
 # import pygrib
 # import numpy as N
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
 try:
     from osgeo import gdal
     from osgeo.gdalconst import *
+
     gdal.TermProgress = gdal.TermProgress_nocb
 except ImportError:
     import gdal
     from gdalconst import *
 try:
     import numpy as N
+
     N.arrayrange = N.arange
 except ImportError:
     import Numeric as N
@@ -38,43 +47,48 @@ try:
     from osgeo import gdal_array as gdalnumeric
 except ImportError:
     import gdalnumeric
-    
+
 import sys
 import os.path
+
+
 # import operator
 # import math
 
 # _____________________________
 def ParseType(type):
     if type == 'Byte':
-	return GDT_Byte
+        return GDT_Byte
     elif type == 'Int16':
-	return GDT_Int16
+        return GDT_Int16
     elif type == 'UInt16':
-	return GDT_UInt16
+        return GDT_UInt16
     elif type == 'Int32':
-	return GDT_Int32
+        return GDT_Int32
     elif type == 'UInt32':
-	return GDT_UInt32
+        return GDT_UInt32
     elif type == 'Float32':
-	return GDT_Float32
+        return GDT_Float32
     elif type == 'Float64':
-	return GDT_Float64
+        return GDT_Float64
     elif type == 'CInt16':
-	return GDT_CInt16
+        return GDT_CInt16
     elif type == 'CInt32':
-	return GDT_CInt32
+        return GDT_CInt32
     elif type == 'CFloat32':
-	return GDT_CFloat32
+        return GDT_CFloat32
     elif type == 'CFloat64':
-	return GDT_CFloat64
+        return GDT_CFloat64
     else:
-	return GDT_Float32
+        return GDT_Float32
+
+
 # ______________________________
 def Usage(message):
-    print message
+    print (message)
 
     sys.exit(1)
+
 
 # ______________________________
 def do_recode(file, outfile, value_s, value_t, outTypeIn, format, options):
@@ -87,7 +101,7 @@ def do_recode(file, outfile, value_s, value_t, outTypeIn, format, options):
         outType = fid0.GetRasterBand(1).DataType
     else:
         outType = ParseType(outTypeIn)
-    
+
     outDrv = gdal.GetDriverByName(format)
     outDs = outDrv.Create(outfile, ns, nl, nb, outType, options)
     outDs.SetProjection(fid0.GetProjection())
@@ -95,30 +109,29 @@ def do_recode(file, outfile, value_s, value_t, outTypeIn, format, options):
 
     for ib in range(nb):
         for il in range(nl):
-            data0=N.ravel(fid0.GetRasterBand(ib+1).ReadAsArray(0,il,ns,1))
+            data0 = N.ravel(fid0.GetRasterBand(ib + 1).ReadAsArray(0, il, ns, 1))
 
             # set to N.zeros to enable auto cast whenever needed
-            dataout=N.zeros(ns) + data0
+            dataout = N.zeros(ns) + data0
             for it in range(len(value_s)):
                 wtp = (data0 == value_s[it])
                 if wtp.any():
-                    dataout[wtp]=value_t[it]
-            
+                    dataout[wtp] = value_t[it]
 
-            dataout.shape=(1,-1)
-            outDs.GetRasterBand(ib+1).WriteArray(N.array(dataout),0,il)
-            gdal.TermProgress( (ib*(ns*nl)+il*ns)/float(ns*nl*nb) )
-            
+            dataout.shape = (1, -1)
+            outDs.GetRasterBand(ib + 1).WriteArray(N.array(dataout), 0, il)
+            gdal.TermProgress((ib * (ns * nl) + il * ns) / float(ns * nl * nb))
+
     gdal.TermProgress(1)
+
 
 # ______________________________
 #
 #   Quick wrapper for calling from ruffus
 #
 def myrecode(file, outfile, value_s, value_t):
-
     format = 'Gtiff'
-    options= []
+    options = []
 
     fid0 = gdal.Open(file, GA_ReadOnly)
     ns = fid0.RasterXSize
@@ -134,31 +147,31 @@ def myrecode(file, outfile, value_s, value_t):
 
     for ib in range(nb):
         for il in range(nl):
-            data0=N.ravel(fid0.GetRasterBand(ib+1).ReadAsArray(0,il,ns,1))
+            data0 = N.ravel(fid0.GetRasterBand(ib + 1).ReadAsArray(0, il, ns, 1))
 
             # set to N.zeros to enable auto cast whenever needed
-            dataout=N.zeros(ns) + data0
+            dataout = N.zeros(ns) + data0
             for it in range(len(value_s)):
                 wtp = (data0 == value_s[it])
                 if wtp.any():
-                    dataout[wtp]=value_t[it]
+                    dataout[wtp] = value_t[it]
 
-
-            dataout.shape=(1,-1)
-            outDs.GetRasterBand(ib+1).WriteArray(N.array(dataout),0,il)
-            gdal.TermProgress( (ib*(ns*nl)+il*ns)/float(ns*nl*nb) )
+            dataout.shape = (1, -1)
+            outDs.GetRasterBand(ib + 1).WriteArray(N.array(dataout), 0, il)
+            gdal.TermProgress((ib * (ns * nl) + il * ns) / float(ns * nl * nb))
 
     gdal.TermProgress(1)
 
+
 # ______________________________
-if __name__=="__main__":
-    
+if __name__ == "__main__":
+
     outfile = None
     format = 'Gtiff'
-    options= []
+    options = []
     file = None
-    value_s=[]
-    value_t=[]
+    value_s = []
+    value_t = []
     outType = None
 
     ii = 1
@@ -178,36 +191,35 @@ if __name__=="__main__":
 
         elif arg == '-r':
             ii = ii + 1
-            value_s.append(float( sys.argv[ii]))
+            value_s.append(float(sys.argv[ii]))
             ii = ii + 1
-            value_t.append( float(sys.argv[ii]))
-            
+            value_t.append(float(sys.argv[ii]))
+
         elif arg == '-o':
             ii = ii + 1
             outfile = sys.argv[ii]
 
-        else :
-            file=arg
+        else:
+            file = arg
 
         ii = ii + 1
 
-    #check inputs
+    # check inputs
     if file is None:
         Usage('Missing an input file name.')
 
     if outfile is None:
         Usage('Missing an output file name.')
 
-    if len(value_s)==0:
+    if len(value_s) == 0:
         Usage('You must define source/target values.')
 
-    if len(value_s)!=len(value_t):
+    if len(value_s) != len(value_t):
         Usage('For each source value you must define a target value.')
 
     if (os.path.isfile(file)):
         pass
     else:
-        Usage('Input file does not exist: '+file)
-        
+        Usage('Input file does not exist: ' + file)
 
     do_recode(file, outfile, value_s, value_t, outType, format, options)

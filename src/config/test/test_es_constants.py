@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
 __author__ = "Jurriaan van 't Klooster"
 
 import site
@@ -17,7 +22,7 @@ class TestConstants(TestCase):
         from config import es_constants
 
         for setting in es_constants.es2globals:
-            print setting
+            print (setting)
 
         self.assertEqual(1, 1)
 

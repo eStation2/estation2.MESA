@@ -1,3 +1,9 @@
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
 __author__ = 'tklooju'
 
 
@@ -12,16 +18,16 @@ def reloadallmodules():
     import webpy_esapp
     # import webpy_esapp_helpers
     # import reloader
-    import imp
+    from importlib import reload
 
-    imp.reload(es_constants)
-    imp.reload(connectdb)
-    imp.reload(functions)
-    imp.reload(querydb)
-    imp.reload(datasets)
-    imp.reload(products)
+    reload(es_constants)
+    reload(connectdb)
+    reload(functions)
+    reload(querydb)
+    reload(datasets)
+    reload(products)
     # imp.reload(webpy_esapp_helpers)
-    imp.reload(webpy_esapp)
+    reload(webpy_esapp)
 
 
     # reloader.enable()

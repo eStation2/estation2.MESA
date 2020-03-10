@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 #
 #	purpose: Define the processing chain for ndvi
 #	author:  M.Clerici & Jurriaan van't Klooster
@@ -7,6 +11,9 @@
 #
 
 # source my definitions
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 from config import es_constants
 
 # Import std modules
@@ -260,7 +267,7 @@ def vgt_ndvi_linearx1(input_files, output_file):
     functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_files[1], "before_file":input_files[0], "after_file": input_files[2], "output_file": output_file,
              "output_format": 'GTIFF', "options": "compress = lzw", 'threshold': 0.1}
-    print args
+    print (args)
     raster_image_math.do_ts_linear_filter(**args)
 
 
@@ -529,7 +536,7 @@ def vgt_ndvi_baresoil_linearx2(input_file, output_file):
     output_file = functions.list_to_element(output_file)
     functions.check_output_dir(os.path.dirname(output_file))
     args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
-    print args
+    print (args)
     raster_image_math.do_make_baresoil(**args)
 
 #   ---------------------------------------------------------------------

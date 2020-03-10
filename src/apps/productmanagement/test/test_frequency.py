@@ -7,7 +7,12 @@
 #
 
 from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import print_function
 
+from future import standard_library
+standard_library.install_aliases()
 import unittest
 import datetime
 
@@ -104,8 +109,8 @@ class TestFrequency(unittest.TestCase):
         to_date = datetime.date(2014, 12, 31)
         dates = frequency.get_dates(from_date, to_date)
         templates = frequency.get_internet_dates(dates, "/%Y/%m/%d/DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0/c_gls_DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc")
-        self.assertEqual(templates[0], '/2014/01/10/DMP-RT6_201401100000_GLOBE_PROBAV_V2.0/c_gls_DMP-RT6_201401100000_GLOBE_PROBAV_V2.0.1.nc')
-        self.assertEqual(templates[1], '/2014/01/20/DMP-RT6_201401200000_GLOBE_PROBAV_V2.0/c_gls_DMP-RT6_201401200000_GLOBE_PROBAV_V2.0.1.nc')
+        self.assertEqual(templates[0], '/%Y/%m/%d/DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0/c_gls_DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc')
+        self.assertEqual(templates[1], '/%Y/%m/%d/DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0/c_gls_DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc')
 
     def test_get_internet_dates_add_days(self):
         #%{+/-<Nt><strftime>} = +/- N delta days/hours/
@@ -117,7 +122,3 @@ class TestFrequency(unittest.TestCase):
         self.assertEqual(templates[0], '/Modis_2014-01-09_201401/mcd14dl.2014-01-01.tif')
         self.assertEqual(templates[1], '/Modis_2014-01-10_201401/mcd14dl.2014-01-02.tif')
 
-
-suite_frequency = unittest.TestLoader().loadTestsFromTestCase(TestFrequency)
-if __name__ == '__main__':
-    unittest.TextTestRunner(verbosity=2).run(suite_frequency)

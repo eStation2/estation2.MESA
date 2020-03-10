@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
 #
 #	purpose: Define the mapset class
 #	author:  M. Clerici
@@ -9,6 +13,13 @@
 
 # Import std modules
 # import pygrib
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from builtins import object
+from past.utils import old_div
 import numpy as N
 import math
 import os
@@ -22,7 +33,7 @@ from osgeo import gdal
 from osgeo import osr, ogr
 
 
-class MapSet:
+class MapSet(object):
 
     def __init__(self):
         self.spatial_ref = osr.SpatialReference()
@@ -89,9 +100,10 @@ class MapSet:
     def assign_vgt4africa_500m(self):
         # Assign the VGT4Africa default mapset (continental)
         self.spatial_ref.SetWellKnownGeogCS("WGS84")
-        self.geo_transform = [-26.004464285714285, 0.0044642857142855, 0.0, 38.004464285714285, 0.0, -0.0044642857142855]
-        self.size_x = 19266         # 9633*2
-        self.size_y = 16354         # 8177*2
+        self.geo_transform = [-26.004464285714285, 0.0044642857142855, 0.0, 38.004464285714285, 0.0,
+                              -0.0044642857142855]
+        self.size_x = 19266  # 9633*2
+        self.size_y = 16354  # 8177*2
         self.short_name = 'WGS84_Africa_500m'
 
     def assign_msg_disk(self):
@@ -102,7 +114,7 @@ class MapSet:
         proj4def = "+proj=geos +lon_0=0 +h=35785831 +DATUM=WGS84"
         self.spatial_ref.ImportFromProj4(proj4def)
         # Set additional inf
-        #self.spatial_ref.SetAttrValue('PROJCS|GEOCS|DATUM',"WGS84")
+        # self.spatial_ref.SetAttrValue('PROJCS|GEOCS|DATUM',"WGS84")
 
         self.geo_transform = [-5570248.477582973, 3000.4031659482757, 0.0, 5570248.477582973, 0.0, -3000.4031659482757]
         self.size_x = 3712
@@ -118,7 +130,7 @@ class MapSet:
         self.spatial_ref.ImportFromProj4(proj4def)
         # Set additional info, as from FEWSNET website
         self.spatial_ref.SetAttrValue('PROJCS', "Albers_Conical_Equal_Area")
-        #self.spatial_ref.SetAttrValue('PROJCS|GEOCS|DATUM|SPHEROID', "Clarke 1866")
+        # self.spatial_ref.SetAttrValue('PROJCS|GEOCS|DATUM|SPHEROID', "Clarke 1866")
 
         self.size_x = 994
         self.size_y = 1089
@@ -148,11 +160,11 @@ class MapSet:
 
     def print_out(self):
         # Print Information on the mapset
-        print 'Spatial Ref WKT: ' + self.spatial_ref.ExportToWkt()
-        print 'GeoTransform   : ', self.geo_transform
-        print 'SizeX          : ', self.size_x
-        print 'SizeY          : ', self.size_y
-        print 'Shortname      : ', self.short_name
+        print ('Spatial Ref WKT: ' + self.spatial_ref.ExportToWkt())
+        print(('GeoTransform   : ', self.geo_transform))
+        print(('SizeX          : ', self.size_x))
+        print(('SizeY          : ', self.size_y))
+        print(('Shortname      : ', self.short_name))
 
     def validate(self, echo=False):
 
@@ -161,7 +173,7 @@ class MapSet:
 
         # Validate the Spatial Reference
         if echo:
-            print 'Spatial Ref Validate [0=ok]: ' + str(self.spatial_ref.Validate())
+            print ('Spatial Ref Validate [0=ok]: ' + str(self.spatial_ref.Validate()))
         result += self.spatial_ref.Validate()
 
         # Checks on the GeoTransform array
@@ -174,18 +186,18 @@ class MapSet:
             if not isinstance(igt, float):
                 code_gt = 2
         if echo:
-            print 'Geo Transfo Validate [0=ok]: ' + str(code_gt)
+            print ('Geo Transfo Validate [0=ok]: ' + str(code_gt))
         result += code_gt
 
         code_size_x = isinstance(self.size_x, int) and self.size_x > 0
         if echo:
-            print 'Size X positive number     : ' + str(code_size_x)
+            print ('Size X positive number     : ' + str(code_size_x))
         if not code_size_x:
             result += 1
 
         code_size_y = isinstance(self.size_y, int) and self.size_y > 0
         if echo:
-            print 'Size Y positive number     : ' + str(code_size_y)
+            print ('Size Y positive number     : ' + str(code_size_y))
         if not code_size_y:
             result += 1
 
@@ -193,21 +205,21 @@ class MapSet:
 
     def get_larger_mapset(self, echo=False):
 
-        larger_mapset=None
+        larger_mapset = None
 
         # SPOTV case
 
         if self.short_name == 'SPOTV-CEMAC-1km':
-            larger_mapset =  'SPOTV-Africa-1km'
+            larger_mapset = 'SPOTV-Africa-1km'
 
         if self.short_name == 'SPOTV-ECOWAS-1km':
-            larger_mapset =  'SPOTV-Africa-1km'
+            larger_mapset = 'SPOTV-Africa-1km'
 
         if self.short_name == 'SPOTV-IGAD-1km':
-            larger_mapset =  'SPOTV-Africa-1km'
+            larger_mapset = 'SPOTV-Africa-1km'
 
         if self.short_name == 'SPOTV-SADC-1km':
-            larger_mapset =  'SPOTV-Africa-1km'
+            larger_mapset = 'SPOTV-Africa-1km'
 
         # These two mapsets apply to PML only, and they should considered 'independent' from the Africa 'one', as the 'larger' is not created
         # See also byg in ftp_data_push ES2-209 - 15.2.2018
@@ -219,72 +231,72 @@ class MapSet:
 
         # MODIS Africa case
         if self.short_name == 'MODIS-IOC-4km':
-            larger_mapset =  'MODIS-Africa-4km'
+            larger_mapset = 'MODIS-Africa-4km'
 
         if self.short_name == 'MODIS-UoG-4km':
-            larger_mapset =  'MODIS-Africa-4km'
+            larger_mapset = 'MODIS-Africa-4km'
 
         return larger_mapset
 
     def compute_common_area(self, second_mapset):
 
-    #   Computes the common area of two mapset, ONLY if they have same resolution
-    #   It returns shift to apply to each image and the common roi dimensions
-    #   Arguments:
-    #
-    #       second_mapset: mapset to compare with
-    #
+        #   Computes the common area of two mapset, ONLY if they have same resolution
+        #   It returns shift to apply to each image and the common roi dimensions
+        #   Arguments:
+        #
+        #       second_mapset: mapset to compare with
+        #
 
-        roi = {'isCommon': None,            # two ROIs have same pixelsize AND area in common
-               'xSize': 0,                  # x-dim of common area
-               'ySize': 0,                  # y-dim of common area
-               'firstXOff': 0,              # x-offset of the common area in ROI-1
-               'firstYOff': 0,              # y-offset of the common area in ROI-1
-               'secondXOff': 0,             # x-offset of the common area in ROI-2
-               'secondYOff': 0,             # y-offset of the common area in ROI-2
+        roi = {'isCommon': None,  # two ROIs have same pixelsize AND area in common
+               'xSize': 0,  # x-dim of common area
+               'ySize': 0,  # y-dim of common area
+               'firstXOff': 0,  # x-offset of the common area in ROI-1
+               'firstYOff': 0,  # y-offset of the common area in ROI-1
+               'secondXOff': 0,  # x-offset of the common area in ROI-2
+               'secondYOff': 0,  # y-offset of the common area in ROI-2
                }
 
         # Accuracy in degrees (0.1 km)
-        accuracy = (1.0/112.0)/10.0
+        accuracy = (1.0 / 112.0) / 10.0
 
         # Assign Geo-transform and image-sizes from mapsets
         firstGeo = self.geo_transform
-        firstNs=self.size_x
-        firstNl=self.size_y
+        firstNs = self.size_x
+        firstNl = self.size_y
         secondGeo = second_mapset.geo_transform
-        secondNs=second_mapset.size_x
-        secondNl=second_mapset.size_y
+        secondNs = second_mapset.size_x
+        secondNl = second_mapset.size_y
 
-        flag=1
+        flag = 1
         for ii in range(len(firstGeo)):
             if firstGeo[ii] != secondGeo[ii]:
-                flag=0
+                flag = 0
 
         if flag == 1:
             # ROIs are identical: return trivial parameters
-            roi['isCommon']=True
-            roi['xSize']=firstNs
-            roi['ySize']=firstNl
+            roi['isCommon'] = True
+            roi['xSize'] = firstNs
+            roi['ySize'] = firstNl
         else:
             # they are not the same, compute offset
             # they must have same pixel size, otherwise return 'No common ROIs'
             if math.fabs(firstGeo[1] - secondGeo[1]) > accuracy or math.fabs(firstGeo[5] - secondGeo[5]) > accuracy:
-                roi['isCommon']=False
+                roi['isCommon'] = False
             else:
-                xshift = int( (secondGeo[0]-firstGeo[0])/math.fabs(firstGeo[1]) )
-                if xshift >0:
-                    firstXOff   = xshift
-                    secondXOff  = int(0)
-                    xSize  = min(int(firstNs - xshift), secondNs)
+                xshift = int(old_div((secondGeo[0] - firstGeo[0]), math.fabs(firstGeo[1])))
+                if xshift > 0:
+                    firstXOff = xshift
+                    secondXOff = int(0)
+                    xSize = min(int(firstNs - xshift), secondNs)
                 else:
                     firstXOff = 0
-                    secondXOff= int(abs(xshift))
-                    xSize  = min((secondNs - abs(xshift)), firstNs)
+                    secondXOff = int(abs(xshift))
+                    xSize = min((secondNs - abs(xshift)), firstNs)
 
-                yshift  = int( (firstGeo[3]-secondGeo[3])/math.fabs(firstGeo[5]) )
+                yshift = int(old_div((firstGeo[3] - secondGeo[3]), math.fabs(firstGeo[5])))
                 if yshift > 0:
                     firstYOff = yshift
-                    secondYOff= int(0)
+                    secondYOff = int(0)
                     ySize = min(int(firstNl - yshift), secondNl)
                 else:
                     firstYOff = 0
@@ -294,13 +306,13 @@ class MapSet:
                 # once every thing is defined, set isCommon to True
                 isCommon = True
 
-            roi['isCommon']=isCommon
-            roi['xSize']=xSize
-            roi['ySize']=ySize
-            roi['firstXOff']=firstXOff
-            roi['firstYOff']=firstYOff
-            roi['secondXOff']=secondXOff
-            roi['secondYOff']=secondYOff
+            roi['isCommon'] = isCommon
+            roi['xSize'] = xSize
+            roi['ySize'] = ySize
+            roi['firstXOff'] = firstXOff
+            roi['firstYOff'] = firstYOff
+            roi['secondXOff'] = secondXOff
+            roi['secondYOff'] = secondYOff
 
         return roi
 
@@ -328,25 +340,27 @@ class MapSet:
         proj4def = "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +DATUM=WGS84"
         srsEqualArea.ImportFromProj4(proj4def)
 
-        transf = osr.CoordinateTransformation(srsOrig,srsEqualArea)
+        transf = osr.CoordinateTransformation(srsOrig, srsEqualArea)
 
-        print " Mapset Name: " + self.short_name
-        print " Pixel position: x " + str(n_col) + " y " + str(n_line)
+        print (" Mapset Name: " + self.short_name)
+        print (" Pixel position: x " + str(n_col) + " y " + str(n_line))
         px = x0 + deltax * n_col
         py = y0 + deltay * n_line
-        print " Pixel position Lon: " + str(px) + " Lat " + str(py)
+        print (" Pixel position Lon: " + str(px) + " Lat " + str(py))
 
-        #The pixel geometry must be created to execute the within method, and to calculate the actual area
-        wkt = "POLYGON(("+str(px)+" "+str(py)+","+str(px + deltax)+" "+str(py)+","+str(px + deltax)+" "+str(py+deltay)+","+str(px)+" "+str(py+deltay)+","+str(px)+" "+str(py)+"))"
+        # The pixel geometry must be created to execute the within method, and to calculate the actual area
+        wkt = "POLYGON((" + str(px) + " " + str(py) + "," + str(px + deltax) + " " + str(py) + "," + str(
+            px + deltax) + " " + str(py + deltay) + "," + str(px) + " " + str(py + deltay) + "," + str(px) + " " + str(
+            py) + "))"
 
         geometry = ogr.CreateGeometryFromWkt(wkt)
         pixel_area = geometry.GetArea()
-        print " Pixel area (Deg^2): " + str(pixel_area)
+        print (" Pixel area (Deg^2): " + str(pixel_area))
 
         geometryArea = geometry.Clone()
         geometryArea.Transform(transf)
         pixel_area = geometryArea.GetArea()
-        print " Pixel area (m^2): " + str(pixel_area)
+        print (" Pixel area (m^2): " + str(pixel_area))
 
     def create_raster_surface(self, filename=None):
 
@@ -355,7 +369,7 @@ class MapSet:
 
         if filename is None:
             dir = '/data/static/'
-            filename = dir+os.path.sep + self.short_name + '_'+ 'pixelsize.tif'
+            filename = dir + os.path.sep + self.short_name + '_' + 'pixelsize.tif'
 
         # Read from the original mapset
         orig_geotranform = self.geo_transform
@@ -369,28 +383,30 @@ class MapSet:
 
         # Create output matrix
 
-        areas = N.zeros((size_y,size_x), dtype=N.float32)
+        areas = N.zeros((size_y, size_x), dtype=N.float32)
 
         # Define the SRS for Sinusoidal projection
         srsEqualArea = osr.SpatialReference()
         proj4def = "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +DATUM=WGS84"
         srsEqualArea.ImportFromProj4(proj4def)
-        transf = osr.CoordinateTransformation(srsOrig,srsEqualArea)
+        transf = osr.CoordinateTransformation(srsOrig, srsEqualArea)
 
         for iline in range(size_y):
-            print iline
+            print (iline)
             for icol in range(size_x):
                 px = x0 + deltax * icol
                 py = y0 + deltay * iline
 
                 # Define the pixel geometry
-                wkt = "POLYGON(("+str(px)+" "+str(py)+","+str(px + deltax)+" "+str(py)+","+str(px + deltax)+" "+str(py+deltay)+","+str(px)+" "+str(py+deltay)+","+str(px)+" "+str(py)+"))"
+                wkt = "POLYGON((" + str(px) + " " + str(py) + "," + str(px + deltax) + " " + str(py) + "," + str(
+                    px + deltax) + " " + str(py + deltay) + "," + str(px) + " " + str(py + deltay) + "," + str(
+                    px) + " " + str(py) + "))"
 
                 geometry = ogr.CreateGeometryFromWkt(wkt)
 
                 geometryArea = geometry.Clone()
                 geometryArea.Transform(transf)
-                areas[iline,icol] = geometryArea.GetArea()
+                areas[iline, icol] = geometryArea.GetArea()
                 geometryArea = None
 
         # Write matrix to output

@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 #
 #	purpose: Define the get CMEMS data routine
 #	author:  M.Clerici
@@ -11,6 +15,8 @@
 # import StringIO
 # import cStringIO
 # import tempfile
+from future import standard_library
+standard_library.install_aliases()
 import sys
 import os
 # import re
@@ -96,7 +102,7 @@ def motu_getlists(datetime_start=None, motu_client_dic='', template=''):
               '" --out-dir ' + out_path + ' --out-name ' + out_filename
 
 
-    print(command)
+    print (command)
     logger.info('Command is: ' + command)
     return command
     #os.system(command)

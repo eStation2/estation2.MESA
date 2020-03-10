@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 #
 #	purpose: Define the processing chain for 'ndvi-like' processing chains
 #	author:  M.Clerici & Jurriaan van't Klooster
@@ -7,6 +11,11 @@
 #
 
 # Import std modules
+from builtins import open
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import glob
 import os
 import tempfile
@@ -412,7 +421,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates_linear
         functions.check_output_dir(os.path.dirname(output_file))
         args = {"input_file": input_files[1], "before_file":input_files[0], "after_file": input_files[2], "output_file": output_file,
                  "output_format": 'GTIFF', "options": "compress = lzw", 'threshold': 0.1}
-        print args
+        print (args)
         #raster_image_math.do_ts_linear_filter(**args)
 
 

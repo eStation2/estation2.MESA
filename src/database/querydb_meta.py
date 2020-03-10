@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 ####################################################################################################################
 #	purpose: Define functions to access and query the postgresql db
 #	author:  Jurriaan van 't Klooster
@@ -5,6 +9,8 @@
 #   descr:	 Functions to access and query the DB using SQLSoup and SQLAlchemy as Database Abstraction Layer and ORM.
 ####################################################################################################################
 
+from future import standard_library
+standard_library.install_aliases()
 import sys
 import traceback
 # import sqlsoup

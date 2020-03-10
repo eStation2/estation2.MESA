@@ -1,0 +1,43 @@
+FROM ubuntu:18.04
+
+USER root
+
+#Setup user
+ARG UID
+ARG GID
+
+ENV DEBIAN_FRONTEND=noninteractive
+ARG http_proxy=http://10.168.209.73:8012
+ARG https_proxy=http://10.168.209.73:8012
+ARG ftp_proxy=http://10.168.209.73:8012
+ARG no_proxy="127.0.0.1, localhost, jrc.ec.europa.eu, jrc.it, jrc.org"
+
+RUN apt-get update && apt-get install -y apache2 libapache2-mod-wsgi
+# Optional Development packages
+RUN apt-get install -y nano vim wget git python
+
+# Hardening apache security by JRC LISO
+ADD extra-conf.d/*.conf /etc/apache2/sites-available/
+RUN ln -s /etc/apache2/sites-available/00-default.conf /etc/apache2/sites-enabled/00-default.conf && \
+    ln -s /etc/apache2/sites-available/basic_security_directives.conf /etc/apache2/sites-enabled/basic_security_directives.conf && \
+    ln -s /etc/apache2/sites-available/cookies_httponly.conf /etc/apache2/sites-enabled/cookies_httponly.conf && \
+    ln -s /etc/apache2/sites-available/X-XSS-Protection.conf /etc/apache2/sites-enabled/X-XSS-Protection.conf && \
+    mkdir -p /var/empty
+
+# Create symbolic link for virtualhost 
+RUN ln -s /etc/apache2/sites-available/estation2.conf /etc/apache2/sites-enabled/estation2.conf 
+
+# Configuring web folder tree
+RUN mkdir -p /var/www/estation2/public_html && mkdir -p /var/log/apache2/
+#ENV APACHE_RUN_USER www-data
+#ENV APACHE_RUN_GROUP www-data
+
+# Enable these Apache modules
+RUN a2enmod headers rewrite proxy wsgi
+RUN service apache2 restart
+WORKDIR /var/www
+
+CMD apache2ctl -D FOREGROUND
+EXPOSE  80
+
+

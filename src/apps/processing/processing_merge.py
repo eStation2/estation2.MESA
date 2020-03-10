@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 #
 #	purpose: Define the processing chain for merging several inputs
 #	author:  M.Clerici & Jurriaan van't Klooster
@@ -7,6 +11,8 @@
 #
 
 # Import std modules
+from future import standard_library
+standard_library.install_aliases()
 import os, sys
 
 # Import eStation2 modules
@@ -82,7 +88,7 @@ def processing_merge(pipeline_run_level=0, pipeline_printout_level=0,
                                                                start_date=start_date, end_date=end_date)
         # If list_dates == None, look at all existing files
         if list_dates is None:
-            print 'To be Done !!!'
+            print ('To be Done !!!')
         # Otherwise, build list of files from list of dates
         else:
             for my_date in list_dates:

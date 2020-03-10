@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 #
 #	purpose: Define a processing chain for computing SPI indicator
 #	author:  M.Clerici & Jurriaan van't Klooster
@@ -18,6 +22,12 @@
 #
 
 # Source generic modules
+from builtins import open
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
 import os
 import glob, datetime
 
@@ -140,7 +150,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                 output_file=es_constants.processing_dir+output_subdir_3moncum+os.path.sep+mydate+out_prod_ident_3moncum
                 yield (file_list, output_file)
             else:
-                print 'At least 1 month is missing for period ending {0}'.format(mydate)
+                print ('At least 1 month is missing for period ending {0}'.format(mydate))
 
     @active_if(activate_cumul_3mon_comput)
     @files(generate_parameters_3moncum)

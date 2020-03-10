@@ -1,3 +1,12 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import open
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
 _author__ = "Marco Clerici"
 #
 #	purpose: Define the processing service
@@ -312,9 +321,9 @@ def worker(num):
     """thread worker function"""
     #print 'Worker:', num
     name = current_process().name
-    print name, 'Starting'
+    print((name, 'Starting'))
     time.sleep(2)
-    print name, 'Exiting'
+    print((name, 'Exiting'))
 
 
 if __name__ == '__OLDmain__':

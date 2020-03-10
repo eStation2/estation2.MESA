@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 #
 #	purpose: Define the processing service (by using ruffus)
 #	author:  M.Clerici & Jurriaan van't Klooster
@@ -7,6 +11,8 @@
 #
 
 # Source my definitions
+from future import standard_library
+standard_library.install_aliases()
 from config import es_constants
 import os
 

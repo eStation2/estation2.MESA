@@ -1,9 +1,18 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 #
 #	purpose: Define the metadata class
 #	author:  M. Clerici
 #	date:	 31.03.2014
 #   descr:	 Defines members and methods of the metadata class
 #
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from past.builtins import basestring
+from builtins import object
 import os
 import datetime
 import os.path
@@ -11,7 +20,7 @@ from config import es_constants
 
 from osgeo import gdal
 from osgeo import gdalconst
-from functions import *
+from .functions import *
 
 # Import eStation2 modules
 from lib.python import es_logging as log
@@ -60,7 +69,7 @@ sds_metadata = { 'eStation2_es2_version': '',               # 0. eStation 2 vers
 
 }
 
-class SdsMetadata:
+class SdsMetadata(object):
 
     def __init__(self):
 
@@ -106,7 +115,7 @@ class SdsMetadata:
             logger.error('The argument should be an open GDAL Dataset. Exit')
         else:
             # Go through the metadata list and write to sds
-            for key, value in sds_metadata.iteritems():
+            for key, value in list(sds_metadata.items()):
                 # Check length of value
                 if len(str(value)) > 1000:
                     wrt_value=str(value)[0:1000]+' + others ...'
@@ -140,7 +149,7 @@ class SdsMetadata:
         else:
 
             # Go through the metadata list and write to sds
-            for key, value in sds_metadata.iteritems():
+            for key, value in list(sds_metadata.items()):
                 try:
                     value = dataset.GetMetadataItem(key)
                     sds_metadata[key] = value
@@ -191,7 +200,7 @@ class SdsMetadata:
     #   Assign prod/subprod/version
         sds_metadata['eStation2_product'] = str(product)
         sds_metadata['eStation2_subProduct'] = str(subproduct)
-        if isinstance(version, str) or isinstance(version, unicode):
+        if isinstance(version, str) or isinstance(version, str):
             sds_metadata['eStation2_product_version'] = version
         else:
             sds_metadata['eStation2_product_version'] = 'undefined'
@@ -214,7 +223,7 @@ class SdsMetadata:
         sds_metadata['eStation2_product'] = str(product)
         sds_metadata['eStation2_subProduct'] = str(subproduct)
 
-        if isinstance(version, str) or isinstance(version, unicode):
+        if isinstance(version, str) or isinstance(version, str):
             sds_metadata['eStation2_product_version'] = version
         else:
             sds_metadata['eStation2_product_version'] = 'undefined'
@@ -292,7 +301,7 @@ class SdsMetadata:
     #
     #   Assign parameters (defined specifically for SST-FRONTS detection)
         parameters_string=''
-        for key, value in sorted(parameters.iteritems()):
+        for key, value in sorted(parameters.items()):
             parameters_string+='{}={}; '.format(key,value)
 
         sds_metadata['eStation2_parameters'] = parameters_string
@@ -374,7 +383,7 @@ class SdsMetadata:
     #   Writes to std output
 
         # Go through the metadata list and write to sds
-        for key, value in sds_metadata.iteritems():
-            print key, value
+        for key, value in list(sds_metadata.items()):
+            print((key, value))
 
 

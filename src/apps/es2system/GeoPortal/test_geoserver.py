@@ -1,11 +1,17 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
 __author__ = 'adminuser'
 
 from unittest import TestCase
 
 import os
-import geoserverREST
-import eStationTools as esTool
-import system_geoserver as sysGeo
+from apps.es2system.GeoPortal import geoserverREST
+from apps.es2system.GeoPortal import eStationTools as esTool
+from apps.es2system.GeoPortal import system_geoserver as sysGeo
 from database import querydb
 
 from lib.python import es_logging as log
@@ -100,27 +106,27 @@ class TestgeoserverREST(TestCase):
     def test_ListWorkspaces(self):
 
         WorkSpaces=geoserverREST.listWorkspaces()
-        print 'List of workspaces'
-        print WorkSpaces
+        print ('List of workspaces')
+        print (WorkSpaces)
 
     def TestIsWorkspace(self):
 
         result=geoserverREST.isWorkspace(workSpace)
         if result:
-            print 'WorkSpace {0} exists.'.format(workSpace)
+            print ('WorkSpace {0} exists.'.format(workSpace))
         else:
-            print 'WorkSpace {0} does NOT exist.'.format(workSpace)
+            print ('WorkSpace {0} does NOT exist.'.format(workSpace))
 
     def TestCreateWorkspaces(self):
 
         workspace = esTool.setWorkspaceName(service, product, subproduct, version, mapset,nameType=geoserverREST.geoserverWorkspaceName)
 
-        print 'Creating workspace: {0}'.format(workSpace)
+        print ('Creating workspace: {0}'.format(workSpace))
 
         if not geoserverREST.isWorkspace(workspace):
-            print geoserverREST.createWorkspace(workspace)
+            print (geoserverREST.createWorkspace(workspace))
         else:
-            print('WS already exists')
+            print ('WS already exists')
 
     # ----------------------------------------------------
     #   Styles
@@ -128,24 +134,23 @@ class TestgeoserverREST(TestCase):
 
     def TestListStyles(self):
         Styles = geoserverREST.listStyles()
-        print Styles
+        print (Styles)
 
     def TestIsStyle(self):
 
         result = geoserverREST.isStyle(sld_name)
 
         if result:
-            print 'Style {0} exists.'.format(sld_name)
+            print ('Style {0} exists.'.format(sld_name))
         else:
-            print 'Style {0} does NOT exist.'.format(sld_name)
-
+            print ('Style {0} does NOT exist.'.format(sld_name))
 
     def TestCreateStyle(self):
 
         name = esTool.createSLD(product,version,subproduct,output_file=sld_file_name)
-        print 'SLD name {}'.format(name)
-        print 'sld_name {}'.format(sld_name)
-        print 'sld_file_name {}'.format(sld_file_name)
+        print ('SLD name {}'.format(name))
+        print ('sld_name {}'.format(sld_name))
+        print ('sld_file_name {}'.format(sld_file_name))
         status = geoserverREST.createStyle(sld_name, sld_file_name)
 
     # ----------------------------------------------------
@@ -155,8 +160,8 @@ class TestgeoserverREST(TestCase):
     def TestIsRaster(self):
         layerName = esTool.setLayerName(date,product,subproduct,translate=False)
         thisResult = geoserverREST.isRaster(workSpace, layerName)
-        print 'TestISRaster {} {}'.format(workSpace, layerName)
-        print thisResult
+        print ('TestISRaster {} {}'.format(workSpace, layerName))
+        print (thisResult)
 
     def TestRegisterRaster(self):
         esTool.registerRaster(service, product, subproduct, version, mapset, date, productType, geoserverREST.restBaseDir)
@@ -170,7 +175,7 @@ class TestEsTools(TestCase):
     def TestCreateSLD(self):
 
         sld_file = esTool.createSLD(product,version,subproduct)
-        print 'Created .sld file is {0}'.format(sld_file)
+        print ('Created .sld file is {0}'.format(sld_file))
 
     def TestExistRemote(self):
 

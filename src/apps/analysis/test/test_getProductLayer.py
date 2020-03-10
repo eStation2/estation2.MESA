@@ -1,6 +1,16 @@
 
 from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
 
+from builtins import round
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import map
+from builtins import str
+from past.utils import old_div
 import unittest
 from datetime import date
 from apps.productmanagement.datasets import Dataset
@@ -117,8 +127,8 @@ class TestGetProductLayer(unittest.TestCase):
         owsrequest = mapscript.OWSRequest()
 
         inputparams = getparams # web.input()
-        for k, v in inputparams.iteritems():
-            print k + ':' + v
+        for k, v in inputparams.items():
+            print (k + ':' + v)
             owsrequest.setParameter(k.upper(), v)
 
         # print owsrequest
@@ -146,13 +156,13 @@ class TestGetProductLayer(unittest.TestCase):
         productmap.status = mapscript.MS_ON
         productmap.units = mapscript.MS_DD
 
-        coords = map(float, inputparams['BBOX'].split(","))
-        print coords
+        coords = list(map(float, inputparams['BBOX'].split(",")))
+        print (coords)
         llx = coords[0]
         lly = coords[1]
         urx = coords[2]
         ury = coords[3]
-        print llx, lly, urx, ury
+        print((llx, lly, urx, ury))
 
         productmap.setExtent(llx, lly, urx, ury)   # -26, -35, 60, 38
         # productmap.setExtent(-26, -35, 60, 38)
@@ -186,13 +196,13 @@ class TestGetProductLayer(unittest.TestCase):
         legend_info = querydb.get_legend_info(legendid=inputparams['legendid'])
         if hasattr(legend_info, "__len__") and legend_info.__len__() > 0:
             for row in legend_info:
-                minstep = int((row.min_value - scale_offset)/scale_factor)    #int(row.min_value*scale_factor+scale_offset)
-                maxstep = int((row.max_value - scale_offset)/scale_factor)    # int(row.max_value*scale_factor+scale_offset)
-                realminstep = int((row.realminstep - scale_offset)/scale_factor)
-                realmaxstep = int((row.realmaxstep - scale_offset)/scale_factor)
-                minstepwidth = int((row.minstepwidth - scale_offset)/scale_factor)
-                maxstepwidth = int((row.maxstepwidth - scale_offset)/scale_factor)
-                totwidth = int((row.totwidth - scale_offset)/scale_factor)
+                minstep = int(old_div((row.min_value - scale_offset),scale_factor))    #int(row.min_value*scale_factor+scale_offset)
+                maxstep = int(old_div((row.max_value - scale_offset),scale_factor))    # int(row.max_value*scale_factor+scale_offset)
+                realminstep = int(old_div((row.realminstep - scale_offset),scale_factor))
+                realmaxstep = int(old_div((row.realmaxstep - scale_offset),scale_factor))
+                minstepwidth = int(old_div((row.minstepwidth - scale_offset),scale_factor))
+                maxstepwidth = int(old_div((row.maxstepwidth - scale_offset),scale_factor))
+                totwidth = int(old_div((row.totwidth - scale_offset),scale_factor))
                 totsteps = row.totsteps
 
             # maxstep = 255
@@ -202,7 +212,7 @@ class TestGetProductLayer(unittest.TestCase):
             maxbuckets = 10000
             num_buckets = maxbuckets
             if minstepwidth > 0:
-                num_buckets = round(totwidth / minstepwidth, 0)
+                num_buckets = round(old_div(totwidth, minstepwidth), 0)
 
             if num_buckets < minbuckets:
                 num_buckets = minbuckets
@@ -240,9 +250,9 @@ class TestGetProductLayer(unittest.TestCase):
                 stepcount = 0
                 for step in legend_steps:
                     stepcount += 1
-                    min_step = int((step.from_step - scale_offset)/scale_factor)
-                    max_step = int((step.to_step - scale_offset)/scale_factor)
-                    colors = map(int, (color.strip() for color in step.color_rgb.split(" ") if color.strip()))
+                    min_step = int(old_div((step.from_step - scale_offset),scale_factor))
+                    max_step = int(old_div((step.to_step - scale_offset),scale_factor))
+                    colors = list(map(int, (color.strip() for color in step.color_rgb.split(" ") if color.strip())))
 
                     if stepcount == legend_steps.__len__():    # For the last step use <= max_step
                         expression_string = '([pixel] >= '+str(min_step)+' and [pixel] <= '+str(max_step)+')'

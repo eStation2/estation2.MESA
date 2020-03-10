@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 #
 #	purpose: Define the processing chain for 'sst-fronts' processing chains
 #	author:  M.Clerici & Jurriaan van't Klooster
@@ -7,6 +11,9 @@
 #
 
 # Import std modules
+from builtins import open
+from future import standard_library
+standard_library.install_aliases()
 import os
 import glob
 import tempfile
@@ -140,7 +147,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                 "parameters": parameters}
 
         raster_image_math.do_detect_sst_fronts(**args)
-        print 'Done with raster'
+        print ('Done with raster')
 
     #   ---------------------------------------------------------------------
     #   SST Fronts (shapefile)

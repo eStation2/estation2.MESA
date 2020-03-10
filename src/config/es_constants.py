@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 #
 #	purpose: Define all variables for es2
 #	author:  M.Clerici & Jurriaan van 't Klooster
@@ -15,9 +19,11 @@
 #   This module will be be imported by any other (instead of locals.py -> to be discontinued)
 #
 
+from future import standard_library
+standard_library.install_aliases()
 import os
 import sys
-import ConfigParser
+import configparser
 from osgeo import gdalconst
 #from lib.python import es_logging as log
 
@@ -32,10 +38,10 @@ else:
     factory_settings_filename = 'factory_settings_windows.ini'
 
 thisfiledir = os.path.dirname(os.path.abspath(__file__))
-config_factorysettings = ConfigParser.ConfigParser()
+config_factorysettings = configparser.ConfigParser()
 config_factorysettings.read([os.path.join(thisfiledir, factory_settings_filename)])
 
-base_local_dir = config_factorysettings.get('FACTORY_SETTINGS', 'base_local_dir', 0)
+base_local_dir = config_factorysettings.get('FACTORY_SETTINGS', 'base_local_dir')
 # print 'base_local_dir: ' + base_local_dir
 
 usersettingsfile = base_local_dir + '/settings/user_settings.ini'
@@ -49,7 +55,7 @@ if not os.path.isfile(usersettingsfile):
     usersettingsfile = os.path.join(thisfiledir, 'install/user_settings.ini')
     # ToDo: copy user_settings.ini from config dir to /eStation2/settings/ ???
 
-config_usersettings = ConfigParser.ConfigParser()
+config_usersettings = configparser.ConfigParser()
 config_usersettings.read([usersettingsfile])
 
 usersettings = config_usersettings.items('USER_SETTINGS')
@@ -59,7 +65,7 @@ for setting, value in usersettings:
     else:
         config_factorysettings.set('FACTORY_SETTINGS',
                                    setting,
-                                   config_factorysettings.get('FACTORY_SETTINGS', setting, 0))
+                                   config_factorysettings.get('FACTORY_SETTINGS', setting))
 
 es2globals = {}
 factorysettings = config_factorysettings.items('FACTORY_SETTINGS')

@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 #
 #	purpose: Define a 'generic' chain for computing yearly stats (LTS) and anomalies (?)
 #	author:  M. Clerici
@@ -11,6 +15,8 @@
 #
 
 # Source my definitions
+from future import standard_library
+standard_library.install_aliases()
 import os
 import re
 import glob, datetime
@@ -40,7 +46,7 @@ def exclude_current_year(input_list):
     return output_list
 
 
-def create_pipeline(input_product, logfile=None, nrt_products=True, update_stats=False):
+def create_pipeline(input_products, logfile=None, nrt_products=True, update_stats=False):
 
     proc_lists = None
 
@@ -79,7 +85,7 @@ def create_pipeline(input_product, logfile=None, nrt_products=True, update_stats
     #   ---------------------------------------------------------------------
     #    Parse the arguments and extract the 4 input variables
     #
-    if len(input_products) <> 4:
+    if len(input_products) != 4:
         spec_logger.error('Modis PP computation requires 4 inputs. Exit')
         return 1
 
@@ -138,7 +144,7 @@ def create_pipeline(input_product, logfile=None, nrt_products=True, update_stats
         spec_logger.error('At least one of 4 expected inputs missing. Exit')
         return 1
 
-    if chla_mapset <> sst_mapset or chla_mapset <> kd490_mapset or chla_mapset <> par_mapset:
+    if chla_mapset != sst_mapset or chla_mapset != kd490_mapset or chla_mapset != par_mapset:
         spec_logger.error('All 4 input mapset must be equals. Exit')
         return 1
 

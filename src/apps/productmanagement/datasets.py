@@ -6,7 +6,17 @@
 #
 
 from __future__ import absolute_import
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import print_function
 
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from past.utils import old_div
+from builtins import object
 import datetime
 import calendar
 import os
@@ -28,8 +38,8 @@ from .helpers import (add_years, add_months, add_dekads, add_pentads, add_days, 
 
 
 def _check_constant(class_, constant_name, value):
-    for k, v in getattr(getattr(class_, constant_name, None),
-                        '__dict__', {}).items():
+    for k, v in list(getattr(getattr(class_, constant_name, None),
+                        '__dict__', {}).items()):
         if k.isupper() and v == value:
             return True
     return False
@@ -43,7 +53,7 @@ def _check_constant(class_, constant_name, value):
 #                   and dateformat (date/datetime)
 #
 class Frequency(object):
-    class UNIT:
+    class UNIT(object):
         YEAR = 'year'
         MONTH = 'month'
         DEKAD = 'dekad'
@@ -57,12 +67,12 @@ class Frequency(object):
         NONE = 'none'
         DAYS7 = '7days'
 
-    class TYPE:
+    class TYPE(object):
         PER = 'p'
         EVERY = 'e'
         NONE = 'n'
 
-    class DATEFORMAT:
+    class DATEFORMAT(object):
         DATETIME = 'YYYYMMDDHHMM'
         DATE = 'YYYYMMDD'
         MONTHDAY = 'MMDD'
@@ -190,11 +200,11 @@ class Frequency(object):
 
     def next_date(self, date):
         if self.frequency_type == self.TYPE.EVERY or self.value == 1:
-            # print(date.strftime("%Y%m%d%H%M"))
+            # print (date.strftime("%Y%m%d%H%M"))
             date = self.get_next_date(date, self.unit, self.value)
         elif self.frequency_type == self.TYPE.PER:
             new_date = self.get_next_date(date, self.unit, 1)
-            date = date + (new_date - date) / self.value
+            date = date + old_div((new_date - date), self.value)
         else:
             raise Exception("Dateformat not managed: %s" % self.dateformat)
         return date
@@ -442,8 +452,8 @@ class Dataset(object):
     def get_interval_dates(self, from_date, to_date, last_included=True, first_included=True):
         dates = []
         first_cycle = True
-        # print(from_date.strftime("%Y%m%d%H%M"))
-        # print(to_date.strftime("%Y%m%d%H%M"))
+        # print (from_date.strftime("%Y%m%d%H%M"))
+        # print (to_date.strftime("%Y%m%d%H%M"))
         while True:
             if not last_included and from_date == to_date:
                 break

@@ -9,6 +9,14 @@
 # logger = log.my_logger(__name__)
 
 from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from past.utils import old_div
 import math
 import re
 from database import querydb
@@ -27,7 +35,7 @@ def generateLegendHTML(legend_id):
     if legend_id == None:
         return legends_HTML
 
-    # print('legend_id: ' + str(legend_id))
+    # print ('legend_id: ' + str(legend_id))
     legend_info = querydb.get_legend_info(legendid=legend_id)
     if hasattr(legend_info, "__len__") and legend_info.__len__() < 1:
         return legends_HTML
@@ -51,8 +59,8 @@ def generateLegendHTML(legend_id):
 
     # legendName = legendName.encode('utf-8', errors='ignore')
     legendNameHorizontal = u''.join(legendName).encode('utf-8')
-    legendNameHorizontal = re.sub('<br>|<BR>|</br>|</BR>', ' ', legendNameHorizontal)
-    legendNameHorizontal = legendNameHorizontal.decode('utf-8')
+    legendNameHorizontal = re.sub('<br>|<BR>|</br>|</BR>', ' ', legendNameHorizontal.decode())
+    # legendNameHorizontal = legendNameHorizontal.decode('utf-8')
 
     ######################################
     # Create horizontal legend
@@ -72,7 +80,7 @@ def generateLegendHTML(legend_id):
             ColumnSpan = 1
 
         if TotSteps > 30:
-            stepWidth = legendWidth / TotSteps
+            stepWidth = old_div(legendWidth, TotSteps)
         else:
             stepWidth = 15
 
@@ -331,7 +339,7 @@ def generateLegendHTML(legend_id):
         legendLabelTable = '<table style="background: ' + legendLabelTableBackgroundColor + '; border:0px solid black; border-spacing:0px; border-padding:0px; cellspacing=0px; cellpadding=0px; margin: 0px; padding: 0px; ">'
 
         row_counter = 0
-        # print('legend_steps: ' + str(legend_steps.__len__()))
+        # print ('legend_steps: ' + str(legend_steps.__len__()))
         for row in legend_steps:
             row_counter += 1
             if row_counter == 1:

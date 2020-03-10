@@ -12,13 +12,36 @@
 #
 
 # import eStation2 modules
-import geoserverREST
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import print_function
+#!/usr/bin/env python
+# _author__ = "Marco Clerici"
+#
+#	purpose: Synchronize data towards GeoServer
+#	author:  M.Clerici & Jurriaan van't Klooster
+#	date:	 26.05.2015
+#       descr:	 For a list of 'active' datasets, ensure synchronization towards GeoServer, by considering:
+#               - .tif file copy
+#               - Workspaces, styles and raster upload to geoserver
+#
+#	history: 1.0
+#
+
+# import eStation2 modules
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from past.utils import old_div
+
 from lib.python import functions
 from lib.python import es_logging as log
 from config import es_constants
 from database import querydb
 import datetime
-import eStationTools as esTools
+from apps.es2system.GeoPortal import eStationTools as esTools
+from apps.es2system.GeoPortal import geoserverREST
 import time
 
 from apps.productmanagement import datasets
@@ -129,7 +152,7 @@ def loop_geoserver():
 
         logger.info("Calling %s" % 'syncGeoserver')
         syncGeoserver()
-        logger.info("Waiting %s minute" % str(sleep_time/60))
+        logger.info("Waiting %s minute" % str(old_div(sleep_time,60)))
         time.sleep(sleep_time)
 
 class SystemDaemon(DaemonDryRunnable):

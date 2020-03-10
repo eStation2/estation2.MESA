@@ -1,6 +1,14 @@
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 # Helpers for the processing.py and processing_..py
 
 # import standard modules
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import datetime
 import os
 import glob
@@ -15,6 +23,7 @@ from config import es_constants
 from lib.python import metadata
 from lib.python import functions
 from lib.python import es_logging as log
+
 
 ######################################################################################
 #
@@ -31,14 +40,14 @@ from lib.python import es_logging as log
 #
 
 def get_list_dates_for_dataset(product_code, sub_product_code, version, start_date=None, end_date=None):
-
     # Manage the dates
     if (start_date != None) or (end_date != None):
         # Get the frequency from product table
-        product_info = querydb.get_product_out_info(productcode=product_code, subproductcode=sub_product_code, version=version)
+        product_info = querydb.get_product_out_info(productcode=product_code, subproductcode=sub_product_code,
+                                                    version=version)
         frequency_id = product_info[0].frequency_id
         dateformat = product_info[0].date_format
-        cDataset = datasets.Dataset(product_code, sub_product_code,'',version=version)
+        cDataset = datasets.Dataset(product_code, sub_product_code, '', version=version)
         cFrequency = cDataset.get_frequency(frequency_id, dateformat)
 
         # Build the list of dates
@@ -49,14 +58,15 @@ def get_list_dates_for_dataset(product_code, sub_product_code, version, start_da
             date_end = datetime.date.today()
 
         if dateformat == 'YYYYMMDDHHMM':
-            list_dates = cFrequency.get_internet_dates(cFrequency.get_dates(date_start, date_end),'%Y%m%d%H%M')
+            list_dates = cFrequency.get_internet_dates(cFrequency.get_dates(date_start, date_end), '%Y%m%d%H%M')
         else:
-            list_dates = cFrequency.get_internet_dates(cFrequency.get_dates(date_start, date_end),'%Y%m%d')
+            list_dates = cFrequency.get_internet_dates(cFrequency.get_dates(date_start, date_end), '%Y%m%d')
 
     else:
         list_dates = None
 
     return list_dates
+
 
 ######################################################################################
 #
@@ -71,19 +81,20 @@ def get_list_dates_for_dataset(product_code, sub_product_code, version, start_da
 #   Output: none
 #
 
-def create_permanently_missing_for_dataset(product_code, sub_product_code, version, mapset_code, start_date=None, end_date=None):
-
+def create_permanently_missing_for_dataset(product_code, sub_product_code, version, mapset_code, start_date=None,
+                                           end_date=None):
     # Get the existing dates for the dataset
-    product = products.Product(product_code,version=version)
-    missing_filenames = product.get_missing_filenames({'product':product_code, 'version':version})
+    product = products.Product(product_code, version=version)
+    missing_filenames = product.get_missing_filenames({'product': product_code, 'version': version})
 
     # Manage the dates
     if (start_date != None) or (end_date != None):
         # Get the frequency from product table
-        product_info = querydb.get_product_out_info(productcode=product_code, subproductcode=sub_product_code, version=version)
+        product_info = querydb.get_product_out_info(productcode=product_code, subproductcode=sub_product_code,
+                                                    version=version)
         frequency_id = product_info[0].frequency_id
         dateformat = product_info[0].date_format
-        cDataset = datasets.Dataset(product_code, sub_product_code,'',version=version)
+        cDataset = datasets.Dataset(product_code, sub_product_code, '', version=version)
         cFrequency = cDataset.get_frequency(frequency_id, dateformat)
 
         # Build the list of dates
@@ -93,11 +104,12 @@ def create_permanently_missing_for_dataset(product_code, sub_product_code, versi
         else:
             date_end = datetime.date.today()
 
-        list_dates = cFrequency.get_internet_dates(cFrequency.get_dates(date_start, date_end),'%Y%m%d')
+        list_dates = cFrequency.get_internet_dates(cFrequency.get_dates(date_start, date_end), '%Y%m%d')
     else:
         list_dates = None
 
     return list_dates
+
 
 ######################################################################################
 #
@@ -109,12 +121,12 @@ def create_permanently_missing_for_dataset(product_code, sub_product_code, versi
 #
 
 def upsert_database(product_code, version, proc_lists, input_product_info):
-
     # Get the existing dates for the dataset
-    product = products.Product(product_code,version=version)
-    missing_filenames = product.get_missing_filenames({'product':product_code, 'version':version})
+    product = products.Product(product_code, version=version)
+    missing_filenames = product.get_missing_filenames({'product': product_code, 'version': version})
 
     return 1
+
 
 ######################################################################################
 #
@@ -127,7 +139,6 @@ def upsert_database(product_code, version, proc_lists, input_product_info):
 #
 
 def remove_old_files(productcode, subproductcode, version, mapsetcode, product_type, nmonths, logger=None):
-
     # Check logger
     if logger is None:
         logger = log.my_logger(__name__)
@@ -141,9 +152,9 @@ def remove_old_files(productcode, subproductcode, version, mapsetcode, product_t
         logger.info("File housekeeping not done on Server ")
         return
 
-    prod_subdir  = functions.set_path_sub_directory(productcode, subproductcode, product_type, version, mapsetcode)
-    prod_dir = es_constants.es2globals['processing_dir']+os.path.sep+prod_subdir
-    list_files = sorted(glob.glob(prod_dir+os.path.sep+'*.tif'))
+    prod_subdir = functions.set_path_sub_directory(productcode, subproductcode, product_type, version, mapsetcode)
+    prod_dir = es_constants.es2globals['processing_dir'] + os.path.sep + prod_subdir
+    list_files = sorted(glob.glob(prod_dir + os.path.sep + '*.tif'))
 
     # Define the earliest date to be kept
     month_now = datetime.date.today().month
@@ -152,12 +163,13 @@ def remove_old_files(productcode, subproductcode, version, mapsetcode, product_t
     for my_file in list_files:
         # Extract the date
         date = functions.get_date_from_path_filename(os.path.basename(my_file))
-        date_yyyy=int(date[0:4])
-        date_month=int(date[4:6])
+        date_yyyy = int(date[0:4])
+        date_month = int(date[4:6])
 
         if date_yyyy < year_now or (date_month + nmonths) <= month_now:
             logger.debug("Deleting file %s " % my_file)
             os.remove(my_file)
+
 
 ######################################################################################
 #
@@ -169,7 +181,6 @@ def remove_old_files(productcode, subproductcode, version, mapsetcode, product_t
 #
 
 def clean_corrupted_files(check_directory, logger=None, dry_run=False):
-
     # Check logger
     if logger is None:
         logger = log.my_logger(__name__)
@@ -188,7 +199,7 @@ def clean_corrupted_files(check_directory, logger=None, dry_run=False):
             logger.debug('Checking file: {0}'.format(my_file))
 
             # Check the file by using gdalinfo
-            command = ['gdalinfo',my_file]
+            command = ['gdalinfo', my_file]
             status = subprocess.call(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if status:
                 logger.info('Error in file: {0}'.format(my_file))

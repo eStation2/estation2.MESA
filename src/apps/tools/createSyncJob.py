@@ -1,3 +1,9 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
 import sys
 import argparse
 from subprocess import *
@@ -5,8 +11,8 @@ from multiprocessing import *
 
 
 def createSyncJob(args):
-    print "We are in!"
-    print args
+    print ("We are in!")
+    print (args)
     # argslist = [args.estation_sync_file,
     #             args.jobid,
     #             args.action,
@@ -35,7 +41,7 @@ def createSyncJob(args):
                            stderr=STDOUT)  # .pid
     jobstatus = job.poll()
     answer = job.stdout.readline()
-    print answer
+    print (answer)
     return answer
 
 
@@ -72,7 +78,7 @@ if __name__ == "__main__":
                 'jobspath': '/eStation2/requests/requestjobs',
                 'action': 'start',
                 'estation_sync_file': '/srv/www/eStation2/apps/tools/eStationSync.jar'}
-    print argslist
+    print (argslist)
 
     createSyncJob(argslist)
 

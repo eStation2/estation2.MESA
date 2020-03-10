@@ -7,7 +7,14 @@
 #
 
 from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 
+from builtins import open
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
 import unittest
 import json
 import pprint
@@ -69,8 +76,7 @@ class TestCreateRequests(unittest.TestCase):
                                indent=4,
                                separators=(', ', ': '))
 
-        print request_json
-
+        print (request_json)
 
     def test_requests_new_dekad(self):
         getparams = {
@@ -114,7 +120,7 @@ class TestCreateRequests(unittest.TestCase):
                                indent=4,
                                separators=(', ', ': '))
 
-        print request_json
+        print (request_json)
 
     def test_requests_new_daily(self):
         getparams = {
@@ -158,9 +164,7 @@ class TestCreateRequests(unittest.TestCase):
                                indent=4,
                                separators=(', ', ': '))
 
-        print request_json
-
-
+        print (request_json)
 
     # Type 1: only product/version defined
     def test_requests_1(self):
@@ -195,7 +199,7 @@ class TestCreateRequests(unittest.TestCase):
             f.write(request_json)
         f.close()
 
-        print test_json_dump
+        print (test_json_dump)
 
     # Type 2: product/version/mapset defined
     def test_requests_2(self):
@@ -218,7 +222,7 @@ class TestCreateRequests(unittest.TestCase):
             f.write(request_json)
         f.close()
 
-        print request_json
+        print (request_json)
 
     # Type 3: product/version/mapset/subproduct defined
     def test_requests_3(self):
@@ -240,44 +244,7 @@ class TestCreateRequests(unittest.TestCase):
             f.write(request_json)
         f.close()
 
-        print request_json
-
-
-    def test_requests_4(self):
-        getparams = {
-            'level': 'dataset',
-            'productcode': 'lsasaf-lst',
-            'version': 'undefined',
-            'mapsetcode': 'MSG-satellite-3km',
-            'subproductcode': 'lst'
-        }
-        productcode = None
-        version = None
-        mapsetcode = None
-        subproductcode = None
-
-        if getparams['level'] == 'product':
-            productcode = getparams['productcode']
-            version = getparams['version']
-        elif getparams['level'] == 'mapset':
-            productcode = getparams['productcode']
-            version = getparams['version']
-            mapsetcode = getparams['mapsetcode']
-        elif getparams['level'] == 'dataset':
-            productcode = getparams['productcode']
-            version = getparams['version']
-            mapsetcode = getparams['mapsetcode']
-            subproductcode = getparams['subproductcode']
-
-        request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
-        request_json = json.dumps(request,
-                               ensure_ascii=False,
-                               sort_keys=True,
-                               indent=4,
-                               separators=(', ', ': '))
-
-        print request_json
-
+        print (request_json)
 
 
 class TestCreateArchives(unittest.TestCase):

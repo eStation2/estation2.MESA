@@ -1,8 +1,15 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import unittest
 import pycurl
-import StringIO
-import cStringIO
+import io
+import io
 from apps.acquisition.get_eumetcast import *
 from database import querydb
 
@@ -38,7 +45,7 @@ class TestGetEumetcast(unittest.TestCase):
         remote_url='ftp://mesa-pc1//space/efts/fromTellicast/forEstation/'
         usr_pwd='mesadata:mesadata'
         d = pycurl.Curl()
-        response = cStringIO.StringIO()
+        response = io.StringIO()
         d.setopt(pycurl.URL, remote_url)
         d.setopt(pycurl.USERPWD, usr_pwd)
         d.setopt(pycurl.FOLLOWLOCATION, 1)
@@ -53,7 +60,7 @@ class TestGetEumetcast(unittest.TestCase):
             if check_line is not 0:
                 line_dir=line.split()[-1]
                 current_list.append(line_dir)
-        print current_list
+        print (current_list)
         return current_list
 
 
@@ -66,6 +73,6 @@ class TestGetEumetcast(unittest.TestCase):
 
     def test_GetEumetcast_Archives(self):
 
-        print('Start Test')
+        print ('Start Test')
         get_archives_eumetcast()
-        print('Test Finished')
+        print ('Test Finished')

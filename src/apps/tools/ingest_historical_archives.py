@@ -1,3 +1,10 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 __author__ = 'analyst'
 #
 #	purpose: Run the script to ingest Historical archives
@@ -74,5 +81,5 @@ def ingest_historical_archives(input_dir=None, dry_run=False):
 if __name__ == '__main__':
     # input_dir = str(sys.argv[1])
     input_dir = es_constants.es2globals['archive_dir']
-    print input_dir
+    print (input_dir)
     ingest_historical_archives(input_dir=input_dir)
