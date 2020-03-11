@@ -61,13 +61,15 @@ dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'der
 #     def default(self, o):
 #         return o.__dict__
 
+
 def str_to_bool(s):
     if s is True or s in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
         return True
-    elif s is True or s in  ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
+    elif s is True or s in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
         return False
     else:
         return False
+
 
 def is_float(s):
     try:

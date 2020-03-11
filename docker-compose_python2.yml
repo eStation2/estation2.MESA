@@ -1,0 +1,83 @@
+version: '3.5'
+
+services:
+
+  web:
+    build:
+      context: build-docker/web/
+      dockerfile: DockerfilePython2
+    container_name: web
+    # environment:
+    #   http_proxy: "${HTTP_PROXY}"
+    #   https_proxy: "${HTTP_PROXY}"
+    #   ftp_proxy: "${HTTP_PROXY}"
+    #   no_proxy: "${NO_PROXY}"
+    image: "estation2python2docker/web:1.0"
+    #command: sleep infinity
+    ports:
+    - 80:80
+    restart: unless-stopped
+    volumes: 
+    - ./log/web:/var/log/apache2
+    - ./src:/var/www/estation2:rw
+    - c:/data:/data:rw
+    - c:/data/eStation2:/eStation2:rw
+
+  mapserver:
+    build:
+      context: build-docker/mapserver/
+      dockerfile: Dockerfile
+    container_name: mapserver
+    # environment:
+    #   http_proxy: "${HTTP_PROXY}"
+    #   https_proxy: "${HTTP_PROXY}"
+    #   ftp_proxy: "${HTTP_PROXY}"
+    #   no_proxy: "${NO_PROXY}"
+    image: "estation2python3docker/mapserver:1.0"
+    #ports:
+    #  - 8080:80
+    #command: sleep infinity
+    restart: unless-stopped
+    volumes:
+    # - /data/mapserver/cgi-bin:/usr/lib/cgi-bin:rw
+    - ./log/mapserver:/var/log/apache2
+    
+  postgres:
+    build:
+      context: build-docker/postgres12
+      dockerfile: Dockerfile
+    container_name: postgres
+    environment:
+      POSTGRES_USER: "${PG_USER}"
+      POSTGRES_PASS: "${PG_PASS}"
+      POSTGRES_DBNAME: "estationdb"
+      POSTGRES_PORT: "5432"
+      DEFAULT_ENCODING: "UTF8"
+      DEFAULT_COLLATION: "en_US.UTF-8"
+      DEFAULT_CTYPE: "en_US.UTF-8"
+      POSTGRES_MULTIPLE_EXTENSIONS: "postgis,adminpack,postgis_topology"
+      POSTGRES_TEMPLATE_EXTENSIONS: "true"
+      WAL_SIZE: "4GB"
+      MIN_WAL_SIZE: "2048MB"
+      WAL_SEGSIZE: "1024"
+      MAINTAINANCE_WORK_MEM: "128MB"
+      DB_VERSION: "${DB_VERSION}"
+    image: "estation2python3docker/postgis:12"
+    #command: sleep infinity
+    ports:
+    - 5432:5432
+    restart: unless-stopped
+    volumes:
+    - docker-postgresql12-volume:/var/lib/postgresql:rw
+    - ./log/postgres:/var/log/postgresql:rw
+    # Starting PostgreSQL 9.6 database server: main[....] 
+    # Error: Config owner (postgres:102) and data owner (root:0) do not match, and config owner
+    # linix -> NTFS problem! -> https://forums.docker.com/t/trying-to-get-postgres-to-work-on-persistent-windows-mount-two-issues/12456/5
+    # - c:/data/postgres96/data:/var/lib/postgresql:rw
+    # - /data/postgres12/etc/postgresql:/etc/postgresql:rw
+    # - /data/postgres12/log/postgresql:/var/log/postgresql:rw
+
+# create an external docker volume: docker volume create --name docker-postgresql-volume -d local
+volumes:
+  docker-postgresql12-volume:
+    external: true

@@ -4088,9 +4088,9 @@ class GetVectorLayer(object):
     def GET(self):
         getparams = web.input()
         filename = getparams['file']
-        layerfilepath = es_constants.estation2_layers_dir + os.path.sep + filename.encode('utf-8').decode()
+        layerfilepath = es_constants.estation2_layers_dir + os.path.sep + filename  #.encode('utf-8').decode()
         # if isFile(layerfilepath):
-        layerfile = open(layerfilepath, 'r')
+        layerfile = open(layerfilepath, 'rb')
         layerfilecontent = layerfile.read()
         # else:
         #   layerfilecontent = '{"success":false, "message":"Layerfile not found!"}'

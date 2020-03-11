@@ -167,7 +167,7 @@ def getCreatedUserWorkspace(userid, workspacename):
             dbschema_analysis.session.close()
 
 
-def getDefaultUserGraphTemplateID(userid, graph_type, istemplate='false', graph_tpl_name='default'):
+def getDefaultUserGraphTemplateID(userid, graph_type, istemplate=False, graph_tpl_name='default'):
     crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
     defaultworkspaceid = getDefaultUserWorkspaceID(userid)
     if not defaultworkspaceid:
