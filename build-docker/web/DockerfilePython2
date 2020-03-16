@@ -67,6 +67,20 @@ WORKDIR /var/www
 CMD apache2ctl -D FOREGROUND
 EXPOSE  80
 
+
+#ADD pythonpath /pythonpath
+#RUN PYTHONPATH=$(cat /pythonpath);
+#COPY docker-entrypoint.sh /usr/local/bin/
+#RUN ln -s /usr/local/bin/docker-entrypoint.sh /
+#ADD docker-entrypoint.sh /docker-entrypoint.sh
+#ADD setup_pythonenvironment.sh /setup_pythonenvironment.sh
+#ENV PYTHONPATH "${PYTONPATH}:/var/www/estation2"
+#CMD [ "python", "-c", "import sys; sys.path.append('/var/www/estation2')" ]
+#ENTRYPOINT /docker-entrypoint.sh
+#ENTRYPOINT ["docker-entrypoint.sh"]
+#ENTRYPOINT /setup_pythonenvironment.sh
+
+
 # Enable apache mod_proxy
 #RUN a2enmod proxy && \
 #    a2enmod proxy_http && \

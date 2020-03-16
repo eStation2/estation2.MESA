@@ -7,7 +7,8 @@ services:
       context: build-docker/web/
       dockerfile: DockerfilePython3
     container_name: web
-    # environment:
+    environment:
+      - PYTHONPATH=${PYTHONPATH}
     #   http_proxy: "${HTTP_PROXY}"
     #   https_proxy: "${HTTP_PROXY}"
     #   ftp_proxy: "${HTTP_PROXY}"
@@ -20,8 +21,8 @@ services:
     volumes: 
     - ./log/web:/var/log/apache2
     - ./src:/var/www/estation2:rw
-    - /Users/Jurvtk/Develop/data:/data:rw
-    - /Users/Jurvtk/Develop/data/eStation2:/eStation2:rw
+    - ${DATA_VOLUME}:/data:rw
+    - ${ESTATION2_VOLUME}:/eStation2:rw
 
   mapserver:
     build:
