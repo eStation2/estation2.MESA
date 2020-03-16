@@ -1,4 +1,5 @@
 # eStation2 Python 2.7 in Docker
+## Introduction
 
 This installation contains the eStation2 code of the main branch (in Python 2.7 with PostgreSQL 9.6) and is "dockerized".
 Docker compose is used to create/build three images and run the three services (containers).
@@ -33,7 +34,41 @@ The three services (containers) are:
     ```
    In the future this volume will be created automatically, probably using swarm mode.
    
-4. Run docker-compose to build and start the eStation2 application.
+4. Setup environment variables for the web service volumes.
+   
+    The web service uses two external volumes, one for the data and one for the eStation2 static layers and settings.
+    In the .env file used by docker-compose, there are two settings which you have to change to the place where you have the data and eStation2 directories.
+    For example in Windows:
+    
+    * DATA_VOLUME=C:\data
+    
+    * ESTATION2_VOLUME=C:\data\eStation2
+
+    The "data" directory should contain the following directories:
+    + processing
+    + ingest
+    + ingest.wrong
+    
+    The "eStation2" directory should contain the following, also empty, directories:
+    + completeness_bars
+    + db_dump
+    + docs   
+    + get_lists
+    + layers
+    + log
+    + logos
+    + requests
+    + settings
+    
+    You can download the docs, layers and logos from the JRC SFTP server [here](ftp://narmauser:JRCkOq7478@srv-ies-ftp.jrc.it/narma/eStation_2.0/static_data).
+    - host: srv-ies-ftp.jrc.it
+    - username: narma
+    - pwd: JRCkOq7478
+    - directory: /narma/eStation_2.0/static_data
+    
+    Unzip the corresponding files in their respective directory.
+    
+5. Run docker-compose to build and start the eStation2 application.
 
    Open a CMD or Powershell (Windows) or a Terminal (MAC) and run the following command. 
    First CD to the directory where you created the clone. You must have an internet connection!
@@ -42,7 +77,9 @@ The three services (containers) are:
    
     docker-compose -f "docker-compose.yml" up -d --build
    ```
-   This will take some minutes to build the three images and run the three services (containers). In the end you will see a result like this:
+   This will take some minutes to build the three images and run the three services (containers). 
+   In the end you will see a result like this:
+   
    ```bash  
     ...
     Successfully built 52ba36b03b87
@@ -58,7 +95,7 @@ The three services (containers) are:
     Creating postgres  ... done
    ```
 
-5. Create and fill the database
+6. Create and fill the database
 
     Running the postgres service will automatically create the estationdb database and estation user, if they not already exist.
     The structure and the data of the database on the other hand, are not (yet) automatically created.
@@ -76,5 +113,7 @@ The three services (containers) are:
     root@5a1d118827bd:/# password: mesadmin
     ```
     
-6. Open a browser and go to [localhost](http://localhost/)
+    You have to do this only ones!
+    
+7. Open a browser and go to [localhost](http://localhost/)
 
