@@ -1,6 +1,7 @@
 _author__ = "Marco Clerici"
 
 import sys
+# sys.path.append('/var/www/estation2')
 
 from config import es_constants
 from apps.acquisition import acquisition

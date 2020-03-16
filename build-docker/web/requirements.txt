@@ -1,0 +1,32 @@
+# conda or anaconda -> to be installed?
+# mod-wsgi  -> already in apache2 installation
+# pygdal    -> needed only when installing GDAL in virtualenv
+# pygrib    -> not used in online version. comment the use in the code!
+# mapscript -> installed through apt install python-mapscript, see Docekfile
+urllib3
+certifi
+ConfigParser
+GDAL
+geojson
+h5netcdf
+html2text
+Pillow
+plotly
+matplotlib
+nose
+numpy
+psycopg2-binary
+pyproj
+requests
+ruffus
+SQLAlchemy==1.1.3
+sqlsoup
+scipy
+sentinelsat
+motuclient 
+pycurl 
+reloader
+web.py
+psutil
+request
+pymorph

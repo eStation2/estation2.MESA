@@ -1,18 +1,18 @@
 _author__ = "Jurriaan van 't Klooster"
 
 from config import es_constants
-from apps.productmanagement.datasets import Dataset
-from apps.productmanagement.products import Product
+# from apps.productmanagement.datasets import Dataset
+# from apps.productmanagement.products import Product
 from lib.python import functions
-from database import querydb
+# from database import querydb
 import unittest
-import datetime
+# import datetime
 import webpy_esapp_helpers
-import webpy_esapp
+# import webpy_esapp
 from database import crud
 
-import plotly.plotly as py
-from plotly.graph_objs import *
+# import plotly.plotly as py
+# from plotly.graph_objs import *
 
 import StringIO
 import matplotlib as mpl
@@ -26,6 +26,22 @@ logger = log.my_logger(__name__)
 
 
 class TestWebpy(unittest.TestCase):
+
+    def test_ExecuteServiceTask(self):
+        params = {
+            'service': 'internet',
+            'task': 'run'
+        }
+        p = functions.dotdict(params)
+        message = webpy_esapp_helpers.execServiceTask(p)
+
+        params = {
+            'service': 'internet',
+            'task': 'stop'
+        }
+        p = functions.dotdict(params)
+        message = webpy_esapp_helpers.execServiceTask(p)
+        self.assertEqual(1, 1)
 
     def test_checkCreateSubproductDir(self):
         # productcode = 'vgt-ndvi'

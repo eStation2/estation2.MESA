@@ -1,0 +1,34 @@
+#!/bin/sh
+# this file contains all the variables needed to build and update the iso image and
+# to update the repository
+
+#this is the base dir of the entire stack
+BASEDIR=/home/esuser/eStation2
+#BASEDIR=/media/sf_eStation2
+
+#GIT code
+GITDIR=$BASEDIR/git-code
+#CODE_DIR=$BASEDIR/git-code
+
+CD_ISO_IMAGE=$BASEDIR/ISO/e-Station-2.iso
+CD_BUILD_DIR=$BASEDIR/CD_IMAGE
+
+# package repository
+PACKAGE_REPO=$BASEDIR/Package-Repository
+
+ALL_PACKAGE_REPO=$BASEDIR/Package-Repository/all-packages
+PYTHON_PACKAGE_REPO=$BASEDIR/Python-Modules
+
+UPDATE_PACKAGE_REPO=$BASEDIR/Package-Repository/update-packages
+UPDATE_PACKAGE_LISTS=$BASEDIR/Package-Repository/update-lists
+
+
+SCRIPTS_DIR=$GITDIR/build/scripts
+
+ESTATION_SRC_DIR=$GITDIR/src
+# variables needed for the build script, now under refactoring
+PACKAGE_BUILD_DIR=$BASEDIR/PACKAGE_BUILD
+#default .deb storage folder
+PACKAGE_BUILD_DIR_DEB=$PACKAGE_BUILD_DIR/deb
+#temporary folder used to hold package files during build
+PACKAGE_BUILD_DIR_TMP=$PACKAGE_BUILD_DIR/tmp

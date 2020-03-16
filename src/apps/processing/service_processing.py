@@ -1,6 +1,8 @@
 _author__ = "Marco Clerici"
 
 import sys
+# sys.path.append('/var/www/estation2')
+
 # import os, time
 from config import es_constants
 from apps.processing import processing
