@@ -20,8 +20,8 @@ services:
     volumes: 
     - ./log/web:/var/log/apache2
     - ./src:/var/www/estation2:rw
-    - /Users/Jurvtk/Develop/data:/data:rw
-    - /Users/Jurvtk/Develop/data/eStation2:/eStation2:rw
+    - C:/data:/data:rw
+    - C:/data/eStation2:/eStation2:rw
 
   mapserver:
     build:
