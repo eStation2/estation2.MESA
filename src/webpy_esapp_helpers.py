@@ -5231,7 +5231,7 @@ def getAllColorSchemes():
         if lastmodfifieddatetime < datetime.datetime.now() - datetime.timedelta(hours=3):  # seconds=5
             colorschemes_json = ColorSchemes().encode('utf-8')
             try:
-                with open(colorschemes_file, "w") as text_file:
+                with open(colorschemes_file, "wb") as text_file:
                     text_file.write(colorschemes_json)
             except IOError:
                 try:
