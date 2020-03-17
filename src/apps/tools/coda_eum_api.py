@@ -64,7 +64,7 @@ def coda_getlists(datetime_start=None, motu_client_dic='', template=''):
 
     try:
         resource = 'S3A* AND ( beginPosition:[{0}T03:00:00.000Z TO {0}T12:59:59.999Z] AND endPosition:[{0}T03:00:00.000Z TO {0}T12:59:59.999Z] ) AND   (platformname:{1} AND producttype:{2} AND timeliness:"{3}" AND instrumentshortname:{4} AND productlevel:{5})&offset=0&limit=25&sortedby=ingestiondate&order=asc'.format(str_day, platformname, producttype, timeliness,instrumentshortname, productlevel)
-        requestURL = base_url+  resource.encode()
+        requestURL = base_url+  resource #.encode(encoding = 'UTF-8',  errors = 'strict')#encode()
         headers = {'Content-type':'application/plain'}
         thisCoverage = requests.get(
             requestURL,

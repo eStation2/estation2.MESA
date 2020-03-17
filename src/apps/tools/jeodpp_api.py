@@ -211,7 +211,8 @@ def http_request_jeodpp(remote_url_file, userpwd='', https_params='', post=False
 
         if userpwd is not ':':
             c.setopt(c.USERPWD,userpwd)
-            https_params = "Authorization: Basic "+base64.b64encode(userpwd)
+            #PYTHON3
+            https_params = "Authorization: Basic "+base64.b64encode(userpwd.encode()).decode()
         if remote_url_file.startswith('https'):
             c.setopt(c.CAINFO, certifi.where()) #Pierluigi
             if https_params is not '':
@@ -245,7 +246,7 @@ def http_post_request_jeodpp(remote_url_file, userpwd='', https_params=''):
         remote_url_file = remote_url_file.replace('\\','') #Pierluigi
 
         if userpwd is not ':':
-            https_params = "Basic "+base64.b64encode(userpwd)
+            https_params = "Basic "+base64.b64encode(userpwd.encode()).decode()
 
         # Adding empty header as parameters are being sent in payload
         headers = {
@@ -278,7 +279,7 @@ def http_delete_request_jeodpp(remote_url_file, userpwd='', https_params=''):
         remote_url_file = remote_url_file.replace('\\','') #Pierluigi
 
         if userpwd is not ':':
-            https_params = "Basic "+base64.b64encode(userpwd)
+            https_params = "Basic "+base64.b64encode(userpwd.encode()).decode()
 
         # Adding empty header as parameters are being sent in payload
         headers = {
@@ -403,7 +404,7 @@ def get_jeodpp_file_from_url(remote_url_file, target_fullpath,  userpwd='', http
         c.setopt(c.WRITEFUNCTION, outputfile.write)
         if userpwd is not ':':
             c.setopt(c.USERPWD,userpwd)
-            https_params = "Authorization: Basic "+base64.b64encode(userpwd)
+            https_params = "Authorization: Basic "+base64.b64encode(userpwd.encode()).decode()
         if remote_url_file.startswith('https'):
             c.setopt(c.CAINFO, certifi.where())  # Pierluigi
             if https_params is not '':
@@ -461,7 +462,8 @@ def get_json_from_url(remote_url_file, userpwd='', https_params=''):
 
         if userpwd is not ':':
             c.setopt(c.USERPWD,userpwd)
-            https_params = "Authorization: Basic "+base64.b64encode(userpwd)
+            # https_params = "Authorization: Basic "+base64.b64encode(userpwd)  #PYTHON2
+            https_params = "Authorization: Basic "+base64.b64encode(userpwd.encode()).decode()
 
         if remote_url_file.startswith('https'):
             c.setopt(c.CAINFO, certifi.where()) #Pierluigi

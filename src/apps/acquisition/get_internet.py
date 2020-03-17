@@ -101,7 +101,8 @@ def signal_handler(signal, frame):
 def get_list_current_subdirs_ftp(remote_url, usr_pwd):
 
     d = pycurl.Curl()
-    response = io.StringIO()
+    #response = io.StringIO()
+    response = io.BytesIO()
     d.setopt(pycurl.URL, remote_url)
     if usr_pwd != ':':
         d.setopt(pycurl.USERPWD, usr_pwd)
@@ -111,10 +112,12 @@ def get_list_current_subdirs_ftp(remote_url, usr_pwd):
     d.close()
     current_list = []
     content=response.getvalue()
-    lines = content.split('\n')
+    #lines = content.split('\n')
+    lines = content.decode().split('\n')
     for line in lines:
         check_line = len(str(line))
         if check_line is not 0:
+        # if check_line > 4:
             line_dir=line.split()[-1]
             current_list.append(line_dir)
     
