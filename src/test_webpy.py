@@ -1,40 +1,50 @@
+# -*- coding: utf-8 -*-
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 from __future__ import division
 from future import standard_library
-standard_library.install_aliases()
 from builtins import str
-_author__ = "Jurriaan van 't Klooster"
 
-from config import es_constants
-# from apps.productmanagement.datasets import Dataset
-# from apps.productmanagement.products import Product
-# from lib.python import functions
-# from database import querydb
-import unittest
-# import datetime
-import webpy_esapp_helpers
-# import webpy_esapp
-from database import crud
-
-# TODO: The plotly.plotly module is deprecated, please install the chart-studio package and use the chart_studio.plotly module instead.
+# TODO: The plotly.plotly module is deprecated, please install the chart-studio package
+#       and use the chart_studio.plotly module instead.
 import plotly as py
 # from plotly.graph_objs import *
-
 import io
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 import base64
+import unittest
 
+import webpy_esapp_helpers
+from config import es_constants
+from lib.python import functions
+from database import crud
 from lib.python import es_logging as log
 
+standard_library.install_aliases()
 logger = log.my_logger(__name__)
 
 
 class TestWebpy(unittest.TestCase):
+
+    def test_ExecuteServiceTask(self):
+        params = {
+            'service': 'system',
+            'task': 'run'
+        }
+        p = functions.dotdict(params)
+        message = webpy_esapp_helpers.execServiceTask(p)
+
+        params = {
+            'service': 'system',
+            'task': 'stop'
+        }
+        p = functions.dotdict(params)
+        message = webpy_esapp_helpers.execServiceTask(p)
+        self.assertEqual(1, 1)
 
     def test_checkCreateSubproductDir(self):
         # productcode = 'vgt-ndvi'

@@ -1,58 +1,63 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import unicode_literals
-from __future__ import absolute_import
 #
-#	purpose: Define a library of functions for general purpose operations
-#	author:  M.Clerici
-#	date:	 28.02.2014
-#   descr:	 It correspond to the file 'Functions' in rel. 1.X, for bash functions.
+# purpose: Define a library of functions for general purpose operations
+# author:  M.Clerici
+# date:	 28.02.2014
+# descr:	 It corresponds to the file 'Functions' in rel. 1.X, for bash functions.
 #            It contains the following sets of functions:
 #            System:    manage the 'system' tab
 #            Date/Time: convert date/time between formats
 #            Naming:    manage file naming
 #            General:   general purpose functions
 #
-#	history: 1.0
+# history: 1.0
 #
-#   TODO-M.C.: replace, where needed/applicable,  datetime()
+# TODO-M.C.: replace, where needed/applicable, datetime()
 #
 
 # Import standard modules
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
 from builtins import dict
 from builtins import round
 from builtins import open
 from builtins import int
 from future import standard_library
-standard_library.install_aliases()
 from builtins import str
 from builtins import object
 from past.utils import old_div
+
 import os
 import math
 import calendar
 import datetime
-import time
 import re
-# import resource
-from datetime import date
 import uuid
 import pickle
 import json
 import glob
 import subprocess
-from socket import socket
-import urllib.request, urllib.parse, urllib.error
 import ast
 import sys
 import numpy as N
+import urllib
 from osgeo import gdal, osr
 from xml.dom import minidom
+from datetime import date
+from socket import socket
+# from urllib import request, parse, error
+# from json import JSONEncoder
+# import resource
+# import time
+
+
 # Import eStation2 modules
 from lib.python import es_logging as log
 from config import es_constants
 
-# from json import JSONEncoder
+standard_library.install_aliases()
+
 logger = log.my_logger(__name__)
 
 dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'derived'}
@@ -92,10 +97,10 @@ def setThemaOtherPC(server_address, thema):
     thema_is_changed = False
     # Set "/esapp" in factorysettings.ini as webserver_root because on CentOS no /esapp is needed!
     url = "http://" + server_address + es_constants.es2globals['webserver_root'] + "/systemsettings/changethemafromotherpc?thema="+thema
-    req = request.Request(url)
+    req = urllib.request.Request(url)
     try:
-        response = request.urlopen(req)
-    except error as e:
+        response = urllib.request.urlopen(req)
+    except urllib.error.URLError as e:
         if hasattr(e, 'reason'):
             logger.warning('We failed to reach a server to change the thema: %s' % server_address)
             logger.warning('Reason: %s' % e.reason)
@@ -117,10 +122,10 @@ def get_status_PC1():
     status_remote_machine = []
     # Set "/esapp" in factorysettings.ini as webserver_root because on CentOS no /esapp is needed!
     url = "http://mesa-pc1:5000/system-data"
-    req = request.Request(url)
+    req = urllib.request.Request(url)
     try:
-        response = request.urlopen(req)
-    except error as e:
+        response = urllib.request.urlopen(req)
+    except urllib.error.URLError as e:
         if hasattr(e, 'reason'):
             logger.warning('We failed to reach a server: %s' % url)
             logger.warning('Reason: %s' % e.reason)
@@ -145,10 +150,10 @@ def get_remote_system_status(server_address):
     status_remote_machine = []
     # Set "/esapp" in factorysettings.ini as webserver_root because on CentOS no /esapp is needed!
     url = "http://" + server_address + es_constants.es2globals['webserver_root'] + "/dashboard/systemstatus"
-    req = request.Request(url)
+    req = urllib.request.Request(url)
     try:
-        response = request.urlopen(req)
-    except error as e:
+        response = urllib.request.urlopen(req)
+    except urllib.error.URLError as e:
         if hasattr(e, 'reason'):
             logger.warning('We failed to reach a server: %s' % server_address)
             logger.warning('Reason: %s' % e.reason)
@@ -557,7 +562,7 @@ def _proxy_defined():
 
 
 def _proxy_internet_on():
-    import urllib.request, urllib.parse, urllib.error
+    # import urllib.request, urllib.parse, urllib.error
 
     test_url = 'http://www.google.com'
     # Case 1: proxy

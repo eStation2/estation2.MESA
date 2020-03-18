@@ -29,8 +29,8 @@ RUN apt-get install -y build-essential ca-certificates libcurl4-openssl-dev libs
 RUN apt-get install -y gdal-bin libgdal-dev libgeos-dev libproj-dev proj-bin python3-gdal python3-mapscript
 # RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && export C_INCLUDE_PATH=/usr/include/gdal
 
-# Set python version to 3.7.6 -> versions installed are python 2.7.17, 3.6.9 and 3.7.6 with 2.7.17 the default!
-# RUN rm /usr/bin/python && ln -s /usr/bin/python3.6 /usr/bin/python
+# Set python command to installed version 3.6.9, by default the python command is python3!
+RUN rm -f /usr/bin/python && ln -s /usr/bin/python3.6 /usr/bin/python
 
 # Install all needed Python packages, listed in the file requirements.txt
 ADD requirements.txt /etc/apache2/sites-available/requirements.txt

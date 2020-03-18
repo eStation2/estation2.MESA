@@ -1,9 +1,4 @@
 #!/usr/bin/python
-
-# if __name__ == '__main__' and __package__ is None:
-#    from os import sys, path
-#    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-
 from __future__ import absolute_import
 from __future__ import unicode_literals
 from __future__ import division
@@ -11,7 +6,6 @@ from __future__ import print_function
 from builtins import int
 from builtins import open
 from future import standard_library
-standard_library.install_aliases()
 from builtins import map
 from builtins import chr
 from builtins import str
@@ -19,20 +13,13 @@ from builtins import range
 from builtins import object
 import sys
 import os
-
-os.umask(0000)
-
-cur_dir = os.path.dirname(__file__)
-if cur_dir not in sys.path:
-    sys.path.append(cur_dir)
-
 import web
 import datetime
 import json
 import glob
 import time
-import webpy_esapp_helpers
 
+import webpy_esapp_helpers
 from config import es_constants
 from database import querydb
 from database import crud
@@ -41,15 +28,26 @@ from apps.productmanagement.datasets import Dataset
 from apps.es2system import es2system
 from apps.productmanagement.products import Product
 from apps.analysis import generateLegendHTML
+from lib.python import functions
+from lib.python import es_logging as log
+from lib.python import reloadmodules
 # from apps.productmanagement.datasets import Frequency
 # from apps.analysis.getTimeseries import (getTimeseries, getFilesList)
 # from multiprocessing import (Process, Queue)
 # from apps.acquisition import acquisition
 # from apps.processing import processing      # Comment in WINDOWS version!
 
-from lib.python import functions
-from lib.python import es_logging as log
-from lib.python import reloadmodules
+# if __name__ == '__main__' and __package__ is None:
+#    from os import sys, path
+#    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+os.umask(0000)
+
+cur_dir = os.path.dirname(__file__)
+if cur_dir not in sys.path:
+    sys.path.append(cur_dir)
+
+standard_library.install_aliases()
 
 logger = log.my_logger(__name__)
 

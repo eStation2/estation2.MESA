@@ -5,9 +5,11 @@ from __future__ import print_function
 from builtins import open
 from builtins import int
 from future import standard_library
+
 standard_library.install_aliases()
 from builtins import str
 from past.utils import old_div
+
 _author__ = "Marco Clerici"
 #
 #	purpose: Define the system service
@@ -88,13 +90,13 @@ def save_status_local_machine():
     logger.debug("Entering routine %s " % 'save_status_local_machine')
 
     # Define .txt filename
-    status_system_file=es_constants.es2globals['status_system_file']
+    status_system_file = es_constants.es2globals['status_system_file']
 
     # Get status of all services
     machine_status = get_status_local_machine()
 
     # Write to file
-    fid = open(status_system_file,'w')
+    fid = open(status_system_file, 'w')
     for value in machine_status:
         fid.write('%s = %s \n' % (value, machine_status[value]))
     fid.close()
@@ -107,13 +109,13 @@ def system_data_sync(source, target):
     #   It is based on rsync daemon, the correct module should be set in /etc/rsyncd.conf file
     #   The rsync daemon should running (permission set in /etc/default/rsync)
 
-    logfile=es_constants.es2globals['log_dir']+'rsync.log'
-    message=time.strftime("%Y-%m-%d %H:%M")+' INFO: Running the data sync now ... \n'
-    log_id=open(logfile,'w')
+    logfile = es_constants.es2globals['log_dir'] + 'rsync.log'
+    message = time.strftime("%Y-%m-%d %H:%M") + ' INFO: Running the data sync now ... \n'
+    log_id = open(logfile, 'w')
     log_id.write(message)
     log_id.close()
     logger.debug("Entering routine %s" % 'system_data_sync')
-    command = 'rsync -CavK '+source+' '+target+ ' >> '+logfile
+    command = 'rsync -CavK ' + source + ' ' + target + ' >> ' + logfile
     logger.debug("Executing %s" % command)
     # return
     status = os.system(command)
@@ -130,7 +132,7 @@ def system_bucardo_service(action):
     logger.debug("Entering routine %s" % 'system_bucardo_service')
 
     # Check that bucardo is running
-    command = ['bucardo','status']
+    command = ['bucardo', 'status']
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
     status_on = re.search('PID', out)
@@ -139,7 +141,7 @@ def system_bucardo_service(action):
         if status_on:
             logger.info('Bucardo already running. Continue')
         else:
-            command = ['bucardo','start']
+            command = ['bucardo', 'start']
             p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = p.communicate()
             logger.info('Bucardo start message: %s' % err)
@@ -147,7 +149,7 @@ def system_bucardo_service(action):
         if not status_on:
             logger.info('Bucardo already stopped. Continue')
         else:
-            command = ['bucardo','stop']
+            command = ['bucardo', 'stop']
             p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = p.communicate()
 
@@ -155,7 +157,7 @@ def system_bucardo_service(action):
     time.sleep(3)
 
     # Check the final status
-    command = ['bucardo','status']
+    command = ['bucardo', 'status']
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
     status_on = re.search('PID', out)
@@ -177,16 +179,15 @@ def system_db_sync_full(pc_role):
     #   Manage the transition from Recovery to Nominal, by forcing a full sync of both DB schemas
     #   pc_role:    role of my PC (either PC2 or PC3)
 
-
     logger.debug("Entering routine %s" % 'system_db_sync_full')
 
-    dump_dir=es_constants.es2globals['db_dump_dir']
+    dump_dir = es_constants.es2globals['db_dump_dir']
 
-    dump_filename=dump_dir+'/dump_data_all_'+datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%S")+'.sql'
+    dump_filename = dump_dir + '/dump_data_all_' + datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%S") + '.sql'
 
     # Create a full dump
-    dumpcommand = 'psql -h localhost -p 5432 -U estation -d estationdb -t -A -c "SELECT products.export_all_data()" -o '+\
-               dump_filename
+    dumpcommand = 'psql -h localhost -p 5432 -U estation -d estationdb -t -A -c "SELECT products.export_all_data()" -o ' + \
+                  dump_filename
 
     status = os.system(dumpcommand)
 
@@ -200,7 +201,7 @@ def system_db_sync_full(pc_role):
         other_pc = 'MESA-PC2'
 
     # Inject the data into the DB of the other PC
-    sync_command = 'psql -h '+other_pc+' -p 5432 -U estation -d estationdb -f '+dump_filename+\
+    sync_command = 'psql -h ' + other_pc + ' -p 5432 -U estation -d estationdb -f ' + dump_filename + \
                    ' 1>/dev/null 2>/eStation2/log/system_db_sync_full.log'
 
     status += os.system(sync_command)
@@ -224,25 +225,25 @@ def system_db_dump(list_dump):
             # See Tuleap Ticket #10905 (VGF-MOI-wk1)
             dump_dir = es_constants.es2globals['db_dump_dir']
             existing_dumps = glob.glob(dump_dir + os.path.sep + 'estationdb_' + dump_schema + '_*')
-            match_name = '.*estationdb_'+dump_schema+'_'+now.strftime("%Y-%m-%d-")+'.*.sql'
-            matches = [ s for s in existing_dumps if re.match(match_name,s)]
+            match_name = '.*estationdb_' + dump_schema + '_' + now.strftime("%Y-%m-%d-") + '.*.sql'
+            matches = [s for s in existing_dumps if re.match(match_name, s)]
             if len(matches) == 0:
-                dump_file = dump_dir+os.path.sep+'estationdb_'+dump_schema+'_'+now.strftime("%Y-%m-%d-%H:%M:%S")+'.sql'
-                command = db_dump+ ' -i '+  \
-                         ' -h localhost '+\
-                         ' -U estation ' +\
-                         ' -F p -a --column-inserts ' +\
-                         ' -f '+dump_file+ \
-                         ' -n '+dump_schema+' estationdb'
+                dump_file = dump_dir + os.path.sep + 'estationdb_' + dump_schema + '_' + now.strftime(
+                    "%Y-%m-%d-%H:%M:%S") + '.sql'
+                command = db_dump + ' -i ' + \
+                          ' -h localhost ' + \
+                          ' -U estation ' + \
+                          ' -F p -a --column-inserts ' + \
+                          ' -f ' + dump_file + \
+                          ' -n ' + dump_schema + ' estationdb'
 
                 logger.info('Command is: %s' % command)
-                status =+ os.system(command)
+                status = + os.system(command)
 
         return status
 
 
 def keep_one_for_month(yymm_date, date_list, remove_list, mode='1perM'):
-
     month_list = []
     # Create the list of files for that yyyy.mm
     # Keep only one file per month
@@ -268,13 +269,13 @@ def keep_one_for_month(yymm_date, date_list, remove_list, mode='1perM'):
 
 
 def system_manage_dumps():
-#   Manage the dump files (house-keeping)
+    #   Manage the dump files (house-keeping)
 
     status = 0
 
     logger.debug("Entering routine %s" % 'system_manage_dumps')
 
-    for schema in ('products','analysis'):
+    for schema in ('products', 'analysis'):
 
         # Initialize lists
         date_list = []
@@ -283,17 +284,19 @@ def system_manage_dumps():
 
         # Get a list of the existing dump files
         dump_dir = es_constants.es2globals['db_dump_dir']
-        existing_dumps = glob.glob(dump_dir+os.path.sep+'estationdb_'+schema+'_*')
+        existing_dumps = glob.glob(dump_dir + os.path.sep + 'estationdb_' + schema + '_*')
 
         # Extract list of ALL dates, and yyyymm dates (1 per month)
         for file_full in existing_dumps:
-            file=os.path.basename(file_full)
-            date_list.append(datetime.date(int(file.split('_')[2].split('-')[0]),int(file.split('_')[2].split('-')[1]),int(file.split('_')[2].split('-')[2])))
-            yyyymm_list.append(datetime.date(int(file.split('_')[2].split('-')[0]),int(file.split('_')[2].split('-')[1]),1))
+            file = os.path.basename(file_full)
+            date_list.append(datetime.date(int(file.split('_')[2].split('-')[0]), int(file.split('_')[2].split('-')[1]),
+                                           int(file.split('_')[2].split('-')[2])))
+            yyyymm_list.append(
+                datetime.date(int(file.split('_')[2].split('-')[0]), int(file.split('_')[2].split('-')[1]), 1))
 
         # Sort month list
-        yyyymm_list=set(yyyymm_list)
-        yyyymm_list=sorted(list(yyyymm_list))
+        yyyymm_list = set(yyyymm_list)
+        yyyymm_list = sorted(list(yyyymm_list))
 
         today = datetime.date.today()
 
@@ -302,17 +305,17 @@ def system_manage_dumps():
 
             # For all months but current, keep only 1 files
             if today.month != yymm_date.month or today.year != yymm_date.year:
-                remove_list = keep_one_for_month(yymm_date,date_list, remove_list)
+                remove_list = keep_one_for_month(yymm_date, date_list, remove_list)
                 logger.debug('Remove list length %i: ' % len(remove_list))
             else:
                 # For the current month
-                remove_list = keep_one_for_month(yymm_date,date_list, remove_list, mode='3files')
+                remove_list = keep_one_for_month(yymm_date, date_list, remove_list, mode='3files')
                 logger.debug('Remove list length %i: ' % len(remove_list))
 
         # Remove files strftime('We are the %d, %b %Y')
         for deldate in remove_list:
             date_string = deldate.strftime('%Y-%m-%d')
-            delfiles = glob.glob(dump_dir+os.path.sep+'estationdb_'+schema+'_'+date_string+'*')
+            delfiles = glob.glob(dump_dir + os.path.sep + 'estationdb_' + schema + '_' + date_string + '*')
             try:
                 for delfile in delfiles:
                     os.remove(delfile)
@@ -332,7 +335,7 @@ def system_bucardo_config():
     logger.debug("Entering routine %s" % 'system_bucardo_config')
 
     # Returns 0 if no any sync exists
-    res_list_sync=os.system('bucardo list sync | grep "No syncs found" 1>/dev/null')
+    res_list_sync = os.system('bucardo list sync | grep "No syncs found" 1>/dev/null')
 
     # If no any sync exists, bucardo still to be configured
     if not res_list_sync:
@@ -347,23 +350,23 @@ def system_bucardo_config():
         else:
             other_pc = 'MESA-PC2'
 
-        command = '/usr/pgsql-9.3/bin/pg_isready -h '+other_pc
+        command = '/usr/pgsql-9.3/bin/pg_isready -h ' + other_pc
         other_pc_not_ready = os.system(command)
 
         if not other_pc_not_ready:
 
             # Execute the configuration
-            command = '/var/www/eStation2/config/install/bucardo_config.sh '+ role.lower() +\
-                      ' 1>/var/log/bucardo/bucardo_config.log'+ ' 2>/var/log/bucardo/bucardo_config.err'
+            command = '/var/www/eStation2/config/install/bucardo_config.sh ' + role.lower() + \
+                      ' 1>/var/log/bucardo/bucardo_config.log' + ' 2>/var/log/bucardo/bucardo_config.err'
 
-            res_bucardo_config=os.system(command)
+            res_bucardo_config = os.system(command)
 
             # Restart bucardo
             command = 'bucardo restart'
-            res_bucardo_config+=os.system(command)
+            res_bucardo_config += os.system(command)
 
         else:
-            logger.error('The other computer '+other_pc+' is not ready. Exit.')
+            logger.error('The other computer ' + other_pc + ' is not ready. Exit.')
 
     # Exit
     return res_bucardo_config
@@ -379,40 +382,40 @@ def system_create_report(target_file=None):
 
     # Create a temp directory
     try:
-        tmp_dir = tempfile.mkdtemp(prefix=__name__+'_', suffix='_' + 'system_report',
+        tmp_dir = tempfile.mkdtemp(prefix=__name__ + '_', suffix='_' + 'system_report',
                                    dir=es_constants.base_tmp_dir)
     except IOError:
         logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
         return 1
 
     # Use a module (to be identified) for dump
-    #target_dir = es_constants.es2globals['status_system_dir']+os.path.sep
-    target_dir=tmp_dir
-    output_filename = target_dir+os.path.sep+'System_report_'+now.strftime("%Y-%m-%d-%H:%M:%S")+'.tgz'
+    # target_dir = es_constants.es2globals['status_system_dir']+os.path.sep
+    target_dir = tmp_dir
+    output_filename = target_dir + os.path.sep + 'System_report_' + now.strftime("%Y-%m-%d-%H:%M:%S") + '.tgz'
 
     # Define List of files to be copied
-    report_files= ["/eStation2/log/*",                                  # All log files
-                   "/eStation2/get_lists/get_eumetcast/*",              # All get lists
-                   "/eStation2/get_lists/get_internet/*",               # All get lists
-                   "/eStation2/settings/*",                             # Machine settings (User+System)
-                   "/eStation2/system/system_status.txt",               # System status
-                   "/etc/passwd",                                       # Users
-                   "/etc/hosts",                                        # Hosts
-                   "/var/log/eStation2/eStation-Apps_*.log",            # All eStation .deb installation files
-                   "/var/lib/pgsql/9.3/data/pg_hba.conf",               # Postgresql config
-                   "/var/lib/pgsql/9.3/data/postgresql.conf",           # Postgresql config
-                   "/usr/local/src/tas/eStation_wsgi_srv/httpd.conf",
-                   "/usr/local/src/tas/anaconda/lib/python2.7/site-packages/eStation.pth",
-                   "/etc/rsyncd.conf"]
+    report_files = ["/eStation2/log/*",  # All log files
+                    "/eStation2/get_lists/get_eumetcast/*",  # All get lists
+                    "/eStation2/get_lists/get_internet/*",  # All get lists
+                    "/eStation2/settings/*",  # Machine settings (User+System)
+                    "/eStation2/system/system_status.txt",  # System status
+                    "/etc/passwd",  # Users
+                    "/etc/hosts",  # Hosts
+                    "/var/log/eStation2/eStation-Apps_*.log",  # All eStation .deb installation files
+                    "/var/lib/pgsql/9.3/data/pg_hba.conf",  # Postgresql config
+                    "/var/lib/pgsql/9.3/data/postgresql.conf",  # Postgresql config
+                    "/usr/local/src/tas/eStation_wsgi_srv/httpd.conf",
+                    "/usr/local/src/tas/anaconda/lib/python2.7/site-packages/eStation.pth",
+                    "/etc/rsyncd.conf"]
 
     # Copy all files there
     for my_item in report_files:
         all_files = glob.glob(my_item)
         for element in all_files:
             if os.path.isfile(element):
-                if not os.path.isdir(tmp_dir+os.path.dirname(element)):
-                    os.makedirs(tmp_dir+os.path.dirname(element))
-                shutil.copy(element, tmp_dir+os.path.dirname(element))
+                if not os.path.isdir(tmp_dir + os.path.dirname(element)):
+                    os.makedirs(tmp_dir + os.path.dirname(element))
+                shutil.copy(element, tmp_dir + os.path.dirname(element))
             else:
                 logger.warning('Will not copy dir ' + element + '. Continue')
 
@@ -434,37 +437,35 @@ def system_install_report(target_file=None):
 
     # Create a temp directory
     try:
-        tmp_dir = tempfile.mkdtemp(prefix=__name__+'_', suffix='_' + 'install_report',
+        tmp_dir = tempfile.mkdtemp(prefix=__name__ + '_', suffix='_' + 'install_report',
                                    dir=es_constants.base_tmp_dir)
     except IOError:
         logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
         return 1
 
     # Use a module (to be identified) for dump
-    target_dir = tmp_dir+os.path.sep
+    target_dir = tmp_dir + os.path.sep
     logger.info(target_dir)
 
-    output_filename = target_dir+'Install_report_'+now.strftime("%Y-%m-%d-%H:%M:%S")+'.tgz'
+    output_filename = target_dir + 'Install_report_' + now.strftime("%Y-%m-%d-%H:%M:%S") + '.tgz'
 
     # Create some tmp files
-    cmd = 'rpm -qa | grep -v eStation > '+tmp_dir+os.path.sep+'List_list_noEstation.txt'
+    cmd = 'rpm -qa | grep -v eStation > ' + tmp_dir + os.path.sep + 'List_list_noEstation.txt'
     status = os.system(cmd)
-    cmd = 'rpm -qa | grep  eStation > '+tmp_dir+os.path.sep+'List_list_Estation.txt'
+    cmd = 'rpm -qa | grep  eStation > ' + tmp_dir + os.path.sep + 'List_list_Estation.txt'
     status = os.system(cmd)
-    cmd = ['pip','freeze']
+    cmd = ['pip', 'freeze']
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
-    pipf = open(tmp_dir+os.path.sep+'List_pip_freeze.txt','w')
+    pipf = open(tmp_dir + os.path.sep + 'List_pip_freeze.txt', 'w')
     for value in out:
         pipf.write(value)
     pipf.close()
 
-
     # Define List of files to be copied
-    report_files= [tmp_dir+os.path.sep+"List_list_noEstation.txt",   # All yum module installed, but eStation
-                   tmp_dir+os.path.sep+"List_list_Estation.txt",     # All eStation module installed
-                   tmp_dir+os.path.sep+"List_pip_freeze.txt"]        # All pip module
-
+    report_files = [tmp_dir + os.path.sep + "List_list_noEstation.txt",  # All yum module installed, but eStation
+                    tmp_dir + os.path.sep + "List_list_Estation.txt",  # All eStation module installed
+                    tmp_dir + os.path.sep + "List_pip_freeze.txt"]  # All pip module
 
     # # Copy all files there -> Not needed: files already there
     # for my_item in report_files:
@@ -499,7 +500,7 @@ def check_delay_time(operation, delay_minutes=None, time=None, write=False):
 
     to_be_executed = False
     dir_info = es_constants.pid_file_dir
-    operations_info_file = dir_info+os.path.sep+operation+'_execution.info'
+    operations_info_file = dir_info + os.path.sep + operation + '_execution.info'
 
     # If write option set, write the info and exit
     if write:
@@ -516,10 +517,10 @@ def check_delay_time(operation, delay_minutes=None, time=None, write=False):
             to_be_executed = True
         else:
             time_latest_execution = info['latest_exec_time']
-            current_delta=datetime.datetime.now()-time_latest_execution
-            current_delta_minutes = int(old_div(current_delta.seconds,60))
+            current_delta = datetime.datetime.now() - time_latest_execution
+            current_delta_minutes = int(old_div(current_delta.seconds, 60))
             if current_delta_minutes > float(delay_minutes):
-               to_be_executed = True
+                to_be_executed = True
 
     elif time is not None:
         # Time to indicate
@@ -554,11 +555,11 @@ def system_manage_lock(lock_id, action):
         if action == 'Delete':
             for f in os.listdir(dir_lock):
                 if re.search('action*.lock', f):
-                    status = os.remove(os.path.join(dir_lock,f))
+                    status = os.remove(os.path.join(dir_lock, f))
         else:
             logger.warning("Only delete action is defined for all locks")
     else:
-        lock_file = dir_lock+os.path.sep+'action_'+lock_id+'.lock'
+        lock_file = dir_lock + os.path.sep + 'action_' + lock_id + '.lock'
         if action == 'Check':
             status = os.path.exists(lock_file)
 
@@ -584,7 +585,7 @@ def clean_temp_dir():
 
     now = time.time()
 
-    for f in glob.glob(es_constants.es2globals['base_tmp_dir']+os.path.sep+'apps.*'):
+    for f in glob.glob(es_constants.es2globals['base_tmp_dir'] + os.path.sep + 'apps.*'):
         try:
             if os.stat(f).st_mtime < now - 3 * 86400:
                 if os.path.isdir(f):
@@ -618,12 +619,13 @@ def loop_system(dry_run=False):
     do_bucardo_config = False
 
     # Restart bucardo
-    command = 'bucardo restart'
-    res_bucardo_restart=os.system(command)
-    if res_bucardo_restart:
-        logger.warning("Error in restarting bucardo")
-    else:
-        logger.info("Bucardo restarted correctly")
+    if do_bucardo_config:
+        command = 'bucardo restart'
+        res_bucardo_restart = os.system(command)
+        if res_bucardo_restart:
+            logger.warning("Error in restarting bucardo")
+        else:
+            logger.info("Bucardo restarted correctly")
 
     # Loop to manage the 'cron-like' operations, i.e.:
 
@@ -649,7 +651,7 @@ def loop_system(dry_run=False):
         schemas_db_sync = []
         schemas_db_dump = []
         do_convert_spirits = False
-        do_clean_tmp= True
+        do_clean_tmp = True
         do_push_ftp = False
 
         if system_settings['data_sync'] in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
@@ -771,7 +773,7 @@ def loop_system(dry_run=False):
                 # data_target = ip_target+'::products'+es_constants.es2globals['processing_dir']
                 data_target = 'PC3::products'
                 system_data_sync(data_source, data_target)
-                check_delay_time(operation,delay_minutes=delay_data_sync_minutes, write=True)
+                check_delay_time(operation, delay_minutes=delay_data_sync_minutes, write=True)
 
         # DB sync: execute every cycle if in system_setting (no delay)
         operation = 'db_sync'
@@ -817,10 +819,9 @@ def loop_system(dry_run=False):
             logger.info("Cleaning Temporary dirs")
             clean_temp_dir()
 
-
         # Exit in case of dry_run
         if dry_run:
-            execute_loop=False
+            execute_loop = False
 
         # Sleep some time
         time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))
@@ -849,22 +850,22 @@ def get_status_PC1():
     try:
         # Check the final status
         # command = [es_constants.es2globals['apps_dir']+'/tools/test_services_pc1.sh', ' 1>/dev/null' ]
-        command = es_constants.es2globals['apps_dir']+'/tools/test_services_pc1.sh'
+        command = es_constants.es2globals['apps_dir'] + '/tools/test_services_pc1.sh'
 
-        #logger.info(command)
+        # logger.info(command)
         # p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # out, err = p.communicate()
         out = cmd(command)
         logger.info(out)
-        tokens=string.split(out)
+        tokens = string.split(out)
 
         logger.info(tokens[0])
         logger.info(tokens[1])
         logger.info(tokens[2])
 
-        dvb_status=string.split(tokens[0],'=')[1]
-        tellicast_status=string.split(tokens[1],'=')[1]
-        fts_status=string.split(tokens[2],'=')[1]
+        dvb_status = string.split(tokens[0], '=')[1]
+        tellicast_status = string.split(tokens[1], '=')[1]
+        fts_status = string.split(tokens[2], '=')[1]
 
         logger.info(dvb_status)
         logger.info(tellicast_status)
@@ -904,15 +905,15 @@ def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None, ma
     if user is None:
         user = server_ftp.server['user']
     if psw is None:
-        psw  = server_ftp.server['psw']
+        psw = server_ftp.server['psw']
     if url is None:
-        url=server_ftp.server['url']
+        url = server_ftp.server['url']
     if trg_dir is None:
-        trg_dir=server_ftp.server['data_dir']
+        trg_dir = server_ftp.server['data_dir']
 
     # Create an ad-hoc file for the lftp command output (beside the standard logger)
-    logfile=es_constants.es2globals['log_dir']+'push_data_ftp.log'
-    message=time.strftime("%Y-%m-%d %H:%M")+' INFO: Running the ftp sync now ... \n'
+    logfile = es_constants.es2globals['log_dir'] + 'push_data_ftp.log'
+    message = time.strftime("%Y-%m-%d %H:%M") + ' INFO: Running the ftp sync now ... \n'
 
     logger.debug("Entering routine %s" % 'push_data_ftp')
 
@@ -930,11 +931,11 @@ def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None, ma
         #     continue
 
         # Check it if is in the list of 'exclusions' defined in ./config/server_ftp.py
-        key ='{}/{}'.format(productcode,version)
+        key = '{}/{}'.format(productcode, version)
         skip = False
         if key in server_ftp.exclusions:
             skip = True
-            logger.debug('Do not sync for {}/{}'.format(productcode,version))
+            logger.debug('Do not sync for {}/{}'.format(productcode, version))
 
         p = Product(product_code=productcode, version=version)
 
@@ -962,7 +963,7 @@ def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None, ma
                             if my_mapset not in mapset_to_use:
                                 mapset_to_use.append(my_mapset)
             else:
-                mapset_to_use=all_prod_mapsets
+                mapset_to_use = all_prod_mapsets
             # Loop over existing mapset
             for mapset in mapset_to_use:
                 all_mapset_datasets = p.get_subproducts(mapset=mapset)
@@ -979,13 +980,15 @@ def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None, ma
                         dataset_dict = functions.row2dict(dataset_info)
                         dataset_dict['mapsetcode'] = mapset
 
-                        logger.debug('Working on {}/{}/{}/{}'.format(productcode,version,mapset,subproductcode))
+                        logger.debug('Working on {}/{}/{}/{}'.format(productcode, version, mapset, subproductcode))
 
-                        subdir = functions.set_path_sub_directory(productcode, subproductcode,  dataset_dict['product_type'], version, mapset)
-                        source = data_dir+subdir
+                        subdir = functions.set_path_sub_directory(productcode, subproductcode,
+                                                                  dataset_dict['product_type'], version, mapset)
+                        source = data_dir + subdir
                         target = trg_dir + subdir
 
-                        command = 'lftp -e "mirror -RLe {} {};exit" -u {}:{} {}"" >> {}'.format(source,target,user,psw,url,logfile)
+                        command = 'lftp -e "mirror -RLe {} {};exit" -u {}:{} {}"" >> {}'.format(source, target, user,
+                                                                                                psw, url, logfile)
                         # command = 'lftp -e "mirror -RLe {} {};exit" -u {}:{} {}"" >> /dev/null'.format(source,target,user,psw,url)
                         logger.debug("Executing %s" % command)
                         spec_logger.info('Working on mapset/subproduct {}/{} \n'.format(mapset, subproductcode))
@@ -1009,5 +1012,3 @@ class SystemDaemon(DaemonDryRunnable):
 class IngestArchiveDaemon(DaemonDryRunnable):
     def run(self):
         iha.ingest_historical_archives(input_dir=None, dry_run=self.dry_run)
-
-

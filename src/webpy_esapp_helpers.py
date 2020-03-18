@@ -1365,6 +1365,7 @@ def execServiceTask(getparams):
             if not status:
                 os.system("python " + system_service_script + " start")
                 message = 'System service started'
+                status = system_daemon.status()
             else:
                 message = 'System service was already up'
 

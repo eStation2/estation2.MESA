@@ -1,17 +1,22 @@
-from __future__ import unicode_literals
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+from __future__ import unicode_literals
+
+import os
+import time
+import unittest
 
 from future import standard_library
-standard_library.install_aliases()
-import unittest
-import os, time
-from config import es_constants
+
 from apps.acquisition import acquisition
+from config import es_constants
 from lib.python import es_logging as log
+
+standard_library.install_aliases()
 logger = log.my_logger(__name__)
-#
+
+
 class TestDaemon(unittest.TestCase):
 
     #   ---------------------------------------------------------------------------
