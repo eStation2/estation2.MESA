@@ -65,10 +65,10 @@ import shutil
 # scipy for chla gradient computation
 # TODO: On reference machines it has to be -> from scipy import ndimage ! Not on our development VMs!
 # TODO: Change to  if sys.platform == 'win32':
-# if sys.platform == 'win32':
-#     import scipy
-# else:
-#     from scipy import ndimage
+if sys.platform == 'win32':
+    import scipy
+else:
+    from scipy import ndimage
 
 logger = log.my_logger(__name__)
 
@@ -279,7 +279,7 @@ def do_stddev_image(input_file='', avg_file='', input_nodata=None, output_nodata
 
         # Get info from avg file
         if avg_file is not None and os.path.exists(avg_file):
-                avgFID = gdal.Open(avg_file, GA_ReadOnly)
+            avgFID = gdal.Open(avg_file, GA_ReadOnly)
         else:
             logger.error('Avg file does not existing: cannot proceed. Exit')
             return
