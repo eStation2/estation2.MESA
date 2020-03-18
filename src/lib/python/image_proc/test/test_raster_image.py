@@ -358,3 +358,20 @@ class TestFunctions(TestCase):
                 "output_format": 'GTIFF', \
                 "output_type": None, "options": "compress=lzw"}
         raster_image_math.do_compute_primary_production(**args)
+
+
+    def test_compute_opFish_indicator(self):
+        input_file = '/data/processing/modis-chla/v2013.1/MODIS-Africa-4km/tif/chla-day/20181007_modis-chla_chla-day_MODIS-Africa-4km_v2013.1.tif'
+
+        output_file = '/data/tmp/20181007_modis-chla_opfish_MODIS-Africa-4km_v2013.1.tif'
+
+        # prod == 'modis-chla':
+        parameters = {'chl_grad_min': 0.00032131,  # smaller window detects more fronts
+                      'chl_grad_int': 0.021107,
+                      'chl_feed_min': 0.08,
+                      'chl_feed_max': 11.0,  # Temperature: 0.45 deg (multiply by 100 !!)
+                      'dc': 0.91}
+
+        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw",
+                "parameters": parameters}
+        raster_image_math.compute_opFish_indicator(**args)
