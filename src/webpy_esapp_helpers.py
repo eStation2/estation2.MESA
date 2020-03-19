@@ -1,9 +1,5 @@
 #!/usr/bin/python
 
-# if __name__ == '__main__' and __package__ is None:
-#    from os import sys, path
-#    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import unicode_literals
@@ -12,23 +8,12 @@ from builtins import open
 from builtins import round
 from builtins import int
 from future import standard_library
-standard_library.install_aliases()
 from builtins import map
 from builtins import str
 from past.utils import old_div
+
 import sys
 import os
-
-# TODO: This turns of caching, remove!!!
-# import sys
-# sys.dont_write_bytecode = True
-
-os.umask(0000)
-
-cur_dir = os.path.dirname(__file__)
-if cur_dir not in sys.path:
-    sys.path.append(cur_dir)
-
 import shutil
 import datetime
 import json
@@ -40,35 +25,47 @@ import base64
 import configparser
 import subprocess
 from subprocess import *
-from multiprocessing import *
-
 import matplotlib as mpl
-
-mpl.use('Agg')
-mpl.rcParams['savefig.pad_inches'] = 0
-
 from matplotlib import pyplot as plt
 
 from lib.python import reloadmodules
 from config import es_constants
 from database import querydb
 from database import crud
-
-from apps.acquisition import get_eumetcast
 from apps.acquisition import acquisition
-from apps.processing import processing  # Comment in WINDOWS version!
+from apps.processing import processing
 from apps.productmanagement.datasets import Dataset
 from apps.es2system import es2system
-from apps.productmanagement.datasets import Frequency
 from apps.productmanagement.products import Product
 from apps.productmanagement import requests
 from apps.analysis import generateLegendHTML
 from apps.analysis.getTimeseries import (getTimeseries, getFilesList)
-# from multiprocessing import (Process, Queue)
-from apps.tools import ingest_historical_archives as iha
-
 from lib.python import functions
 from lib.python import es_logging as log
+
+# from apps.acquisition import get_eumetcast
+# from apps.productmanagement.datasets import Frequency
+# from multiprocessing import (Process, Queue)
+# from apps.tools import ingest_historical_archives as iha
+# from multiprocessing import *
+
+# TODO: This turns of caching, remove!!!
+# sys.dont_write_bytecode = True
+
+# if __name__ == '__main__' and __package__ is None:
+#    from os import sys, path
+#    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+os.umask(0000)
+
+cur_dir = os.path.dirname(__file__)
+if cur_dir not in sys.path:
+    sys.path.append(cur_dir)
+
+mpl.use('Agg')
+mpl.rcParams['savefig.pad_inches'] = 0
+
+standard_library.install_aliases()
 
 logger = log.my_logger(__name__)
 
@@ -80,7 +77,8 @@ def GetLogos():
     logos = querydb.get_logos()
     if hasattr(logos, "__len__") and logos.__len__() > 0:
         for logo in logos:
-            logofilepath = es_constants.estation2_logos_dir + os.path.sep + logo['logo_filename'].encode('utf-8').decode()
+            logofilepath = es_constants.estation2_logos_dir + os.path.sep + logo['logo_filename'].encode(
+                'utf-8').decode()
             if os.path.exists(logofilepath):
                 logofile = open(logofilepath, 'rb')
                 logofilecontent = logofile.read()

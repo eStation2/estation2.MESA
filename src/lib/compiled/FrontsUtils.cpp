@@ -19,9 +19,12 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "/usr/include/python2.7/Python.h"
-#include "/usr/include/python2.7/pyconfig.h"
-#include "/usr/share/pyshared/numpy/core/include/numpy/arrayobject.h"
+//#include "/usr/include/python2.7/Python.h"
+//#include "/usr/include/python2.7/pyconfig.h"
+//#include "/usr/share/pyshared/numpy/core/include/numpy/arrayobject.h"
+#include "/usr/include/python3.6/Python.h"
+#include "/usr/include/python3.6/pyconfig.h"
+#include "/usr/local/lib/python3.6/dist-packages/numpy/core/include/numpy/arrayobject.h"
 
 #pragma warning(disable: 4244)		// warning C4244: '=' : conversion from 'double' to 'npy_float32', possible loss of data
 

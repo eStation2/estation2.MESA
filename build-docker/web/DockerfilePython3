@@ -38,6 +38,10 @@ RUN pip3 install --upgrade pip
 # some packages depend on setuptools to be installed. the reqiurements.txt does not preserve the order of install so install setuptools before the requirements.txt
 RUN pip3 install setuptools
 RUN pip3 install -r /etc/apache2/sites-available/requirements.txt
+RUN pip3 install --upgrade numpy
+
+# Update all outdated packages
+# RUN pip3 list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1  | xargs -n1 pip install -U
 
 ADD 00-default.conf /etc/apache2/sites-available/00-default.conf
 # ADD basic_security_directives.conf /etc/apache2/sites-available/basic_security_directives.conf
