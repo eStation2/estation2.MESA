@@ -58,6 +58,12 @@ RUN ln -s /etc/apache2/sites-available/00-default.conf /etc/apache2/sites-enable
 ADD estation2.conf /etc/apache2/sites-available/estation2.conf
 RUN ln -s /etc/apache2/sites-available/estation2.conf /etc/apache2/sites-enabled/estation2.conf
 
+
+# SNAP Installation
+#ADD esa-snap_all_unix_7_0.sh /tmp
+#RUN /tmp/esa-snap_all_unix_7_0.sh -q -dir "/usr/local"
+
+
 # Configuring web folder tree
 RUN mkdir -p /var/www/estation2 && mkdir -p /var/log/apache2/
 #ENV APACHE_RUN_USER www-data

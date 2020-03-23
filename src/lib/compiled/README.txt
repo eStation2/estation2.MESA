@@ -1,7 +1,7 @@
 TODO
-The C extension FrontUtils.cpp is not compatible for Pyhton 3
+The C extension FrontUtils.cpp is not compatible for Python 3
 Rewrite the code.
-Tutotials:
+Tutorials:
 http://python3porting.com/cextensions.html
 https://py3c.readthedocs.io/en/latest/guide.html
 
