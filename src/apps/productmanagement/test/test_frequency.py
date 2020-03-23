@@ -122,3 +122,7 @@ class TestFrequency(unittest.TestCase):
         self.assertEqual(templates[0], '/Modis_2014-01-09_201401/mcd14dl.2014-01-01.tif')
         self.assertEqual(templates[1], '/Modis_2014-01-10_201401/mcd14dl.2014-01-02.tif')
 
+
+suite_frequency = unittest.TestLoader().loadTestsFromTestCase(TestFrequency)
+if __name__ == '__main__':
+    unittest.TextTestRunner(verbosity=2).run(suite_frequency)

@@ -519,8 +519,8 @@ class ImportLogo(object):
                             break
                         ii += 1
 
-                finalfilename = new_name_final.split('/')[
-                    -1]  # splits the and chooses the last part (the filename with extension)
+                # splits the and chooses the last part (the filename with extension)
+                finalfilename = new_name_final.split('/')[-1]
                 success = True
             except:
                 success = False
@@ -1234,7 +1234,7 @@ class GetHelp(object):
             docs_dir = es_constants.es2globals['base_dir'] + '/apps/help/userdocs/'
 
         if getparams['lang'] == '':
-            getparams['lang'] = es_constants.es2globals['default_language'];
+            getparams['lang'] = es_constants.es2globals['default_language']
 
         if getparams['lang'] == 'eng':
             lang_dir = 'EN/'
@@ -4383,7 +4383,7 @@ class GetBackgroundLayer(object):
         backgroundlayer.status = mapscript.MS_ON
         backgroundlayer.units = mapscript.MS_DD
 
-        coords = list(map(float, inputparams.BBOX.split(",")))
+        coords = list(map(float, inputparams.BBOX.split(',')))
         llx = coords[0]
         lly = coords[1]
         urx = coords[2]
