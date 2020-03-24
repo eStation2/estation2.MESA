@@ -23,15 +23,15 @@ from ..exceptions import WrongDateParameter
 
 class TestCasters(unittest.TestCase):
     def test_cast_1_0(self):
-        self.assertEquals(1, cast_to_int("1"))
-        self.assertEquals(1, cast_to_int("1.0"))
-        self.assertEquals(1, cast_to_int("1."))
-        self.assertEquals(1, cast_to_int(1))
-        self.assertEquals(1, cast_to_int(1.0))
-        self.assertEquals(1, cast_to_int("1.1"))
-        self.assertEquals(1, cast_to_int(1.1))
-        self.assertEquals(1, cast_to_int(u"1.1"))
-        self.assertEquals("a", cast_to_int(u"a"))
+        self.assertEqual(1, cast_to_int("1"))
+        self.assertEqual(1, cast_to_int("1.0"))
+        self.assertEqual(1, cast_to_int("1."))
+        self.assertEqual(1, cast_to_int(1))
+        self.assertEqual(1, cast_to_int(1.0))
+        self.assertEqual(1, cast_to_int("1.1"))
+        self.assertEqual(1, cast_to_int(1.1))
+        self.assertEqual(1, cast_to_int(u"1.1"))
+        self.assertEqual("a", cast_to_int(u"a"))
 
 
 class TestHelpersDate(unittest.TestCase):
@@ -162,7 +162,7 @@ class TestHelpersGap(unittest.TestCase):
     def test_find_gap_dekad_intervals_no_gap_to_date(self):
         intervals = find_gaps(self.files_dekad, frequency=Frequency(dateformat='YYYYMMDD', value=1,
                 unit=Frequency.UNIT.DEKAD, frequency_type=Frequency.TYPE.EVERY),
-                only_intervals=True, to_date=datetime.date(2014, 06, 10))
+                only_intervals=True, to_date=datetime.date(2014, 6, 10))
         self.assertEqual(len(intervals), 1)
         self.assertEqual(intervals[0][2], INTERVAL_TYPE.PRESENT)
 
