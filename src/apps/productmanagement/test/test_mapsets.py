@@ -22,13 +22,17 @@ from database import connectdb
 
 class TestMapsets(unittest.TestCase):
     def setUp(self):
-        setattr(querydb, 'db', connectdb.ConnectDB(use_sqlite=True).db)
+        setattr(querydb, 'db', connectdb.ConnectDB().db)
 
     def test_mapset_not_existent(self):
-        kwargs = {'mapset_code':"---prod---"}
+        kwargs = {'mapset_code':"---mapset---"}
         self.assertRaisesRegexp(NoMapsetFound, "(?i).*found.*mapset.*", Mapset, **kwargs)
 
     def test_mapset(self):
-        kwargs = {'mapset_code':"WGS84_Africa_1km"}
+        kwargs = {'mapset_code':"SPOTV-Africa-1km"}
         mapset = Mapset(**kwargs)
         self.assertIsInstance(mapset, Mapset)
+
+suite_mapsets = unittest.TestLoader().loadTestsFromTestCase(TestMapsets)
+if __name__ == '__main__':
+    unittest.TextTestRunner(verbosity=2).run(suite_mapsets)

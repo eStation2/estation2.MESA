@@ -19,9 +19,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "/usr/include/python2.7/Python.h"
-#include "/usr/include/python2.7/pyconfig.h"
-#include "/usr/share/pyshared/numpy/core/include/numpy/arrayobject.h"
+//#include "/usr/include/python2.7/Python.h"
+//#include "/usr/include/python2.7/pyconfig.h"
+//#include "/usr/share/pyshared/numpy/core/include/numpy/arrayobject.h"
+#define PY_SSIZE_T_CLEAN
+#include "/usr/include/python3.6/Python.h"
+#include "/usr/include/python3.6/pyconfig.h"
+#include "/usr/local/lib/python3.6/dist-packages/numpy/core/include/numpy/arrayobject.h"
 
 #pragma warning(disable: 4244)		// warning C4244: '=' : conversion from 'double' to 'npy_float32', possible loss of data
 
@@ -32,7 +36,7 @@
  *  The original code by Nicolas Devillard - 1998. Public domain.
  *  Converted to C macros by Jason Roberts.
  */
-
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define ELEM_SWAP(dataType, a,b) { register dataType t=(a);(a)=(b);(b)=t; }
 
 #define QUICK_MEDIAN_SELECT(dataType, arr, n, pFilteredImage, row, col)                 \
@@ -622,13 +626,30 @@ static PyMethodDef FrontsUtilsMethods[] =
     {NULL, NULL, 0, NULL}
 };
 
-PyMODINIT_FUNC initFrontsUtils(void)
-{
-    // Initialize as a Python extension module.
 
-    Py_InitModule("FrontsUtils", FrontsUtilsMethods);
-
-    // Initialize numpy.
-
-    import_array();
+static struct PyModuleDef FrontsUtilsmodule = {
+    PyModuleDef_HEAD_INIT,
+    "FrontUtils",   /* name of module */
+    NULL, /* module documentation, may be NULL */
+    -1,       /* size of per-interpreter state of the module,
+                 or -1 if the module keeps state in global variables. */
+    FrontsUtilsMethods
 };
+
+PyMODINIT_FUNC
+PyInit_FrontsUtils(void)
+{
+    return PyModule_Create(&FrontsUtilsmodule);
+}
+// Python2 implementation (obsolete)
+
+//PyMODINIT_FUNC initFrontsUtils(void)
+//{
+//    // Initialize as a Python extension module.
+//
+//    Py_InitModule("FrontsUtils", FrontsUtilsMethods);
+//
+//    // Initialize numpy.
+//
+//    import_array();
+//};
