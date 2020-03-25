@@ -1075,7 +1075,7 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files, my_logger):
             out_tmp_file_gtiff = tmpdir + os.path.sep + id_subproduct + '_' + id_mapset + '.tif.merged'
 
             # Take gdal_merge.py from es2globals
-            command = es_constants.gdal_merge + ' -init '+ str(nodata_value)+' -co \"compress=lzw\" -ot Float32 -o '
+            command = es_constants.gdal_merge + ' -init '+ str(nodata_value)+' -co \"compress=lzw\" -ot Float32 -of GTiff -o '
             command += out_tmp_file_gtiff
             for file_add in geotiff_files:
                 command += ' '
