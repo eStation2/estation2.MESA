@@ -31,16 +31,15 @@ from lib.python import es_logging as log
 from lib.python import metadata
 logger = log.my_logger(__name__)
 
-
 def glob_monkey(path):
     return []
-
 
 class TestProducts(unittest.TestCase):
     def setUp(self):
         setattr(querydb, 'db', connectdb.ConnectDB().db)
-        self.kwargs = {'product_code':"vgt_ndvi"}
-        self.mapsets = ('WGS84_Africa_1km', 'WGS84_Sahel_1km')
+        self.kwargs = {'product_code': "vgt-ndvi",
+                       'version': "sv2-pv2.2"}
+        self.mapsets = ('SPOTV-Africa-1km', 'SPOTV-Africa-1km')
         self.subproducts = ('sm', 'ndv')
         self.files_mapsets = [os.path.join(es_constants.es2globals['data_dir'],
                               self.kwargs['product_code'], mapset) for mapset in self.mapsets]
@@ -65,7 +64,7 @@ class TestProducts(unittest.TestCase):
 
     def test_class_no_product(self):
         kwargs = {'product_code':"---prod---"}
-        self.assertRaisesRegexp(NoProductFound, "(?i).*found.*product.*", Product, **kwargs)
+        self.assertRaisesRegex(NoProductFound, "No.*Product.*Found.*", Product, **kwargs)
 
     def test_class_mapsets(self):
         product = self.get_product()
@@ -133,7 +132,7 @@ class TestProducts(unittest.TestCase):
                         mapset_dict['mapsetdatasets'].append(dataset_dict)
                     prod_dict['productmapsets'].append(mapset_dict)
             products_dict_all.append(prod_dict)
-        self.assertEquals(len(db_products), 31)
+        self.assertEqual(len(db_products), 49)
 
     def test_get_missing(self):
         product = self.get_product()
@@ -142,17 +141,19 @@ class TestProducts(unittest.TestCase):
         self.assertEqual(len(product.get_missing_datasets(mapset=mapsets[0], sub_product_code=subproducts[0])), 1)
         missing = product.get_missing_datasets(mapset=mapsets[0])
         self.assertEqual(len(missing), 2)
-        self.assertEqual(missing[0]['info']['missingfiles'], 1)
+        # self.assertEqual(missing[0]['info']['missingfiles'], 1)
         self.assertEqual(len(product.get_missing_datasets()), 4)
-        self.assertRaisesRegexp(MissingMapset, "(?i).*mapset.*%s*" % subproducts[0], product.get_missing_datasets,
+        self.assertRaisesRegex(MissingMapset, "(?i).*mapset.*%s*" % subproducts[0], product.get_missing_datasets,
                 **{'sub_product_code': subproducts[0]})
 
     def test_get_missing_from_date_to_date(self):
         product = self.get_product()
+
         mapsets = product.mapsets
+        sub_product = product.subproducts[0]
         from_date=datetime.date(2000, 1, 1)
         to_date=datetime.date(2040, 1, 1)
-        missing = product.get_missing_datasets(mapset=mapsets[0], from_date=from_date, to_date=to_date)
+        missing = product.get_missing_datasets(mapset=mapsets[0], sub_product_code=sub_product, from_date=from_date, to_date=to_date)
         self.assertEqual(missing[0]['info']['missingfiles'], 1441)
 
     def test_get_missing_all(self):
@@ -179,7 +180,7 @@ class TestProducts(unittest.TestCase):
                 'lastdate': today,
                 'firstdate': today,
                 },
-            'product': 'vgt_ndvi',
+            'product': 'vgt-ndvi',
             'to_end': True,
             'mapset_data': {
                 'rotation_factor_long': 0.0,
@@ -189,15 +190,15 @@ class TestProducts(unittest.TestCase):
                 'pixel_shift_long': 0.008928571428571,
                 'upper_left_lat': 38.004464285714285,
                 'upper_left_long': -26.004464285714285,
-                'mapsetcode': u'WGS84_Africa_1km',
+                'mapsetcode': u'SPOTV-Africa-1km',
                 'pixel_size_y': 8177,
                 'pixel_size_x': 9633,
                 'srs_wkt': u'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],TOWGS84[0,0,0,0,0,0,0],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9108"]],AUTHORITY["EPSG","4326"]]',
                 'rotation_factor_lat': 0.0},
             'subproduct': 'sm',
-            'version': None,
+            'version': 'sv2-pv2.2',
             'from_start': True,
-            'mapset': 'WGS84_Africa_1km'}]
+            'mapset': 'SPOTV-Africa-1km'}]
         product = self.get_product()
         dates = product.get_missing_filenames(missing[0])
         self.assertIsInstance(dates, list)
