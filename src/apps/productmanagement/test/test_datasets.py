@@ -84,7 +84,7 @@ class TestDatasets(unittest.TestCase):
     def test_wrong_date(self):
         kwargs = self.kwargs.copy()
         kwargs.update({'from_date': '2014-10-01'})
-        self.assertRaisesRegexp(WrongDateType, "(?i).*wrong.*date.*type.*",
+        self.assertRaisesRegex(WrongDateType, "(?i).*wrong.*date.*type.*",
                 Dataset, **kwargs)
 
     def test_frequency_8days(self):
@@ -98,12 +98,12 @@ class TestDatasets(unittest.TestCase):
         dataset = Dataset(**kwargs)
         dataset.get_filenames = lambda **my_kwargs : self.files_dekad
         intervals = dataset.intervals
-        self.assertEquals(len(intervals), 5)
-        self.assertEquals(intervals[0].interval_type, INTERVAL_TYPE.PRESENT)
-        self.assertEquals(intervals[1].interval_type, INTERVAL_TYPE.PERMANENT_MISSING)
-        self.assertEquals(intervals[2].interval_type, INTERVAL_TYPE.PRESENT)
-        self.assertEquals(intervals[3].interval_type, INTERVAL_TYPE.MISSING)
-        self.assertEquals(intervals[4].interval_type, INTERVAL_TYPE.PRESENT)
+        self.assertEqual(len(intervals), 5)
+        self.assertEqual(intervals[0].interval_type, INTERVAL_TYPE.PRESENT)
+        self.assertEqual(intervals[1].interval_type, INTERVAL_TYPE.PERMANENT_MISSING)
+        self.assertEqual(intervals[2].interval_type, INTERVAL_TYPE.PRESENT)
+        self.assertEqual(intervals[3].interval_type, INTERVAL_TYPE.MISSING)
+        self.assertEqual(intervals[4].interval_type, INTERVAL_TYPE.PRESENT)
 
     def test_number_files(self):
         kwargs = self.kwargs.copy()
@@ -111,7 +111,7 @@ class TestDatasets(unittest.TestCase):
         dataset = Dataset(**kwargs)
         dataset.get_filenames = lambda **my_kwargs : self.files_dekad
         number = dataset.get_number_files()
-        self.assertEquals(number, number)
+        self.assertEqual(number, number)
 
     def test_normalized_info(self):
         kwargs = self.kwargs.copy()
@@ -129,10 +129,10 @@ class TestDatasets(unittest.TestCase):
         total = 0
         for segment in segments:
             total += segment['intervalpercentage']
-        self.assertEquals(int(total), 100)
-        self.assertEquals(segments[0]['intervalpercentage'], 50.0)
-        self.assertEquals(segments[1]['intervalpercentage'], 25.0)
-        self.assertEquals(segments[2]['intervalpercentage'], 25.0)
+        self.assertEqual(int(total), 100)
+        self.assertEqual(segments[0]['intervalpercentage'], 50.0)
+        self.assertEqual(segments[1]['intervalpercentage'], 25.0)
+        self.assertEqual(segments[2]['intervalpercentage'], 25.0)
 
     def test_normalized_info_15_minutes(self):
         kwargs = self.kwargs.copy()
@@ -147,9 +147,9 @@ class TestDatasets(unittest.TestCase):
         dataset = Dataset(**kwargs)
         completeness = dataset.get_dataset_normalized_info()
         pass
-        #self.assertEquals(completeness['totfiles'], 18289)
-        #self.assertEquals(completeness['missingfiles'], 18288)
-        #self.assertEquals(completeness['intervals'][0]['intervalpercentage'], 1.0)
+        #self.assertEqual(completeness['totfiles'], 18289)
+        #self.assertEqual(completeness['missingfiles'], 18288)
+        #self.assertEqual(completeness['intervals'][0]['intervalpercentage'], 1.0)
 
     def test_product_only_month_day(self):
         kwargs = self.kwargs.copy()
@@ -178,17 +178,17 @@ class TestDatasets(unittest.TestCase):
         dataset = Dataset(**kwargs)
         dataset.get_filenames = lambda **my_kwargs : files
         completeness = dataset.get_dataset_normalized_info()
-        self.assertEquals(completeness['totfiles'], 12)
-        self.assertEquals(completeness['missingfiles'], 0)
-        self.assertEquals(completeness['intervals'][0]['todate'], '12-01')
-        self.assertEquals(completeness['intervals'][0]['fromdate'], '01-01')
-        self.assertEquals(completeness['firstdate'], '01-01')
-        self.assertEquals(completeness['lastdate'], '12-01')
+        self.assertEqual(completeness['totfiles'], 12)
+        self.assertEqual(completeness['missingfiles'], 0)
+        self.assertEqual(completeness['intervals'][0]['todate'], '12-01')
+        self.assertEqual(completeness['intervals'][0]['fromdate'], '01-01')
+        self.assertEqual(completeness['firstdate'], '01-01')
+        self.assertEqual(completeness['lastdate'], '12-01')
         current_date = datetime.date(2014, 1, 1)
         last_date = datetime.date(2015, 1, 1)
         for i in range(12):
             current_date = dataset.next_date(current_date)
-        self.assertEquals(last_date, current_date)
+        self.assertEqual(last_date, current_date)
 
     def test_product_vgt_fapar(self):
         kwargs = self.kwargs.copy()
@@ -206,8 +206,8 @@ class TestDatasets(unittest.TestCase):
         dataset = Dataset(**kwargs)
         dataset.get_filenames = lambda **my_kwargs : files
         completeness = dataset.get_dataset_normalized_info()
-        self.assertEquals(completeness['totfiles'], 36)
-        self.assertEquals(completeness['missingfiles'], 35)
+        self.assertEqual(completeness['totfiles'], 36)
+        self.assertEqual(completeness['missingfiles'], 35)
 
     def test_get_dates(self):
         kwargs = {'product_code':"vgt-ndvi",
@@ -226,7 +226,7 @@ class TestDatasets(unittest.TestCase):
                     self.assertTrue(last < date)
                 last = date
 
-        self.assertEquals(len(dates), 36)
+        self.assertEqual(len(dates), 36)
 
     def test_with_xml(self):
         kwargs = self.kwargs.copy()
@@ -241,43 +241,46 @@ class TestDatasets(unittest.TestCase):
 
         # Note: the .missing (permanent missing) are not counted as 'missing'
         completeness = dataset.get_dataset_normalized_info()
-        self.assertEquals(completeness['missingfiles'], 3)
+        self.assertEqual(completeness['missingfiles'], 3)
 
     def test_product_no_dates(self):
         kwargs = {
-                'product_code':"fewsnet_rfe",
-                'sub_product_code': "rfe",
+                'product_code': "fewsnet-rfe",
+                'version': "2.0",
                 'sub_product_code': "1monmax",
-                'mapset': 'WGS84_Africa_1km',
+                'mapset': 'FEWSNET-Africa-8km',
         }
         files = [
-            "0101_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
-            "0201_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
-            "0301_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
-            "0401_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
-            "0501_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
-            "0601_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
-            "0701_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
-            "0801_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
-            "0901_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
-            "1001_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
-            "1101_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
-            "1201_fewsnet_rfe_1monmax_FEWSNET_Africa_8km.tif",
+            "0101_fewsnet-rfe_1monmax_FEWSNET-Africa-8km_2.0.tif",
+            "0201_fewsnet-rfe_1monmax_FEWSNET-Africa-8km_2.0.tif",
+            "0301_fewsnet-rfe_1monmax_FEWSNET-Africa-8km_2.0.tif",
+            "0401_fewsnet-rfe_1monmax_FEWSNET-Africa-8km_2.0.tif",
+            "0501_fewsnet-rfe_1monmax_FEWSNET-Africa-8km_2.0.tif",
+            "0601_fewsnet-rfe_1monmax_FEWSNET-Africa-8km_2.0.tif",
+            "0701_fewsnet-rfe_1monmax_FEWSNET-Africa-8km_2.0.tif",
+            "0801_fewsnet-rfe_1monmax_FEWSNET-Africa-8km_2.0.tif",
+            "0901_fewsnet-rfe_1monmax_FEWSNET-Africa-8km_2.0.tif",
+            "1001_fewsnet-rfe_1monmax_FEWSNET-Africa-8km_2.0.tif",
+            "1101_fewsnet-rfe_1monmax_FEWSNET-Africa-8km_2.0.tif",
+            "1201_fewsnet-rfe_1monmax_FEWSNET-Africa-8km_2.0.tif",
         ]
+
         dataset = Dataset(**kwargs)
-        dataset.get_filenames = lambda: files
+        dataset.get_filenames = lambda **my_kwargs: files
+        dataset._clean_cache()
+
         completeness = dataset.get_dataset_normalized_info()
-        self.assertEquals(completeness['totfiles'], 12)
-        self.assertEquals(completeness['missingfiles'], 0)
-        self.assertEquals(completeness['intervals'][0]['todate'], '12-01')
-        self.assertEquals(completeness['intervals'][0]['fromdate'], '01-01')
-        self.assertEquals(completeness['firstdate'], '01-01')
-        self.assertEquals(completeness['lastdate'], '12-01')
+        self.assertEqual(completeness['totfiles'], 12)
+        self.assertEqual(completeness['missingfiles'], 0)
+        self.assertEqual(completeness['intervals'][0]['todate'], '12-01')
+        self.assertEqual(completeness['intervals'][0]['fromdate'], '01-01')
+        self.assertEqual(completeness['firstdate'], '01-01')
+        self.assertEqual(completeness['lastdate'], '12-01')
         current_date = datetime.date(2014, 1, 1)
         last_date = datetime.date(2015, 1, 1)
         for i in range(12):
             current_date = dataset.next_date(current_date)
-        self.assertEquals(last_date, current_date)
+        self.assertEqual(last_date, current_date)
 
     def test_find_gaps(self):
         start_time = time.time()
@@ -392,7 +395,7 @@ class TestDatasets(unittest.TestCase):
 #         dataset=Dataset('vgt-ndvi','10dmax-linearx2', 'SPOTV-Africa-1km', version='sv2-pv2.1')
 #         filenames=dataset.get_filenames()
 #         info = dataset.get_dataset_normalized_info()
-#         self.assertEquals(info['missingfiles'], 0)
+#         self.assertEqual(info['missingfiles'], 0)
 #
 #     def test_normalized_info_vgt_ndvi_2(self):
 #         dataset=Dataset('vgt-ndvi','year_min_linearx2', 'SPOTV-Africa-1km', version='sv2-pv2.1')
@@ -400,9 +403,9 @@ class TestDatasets(unittest.TestCase):
 #         print filenames
 #         info = dataset.get_dataset_normalized_info()
 #         print info
-#         self.assertEquals(info['missingfiles'], 1)
+#         self.assertEqual(info['missingfiles'], 1)
 
 
 suite_datasets = unittest.TestLoader().loadTestsFromTestCase(TestDatasets)
-# if __name__ == '__main__':
-#     unittest.TextTestRunner(verbosity=2).run(suite_datasets)
+if __name__ == '__main__':
+    unittest.TextTestRunner(verbosity=2).run(suite_datasets)
