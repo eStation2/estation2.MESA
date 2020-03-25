@@ -4864,18 +4864,9 @@ class ProductAcquisition(object):
         self.lang = "eng"
 
     def GET(self, params):
-        # return web.ctx
-        getparams = web.input()
+        params = web.input()
 
-        products = querydb.get_products_acquisition(activated=getparams.activated)
-        # if getparams.activated or not getparams.activated:
-        #     products = querydb.get_products_acquisition(activated=getparams.activated)
-        # else:
-        #     products = querydb.get_products_acquisition()
-        # products = querydb.get_products(activated=getparams.activated)
-        products_json = functions.tojson(products)
-        products_json = '{"success":"true", "total":' + str(products.__len__()) + ',"products":[' + products_json + ']}'
-        return products_json
+        return webpy_esapp_helpers.getProductAcquisition(params.activated)
 
 
 if __name__ == "__main__":

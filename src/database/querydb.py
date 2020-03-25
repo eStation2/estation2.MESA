@@ -1,7 +1,3 @@
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import absolute_import
-from __future__ import division
 ####################################################################################################################
 #	purpose: Define functions to access and query the postgresql db
 #	author:  Jurriaan van 't Klooster
@@ -9,9 +5,13 @@ from __future__ import division
 #   descr:	 Functions to access and query the DB using SQLSoup and SQLAlchemy as Database Abstraction Layer and ORM.
 ####################################################################################################################
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 from future import standard_library
-standard_library.install_aliases()
 from builtins import str
+
 import sys
 import traceback
 # import sqlsoup
@@ -27,6 +27,8 @@ from database import crud
 from config import es_constants
 from lib.python import functions
 
+
+standard_library.install_aliases()
 logger = log.my_logger(__name__)
 
 db = connectdb.ConnectDB(schema='products').db
@@ -89,7 +91,8 @@ def get_last_graph_tpl_id(userid, workspaceid):
 def get_workspace_maps(workspaceid, userid):
     global dbschema_analysis
     try:
-        query = "SELECT * FROM analysis.user_map_templates WHERE workspaceid = " + str(workspaceid) + " AND userid = '" + userid + "'"
+        query = "SELECT * FROM analysis.user_map_templates WHERE workspaceid = " + str(workspaceid) + \
+                " AND userid = '" + userid + "'"
 
         result = dbschema_analysis.execute(query)
         result = result.fetchall()
@@ -105,7 +108,8 @@ def get_workspace_maps(workspaceid, userid):
 def get_workspace_graphs(workspaceid, userid):
     global dbschema_analysis
     try:
-        query = "SELECT * FROM analysis.user_graph_templates WHERE workspaceid = " + str(workspaceid) + " AND userid = '" + userid + "'"
+        query = "SELECT * FROM analysis.user_graph_templates WHERE workspaceid = " + str(workspaceid) + \
+                " AND userid = '" + userid + "'"
 
         result = dbschema_analysis.execute(query)
         result = result.fetchall()
@@ -137,7 +141,9 @@ def get_user_workspaces(userid):
 def getCreatedUserWorkspace(userid, workspacename):
     global dbschema_analysis
     try:
-        # query = "SELECT max(workspaceid) as lastworkspaceid FROM analysis.user_workspaces WHERE userid = '" + userid + "';"
+        # query = "SELECT max(workspaceid) as lastworkspaceid
+        # FROM analysis.user_workspaces
+        # WHERE userid = '" + userid + "';"
 
         query = "SELECT workspaceid as lastworkspaceid FROM analysis.user_workspaces " \
                 " WHERE userid = '" + userid + "'" \
@@ -255,11 +261,12 @@ def copylegend(legendid=-1, legend_descriptive_name=''):
             dbschema_analysis.session.close()
 
 
-def activate_deactivate_product(productcode='', version='', activate=False, force=False):
+def activate_deactivate_product(productcode='', version='', activate=False):
     global db
     try:
-        # query = "SELECT * FROM products.activate_deactivate_product_ingestion_pads_processing('" + productcode + "', '" + version + "', " + str(
-        #     activate).upper() + ", " + str(force).upper() + "); COMMIT;"
+        # query = "SELECT *
+        # FROM products.activate_deactivate_product_ingestion_pads_processing('" + productcode +
+        # "', '" + version + "', " + str(activate).upper() + ", " + str(force).upper() + "); COMMIT;"
 
         query = "SELECT * FROM products.activate_deactivate_product('" + productcode + "', '" \
                 + version + "', " + str(activate).upper() + "); COMMIT;"
@@ -281,8 +288,11 @@ def activate_deactivate_product(productcode='', version='', activate=False, forc
 def get_product_default_legend_steps(productcode, version, subproductcode):
     global dbschema_analysis
     try:
-        query = " SELECT ls.from_step, ls.to_step, ls.color_rgb, ls.color_label, p.scale_factor, p.scale_offset FROM analysis.product_legend pl " + \
-                " INNER JOIN products.product p ON pl.productcode = p.productcode AND pl.version = p.version AND pl.subproductcode = p.subproductcode " + \
+        query = " SELECT ls.from_step, ls.to_step, ls.color_rgb, ls.color_label, p.scale_factor, p.scale_offset " + \
+                " FROM analysis.product_legend pl " + \
+                " INNER JOIN products.product p ON pl.productcode = p.productcode " + \
+                "        AND pl.version = p.version " + \
+                "        AND pl.subproductcode = p.subproductcode " + \
                 " INNER JOIN analysis.legend_step ls ON pl.legend_id = ls.legend_id " \
                 " WHERE pl.productcode = '" + productcode + "'" + \
                 "   AND pl.version = '" + version + "'" + \
@@ -306,7 +316,9 @@ def get_user_map_templates(userid):
     global dbschema_analysis
     try:
         query = " SELECT * FROM analysis.user_map_templates umt " + \
-                " JOIN (SELECT workspaceid FROM analysis.user_workspaces WHERE userid='" + userid + "' AND isdefault=TRUE) uw " + \
+                " JOIN (SELECT workspaceid " + \
+                "       FROM analysis.user_workspaces " + \
+                "       WHERE userid='" + userid + "' AND isdefault=TRUE) uw " + \
                 " ON umt.workspaceid = uw.workspaceid " + \
                 " WHERE umt.userid = '" + userid + "'"
 
@@ -340,7 +352,9 @@ def getusers():
 def checklogin(login=None):
     global dbschema_analysis
     try:
-        query = "SELECT * FROM analysis.users WHERE userid = '" + login.username + "' AND password = '" + login.password + "'"
+        query = "SELECT * FROM analysis.users " + \
+                "WHERE userid = '" + login.username + "'" + \
+                "  AND password = '" + login.password + "'"
         result = dbschema_analysis.execute(query)
         result = result.fetchall()
         return result
@@ -575,7 +589,8 @@ def __get_product_timeseries_drawproperties(product, user='', graph_tpl_name='')
                     "   AND tdp.subproductcode = '" + product['subproductcode'] + "' " + \
                     "   AND tdp.version ='" + product['version'] + "' "
 
-            # " SELECT productcode, subproductcode, version, tsname_in_legend, charttype, linestyle, linewidth, color, yaxe_id " + \
+            # " SELECT productcode, subproductcode, version, tsname_in_legend,
+            #   charttype, linestyle, linewidth, color, yaxe_id " + \
             # " FROM analysis.user_tpl_timeseries_drawproperties uts " + \
             # " WHERE uts.userid = '" + user + "' " + \
             # "   AND uts.graph_tpl_name = '" + graph_tpl_name + "' " + \
@@ -1127,7 +1142,8 @@ def __get_timeseries_drawproperties(params):
     global dbschema_analysis
     try:
         if hasattr(params, "userid") and params.userid != '':
-            query = " SELECT productcode, subproductcode, version, tsname_in_legend, charttype, linestyle, linewidth, color, yaxe_id " + \
+            query = " SELECT productcode, subproductcode, version, tsname_in_legend, " + \
+                    "        charttype, linestyle, linewidth, color, yaxe_id " + \
                     " FROM analysis.timeseries_drawproperties_new " + \
                     " WHERE (productcode, subproductcode, version) NOT IN " + \
                     "	(SELECT productcode, subproductcode, version " + \
@@ -1135,13 +1151,15 @@ def __get_timeseries_drawproperties(params):
                     "	 WHERE uts.userid = '" + params.userid + "' " + \
                     "	   AND uts.graph_tpl_name = '" + params.graph_tpl_name + "') " + \
                     " UNION " + \
-                    " SELECT productcode, subproductcode, version, tsname_in_legend, charttype, linestyle, linewidth, color, yaxe_id " + \
+                    " SELECT productcode, subproductcode, version, tsname_in_legend, " + \
+                    "        charttype, linestyle, linewidth, color, yaxe_id " + \
                     " FROM analysis.user_tpl_timeseries_drawproperties uts " + \
                     " WHERE uts.userid = '" + params.userid + "' " + \
                     "   AND uts.graph_tpl_name = '" + params.graph_tpl_name + "' " + \
                     " ORDER BY productcode ASC, subproductcode ASC, version ASC"
         else:
-            query = "SELECT * FROM analysis.timeseries_drawproperties_new order by productcode asc, subproductcode asc, version asc"
+            query = "SELECT * FROM analysis.timeseries_drawproperties_new " \
+                    "ORDER BY productcode ASC, subproductcode ASC, version ASC"
 
         result = dbschema_analysis.execute(query)
         result = result.fetchall()
@@ -1461,8 +1479,9 @@ def update_user_graph_tpl_drawproperties(graphdrawprobs, graphtpl_info):
 
     try:
         graph_tpl_id = graphtpl_info['graph_tpl_id']
-        if graphtpl_info['graph_tpl_name'] == 'default' and graphtpl_info['graph_tpl_id'] == '-1' and graphtpl_info[
-            'istemplate'] == 'false':
+        if graphtpl_info['graph_tpl_name'] == 'default' \
+                and graphtpl_info['graph_tpl_id'] == '-1' \
+                and graphtpl_info['istemplate'] == 'false':
             graph_tpl_id = getDefaultUserGraphTemplateID(graphtpl_info['userid'], graphdrawprobs['graph_type'])
 
         where = and_(dbschema_analysis.user_graph_tpl_drawproperties.graph_tpl_id == graph_tpl_id,
@@ -1573,9 +1592,15 @@ def get_legend_totals(legendid):
     try:
 
         query = " SELECT ts.TotSteps, tsl.TotColorLabels, tgl.TotGroupLabels " + \
-                " FROM ( SELECT count(*) as TotSteps FROM analysis.legend_step ls1 WHERE ls1.legend_id = " + str(legendid) + " ) ts, " + \
-                "      ( SELECT count(color_label) as TotColorLabels FROM analysis.legend_step ls2 WHERE ls2.legend_id = " + str(legendid) + " AND trim(color_label) != '') tsl, " + \
-                "      ( SELECT count(group_label) as TotGroupLabels FROM analysis.legend_step ls3 WHERE ls3.legend_id = " + str(legendid) + " AND trim(group_label) != '') tgl "
+                " FROM ( SELECT count(*) as TotSteps " + \
+                "        FROM analysis.legend_step ls1 " + \
+                "        WHERE ls1.legend_id = " + str(legendid) + " ) ts, " + \
+                "      ( SELECT count(color_label) as TotColorLabels " + \
+                "        FROM analysis.legend_step ls2 " + \
+                "        WHERE ls2.legend_id = " + str(legendid) + " AND trim(color_label) != '') tsl, " + \
+                "      ( SELECT count(group_label) as TotGroupLabels " + \
+                "        FROM analysis.legend_step ls3 " + \
+                "        WHERE ls3.legend_id = " + str(legendid) + " AND trim(group_label) != '') tgl "
         legendtotals = dbschema_analysis.execute(query)
         legendtotals = legendtotals.fetchall()
 
@@ -1592,7 +1617,9 @@ def get_legend_totals(legendid):
 def get_spirits():
     global db
     try:
-        query = "SELECT * FROM products.spirits WHERE activated = true ORDER BY productcode, version, subproductcode, mapsetcode"
+        query = "SELECT * FROM products.spirits " + \
+                "WHERE activated = true " + \
+                "ORDER BY productcode, version, subproductcode, mapsetcode"
         spirits = db.execute(query)
         spirits = spirits.fetchall()
 
@@ -1612,35 +1639,51 @@ def get_enabled_ingest_derived_of_product(productcode, version, mapsetcode=None)
         if mapsetcode is None:
             query = "select p.productcode, p.version, i.mapsetcode, p.subproductcode, p.product_type " + \
                     "from products.product p " + \
-                    "     inner join products.ingestion i on p.productcode = i.productcode and p.subproductcode = i.subproductcode and p.version = i.version " + \
-                    "where p.productcode = '" + productcode + "' and p.version = '" + version + "' and p.product_type = 'Ingest' and i.enabled = true " + \
+                    "     inner join products.ingestion i on p.productcode = i.productcode " + \
+                    "            and p.subproductcode = i.subproductcode and p.version = i.version " + \
+                    "where p.productcode = '" + productcode + "' and p.version = '" + version + "'" + \
+                    "  and p.product_type = 'Ingest' and i.enabled = true " + \
                     " union " + \
                     "select p.productcode, p.version, derived.mapsetcode, p.subproductcode, p.product_type " + \
                     "from products.product p " + \
                     "     inner join ( " + \
                     "        select pp.productcode, pp.subproductcode, pp.version, pp.mapsetcode, proc.activated " + \
                     "        from products.process_product pp " + \
-                    "             inner join products.processing proc on pp.process_id = proc.process_id where proc.enabled = true and pp.type = 'OUTPUT' and pp.final = true " + \
-                    "        ) derived " + \
-                    "     on p.productcode = derived.productcode and p.subproductcode = derived.subproductcode and p.version = derived.version " + \
-                    "where p.productcode = '" + productcode + "' and p.version = '" + version + "' and p.product_type = 'Derived' " + \
+                    "             inner join products.processing proc on pp.process_id = proc.process_id " + \
+                    "        where proc.enabled = true and pp.type = 'OUTPUT' and pp.final = true ) derived " + \
+                    "     on p.productcode = derived.productcode " + \
+                    "        and p.subproductcode = derived.subproductcode " + \
+                    "        and p.version = derived.version " + \
+                    "where p.productcode = '" + productcode + "'" + \
+                    "  and p.version = '" + version + "'" + \
+                    "  and p.product_type = 'Derived' " + \
                     "order by mapsetcode"
         else:
             query = "select p.productcode, p.version, i.mapsetcode, p.subproductcode, p.product_type " + \
                     "from products.product p " + \
-                    "     inner join products.ingestion i on p.productcode = i.productcode and p.subproductcode = i.subproductcode and p.version = i.version " + \
-                    "where p.productcode = '" + productcode + "' and p.version = '" + version + "' and p.product_type = 'Ingest' and i.enabled = true " + \
-                    " and i.mapsetcode = '" + mapsetcode + "'" + \
+                    "     inner join products.ingestion i " + \
+                    "     on p.productcode = i.productcode " + \
+                    "        and p.subproductcode = i.subproductcode " + \
+                    "        and p.version = i.version " + \
+                    "where p.productcode = '" + productcode + "'" + \
+                    "  and p.version = '" + version + "'" + \
+                    "  and p.product_type = 'Ingest' " + \
+                    "  and i.enabled = true " + \
+                    "  and i.mapsetcode = '" + mapsetcode + "'" + \
                     " union " + \
                     "select p.productcode, p.version, derived.mapsetcode, p.subproductcode, p.product_type " + \
                     "from products.product p " + \
                     "     inner join ( " + \
                     "        select pp.productcode, pp.subproductcode, pp.version, pp.mapsetcode, proc.activated " + \
                     "        from products.process_product pp " + \
-                    "             inner join products.processing proc on pp.process_id = proc.process_id where proc.enabled = true and pp.type = 'OUTPUT' and pp.final = true " + \
+                    "             inner join products.processing proc on pp.process_id = proc.process_id " + \
+                    "        where proc.enabled = true and pp.type = 'OUTPUT' and pp.final = true " + \
                     "        ) derived " + \
-                    "     on p.productcode = derived.productcode and p.subproductcode = derived.subproductcode and p.version = derived.version " + \
-                    "where p.productcode = '" + productcode + "' and p.version = '" + version + "' and p.product_type = 'Derived' " + \
+                    "     on p.productcode = derived.productcode " + \
+                    "        and p.subproductcode = derived.subproductcode " + \
+                    "        and p.version = derived.version " + \
+                    "where p.productcode = '" + productcode + "' and p.version = '" + version + "'" + \
+                    "  and p.product_type = 'Derived' " + \
                     "and derived.mapsetcode = '" + mapsetcode + "' " + \
                     "order by mapsetcode"
 
@@ -1797,7 +1840,8 @@ def update_product_info(productinfo):
         db.commit()
 
         # If changed, update productcode and version for all its sub products. Will not reflect in generated files!
-        if productinfo['productcode'] != productinfo['orig_productcode'] or productinfo['version'] != productinfo['orig_version']:
+        if productinfo['productcode'] != productinfo['orig_productcode'] \
+                or productinfo['version'] != productinfo['orig_version']:
             query = "UPDATE products.product SET " + \
                     "  productcode = '" + productinfo['productcode'] + "', " + \
                     "  version = '" + productinfo['version'] + "' " + \
@@ -1926,7 +1970,6 @@ def get_mapsets_for_ingest(productcode, version, subproductcode):
 def get_mapset(mapsetcode='', allrecs=False):
     global db
     try:
-        mapset = []
 
         # "        THEN CASE WHEN bbox.upper_left_long < 0 " \
         # "                  THEN bbox.upper_left_long - (resolution.pixel_shift_long/2)  " \
@@ -2012,7 +2055,7 @@ def __get_mapset(mapsetcode='', allrecs=False):
 def get_mapsets():
     global db
     try:
-        query = " SELECT mapset_new.mapsetcode, " \
+        query = "SELECT mapset_new.mapsetcode, " \
                 " mapset_new.defined_by, " \
                 " mapset_new.descriptive_name, " \
                 " mapset_new.description, " \
@@ -2035,7 +2078,7 @@ def get_mapsets():
                 " resolution.pixel_shift_long, " \
                 " resolution.pixel_shift_lat, " \
                 " i.ingestions_assigned " \
-                " FROM products.mapset_new AS mapset_new " \
+                "FROM products.mapset_new AS mapset_new " \
                 " INNER JOIN products.projection AS projection ON mapset_new.proj_code = projection.proj_code " \
                 " INNER JOIN products.resolution AS resolution ON mapset_new.resolutioncode = resolution.resolutioncode " \
                 " INNER JOIN products.bbox ON mapset_new.bboxcode = bbox.bboxcode " \
@@ -2125,7 +2168,11 @@ def get_categories(all=False):
         if all:
             query = "SELECT * FROM products.product_category ORDER BY category_id"
         else:
-            query = "select * from products.product_category where category_id in (select distinct category_id from products.product where activated = true) ORDER BY order_index"
+            query = "SELECT * FROM products.product_category " + \
+                    "WHERE category_id IN (SELECT DISTINCT category_id " + \
+                    "                      FROM products.product " + \
+                    "                      WHERE activated = true) " + \
+                    "ORDER BY order_index"
         categories = db.execute(query)
         categories = categories.fetchall()
 
@@ -2441,7 +2488,8 @@ def get_timeseries_products(masked=None):
                 "       pnative.descriptive_name as group_product_descriptive_name " + \
                 "from products.product p " + \
                 "     left outer join products.product_category pc on p.category_id = pc.category_id " + \
-                "     left outer join products.product pnative on p.productcode = pnative.productcode and p.version = pnative.version " + \
+                "     left outer join products.product pnative " + \
+                "           on p.productcode = pnative.productcode and p.version = pnative.version " + \
                 "where p.timeseries_role = 'Initial' " + \
                 "  and pnative.product_type = 'Native' "
 
@@ -2715,16 +2763,21 @@ def get_legend_assigned_datasets(legendid):
 def export_legend_steps(legendid=None):
     global dbschema_analysis
     try:
-        # query = " SELECT to_step || ', ' || replace(color_rgb, ' ', ', ') || ', 255, ' || COALESCE('''' || color_label || '''', '') as legendstep " + \
+        # query = " SELECT to_step || ', ' || replace(color_rgb, ' ', ', ') || " + \
+        #         " ', 255, ' || COALESCE('''' || color_label || '''', '') as legendstep " + \
         #         " FROM analysis.legend_step " + \
         #         " WHERE legend_id = " + str(legendid) + \
         #         " ORDER BY from_step ASC "
 
-        query = " SELECT (ls.to_step - pinfo.scale_offset)/pinfo.scale_factor || ', ' || replace(ls.color_rgb, ' ', ', ') || ', 255, ' || COALESCE(ls.color_label, '') as legendstep " + \
+        query = " SELECT (ls.to_step - pinfo.scale_offset)/pinfo.scale_factor || ', ' || " + \
+                "    replace(ls.color_rgb, ' ', ', ') || ', 255, ' || COALESCE(ls.color_label, '') as legendstep " + \
                 " FROM analysis.legend_step ls, " + \
                 " (SELECT " + str(legendid) + " as legend_id, p.scale_offset, p.scale_factor " + \
                 "  FROM products.product p" + \
-                "  WHERE (p.productcode, p.subproductcode, p.version) IN (SELECT productcode, subproductcode, version FROM analysis.product_legend WHERE legend_id = " + str(legendid) + " LIMIT 1)) pinfo " + \
+                "  WHERE (p.productcode, p.subproductcode, p.version) IN " + \
+                "        (SELECT productcode, subproductcode, version " + \
+                "         FROM analysis.product_legend " + \
+                "         WHERE legend_id = " + str(legendid) + " LIMIT 1)) pinfo " + \
                 " WHERE ls.legend_id = " + str(legendid) + \
                 " AND ls.legend_id = pinfo.legend_id " + \
                 " ORDER BY ls.from_step ASC "
@@ -2959,9 +3012,9 @@ def get_ingestions():
         #                                   i.c.subproductcode == p.c.subproductcode,
         #                                   i.c.version == p.c.version)))
         #
-        #     # select_from(p.outerjoin(i, and_(p.c.productcode == i.c.productcode,
-        #     #                                 p.c.subproductcode == i.c.subproductcode,
-        #     #                                 p.c.version == i.c.version)).outerjoin(m, i.c.mapsetcode == m.c.mapsetcode))
+        # # select_from(p.outerjoin(i, and_(p.c.productcode == i.c.productcode,
+        # #                                 p.c.subproductcode == i.c.subproductcode,
+        # #                                 p.c.version == i.c.version)).outerjoin(m, i.c.mapsetcode == m.c.mapsetcode))
         #
         # s = s.alias('ingest')
         # i = db.map(s, primary_key=[s.c.productid, i.c.subproductcode, i.c.mapsetcode])
@@ -3015,7 +3068,8 @@ def get_dataacquisitions():
         # pa = db.map(s, primary_key=[s.c.productid])
         # dataacquisitions = pa.order_by(desc(pa.productcode)).all()
 
-        query = " SELECT CONCAT(products.product_acquisition_data_source.productcode, '_', products.product_acquisition_data_source.version) AS productid, " + \
+        query = " SELECT CONCAT(products.product_acquisition_data_source.productcode, '_', " + \
+                "        products.product_acquisition_data_source.version) AS productid, " + \
                 "        productcode, " + \
                 "        subproductcode, " + \
                 "        version, " + \
@@ -3042,6 +3096,70 @@ def get_dataacquisitions():
 
 
 def get_products_acquisition(activated=None):
+    global db
+    try:
+        masked = '   AND p.masked = FALSE'
+        totgets = '   AND pads.totgets > 0 '
+        if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            active = '   AND p.activated = TRUE '
+        elif activated is False or activated in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
+            active = '   AND p.activated = FALSE '
+        else:
+            totgets = ''
+            active = ''
+            masked = ''
+
+        query = " SELECT p.productcode ||  '_' || p.version as productid, " + \
+                "        p.productcode, " + \
+                "        p.subproductcode, " + \
+                "        p.version, " + \
+                "        p.defined_by, " + \
+                "        p.activated, " + \
+                "        p.product_type, " + \
+                "        COALESCE(p.descriptive_name, '') as prod_descriptive_name, " + \
+                " COALESCE(p.description, '') as description, " + \
+                " COALESCE(p.provider, '') as provider, " + \
+                " p.masked, " + \
+                " pc.category_id, " + \
+                " pc.descriptive_name as cat_descr_name, " + \
+                " pc.order_index, " + \
+                " subprods.totsubprods " + \
+                " FROM products.product as p INNER JOIN products.product_category as pc " + \
+                "   ON p.category_id = pc.category_id " + \
+                " INNER JOIN (SELECT COUNT(pads.data_source_id) as totgets, " + \
+                "                    pads.productcode as pads_productcode, " + \
+                "                    pads.subproductcode as pads_subproductcode, " + \
+                "                    pads.version as pads_version " + \
+                "             FROM products.product_acquisition_data_source as pads " + \
+                "             GROUP BY pads.productcode, pads.subproductcode, pads.version) as pads " + \
+                "     ON p.productcode = pads.pads_productcode " + \
+                "        AND p.version = pads.pads_version " + \
+                "        AND p.subproductcode = pads.pads_subproductcode " + \
+                " RIGHT OUTER JOIN (SELECT COUNT(subprods.subproductcode) as totsubprods, " + \
+                "                     subprods.productcode as subprods_productcode, " + \
+                "                     subprods.version as subprods_version " + \
+                "             FROM products.product as subprods " + \
+                "             WHERE subprods.product_type != 'Native' " + \
+                "             GROUP BY subprods.productcode, subprods.version) as subprods " + \
+                "     ON p.productcode = subprods.subprods_productcode AND p.version = subprods.subprods_version " + \
+                " WHERE p.product_type = 'Native' " + masked + active + totgets + \
+                " ORDER BY pc.order_index, p.productcode "
+
+        productslist = db.execute(query)
+        productslist = productslist.fetchall()
+
+        return productslist
+
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and log the error telling what happened.
+        logger.error("get_products_acquisition: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
+def __get_products_acquisition(activated=None):
     global db
     try:
         pc = db.product_category._table
@@ -3640,15 +3758,15 @@ def get_datasource_descr(source_type='', source_id=''):
     try:
 
         if source_type == 'EUMETCAST':
-            query = "SELECT es.filter_expression_jrc, dsd.* \
-                     FROM products.eumetcast_source es JOIN products.datasource_description dsd \
-                         ON es.datasource_descr_id = dsd.datasource_descr_id \
-                     WHERE es.datasource_descr_id = '" + source_id + "'"
+            query = "SELECT es.filter_expression_jrc, dsd.* " + \
+                    "FROM products.eumetcast_source es JOIN products.datasource_description dsd " + \
+                    "  ON es.datasource_descr_id = dsd.datasource_descr_id " + \
+                    "WHERE es.datasource_descr_id = '" + source_id + "'"
         else:   # source_type == 'INTERNET'
-            query = "SELECT ints.*, dsd.* \
-                     FROM products.internet_source ints JOIN products.datasource_description dsd \
-                         ON ints.datasource_descr_id = dsd.datasource_descr_id \
-                     WHERE ints.datasource_descr_id = '" + source_id + "'"
+            query = "SELECT ints.*, dsd.* " + \
+                    "FROM products.internet_source ints JOIN products.datasource_description dsd " + \
+                    "  ON ints.datasource_descr_id = dsd.datasource_descr_id " + \
+                    "WHERE ints.datasource_descr_id = '" + source_id + "'"
 
         result = dbschema_analysis.execute(query)
         datasource_descr = result.fetchall()
@@ -3691,11 +3809,11 @@ def get_eumetcast_sources():
     global db
     try:
 
-        query = "SELECT pads.*, es.eumetcast_id, es.filter_expression_jrc \
-                 FROM products.eumetcast_source es JOIN products.product_acquisition_data_source pads \
-                   ON pads.data_source_id = es.eumetcast_id \
-                 WHERE pads.type = 'EUMETCAST' \
-                   AND pads.activated"
+        query = "SELECT pads.*, es.eumetcast_id, es.filter_expression_jrc " + \
+                "FROM products.eumetcast_source es JOIN products.product_acquisition_data_source pads " + \
+                "  ON pads.data_source_id = es.eumetcast_id " + \
+                "WHERE pads.type = 'EUMETCAST' " + \
+                "  AND pads.activated"
 
         result = dbschema_analysis.execute(query)
         eumetcast_sources = result.fetchall()
@@ -3737,16 +3855,19 @@ def get_active_internet_sources():
     global db
 
     try:
-        query = "SELECT * FROM products.internet_source i \
-                 WHERE i.internet_id IN (  \
-                    SELECT data_source_id FROM products.product_acquisition_data_source pads JOIN products.product p \
-                    ON pads.productcode = p.productcode AND pads.subproductcode = p.subproductcode AND pads.version = p.version \
-                       AND p.product_type = 'Native' AND p.activated = TRUE \
-                    WHERE pads.type = 'INTERNET' AND pads.activated = TRUE)"
+        query = "SELECT * FROM products.internet_source i " + \
+                "WHERE i.internet_id IN (  " + \
+                "    SELECT data_source_id " + \
+                "    FROM products.product_acquisition_data_source pads JOIN products.product p " + \
+                "      ON pads.productcode = p.productcode " + \
+                "       AND pads.subproductcode = p.subproductcode " + \
+                "       AND pads.version = p.version " + \
+                "       AND p.product_type = 'Native' " + \
+                "       AND p.activated = TRUE " + \
+                "    WHERE pads.type = 'INTERNET' AND pads.activated = TRUE)"
 
         result = dbschema_analysis.execute(query)
         internet_sources = result.fetchall()
-
 
         # session = db.session
         #
@@ -3947,6 +4068,8 @@ def get_processingchains_input_products(process_id=None):
 def get_processingchain_output_products(process_id=None):
     global db
     try:
+        processing_chain_output_products = []
+
         if process_id is not None:
             myprocess_id = process_id
             processfinaloutput = db.process_product._table
@@ -3992,9 +4115,11 @@ def get_processingchain_output_products(process_id=None):
                          db.pfo.c.type == 'OUTPUT',
                          db.pfo.c.final == True)
 
-            processing_chain_output_products = db.join(db.pfo, db.p, and_(db.pfo.productcode == db.p.prod_productcode,
-                                                                          db.pfo.subproductcode == db.p.prod_subproductcode,
-                                                                          db.pfo.version == db.p.prod_version),
+            processing_chain_output_products = db.join(db.pfo,
+                                                       db.p,
+                                                       and_(db.pfo.productcode == db.p.prod_productcode,
+                                                            db.pfo.subproductcode == db.p.prod_subproductcode,
+                                                            db.pfo.version == db.p.prod_version),
                                                        isouter=True)
             processing_chain_output_products = processing_chain_output_products.filter(where).all()
 
@@ -4312,11 +4437,11 @@ def get_product_subproducts(productcode='', version='undefined'):
     global db
     try:
 
-        query = " SELECT * FROM products.product " \
+        query = " SELECT * FROM products.product " + \
                 " WHERE product_type != 'Native' " \
-                "   AND productcode = '" + productcode + "'" \
-                "   AND version = '" + version + "'" \
-                "   AND defined_by != 'JRC-Test' "\
+                "   AND productcode = '" + productcode + "'" + \
+                "   AND version = '" + version + "'" + \
+                "   AND defined_by != 'JRC-Test' " + \
                 " ORDER BY productcode, version, product_type DESC, subproductcode"
         subproducts = db.execute(query)
         subproducts = subproducts.fetchall()
@@ -4347,8 +4472,9 @@ def get_ingestsubproducts():
     try:
         # || '_' || subproductcode
         query = " SELECT p.productcode || '_' || p.version as productid, " + \
-                "        p.subproductcode as orig_subproductcode, " \
-                "	     CASE WHEN TRIM(p.timeseries_role) = 'Initial' THEN TRUE ELSE FALSE END AS enable_in_timeseries, * " + \
+                "        p.subproductcode as orig_subproductcode, " + \
+                "	     CASE WHEN TRIM(p.timeseries_role) = 'Initial' " + \
+                "             THEN TRUE ELSE FALSE END AS enable_in_timeseries, * " + \
                 " FROM products.product p" \
                 " WHERE p.product_type = 'Ingest' " \
                 " ORDER BY p.productcode, p.version DESC, p.subproductcode"
@@ -4379,12 +4505,16 @@ def get_ingestsubproducts():
 def get_active_subdatasource_descriptions():
     global db
     try:
-        query = " SELECT pads.productcode as pads_productcode, pads.version as pads_version, pads.data_source_id as pads_data_source_id, pads.type as pads_type, " + \
-                "	CASE WHEN TRIM(i.descriptive_name) != '' THEN i.descriptive_name ELSE e.collection_name END AS datasource_descriptivename, " + \
+        query = " SELECT pads.productcode as pads_productcode, pads.version as pads_version, " + \
+                "        pads.data_source_id as pads_data_source_id, pads.type as pads_type, " + \
+                "	CASE WHEN TRIM(i.descriptive_name) != '' THEN i.descriptive_name " + \
+                "        ELSE e.collection_name END AS datasource_descriptivename, " + \
                 "	dd.preproc_type, dd.native_mapset, sdd.* " + \
                 " FROM products.product_acquisition_data_source pads " + \
                 " LEFT OUTER JOIN products.sub_datasource_description sdd " + \
-                "	ON pads.productcode = sdd.productcode AND pads.version = sdd.version AND pads.data_source_id = sdd.datasource_descr_id " + \
+                "	ON pads.productcode = sdd.productcode " + \
+                "    AND pads.version = sdd.version " + \
+                "    AND pads.data_source_id = sdd.datasource_descr_id " + \
                 " LEFT OUTER JOIN products.internet_source i " + \
                 "	ON i.internet_id = pads.data_source_id " + \
                 " LEFT OUTER JOIN products.eumetcast_source e " + \
@@ -4534,7 +4664,9 @@ def get_thema_products(thema):
     global db
     try:
 
-        query = " SELECT productcode, version FROM products.thema_product WHERE thema_id = '" + thema + "' AND activated = TRUE"
+        query = " SELECT productcode, version " + \
+                " FROM products.thema_product " + \
+                " WHERE thema_id = '" + thema + "' AND activated = TRUE"
 
         themaproducts = db.execute(query)
         themaproducts = themaproducts.fetchall()
