@@ -23,71 +23,71 @@ from ..exceptions import WrongDateParameter
 
 class TestCasters(unittest.TestCase):
     def test_cast_1_0(self):
-        self.assertEquals(1, cast_to_int("1"))
-        self.assertEquals(1, cast_to_int("1.0"))
-        self.assertEquals(1, cast_to_int("1."))
-        self.assertEquals(1, cast_to_int(1))
-        self.assertEquals(1, cast_to_int(1.0))
-        self.assertEquals(1, cast_to_int("1.1"))
-        self.assertEquals(1, cast_to_int(1.1))
-        self.assertEquals(1, cast_to_int(u"1.1"))
-        self.assertEquals("a", cast_to_int(u"a"))
+        self.assertEqual(1, cast_to_int("1"))
+        self.assertEqual(1, cast_to_int("1.0"))
+        self.assertEqual(1, cast_to_int("1."))
+        self.assertEqual(1, cast_to_int(1))
+        self.assertEqual(1, cast_to_int(1.0))
+        self.assertEqual(1, cast_to_int("1.1"))
+        self.assertEqual(1, cast_to_int(1.1))
+        self.assertEqual(1, cast_to_int(u"1.1"))
+        self.assertEqual("a", cast_to_int(u"a"))
 
 
 class TestHelpersDate(unittest.TestCase):
     def test_add_years(self):
-        self.assertEquals(add_years(datetime.date(2000, 3, 4), 4), datetime.date(2004, 3, 4))
+        self.assertEqual(add_years(datetime.date(2000, 3, 4), 4), datetime.date(2004, 3, 4))
 
     def test_add_years_to_leap_year_1(self):
-        self.assertEquals(add_years(datetime.date(2000, 2, 29), 4), datetime.date(2004, 2, 29))
+        self.assertEqual(add_years(datetime.date(2000, 2, 29), 4), datetime.date(2004, 2, 29))
 
     def test_add_years_to_leap_year_2(self):
-        self.assertEquals(add_years(datetime.date(2000, 2, 29), 3), datetime.date(2003, 2, 28))
+        self.assertEqual(add_years(datetime.date(2000, 2, 29), 3), datetime.date(2003, 2, 28))
 
     def test_add_months_1(self):
-        self.assertEquals(add_months(datetime.date(2000, 3, 4), 4), datetime.date(2000, 7, 4))
+        self.assertEqual(add_months(datetime.date(2000, 3, 4), 4), datetime.date(2000, 7, 4))
 
     def test_add_months_2(self):
-        self.assertEquals(add_months(datetime.date(2000, 3, 4), 26), datetime.date(2002, 5, 4))
+        self.assertEqual(add_months(datetime.date(2000, 3, 4), 26), datetime.date(2002, 5, 4))
 
     def test_add_months_3(self):
-        self.assertEquals(add_months(datetime.date(2000, 3, 31), 13), datetime.date(2001, 4, 30))
+        self.assertEqual(add_months(datetime.date(2000, 3, 31), 13), datetime.date(2001, 4, 30))
 
     def test_add_months_4(self):
-        self.assertEquals(add_months(datetime.date(2000, 1, 1), 11), datetime.date(2000, 12, 1))
+        self.assertEqual(add_months(datetime.date(2000, 1, 1), 11), datetime.date(2000, 12, 1))
 
     def test_add_dekad_1(self):
-        self.assertEquals(add_dekads(datetime.date(2000, 1, 1), 2), datetime.date(2000, 1, 21))
+        self.assertEqual(add_dekads(datetime.date(2000, 1, 1), 2), datetime.date(2000, 1, 21))
 
     def test_add_dekad_2(self):
-        self.assertEquals(add_dekads(datetime.date(2000, 1, 28), 1), datetime.date(2000, 2, 8))
+        self.assertEqual(add_dekads(datetime.date(2000, 1, 28), 1), datetime.date(2000, 2, 8))
 
     def test_add_dekad_3(self):
-        self.assertEquals(add_dekads(datetime.date(2000, 1, 30), 3), datetime.date(2000, 3, 10))
+        self.assertEqual(add_dekads(datetime.date(2000, 1, 30), 3), datetime.date(2000, 3, 10))
 
     def test_add_pentad_1(self):
-        self.assertEquals(add_pentads(datetime.date(2000, 1, 1), 2), datetime.date(2000, 1, 11))
+        self.assertEqual(add_pentads(datetime.date(2000, 1, 1), 2), datetime.date(2000, 1, 11))
 
     def test_add_pentad_2(self):
-        self.assertEquals(add_pentads(datetime.date(2000, 1, 28), 1), datetime.date(2000, 2, 3))
+        self.assertEqual(add_pentads(datetime.date(2000, 1, 28), 1), datetime.date(2000, 2, 3))
 
     def test_add_pentad_3(self):
-        self.assertEquals(add_pentads(datetime.date(2000, 1, 30), 3), datetime.date(2000, 2, 15))
+        self.assertEqual(add_pentads(datetime.date(2000, 1, 30), 3), datetime.date(2000, 2, 15))
 
     def test_add_days8_1(self):
-        self.assertEquals(add_days(datetime.date(2000, 1, 1), 2, 8), datetime.date(2000, 1, 17))
+        self.assertEqual(add_days(datetime.date(2000, 1, 1), 2, 8), datetime.date(2000, 1, 17))
 
     def test_add_days8_2(self):
-        self.assertEquals(add_days(datetime.date(2000, 2, 26), 1, 8), datetime.date(2000, 3, 5))
+        self.assertEqual(add_days(datetime.date(2000, 2, 26), 1, 8), datetime.date(2000, 3, 5))
 
     def test_add_days8_3(self):
-        self.assertEquals(add_days(datetime.date(2001, 2, 26), 1, 8), datetime.date(2001, 3, 6))
+        self.assertEqual(add_days(datetime.date(2001, 2, 26), 1, 8), datetime.date(2001, 3, 6))
 
     def test_add_days8_4(self):
-        self.assertEquals(add_days(datetime.date(2000, 12, 25), 1, 8), datetime.date(2001, 1, 1))
+        self.assertEqual(add_days(datetime.date(2000, 12, 25), 1, 8), datetime.date(2001, 1, 1))
 
     def test_add_days16_1(self):
-        self.assertEquals(add_days(datetime.date(2000, 12, 25), 1, 16), datetime.date(2001, 1, 1))
+        self.assertEqual(add_days(datetime.date(2000, 12, 25), 1, 16), datetime.date(2001, 1, 1))
 
 
 class TestHelpersGap(unittest.TestCase):

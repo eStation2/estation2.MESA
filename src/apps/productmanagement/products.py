@@ -55,6 +55,9 @@ class Product(object):
         self._db_product = querydb.get_product_native(**kwargs)
         if self._db_product is None:
             raise NoProductFound(kwargs)
+        if isinstance(self._db_product,list):
+            if len(self._db_product) == 0:
+                raise NoProductFound(kwargs)
         self._fullpath = os.path.join(es_constants.es2globals['processing_dir'], product_code)
         if version:
             self._fullpath = os.path.join(self._fullpath, version)
@@ -92,6 +95,7 @@ class Product(object):
         return [subproduct for subproduct in
                     set(os.path.basename(subproduct) for subproduct in self._get_full_subproducts(mapset=mapset))]
 
+    # Return the missing info for a single dataset (i.e. product-version-mapset-subproduct)
     def get_missing_dataset_subproduct(self, mapset, sub_product_code, from_date=None, to_date=None):
         mapset_obj = Mapset(mapset_code=mapset)
         missing = {
@@ -108,6 +112,7 @@ class Product(object):
         missing['info'] = dataset.get_dataset_normalized_info(from_date, to_date)
         return missing
 
+    # Return the list of datasets (i.e. mapset*subproducts) associated to prod-version
     def get_missing_datasets(self, mapset=None, sub_product_code=None, from_date=None, to_date=None):
         missings = []
         if sub_product_code:
