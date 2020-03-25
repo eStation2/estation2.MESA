@@ -21,17 +21,17 @@ class TestFunctions(unittest.TestCase):
 
         # Static Definitions
         base_input_dir  = '/data/processing/'
-        output_base_dir = '/data/processing/test_OTJT/'
+        output_base_dir = '/data/tmp/test_OTJT/'
 
         # ============ Select the product ========================
-        product = 'pml-modis-chl'
+        product = 'pml-modis-sst'
 
         if product == 'pml-modis-sst':
             version='3.0'
             subproduct='sst-3day'
             type='tif'
             region='SPOTV-IOC-1km'
-            date='20161017'
+            date='20200318'
 
             # Best found so far ...
 
