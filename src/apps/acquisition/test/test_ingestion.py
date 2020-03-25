@@ -4,10 +4,11 @@ from __future__ import absolute_import
 from __future__ import division
 from builtins import open
 from future import standard_library
+
 standard_library.install_aliases()
 from builtins import str
-_author__ = "Marco Clerici"
 
+_author__ = "Marco Clerici"
 
 from config import es_constants
 from apps.acquisition import ingestion
@@ -26,6 +27,7 @@ from osgeo import gdal
 
 # Overwrite Dirs
 from lib.python import es_logging as log
+
 logger = log.my_logger(__name__)
 
 
@@ -42,23 +44,23 @@ class TestIngestion(unittest.TestCase):
         # having columns as: latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp
 
         # Definitions
-        myfile='Global_MCD14DL_2015042.txt'
+        myfile = 'Global_MCD14DL_2015042.txt'
         file_mcd14dl = es_constants.es2globals['ingest_dir'] + myfile
-        shutil.copy('/data/processing/modis-firms/v5.0/archive/'+myfile, file_mcd14dl)
+        shutil.copy('/data/processing/modis-firms/v5.0/archive/' + myfile, file_mcd14dl)
         pix_size = '0.008928571428571'
         # Create a temporary working dir
-        tmpdir='/tmp/eStation2/test_ingest_firms_nasa/'
-        file_vrt=tmpdir+"firms_file.vrt"
-        file_csv=tmpdir+"firms_file.csv"
-        file_tif=tmpdir+"firms_file.tif"
-        out_layer="firms_file"
-        file_shp=tmpdir+out_layer+".shp"
+        tmpdir = '/tmp/eStation2/test_ingest_firms_nasa/'
+        file_vrt = tmpdir + "firms_file.vrt"
+        file_csv = tmpdir + "firms_file.csv"
+        file_tif = tmpdir + "firms_file.tif"
+        out_layer = "firms_file"
+        file_shp = tmpdir + out_layer + ".shp"
 
         # Write the 'vrt' file
-        with open(file_vrt,'w') as outFile:
+        with open(file_vrt, 'w') as outFile:
             outFile.write('<OGRVRTDataSource>\n')
             outFile.write('    <OGRVRTLayer name="firms_file">\n')
-            outFile.write('        <SrcDataSource>'+file_csv+'</SrcDataSource>\n')
+            outFile.write('        <SrcDataSource>' + file_csv + '</SrcDataSource>\n')
             outFile.write('        <OGRVRTLayer name="firms_file" />\n')
             outFile.write('        <GeometryType>wkbPoint</GeometryType>\n')
             outFile.write('        <LayerSRS>WGS84</LayerSRS>\n')
@@ -67,23 +69,23 @@ class TestIngestion(unittest.TestCase):
             outFile.write('</OGRVRTDataSource>\n')
 
         # Generate the csv file with header
-        with open(file_csv,'w') as outFile:
-            #outFile.write('latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp')
+        with open(file_csv, 'w') as outFile:
+            # outFile.write('latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp')
             with open(file_mcd14dl, 'r') as input_file:
                 outFile.write(input_file.read())
 
         # Execute the ogr2ogr command
-        command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
-        #print ('['+command+']')
+        command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' ' + file_vrt
+        # print ('['+command+']')
         os.system(command)
 
         # Convert from shapefile to rasterfile
-        command = 'gdal_rasterize  -l ' + out_layer + ' -burn 1 '\
+        command = 'gdal_rasterize  -l ' + out_layer + ' -burn 1 ' \
                   + ' -tr ' + str(pix_size) + ' ' + str(pix_size) \
-                  + ' -co "compress=LZW" -of GTiff -ot Byte '     \
-                  +file_shp+' '+file_tif
+                  + ' -co "compress=LZW" -of GTiff -ot Byte ' \
+                  + file_shp + ' ' + file_tif
 
-        #print ('['+command+']')
+        # print ('['+command+']')
         os.system(command)
 
     def test_ingest_modis_firms_nasa_6(self):
@@ -92,23 +94,23 @@ class TestIngestion(unittest.TestCase):
         # having columns as: latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp
 
         # Definitions
-        myfile='MODIS_C6_Global_MCD14DL_NRT_2016024.txt'
+        myfile = 'MODIS_C6_Global_MCD14DL_NRT_2016024.txt'
         file_mcd14dl = es_constants.es2globals['ingest_dir'] + myfile
         # shutil.copy('/data/processing/modis-firms/v5.0/archive/'+myfile, file_mcd14dl)
         pix_size = '0.008928571428571'
         # Create a temporary working dir
-        tmpdir='/tmp/eStation2/test_ingest_firms_nasa/'
-        file_vrt=tmpdir+"firms_file.vrt"
-        file_csv=tmpdir+"firms_file.csv"
-        file_tif=tmpdir+"firms_file.tif"
-        out_layer="firms_file"
-        file_shp=tmpdir+out_layer+".shp"
+        tmpdir = '/tmp/eStation2/test_ingest_firms_nasa/'
+        file_vrt = tmpdir + "firms_file.vrt"
+        file_csv = tmpdir + "firms_file.csv"
+        file_tif = tmpdir + "firms_file.tif"
+        out_layer = "firms_file"
+        file_shp = tmpdir + out_layer + ".shp"
 
         # Write the 'vrt' file
-        with open(file_vrt,'w') as outFile:
+        with open(file_vrt, 'w') as outFile:
             outFile.write('<OGRVRTDataSource>\n')
             outFile.write('    <OGRVRTLayer name="firms_file">\n')
-            outFile.write('        <SrcDataSource>'+file_csv+'</SrcDataSource>\n')
+            outFile.write('        <SrcDataSource>' + file_csv + '</SrcDataSource>\n')
             outFile.write('        <OGRVRTLayer name="firms_file" />\n')
             outFile.write('        <GeometryType>wkbPoint</GeometryType>\n')
             outFile.write('        <LayerSRS>WGS84</LayerSRS>\n')
@@ -117,23 +119,23 @@ class TestIngestion(unittest.TestCase):
             outFile.write('</OGRVRTDataSource>\n')
 
         # Generate the csv file with header
-        with open(file_csv,'w') as outFile:
-            #outFile.write('latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp')
+        with open(file_csv, 'w') as outFile:
+            # outFile.write('latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp')
             with open(file_mcd14dl, 'r') as input_file:
                 outFile.write(input_file.read())
 
         # Execute the ogr2ogr command
-        command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
-        #print ('['+command+']')
+        command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' ' + file_vrt
+        # print ('['+command+']')
         os.system(command)
 
         # Convert from shapefile to rasterfile
-        command = 'gdal_rasterize  -l ' + out_layer + ' -burn 1 '\
+        command = 'gdal_rasterize  -l ' + out_layer + ' -burn 1 ' \
                   + ' -tr ' + str(pix_size) + ' ' + str(pix_size) \
-                  + ' -co "compress=LZW" -of GTiff -ot Byte '     \
-                  +file_shp+' '+file_tif
+                  + ' -co "compress=LZW" -of GTiff -ot Byte ' \
+                  + file_shp + ' ' + file_tif
 
-        #print ('['+command+']')
+        # print ('['+command+']')
         os.system(command)
 
     def test_ingest_modis_sst_netcdf(self):
@@ -144,7 +146,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'v2013.1'
         subproductcode = 'sst-day'
         mapsetcode = 'MODIS-Africa-4km'
-        datasource_descrID='GSFC:CGI:MODIS:SST:1D'
+        datasource_descrID = 'GSFC:CGI:MODIS:SST:1D'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -159,15 +161,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
-        datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
-                                                      source_id=datasource_descrID)
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -180,7 +182,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'v2013.1'
         subproductcode = 'chla-day'
         mapsetcode = 'MODIS-Africa-4km'
-        datasource_descrID='GSFC:CGI:MODIS:CHLA:1D'
+        datasource_descrID = 'GSFC:CGI:MODIS:CHLA:1D'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -195,15 +197,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
-        datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
-                                                      source_id=datasource_descrID)
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -216,7 +218,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'v2012.0'
         subproductcode = 'kd490-day'
         mapsetcode = 'MODIS-Africa-4km'
-        datasource_descrID='GSFC:CGI:MODIS:KD490:1D'
+        datasource_descrID = 'GSFC:CGI:MODIS:KD490:1D'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -231,14 +233,14 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
-        datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
-                                                      source_id=datasource_descrID)
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -251,7 +253,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'v2012.0'
         subproductcode = 'par-day'
         mapsetcode = 'MODIS-Africa-4km'
-        datasource_descrID='GSFC:CGI:MODIS:PAR:1D'
+        datasource_descrID = 'GSFC:CGI:MODIS:PAR:1D'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -266,14 +268,14 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
-        datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
-                                                      source_id=datasource_descrID)
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -286,7 +288,7 @@ class TestIngestion(unittest.TestCase):
         productversion = '3.0'
         subproductcode = 'sst-3day'
         mapsetcode = 'SPOTV-IOC-1km'
-        datasource_descrID='EO:EUM:DAT:MULT:CPMAD:SST'
+        datasource_descrID = 'EO:EUM:DAT:MULT:CPMAD:SST'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -301,14 +303,14 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
-        datasource_descr=querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                      source_id=datasource_descrID)
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -321,7 +323,7 @@ class TestIngestion(unittest.TestCase):
         productversion = '3.0'
         subproductcode = 'chl-3day'
         mapsetcode = 'SPOTV-IOC-1km'
-        datasource_descrID='EO:EUM:DAT:MULT:CPMAD:OC'
+        datasource_descrID = 'EO:EUM:DAT:MULT:CPMAD:OC'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -336,19 +338,18 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
-        datasource_descr=querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                      source_id=datasource_descrID)
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
-
 
     def test_ingest_lsasaf_et_disk(self):
 
@@ -360,7 +361,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'undefined'
         subproductcode = 'et'
         mapsetcode = 'MSG-satellite-3km'
-        datasource_descrID='EO:EUM:DAT:MSG:ET-SEVIRI'
+        datasource_descrID = 'EO:EUM:DAT:MSG:ET-SEVIRI'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -375,14 +376,14 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -395,7 +396,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'undefined'
         subproductcode = 'et'
         mapsetcode = 'MSG-satellite-3km'
-        datasource_descrID='EO:EUM:DAT:MSG:ET-SEVIRI'
+        datasource_descrID = 'EO:EUM:DAT:MSG:ET-SEVIRI'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -410,15 +411,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -431,7 +432,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'V1.4'
         subproductcode = 'lai'
         mapsetcode = 'SPOTV-Africa-1km'
-        datasource_descrID='EO:EUM:DAT:PROBA-V:LAI'
+        datasource_descrID = 'EO:EUM:DAT:PROBA-V:LAI'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -446,15 +447,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -467,7 +468,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'V1.4'
         subproductcode = 'fcover'
         mapsetcode = 'SPOTV-Africa-1km'
-        datasource_descrID='EO:EUM:DAT:PROBA-V:FCOVER'
+        datasource_descrID = 'EO:EUM:DAT:PROBA-V:FCOVER'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -482,15 +483,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -503,7 +504,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'V2.0'
         subproductcode = 'fcover'
         mapsetcode = 'SPOTV-Africa-1km'
-        datasource_descrID='PDF:GLS:VGT-V2.0:FCOVER'
+        datasource_descrID = 'PDF:GLS:VGT-V2.0:FCOVER'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -518,15 +519,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -539,7 +540,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'V1.4'
         subproductcode = 'fapar'
         mapsetcode = 'SPOTV-Africa-1km'
-        datasource_descrID='EO:EUM:DAT:PROBA-V:FAPAR'
+        datasource_descrID = 'EO:EUM:DAT:PROBA-V:FAPAR'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -554,15 +555,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -575,7 +576,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'V1.0'
         subproductcode = 'dmp'
         mapsetcode = 'SPOTV-Africa-1km'
-        datasource_descrID='EO:EUM:DAT:PROBA-V:DMP'
+        datasource_descrID = 'EO:EUM:DAT:PROBA-V:DMP'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -590,15 +591,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -611,7 +612,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'proba-v2.1'
         subproductcode = 'ndv'
         mapsetcode = 'SPOTV-Africa-1km'
-        datasource_descrID='EO:EUM:DAT:PROBA-V2.1:NDVI'
+        datasource_descrID = 'EO:EUM:DAT:PROBA-V2.1:NDVI'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -626,15 +627,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -647,7 +648,7 @@ class TestIngestion(unittest.TestCase):
         productversion = '2.0'
         subproductcode = '10d'
         mapsetcode = 'CHIRP-Africa-5km'
-        datasource_descrID='UCSB:CHIRPS:DEKAD:2.0'
+        datasource_descrID = 'UCSB:CHIRPS:DEKAD:2.0'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -662,18 +663,17 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
-
 
     def test_ingest_spi(self):
 
@@ -683,7 +683,7 @@ class TestIngestion(unittest.TestCase):
         productversion = '2.0'
         subproductcode = '10d'
         mapsetcode = 'CHIRP-Africa-5km'
-        datasource_descrID='UCSB:CHIRPS:DEKAD:2.0'
+        datasource_descrID = 'UCSB:CHIRPS:DEKAD:2.0'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -698,18 +698,17 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
-
 
     def test_ingest_chirps_tif(self):
 
@@ -719,7 +718,7 @@ class TestIngestion(unittest.TestCase):
         productversion = '2.0'
         subproductcode = '10d'
         mapsetcode = 'CHIRP-Africa-5km'
-        datasource_descrID='UCSB:CHIRPS:PREL:DEKAD'
+        datasource_descrID = 'UCSB:CHIRPS:PREL:DEKAD'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -734,11 +733,11 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
@@ -751,7 +750,7 @@ class TestIngestion(unittest.TestCase):
     def test_ingest_fewsnet_rfe(self):
 
         # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
-        #date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180306T095629_20180306T095929_20180306T114727_0179_028_307_3420_MAR_O_NR_002.SEN3.tar')
+        # date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180306T095629_20180306T095929_20180306T114727_0179_028_307_3420_MAR_O_NR_002.SEN3.tar')
         date_fileslist = glob.glob('/data/TestIngestion/a18073rb.zip')
         in_date = '18073'
         productcode = 'fewsnet-rfe'
@@ -782,9 +781,8 @@ class TestIngestion(unittest.TestCase):
         subproducts = []
         subproducts.append(sprod)
 
-
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
     def test_ingest_tamsat_rfe(self):
@@ -819,22 +817,20 @@ class TestIngestion(unittest.TestCase):
         subproducts = []
         subproducts.append(sprod)
 
-
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-
 
     def test_ingest_jrc_wbd_avg(self):
 
         date_fileslist = glob.glob('/data/ingest/JRC-WBD-AVG-ICPAC_1985-2015_1201*')
-        #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
+        # date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
         in_date = '1201'
         productcode = 'wd-gee'
         productversion = '1.0'
         subproductcode = 'avg'
         mapsetcode = 'WD-GEE-ECOWAS-AVG'
-        datasource_descrID='JRC:WBD:GEE:AVG'
+        datasource_descrID = 'JRC:WBD:GEE:AVG'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -849,15 +845,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -912,13 +908,13 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_mars_wsi(self):
 
-        date_fileslist = ['/data/ingest/wsi_hp_pasture_20190501.img','/data/ingest/wsi_hp_pasture_20190501.hdr']
+        date_fileslist = ['/data/ingest/wsi_hp_pasture_20190501.img', '/data/ingest/wsi_hp_pasture_20190501.hdr']
         in_date = '20190501'
         productcode = 'wsi-hp'
         productversion = 'V1.0'
         subproductcode = 'pasture'
         mapsetcode = 'SPOTV-Africa-1km'
-        datasource_descrID='JRC:MARS:WSI:PASTURE'
+        datasource_descrID = 'JRC:MARS:WSI:PASTURE'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -933,19 +929,18 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
-
 
     def test_ingest_ecmwf_rain(self):
 
@@ -955,7 +950,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'OPE'
         subproductcode = '10d'
         mapsetcode = 'ECMWF-Africa-25km'
-        datasource_descrID='ECMWF:MARS:RAIN:OPE'
+        datasource_descrID = 'ECMWF:MARS:RAIN:OPE'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -970,19 +965,18 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
-
 
     def test_ingest_eumetcast(self):
 
@@ -995,14 +989,13 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_jrc_wbd_occ(self):
 
-
         date_fileslist = glob.glob('/data/ingest/JRC-WBD_ICPAC_20181201*.tif')
         in_date = '20181201'
         productcode = 'wd-gee'
         productversion = '1.0'
         subproductcode = 'occurr'
         mapsetcode = 'WD-GEE-IGAD-AVG'
-        datasource_descrID='JRC:WBD:GEE'
+        datasource_descrID = 'JRC:WBD:GEE'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1017,15 +1010,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -1038,7 +1031,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'OPE'
         subproductcode = '10d'
         mapsetcode = 'ECMWF-Africa-25km'
-        datasource_descrID='ECMWF:MARS:EVPT:OPE'
+        datasource_descrID = 'ECMWF:MARS:EVPT:OPE'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1053,15 +1046,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -1074,7 +1067,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'undefined'
         subproductcode = 'mpe'
         mapsetcode = 'MSG-satellite-3km'
-        datasource_descrID='EO:EUM:DAT:MSG:MPE-GRIB'
+        datasource_descrID = 'EO:EUM:DAT:MSG:MPE-GRIB'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1089,15 +1082,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
 
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
@@ -1109,7 +1102,7 @@ class TestIngestion(unittest.TestCase):
         productversion = '2.0'
         subproductcode = '1day'
         mapsetcode = 'ARC2-Africa-11km'
-        datasource_descrID='CPC:NOAA:RAIN:ARC2'
+        datasource_descrID = 'CPC:NOAA:RAIN:ARC2'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1124,16 +1117,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-
 
     # def test_ingest_cpc_soilmoisture(self):
     #
@@ -1158,15 +1150,15 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_gsod_rain(self):
 
-        filename='*-99999-2016.op.gz'
-        os.system('cp /data/temp/Data/GSOD/'+filename+' /data/ingest/')
-        date_fileslist = glob.glob('/data/ingest/'+filename)
-        in_date='20160501'
+        filename = '*-99999-2016.op.gz'
+        os.system('cp /data/temp/Data/GSOD/' + filename + ' /data/ingest/')
+        date_fileslist = glob.glob('/data/ingest/' + filename)
+        in_date = '20160501'
         productcode = 'gsod-rain'
         productversion = '1.0'
         subproductcode = '1dmeas'
         mapsetcode = 'SPOTV-SADC-1km'
-        datasource_descrID='NOAA:GSOD'
+        datasource_descrID = 'NOAA:GSOD'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1181,32 +1173,31 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
 
-
     def test_ingest_cpc_soilmoisture(self):
 
-        filename='w.201609.mon'
-        shutil.copy('/data/processing/exchange/'+filename,'/data/ingest/'+filename)
+        filename = 'w.201609.mon'
+        shutil.copy('/data/processing/exchange/' + filename, '/data/ingest/' + filename)
         date_fileslist = glob.glob('/data/ingest/w.201609.mon')
         in_date = '201201'
         productcode = 'cpc-sm'
         productversion = '1.0'
         subproductcode = 'sm'
         mapsetcode = 'CPC-Africa-50km'
-        #mapsetcode = 'CPC-Global-50km'
-        datasource_descrID='CPC:NCEP:NOAA:SM'
+        # mapsetcode = 'CPC-Global-50km'
+        datasource_descrID = 'CPC:NCEP:NOAA:SM'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1221,30 +1212,30 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
 
     def test_ingest_sadc_wrsi(self):
 
-        filename='WRSI2016*'
-        os.system('cp /data/processing/exchange/WRSI/'+filename+' /data/ingest/')
-        date_fileslist = glob.glob('/data/ingest/'+filename+'.bil')
+        filename = 'WRSI2016*'
+        os.system('cp /data/processing/exchange/WRSI/' + filename + ' /data/ingest/')
+        date_fileslist = glob.glob('/data/ingest/' + filename + '.bil')
         in_date = '201632'
         productcode = 'wrsi-sadc'
         productversion = '1.0'
         subproductcode = 'wrsi'
         mapsetcode = 'GEOWRSI-SADC-11km'
-        datasource_descrID='BDMS:SADC:GEOWRSI:WRSI'
+        datasource_descrID = 'BDMS:SADC:GEOWRSI:WRSI'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1259,15 +1250,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -1280,7 +1271,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'undefined'
         subproductcode = 'mpe'
         mapsetcode = 'MSG-satellite-3km'
-        datasource_descrID='EO:EUM:DAT:MSG:MPE-UMARF'
+        datasource_descrID = 'EO:EUM:DAT:MSG:MPE-UMARF'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1295,24 +1286,23 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
 
     def test_ingest_g_cls_ndvi_2_2_netcdf(self):
 
-
         file = '/data/TestIngestion/c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.nc'
-        outputfile= '/data/TestIngestion/c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.tif'
+        outputfile = '/data/TestIngestion/c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.tif'
 
         # hdf = gdal.Open('HDF5:'+file+'://NDVI')
         hdf = gdal.Open(file)
@@ -1321,7 +1311,7 @@ class TestIngestion(unittest.TestCase):
         # sdslist = in_ds.GetSubDatasets()
         # in_ds = gdal.Open('HDF5:'+file+'://NDVI')
         ingestion.write_ds_to_geotiff(hdf, outputfile)
-        print (sdsdict)
+        print(sdsdict)
         #
         #
         # date_fileslist = glob.glob('/data/native/DISK_MSG_MPE/MSG3*201609301200*gz')
@@ -1368,8 +1358,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'proba-v2.2'
         subproductcode = 'ndv'
         mapsetcode = 'SPOTV-Africa-1km'
-        datasource_descrID='EO:EUM:DAT:PROBA-V2.2:NDVI'
-
+        datasource_descrID = 'EO:EUM:DAT:PROBA-V2.2:NDVI'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1384,15 +1373,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -1408,8 +1397,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'proba100-v1.0'
         subproductcode = 'ndv'
         mapsetcode = 'PROBAV-Africa-100m'
-        datasource_descrID='PDF:VITO:PROBA-V1:NDVI100'
-
+        datasource_descrID = 'PDF:VITO:PROBA-V1:NDVI100'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1424,15 +1412,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -1474,30 +1462,27 @@ class TestIngestion(unittest.TestCase):
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger,
-                               echo_query=1)
+                            echo_query=1)
 
         self.assertEqual(1, 1)
 
     def test_ingest_g_cls_ndvi_2_2_global(self):
 
-
         # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
         # Products released from VITO in March 2017
 
-        #date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_201706*_GLOBE_PROBAV_V2.2.1.nc')
+        # date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_201706*_GLOBE_PROBAV_V2.2.1.nc')
         # date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_19*_GLOBE_VGT_V2.2.1.nc')
         date_fileslist = glob.glob('/data/processing/exchange/c_gls_NDVI_201811010000_GLOBE_PROBAV_V2.2.1.nc')
 
         for one_file in date_fileslist:
-
             one_filename = os.path.basename(one_file)
             in_date = one_filename.split('_')[3]
             productcode = 'vgt-ndvi'
             productversion = 'proba-v2.2'
             subproductcode = 'ndv'
             mapsetcode = 'SPOTV-Africa-1km'
-            datasource_descrID='PDF:GLS:PROBA-V2.2:NDVI'
-
+            datasource_descrID = 'PDF:GLS:PROBA-V2.2:NDVI'
 
             product = {"productcode": productcode,
                        "version": productversion}
@@ -1512,11 +1497,11 @@ class TestIngestion(unittest.TestCase):
             re_extract = product_in_info.re_extract
 
             sprod = {'subproduct': subproductcode,
-                                 'mapsetcode': mapsetcode,
-                                 're_extract': re_extract,
-                                 're_process': re_process}
+                     'mapsetcode': mapsetcode,
+                     're_extract': re_extract,
+                     're_process': re_process}
 
-            subproducts=[]
+            subproducts = []
             subproducts.append(sprod)
             datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                             source_id=datasource_descrID)
@@ -1524,21 +1509,18 @@ class TestIngestion(unittest.TestCase):
 
     def test_ingest_g_cls_ndvi_300m_global(self):
 
-
         # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
         # Products released from VITO in March 2017
         date_fileslist = glob.glob('/data/ingest/c_gls_NDVI300_201901010000_GLOBE_PROBAV_V1.0.1.nc')
 
         for one_file in date_fileslist:
-
             one_filename = os.path.basename(one_file)
             in_date = '20190101'
             productcode = 'vgt-ndvi'
             productversion = 'proba300-v1.0'
             subproductcode = 'ndv'
             mapsetcode = 'SPOTV-Africa-300m'
-            datasource_descrID='PDF:GLS:PROBA-V1.0:NDVI300'
-
+            datasource_descrID = 'PDF:GLS:PROBA-V1.0:NDVI300'
 
             product = {"productcode": productcode,
                        "version": productversion}
@@ -1552,16 +1534,15 @@ class TestIngestion(unittest.TestCase):
             re_process = product_in_info.re_process
             re_extract = product_in_info.re_extract
             sprod = {'subproduct': subproductcode,
-                                 'mapsetcode': mapsetcode,
-                                 're_extract': re_extract,
-                                 're_process': re_process }
+                     'mapsetcode': mapsetcode,
+                     're_extract': re_extract,
+                     're_process': re_process}
 
-            subproducts=[]
+            subproducts = []
             subproducts.append(sprod)
             datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                             source_id=datasource_descrID)
             ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-
 
     def test_ingest_g_cls_ba_300m_global(self):
         # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
@@ -1569,14 +1550,13 @@ class TestIngestion(unittest.TestCase):
         date_fileslist = glob.glob('/data/ingest/c_gls_BA300_201908100000_GLOBE_PROBAV_V1.1.1.nc')
 
         for one_file in date_fileslist:
-
             one_filename = os.path.basename(one_file)
             in_date = '20190510'
             productcode = 'vgt-ba'
             productversion = 'V1.1'
             subproductcode = 'ba'
             mapsetcode = 'SENTINEL-Africa-300m'
-            datasource_descrID='PDF:GLS:PROBA-V1.1:BA300'
+            datasource_descrID = 'PDF:GLS:PROBA-V1.1:BA300'
 
             product = {"productcode": productcode,
                        "version": productversion}
@@ -1590,17 +1570,16 @@ class TestIngestion(unittest.TestCase):
             re_process = product_in_info.re_process
             re_extract = product_in_info.re_extract
             sprod = {'subproduct': subproductcode,
-                                 'mapsetcode': mapsetcode,
-                                 're_extract': re_extract,
-                                 're_process': re_process,
-                                 'nodata': product_in_info.no_data }
+                     'mapsetcode': mapsetcode,
+                     're_extract': re_extract,
+                     're_process': re_process,
+                     'nodata': product_in_info.no_data}
 
-            subproducts=[]
+            subproducts = []
             subproducts.append(sprod)
             datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                             source_id=datasource_descrID)
             ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-
 
     def test_ingest_g_cls_fapar_2_0_1(self):
 
@@ -1613,8 +1592,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'V2.0'
         subproductcode = 'fapar'
         mapsetcode = 'SPOTV-Africa-1km'
-        datasource_descrID='EO:EUM:DAT:PROBA-V2.0:FAPAR'
-
+        datasource_descrID = 'EO:EUM:DAT:PROBA-V2.0:FAPAR'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1629,15 +1607,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -1653,8 +1631,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'V2.0'
         subproductcode = 'dmp'
         mapsetcode = 'SPOTV-Africa-1km'
-        datasource_descrID='PDF:GLS:PROBA-V2.0:DMP_RT0'
-
+        datasource_descrID = 'PDF:GLS:PROBA-V2.0:DMP_RT0'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1670,11 +1647,11 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
@@ -1691,8 +1668,7 @@ class TestIngestion(unittest.TestCase):
         productversion = 'v1'
         subproductcode = 'sadc-vci'
         mapsetcode = 'SPOTV-SADC-1km'
-        datasource_descrID='EO:EUM:DAT:MULT:VCI'
-
+        datasource_descrID = 'EO:EUM:DAT:MULT:VCI'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1707,15 +1683,15 @@ class TestIngestion(unittest.TestCase):
         re_extract = product_in_info.re_extract
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -1723,17 +1699,17 @@ class TestIngestion(unittest.TestCase):
     def test_ingest_s3_olci_wrr(self):
 
         # Test the ingestion of the Sentinel-3/OLCI Level-2 WRR product (on d6-dev-vm19 !!!!!)
-        #date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/S3A_OL_2_WRR____20180306T092820_20180306T101211_20180306T115859_2631_028_307______MAR_O_NR_002.SEN3.tar')
-        date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/march08/S3A_OL_2_WRR____*.SEN3.tar')
-        single_date =  os.path.basename(date_fileslist[0])
+        # date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/S3A_OL_2_WRR____20180306T092820_20180306T101211_20180306T115859_2631_028_307______MAR_O_NR_002.SEN3.tar')
+        date_fileslist = glob.glob(
+            '/data/processing/exchange/Sentinel-3/S3A_OL_2_WRR/march08/S3A_OL_2_WRR____*.SEN3.tar')
+        single_date = os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
-        in_date = in_date.split('T')[0] #+ '0000'
+        in_date = in_date.split('T')[0]  # + '0000'
         productcode = 'olci-wrr'
         productversion = 'V02.0'
         subproductcode = 'chl-nn'
         mapsetcode = 'SPOTV-Africa-1km'
-        datasource_descrID='EO:EUM:DAT:SENTINEL-3:OL_2_WRR___NRT'
-
+        datasource_descrID = 'EO:EUM:DAT:SENTINEL-3:OL_2_WRR___NRT'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1749,31 +1725,31 @@ class TestIngestion(unittest.TestCase):
         no_data = product_in_info.no_data
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process,
-                             'nodata': no_data}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process,
+                 'nodata': no_data}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
     def test_ingest_s3_olci_wrr_chl_oc4me(self):
 
         # Test the ingestion of the Sentinel-3/OLCI Level-2 WRR product (on d6-dev-vm19 !!!!!)
-        date_fileslist = glob.glob('/spatial_data//data/processing/olci-wrr/V02.0/archive/S3A_OL_2_WRR____20181201*.SEN3.tar')
-        single_date =  os.path.basename(date_fileslist[0])
+        date_fileslist = glob.glob(
+            '/spatial_data//data/processing/olci-wrr/V02.0/archive/S3A_OL_2_WRR____20181201*.SEN3.tar')
+        single_date = os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
-        in_date = in_date.split('T')[0] #+ '0000'
+        in_date = in_date.split('T')[0]  # + '0000'
         productcode = 'olci-wrr'
         productversion = 'V02.0'
         subproductcode = 'chl-oc4me'
         mapsetcode = 'SPOTV-Africa-1km'
-        datasource_descrID='EO:EUM:DAT:SENTINEL-3:OL_2_WRR___NRT'
-
+        datasource_descrID = 'EO:EUM:DAT:SENTINEL-3:OL_2_WRR___NRT'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1789,16 +1765,16 @@ class TestIngestion(unittest.TestCase):
         no_data = product_in_info.no_data
 
         sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process,
-                             'nodata': no_data}
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process,
+                 'nodata': no_data}
 
-        subproducts=[]
+        subproducts = []
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
     def test_ingest_smos_sss(self):
@@ -1806,7 +1782,7 @@ class TestIngestion(unittest.TestCase):
         date_fileslist = glob.glob('/data/ingest/SM_OPER_MIR_OSUDP2_20190805T*.nc')
         single_date = os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
-        in_date = '20190805' #in_date.split('T')[0]  # + '0000'
+        in_date = '20190805'  # in_date.split('T')[0]  # + '0000'
         productcode = 'smos-nc'
         productversion = '1.0'
         subproductcode = 'sss'
@@ -1845,11 +1821,11 @@ class TestIngestion(unittest.TestCase):
     def test_ingest_s3_slstr_sst(self):
 
         # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
-        #date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180306T095629_20180306T095929_20180306T114727_0179_028_307_3420_MAR_O_NR_002.SEN3.tar')
+        # date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180306T095629_20180306T095929_20180306T114727_0179_028_307_3420_MAR_O_NR_002.SEN3.tar')
         date_fileslist = glob.glob('/data/ingest/S3A_SL_2_WST____20190405T09*.SEN3.tar')
-        single_date =  os.path.basename(date_fileslist[0])
+        single_date = os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
-        in_date = in_date.split('T')[0] #+ '0000'
+        in_date = in_date.split('T')[0]  # + '0000'
         # for one_file in date_fileslist:
         #
         #     one_filename = os.path.basename(one_file)
@@ -1886,9 +1862,8 @@ class TestIngestion(unittest.TestCase):
         subproducts = []
         subproducts.append(sprod)
 
-
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
     def test_ingest_s3_slstr_sst_zipped(self):
@@ -1941,7 +1916,6 @@ class TestIngestion(unittest.TestCase):
         #                                                                       source_id=datasource_descrID):
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-
     def test_ingest_motu_chl(self):
 
         date_fileslist = glob.glob('/data/ingest/20181124_GLOBAL_ANALYSIS_FORECAST_BIO_001_014-TDS.nc')
@@ -1975,9 +1949,8 @@ class TestIngestion(unittest.TestCase):
         subproducts = []
         subproducts.append(sprod)
 
-
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
+                                                        source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
     def test_ingest_aviso_mwind(self):
@@ -2016,5 +1989,3 @@ class TestIngestion(unittest.TestCase):
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-
-

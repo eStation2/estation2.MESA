@@ -13,6 +13,11 @@ import json
 
 
 class TestFunctions(TestCase):
+
+    def test_write_graph_xml_band_math_subset(self):
+        param = ''
+        self.assertTrue(functions.write_graph_xml_band_math_subset(param))
+
     def test_tcp_test(self):
         mesaproc = "139.191.147.79:22"
         mesaproc = 'mesa-proc.ies.jrc.it'

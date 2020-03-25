@@ -162,7 +162,7 @@ class TestHelpersGap(unittest.TestCase):
     def test_find_gap_dekad_intervals_no_gap_to_date(self):
         intervals = find_gaps(self.files_dekad, frequency=Frequency(dateformat='YYYYMMDD', value=1,
                 unit=Frequency.UNIT.DEKAD, frequency_type=Frequency.TYPE.EVERY),
-                only_intervals=True, to_date=datetime.date(2014, 06, 10))
+                only_intervals=True, to_date=datetime.date(2014, 6, 10))
         self.assertEqual(len(intervals), 1)
         self.assertEqual(intervals[0][2], INTERVAL_TYPE.PRESENT)
 

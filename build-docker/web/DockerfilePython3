@@ -14,13 +14,13 @@ ARG GID
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt update && apt install -y software-properties-common
-RUN add-apt-repository ppa:ubuntugis/ubuntugis-unstable -y
+RUN add-apt-repository ppa:ubuntugis/ppa -y
 
 # Add Apache2 with mod-wsgi and Python3  - not available python3.7-dev python3.7-tk 
 RUN apt-get update && apt-get install -y apache2 apache2-dev python3-dev python3-pip libapache2-mod-wsgi-py3 locales
 
 # Optional Development packages
-RUN apt-get install -y make cmake gcc nano vim wget git
+RUN apt-get install -y make cmake gcc nano vim wget git unzip
 
 # Add essential packages
 RUN apt-get install -y build-essential ca-certificates libcurl4-openssl-dev libssl-dev
