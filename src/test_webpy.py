@@ -30,6 +30,24 @@ logger = log.my_logger(__name__)
 
 class TestWebpy(unittest.TestCase):
 
+    def test_ProductAcquisition(self):
+        params = {
+            'activated': None
+        }
+        p = functions.dotdict(params)
+        result = webpy_esapp_helpers.getProductAcquisition(p)
+        params = {
+            'activated': True
+        }
+        p = functions.dotdict(params)
+        result = webpy_esapp_helpers.getProductAcquisition(p)
+        params = {
+            'activated': False
+        }
+        p = functions.dotdict(params)
+        result = webpy_esapp_helpers.getProductAcquisition(p)
+        self.assertEqual(1, 1)
+
     def test_ExecuteServiceTask(self):
         params = {
             'service': 'system',

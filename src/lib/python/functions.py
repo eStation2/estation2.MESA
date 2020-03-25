@@ -62,6 +62,7 @@ logger = log.my_logger(__name__)
 
 dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'derived'}
 
+
 # class ObjectEncoder(JSONEncoder):
 #     def default(self, o):
 #         return o.__dict__
@@ -96,7 +97,8 @@ def setThemaOtherPC(server_address, thema):
     # from urllib import request, error
     thema_is_changed = False
     # Set "/esapp" in factorysettings.ini as webserver_root because on CentOS no /esapp is needed!
-    url = "http://" + server_address + es_constants.es2globals['webserver_root'] + "/systemsettings/changethemafromotherpc?thema="+thema
+    url = "http://" + server_address + es_constants.es2globals[
+        'webserver_root'] + "/systemsettings/changethemafromotherpc?thema=" + thema
     req = urllib.request.Request(url)
     try:
         response = urllib.request.urlopen(req)
@@ -176,7 +178,7 @@ def _check_connection(server_info):
         sock = socket()
         # sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(1)
-        sock.connect((server_info[:cpos], int(server_info[cpos+1:])))
+        sock.connect((server_info[:cpos], int(server_info[cpos + 1:])))
         # sock.shutdown(1)
         sock.close
         return True
@@ -190,9 +192,9 @@ def check_connection(server_info):
         response = os.system("ping -c 1 -w2 " + server_info + " > /dev/null 2>&1")
         # check the response...
         if response == 0:
-          return True
+            return True
         else:
-          return False
+            return False
     except:
         return False
 
@@ -210,7 +212,7 @@ def getStatusPostgreSQL():
 
         out, err = p.communicate()
         # print out
-        if re.search('running', out) or re.search('online', out) or re.search('en cours', out):      # ToDo: Add Portuguese!
+        if re.search('running', out) or re.search('online', out) or re.search('en cours', out):  # ToDo: Add Portuguese!
             psql_status = True
         else:
             psql_status = False
@@ -267,7 +269,6 @@ def getStatusAllServices():
 
 
 def getStatusAllServicesWin():
-
     # Get status of the ingestion service
     command = 'NET START | find "estation2 - ingestion"'
     ingest = os.system(command)
@@ -321,13 +322,13 @@ def getStatusAllServicesWin():
 
 def getListVersions():
     # Return the list of installed versions as a dictionary, by looking at versioned dirs
-    base = es_constants.es2globals['base_dir']+"-"
+    base = es_constants.es2globals['base_dir'] + "-"
     versions = []
-    vers_dirs = glob.glob(base+'*')
+    vers_dirs = glob.glob(base + '*')
     for ver in vers_dirs:
         if os.path.isdir(ver):
             if sys.platform == 'win32':
-                ver = ver.replace('\\','/')
+                ver = ver.replace('\\', '/')
                 base = base.replace('\\', '/')
             v = ver.replace(base, '')
             versions.append(v)
@@ -343,7 +344,7 @@ def getListVersions():
 def setSystemSetting(setting=None, value=None):
     import configparser
     if setting is not None:
-        systemsettingsfilepath = es_constants.es2globals['settings_dir']+'/system_settings.ini'
+        systemsettingsfilepath = es_constants.es2globals['settings_dir'] + '/system_settings.ini'
         config_systemsettings = configparser.ConfigParser()
         config_systemsettings.read(['system_settings.ini', systemsettingsfilepath])
 
@@ -362,7 +363,7 @@ def setSystemSetting(setting=None, value=None):
 def setUserSetting(setting=None, value=None):
     import configparser
     if setting is not None:
-        usersettingsfilepath = es_constants.es2globals['settings_dir']+'/user_settings.ini'
+        usersettingsfilepath = es_constants.es2globals['settings_dir'] + '/user_settings.ini'
         config_usersettings = configparser.ConfigParser()
         config_usersettings.read(['user_settings.ini', usersettingsfilepath])
 
@@ -390,7 +391,7 @@ def getSystemSettings():
 
     thisfiledir = os.path.dirname(os.path.abspath(__file__))
 
-    systemsettingsfile = es_constants.es2globals['settings_dir']+'/system_settings.ini'
+    systemsettingsfile = es_constants.es2globals['settings_dir'] + '/system_settings.ini'
     if not os.path.isfile(systemsettingsfile):
         systemsettingsfile = os.path.join(thisfiledir, 'config/install/', 'system_settings.ini')
 
@@ -400,7 +401,7 @@ def getSystemSettings():
     systemsettings = config_systemsettings.items('SYSTEM_SETTINGS')  # returns a list of tuples
     # for setting, value in systemsettings:
     #      print setting + ': ' + value
-    systemsettings = dict(systemsettings)   # convert list of tuples to dict
+    systemsettings = dict(systemsettings)  # convert list of tuples to dict
     # print systemsettings
     return systemsettings
 
@@ -411,7 +412,7 @@ def getUserSettings():
     thisfiledir = os.path.dirname(os.path.abspath(__file__))
 
     if es_constants.es2globals['settings_dir'] != '':
-        usersettingsfile = es_constants.es2globals['settings_dir']+'/user_settings.ini'
+        usersettingsfile = es_constants.es2globals['settings_dir'] + '/user_settings.ini'
     else:
         usersettingsfile = '/eStation2/settings/user_settings.ini'
 
@@ -424,7 +425,7 @@ def getUserSettings():
     usersettings = config_usersettings.items('USER_SETTINGS')  # returns a list of tuples
     # for setting, value in usersettings:
     #      print setting + ': ' + value
-    usersettings = dict(usersettings)   # convert list of tuples to dict
+    usersettings = dict(usersettings)  # convert list of tuples to dict
     # print usersettings
     return usersettings
 
@@ -486,7 +487,7 @@ def rgb2html(rgb):
     color += '00' if len(g) < 2 else '' + g
     color += '00' if len(b) < 2 else '' + b
 
-    return '#'+color
+    return '#' + color
 
 
 def __row2dict(row):
@@ -545,7 +546,6 @@ def tojson(queryresult):
 
 
 def _proxy_defined():
-
     proxy_def = True
 
     # Check if proxy is defined
@@ -588,7 +588,7 @@ def _proxy_internet_on():
     return False
 
 
-def internet_on():     # is_connected():
+def internet_on():  # is_connected():
 
     # Add check for JRC server
     system_settings = getSystemSettings()
@@ -710,7 +710,8 @@ def is_date_yyyymmddhhmm(string_date, silent=False):
         return isdate_yyyymmddhhmm
 
     # check the yyyymmdd format
-    date_format_yyyymmddhhmm = re.match('^[1-2][0-9][0-9][0-9][0-1][0-9][0-3][0-9][0-2][0-9][0-5][0-9]', str(string_date))
+    date_format_yyyymmddhhmm = re.match('^[1-2][0-9][0-9][0-9][0-1][0-9][0-3][0-9][0-2][0-9][0-5][0-9]',
+                                        str(string_date))
     if date_format_yyyymmddhhmm:
         year = int(string_date[0:4])
         month = int(string_date[4:6])
@@ -788,7 +789,7 @@ def conv_date_2_dekad(year_month_day):
         if not int(str(year_month_day)[0:4]) >= 1980:
             logger.error('Invalid Year of Date. Must be >= 1980 %s' % year_month_day)
         else:
-            year = int(str(year_month_day)[0:4])            
+            year = int(str(year_month_day)[0:4])
             month = int(str(year_month_day)[4:6])
             day = int(str(year_month_day)[6:8])
             if day == 31:
@@ -810,15 +811,14 @@ def conv_date_2_dekad(year_month_day):
 #   Output: 8-day period of the year, in range 1 .. 45
 #
 def conv_date_2_8days(year_month_day):
-
     period_no = -1
     # check the format of year_month_day. It must be a valid YYYYMMDD format.
     if is_date_yyyymmdd(year_month_day):
-        dt_current = datetime.date(int(year_month_day[0:4]),int(year_month_day[4:6]),int(year_month_day[6:8]))
-        dt_first   = datetime.date(int(year_month_day[0:4]),1,1)
+        dt_current = datetime.date(int(year_month_day[0:4]), int(year_month_day[4:6]), int(year_month_day[6:8]))
+        dt_first = datetime.date(int(year_month_day[0:4]), 1, 1)
         delta = dt_current - dt_first
         delta_days = delta.days
-        period_no = 1 + int(old_div(delta_days,8))
+        period_no = 1 + int(old_div(delta_days, 8))
 
     return period_no
 
@@ -882,17 +882,16 @@ def conv_dekad_2_date(dekad):
 #   Output: number from 1 to 36
 #
 def dekad_nbr_in_season(dekad, start_season):
-
-    year='2000'
+    year = '2000'
     if int(dekad) >= int(start_season):
-        year2='2000'
+        year2 = '2000'
     else:
-        year2='2001'
+        year2 = '2001'
 
-    dekad_start = conv_date_2_dekad(year+start_season)
-    dekad_curr = conv_date_2_dekad(year2+dekad)
+    dekad_start = conv_date_2_dekad(year + start_season)
+    dekad_curr = conv_date_2_dekad(year2 + dekad)
 
-    return dekad_curr-dekad_start+1
+    return dekad_curr - dekad_start + 1
 
 
 ######################################################################################
@@ -913,7 +912,7 @@ def conv_month_2_date(month):
         month = int(str(month)) - 1
         year = old_div(month, 12)
         month -= year * 12
-        #returns always the first dekad of the month
+        # returns always the first dekad of the month
         month_date = 10000 * (year + 1980) + 100 * (month + 1) + 1
 
     return str(month_date)
@@ -952,7 +951,7 @@ def conv_date_yyyydoy_2_yyyymmdd(yeardoy):
         if int(str(doy)) <= 0 or int(str(doy)) >= 367:
             logger.error('Invalid DayOfYear Value. %s' % doy)
             return -1
-    date_yyyymmdd = (datetime.datetime(int(str(year)), 1, 1) + datetime.timedelta(int(str(doy)) - 1)).strftime('%Y%m%d')    
+    date_yyyymmdd = (datetime.datetime(int(str(year)), 1, 1) + datetime.timedelta(int(str(doy)) - 1)).strftime('%Y%m%d')
 
     return date_yyyymmdd
 
@@ -1007,8 +1006,8 @@ def conv_yyyy_mm_dkx_2_yyyymmdd(yyyy_mm_dkx):
             day = '11'
         if dekad == 3:
             day = '21'
-        #date_tmp = datetime.datetime(year=year, month=month, day=day)
-        date_yyyymmdd = year+month+day
+        # date_tmp = datetime.datetime(year=year, month=month, day=day)
+        date_yyyymmdd = year + month + day
     return date_yyyymmdd
 
 
@@ -1024,7 +1023,7 @@ def conv_yyyy_mm_dkx_2_yyyymmdd(yyyy_mm_dkx):
 #   Output: date (YYYYMMDD), otherwise -1
 #
 def conv_yymmk_2_yyyymmdd(yymmk):
-    #date_yyyymmdd = -1
+    # date_yyyymmdd = -1
     # if is_yymmk(yymmk):
 
     year = int(str(yymmk)[0:2])
@@ -1040,8 +1039,8 @@ def conv_yymmk_2_yyyymmdd(yymmk):
         day = '11'
     if dekad == 3:
         day = '21'
-    #date_tmp = datetime.datetime(year=year, month=month, day=day)
-    date_yyyymmdd = str(year)+month+day
+    # date_tmp = datetime.datetime(year=year, month=month, day=day)
+    date_yyyymmdd = str(year) + month + day
     return date_yyyymmdd
 
 
@@ -1057,7 +1056,6 @@ def conv_yymmk_2_yyyymmdd(yymmk):
 #   Output: date (YYYYMMDD), otherwise -1
 #
 def conv_yyyydmmdk_2_yyyymmdd(yymmk):
-
     year = int(str(yymmk)[0:4])
     month = str(yymmk)[5:7]
     dekad = int(str(yymmk)[8:9])
@@ -1070,8 +1068,8 @@ def conv_yyyydmmdk_2_yyyymmdd(yymmk):
     else:
         date_yyyymmdd = -1
 
-    #date_tmp = datetime.datetime(year=year, month=month, day=day)
-    date_yyyymmdd = str(year)+month+day
+    # date_tmp = datetime.datetime(year=year, month=month, day=day)
+    date_yyyymmdd = str(year) + month + day
     return date_yyyymmdd
 
 
@@ -1084,7 +1082,6 @@ def conv_yyyydmmdk_2_yyyymmdd(yymmk):
 #   Output: date (YYYYMMDD), otherwise -1
 #
 def conv_yyyymmdd_g2_2_yyyymmdd(yymmk):
-
     year = int(str(yymmk)[0:4])
     month = str(yymmk)[4:6]
     day = int(str(yymmk)[6:8])
@@ -1095,7 +1092,7 @@ def conv_yyyymmdd_g2_2_yyyymmdd(yymmk):
     else:
         day = '21'
 
-    date_yyyymmdd = str(year)+month+day
+    date_yyyymmdd = str(year) + month + day
     return date_yyyymmdd
 
 
@@ -1108,13 +1105,12 @@ def conv_yyyymmdd_g2_2_yyyymmdd(yymmk):
 #   Output: YYYY0101/YYYY0401/YYYY0701/YYYY1001
 #
 def conv_date_2_quarter(date):
-
     quarter_date = -1
     if is_date_yyyymmdd(date):
         year = str(date[0:4])
         month = str(date[4:6])
-        quarter = (old_div((int(month)-1),3))*3+1
-        quarter_date = '{0}'.format(year)+'{:02d}'.format(quarter)+'01'
+        quarter = (old_div((int(month) - 1), 3)) * 3 + 1
+        quarter_date = '{0}'.format(year) + '{:02d}'.format(quarter) + '01'
     return str(quarter_date)
 
 
@@ -1127,13 +1123,12 @@ def conv_date_2_quarter(date):
 #   Output: YYYY0101 or YYYY0601
 #
 def conv_date_2_semester(date):
-
     semester_date = -1
     if is_date_yyyymmdd(date):
         year = str(date[0:4])
         month = str(date[4:6])
         semester = '01' if int(month) <= 6 else '07'
-        semester_date = '{0}'.format(year)+semester+'01'
+        semester_date = '{0}'.format(year) + semester + '01'
     return str(semester_date)
 
 
@@ -1146,7 +1141,6 @@ def conv_date_2_semester(date):
 #   Output: number of days
 #
 def day_per_dekad(yyyymmdd):
-
     from calendar import monthrange
     year = int(str(yyyymmdd)[0:4])
     month = int(str(yyyymmdd)[4:6])
@@ -1154,7 +1148,7 @@ def day_per_dekad(yyyymmdd):
     if dekad <= 20:
         days = 10
     else:
-        tot_days = monthrange(year,month)[1]
+        tot_days = monthrange(year, month)[1]
         days = tot_days - 20
 
     return days
@@ -1169,11 +1163,10 @@ def day_per_dekad(yyyymmdd):
 #   Output: number of days
 #
 def get_number_days_month(yyyymmdd):
-
     from calendar import monthrange
     year = int(str(yyyymmdd)[0:4])
     month = int(str(yyyymmdd)[4:6])
-    tot_days = monthrange(year,month)[1]
+    tot_days = monthrange(year, month)[1]
 
     return tot_days
 
@@ -1189,11 +1182,11 @@ def get_number_days_month(yyyymmdd):
 def conv_list_2_string(inlist):
     file_string = ''
     try:
-        if isinstance(inlist,str):
-            file_string+=inlist
+        if isinstance(inlist, str):
+            file_string += inlist
         else:
             for ifile in inlist:
-                file_string+=ifile+';'
+                file_string += ifile + ';'
     except:
         pass
     return file_string
@@ -1229,24 +1222,23 @@ def conv_list_2_unique_value(inlist):
 #   Output: year, month, day,
 #
 def extract_from_date(str_date):
-
     str_hour = '0000'
 
     if is_date_mmdd(str_date, silent=True):
-        str_year=''
-        str_month=str_date[0:2]
-        str_day=str_date[2:4]
+        str_year = ''
+        str_month = str_date[0:2]
+        str_day = str_date[2:4]
 
     if is_date_yyyymmdd(str_date, silent=True):
-        str_year=str_date[0:4]
-        str_month=str_date[4:6]
-        str_day=str_date[6:8]
+        str_year = str_date[0:4]
+        str_month = str_date[4:6]
+        str_day = str_date[6:8]
 
     if is_date_yyyymmddhhmm(str_date, silent=True):
-        str_year=str_date[0:4]
-        str_month=str_date[4:6]
-        str_day=str_date[6:8]
-        str_hour=str_date[8:12]
+        str_year = str_date[0:4]
+        str_month = str_date[4:6]
+        str_day = str_date[6:8]
+        str_hour = str_date[8:12]
 
     return [str_year, str_month, str_day, str_hour]
 
@@ -1259,7 +1251,6 @@ def extract_from_date(str_date):
 #   Output: list with excluded current yeat
 #
 def exclude_current_year(input_list):
-
     output_list = []
     today = datetime.date.today()
     current_year = today.strftime('%Y')
@@ -1280,7 +1271,7 @@ def exclude_current_year(input_list):
 #
 def get_modified_time_from_file(file_path):
     modified_time_sec = os.path.getmtime(file_path)
-    #modified_time = time.ctime(modified_time_sec)
+    # modified_time = time.ctime(modified_time_sec)
     return modified_time_sec
 
 
@@ -1309,11 +1300,10 @@ def get_modified_time_from_file(file_path):
 #   Description: creates filename WITHOUT date field (for ruffus formatters)
 #
 def set_path_filename_no_date(product_code, sub_product_code, mapset_id, version, extension):
-
-    filename_nodate =     "_" + str(product_code) + '_' \
-                              + str(sub_product_code) + "_" \
-                              + mapset_id + "_" \
-                              + version + extension
+    filename_nodate = "_" + str(product_code) + '_' \
+                      + str(sub_product_code) + "_" \
+                      + mapset_id + "_" \
+                      + version + extension
 
     return filename_nodate
 
@@ -1327,8 +1317,7 @@ def set_path_filename_no_date(product_code, sub_product_code, mapset_id, version
 #   Output: process_id, subdir
 #   Description: creates filename
 #
-def set_path_filename(date_str, product_code, sub_product_code, mapset_id, version,  extension):
-
+def set_path_filename(date_str, product_code, sub_product_code, mapset_id, version, extension):
     filename = date_str + set_path_filename_no_date(product_code, sub_product_code, mapset_id, version, extension)
     return filename
 
@@ -1343,7 +1332,6 @@ def set_path_filename(date_str, product_code, sub_product_code, mapset_id, versi
 #   Description: creates filename
 #
 def set_path_sub_directory(product_code, sub_product_code, product_type, version, mapset):
-
     type_subdir = dict_subprod_type_2_dir[product_type]
 
     if product_type == 'Native':
@@ -1355,8 +1343,8 @@ def set_path_sub_directory(product_code, sub_product_code, product_type, version
     else:
         sub_directory = str(product_code) + os.path.sep + \
                         str(version) + os.path.sep + \
-                        mapset + os.path.sep +\
-                        type_subdir + os.path.sep +\
+                        mapset + os.path.sep + \
+                        type_subdir + os.path.sep + \
                         str(sub_product_code) + os.path.sep
 
     return sub_directory
@@ -1372,14 +1360,13 @@ def set_path_sub_directory(product_code, sub_product_code, product_type, version
 #   Output: filename
 #   Description: creates filename
 #
-def set_path_filename_eumetcast(date_str, product_code, sub_product_code, mapset_id, version,  extension):
-
-    filename = es_constants.es2globals['prefix_eumetcast_files'] +\
+def set_path_filename_eumetcast(date_str, product_code, sub_product_code, mapset_id, version, extension):
+    filename = es_constants.es2globals['prefix_eumetcast_files'] + \
                product_code + '_' + \
-               sub_product_code + '_' +\
-               date_str + '_'+\
-               mapset_id + '_' +\
-               version +\
+               sub_product_code + '_' + \
+               date_str + '_' + \
+               mapset_id + '_' + \
+               version + \
                extension
 
     return filename
@@ -1411,15 +1398,14 @@ def is_file_exists_in_path(file_path):
 #   Description: returns information form the directory
 #
 def get_from_path_dir(dir_name):
-
     # Make sure there is a leading separator at the end of 'dir'
-    mydir=dir_name+os.path.sep
+    mydir = dir_name + os.path.sep
 
     tokens = [token for token in mydir.split(os.sep) if token]
     sub_product_code = tokens[-1]
     mapset = tokens[-3]
-    version =  tokens[-4]
-    product_code =  tokens[-5]
+    version = tokens[-4]
+    product_code = tokens[-5]
 
     return [product_code, sub_product_code, version, mapset]
 
@@ -1434,7 +1420,6 @@ def get_from_path_dir(dir_name):
 #   Description: returns information form the filename
 #
 def get_date_from_path_filename(filename):
-
     str_date = filename.split('_')[0]
 
     return str_date
@@ -1450,7 +1435,6 @@ def get_date_from_path_filename(filename):
 #   Description: returns information form the fullpath
 #
 def get_date_from_path_full(full_path):
-
     # Remove the directory
     dir, filename = os.path.split(full_path)
 
@@ -1470,10 +1454,10 @@ def get_date_from_path_full(full_path):
 #   Description: returns subdir from the fullpath
 #
 def get_subdir_from_path_full(full_path):
-
     # Remove the directory
     subdirs = full_path.split(os.path.sep)
-    str_subdir = subdirs[-6]+os.path.sep+subdirs[-5]+os.path.sep+subdirs[-4]+os.path.sep+subdirs[-3]+os.path.sep+subdirs[-2]+os.path.sep
+    str_subdir = subdirs[-6] + os.path.sep + subdirs[-5] + os.path.sep + subdirs[-4] + os.path.sep + subdirs[
+        -3] + os.path.sep + subdirs[-2] + os.path.sep
 
     return str_subdir
 
@@ -1488,7 +1472,6 @@ def get_subdir_from_path_full(full_path):
 #   Description: returns information form the fullpath
 #
 def get_all_from_path_full(full_path):
-
     # Split directory and filename
     dir, filename = os.path.split(full_path)
 
@@ -1543,7 +1526,7 @@ def get_all_from_filename(filename):
     mapset = tokens[3]
     # Remove extension from tokens[4] -> version
     parts = tokens[4].split('.')
-    version = tokens[4].replace('.'+parts[-1],'')
+    version = tokens[4].replace('.' + parts[-1], '')
 
     return [str_date, product_code, sub_product_code, mapset, version]
 
@@ -1558,8 +1541,7 @@ def get_all_from_filename(filename):
 #   Description: returns information form the fullpath
 #
 def get_all_from_filename_eumetcast(filename):
-
-    extension='.tif'
+    extension = '.tif'
     # Ensure there is no dir path
     fileonly = os.path.basename(filename)
     # Get info from directory
@@ -1568,7 +1550,7 @@ def get_all_from_filename_eumetcast(filename):
     sub_product_code = tokens[3]
     str_date = tokens[4]
     mapset = tokens[5]
-    version =  tokens[6].strip(extension)
+    version = tokens[6].strip(extension)
 
     return [str_date, product_code, sub_product_code, mapset, version]
 
@@ -1582,7 +1564,6 @@ def get_all_from_filename_eumetcast(filename):
 #   Output: product_type
 #
 def get_product_type_from_subdir(subdir):
-
     # Get info from directory
     tokens = [token for token in subdir.split(os.path.sep) if token]
     product_subdir = tokens[-2]
@@ -1604,7 +1585,6 @@ def get_product_type_from_subdir(subdir):
 #   Description: returns information form the fullpath
 #
 def convert_name_from_archive(filename, product_type, with_dir=False, new_mapset=False):
-
     extension = '.tif'
     [dir, name] = os.path.split(filename)
     [str_date, product_code, sub_product_code, mapset, version] = get_all_from_filename(name)
@@ -1612,10 +1592,9 @@ def convert_name_from_archive(filename, product_type, with_dir=False, new_mapset
         mapset = new_mapset
     filename = set_path_filename(str_date, product_code, sub_product_code, mapset, version, extension)
     if with_dir:
-        subdir=set_path_sub_directory(product_code, sub_product_code, product_type, version, mapset)
-        filename = subdir+filename
+        subdir = set_path_sub_directory(product_code, sub_product_code, product_type, version, mapset)
+        filename = subdir + filename
     return filename
-
 
 
 ######################################################################################
@@ -1628,7 +1607,6 @@ def convert_name_from_archive(filename, product_type, with_dir=False, new_mapset
 #   Description: returns information form the fullpath
 #
 def convert_name_to_eumetcast(filename, tgz=False):
-
     if tgz:
         extension = '.tgz'
     else:
@@ -1638,7 +1616,8 @@ def convert_name_to_eumetcast(filename, tgz=False):
 
     [str_date, product_code, sub_product_code, mapset, version] = get_all_from_filename(name)
 
-    filename_eumetcast = set_path_filename_eumetcast(str_date, product_code, sub_product_code, mapset, version, extension)
+    filename_eumetcast = set_path_filename_eumetcast(str_date, product_code, sub_product_code, mapset, version,
+                                                     extension)
 
     return filename_eumetcast
 
@@ -1655,7 +1634,6 @@ def convert_name_to_eumetcast(filename, tgz=False):
 #   Description: returns information form the fullpath
 #
 def convert_name_from_eumetcast(filename, product_type, with_dir=False, new_mapset=False):
-
     extension = '.tif'
     [dir, name] = os.path.split(filename)
     [str_date, product_code, sub_product_code, mapset, version] = get_all_from_filename_eumetcast(name)
@@ -1663,8 +1641,8 @@ def convert_name_from_eumetcast(filename, product_type, with_dir=False, new_maps
         mapset = new_mapset
     filename = set_path_filename(str_date, product_code, sub_product_code, mapset, version, extension)
     if with_dir:
-        subdir=set_path_sub_directory(product_code, sub_product_code, product_type, version, mapset)
-        filename = subdir+filename
+        subdir = set_path_sub_directory(product_code, sub_product_code, product_type, version, mapset)
+        filename = subdir + filename
     return filename
 
 
@@ -1677,12 +1655,11 @@ def convert_name_from_eumetcast(filename, product_type, with_dir=False, new_maps
 #   Output: none
 #
 def check_output_dir(output_dir):
-
     # Is it a list ?
     if isinstance(output_dir, list):
-        my_dir=output_dir[0]
+        my_dir = output_dir[0]
     else:
-        my_dir=output_dir
+        my_dir = output_dir
     # It does exist ?
     if not os.path.isdir(my_dir):
         try:
@@ -1705,7 +1682,6 @@ def check_output_dir(output_dir):
 #   Output: none
 #
 def create_sym_link(src_file, trg_file, force=False):
-
     # Does the source file already exist ?
     if not os.path.isfile(src_file):
         logger.info('Source file does not exist. Exit')
@@ -1740,13 +1716,12 @@ def create_sym_link(src_file, trg_file, force=False):
 #   Output: none
 #
 def ensure_sep_present(path, position):
-
-    if position=='begin':
+    if position == 'begin':
         if not path.startswith("/"):
-            path='/'+path
-    elif position=='end':
+            path = '/' + path
+    elif position == 'end':
         if not path.endswith("/"):
-            path=path+'/'
+            path = path + '/'
 
     return path
 
@@ -1769,7 +1744,6 @@ def ensure_sep_present(path, position):
 #  Dump an object info a file (pickle serialization)
 #
 def dump_obj_to_pickle(obj, filename):
-
     dump_file = open(filename, 'wb')
     pickle.dump(obj, dump_file)
     dump_file.close()
@@ -1781,7 +1755,6 @@ def dump_obj_to_pickle(obj, filename):
 #  If file cannot be loaded (corrupted), delete it (and return the passed object)
 #
 def restore_obj_from_pickle(obj, filename):
-
     # Restore/Create Info
     if os.path.exists(filename):
         try:
@@ -1793,9 +1766,9 @@ def restore_obj_from_pickle(obj, filename):
             logger.debug("Dump file %s can't be loaded, the file will be removed.", filename)
             os.remove(filename)
     # else:
-        # Create an empty file in the tmp dir
-        # logger.debug("Dump file %s does not exist", filename)
-        #open(filename, 'a').close()
+    # Create an empty file in the tmp dir
+    # logger.debug("Dump file %s does not exist", filename)
+    # open(filename, 'a').close()
 
     return obj
 
@@ -1804,7 +1777,6 @@ def restore_obj_from_pickle(obj, filename):
 #  Load an object from a file (pickle serialization), if the file exist
 #
 def load_obj_from_pickle(filename):
-
     obj = None
 
     # Restore/Create Info
@@ -1815,8 +1787,8 @@ def load_obj_from_pickle(filename):
         except:
             logger.debug("Dump file %s can't be loaded, the file will be removed.", filename)
     # else:
-        # Raise warning
-        # logger.debug("Dump file %s does not exist.", filename)
+    # Raise warning
+    # logger.debug("Dump file %s does not exist.", filename)
 
     return obj
 
@@ -1832,7 +1804,7 @@ def load_obj_from_pickle(filename):
 def is_S3_OL_data_captured_during_day(filename):
     day_data = False
     # filename example = S3A_OL_2_WRR____20180428T163216_20180428T171635_20180428T191407_2659_030_297______MAR_O_NR_002
-    hour = int(filename[25]+filename[26])
+    hour = int(filename[25] + filename[26])
     if 5 <= hour <= 16:
         day_data = True
 
@@ -1870,7 +1842,7 @@ def check_polygons_intersects(poly1, poly2):
     intersects = False
     dx = min(poly1[2], poly2[2]) - max(poly1[0], poly2[0])
     dy = min(poly1[3], poly2[3]) - max(poly1[1], poly2[1])
-    if (dx>=0) and (dy>=0):
+    if (dx >= 0) and (dy >= 0):
         intersects = True
 
     return intersects
@@ -1886,13 +1858,12 @@ def check_polygons_intersects(poly1, poly2):
 #   Output: Boundary Box (lon_min, lat_min, lon_max, lat_max)
 #
 def sentinel_get_footprint(dir, filename=None):
-
     bbox = []
     if filename is None:
-        filename='xfdumanifest.xml'
+        filename = 'xfdumanifest.xml'
 
     # parse the xml file
-    xml_doc = minidom.parse(dir+os.path.sep+filename)
+    xml_doc = minidom.parse(dir + os.path.sep + filename)
 
     # Namespace declaration
     # xmlns:sentinel-safe="http://www.esa.int/safe/sentinel/1.1"
@@ -1915,7 +1886,7 @@ def sentinel_get_footprint(dir, filename=None):
             footPrintElem = metadataObject.getElementsByTagNameNS(nsSentinelSafe, "footPrint")[0]
             posList = footPrintElem.getElementsByTagNameNS(nsGML, "posList")[0]
 
-            print (posList.firstChild.data)
+            print(posList.firstChild.data)
             footPrintString = posList.firstChild.data
             listFootPrint = footPrintString.split(' ')
 
@@ -1951,7 +1922,6 @@ def sentinel_get_footprint(dir, filename=None):
 #   Output: tile horizontal "code" and vertical "code"
 #
 def modis_latlon_to_hv_tile(latitude, longitude):
-
     # Check args valid range
     if latitude > 90.0 or latitude < -90.0:
         logger.error('Latitude invalid %s' % latitude)
@@ -1960,7 +1930,7 @@ def modis_latlon_to_hv_tile(latitude, longitude):
         logger.error('Longitude invalid %s' % longitude)
         return 1
 
-    #convert the data to tiles
+    # convert the data to tiles
     rad_sphere = 6371007.181
     t_size = 1111950
     pi_val = math.pi
@@ -1983,7 +1953,6 @@ def modis_latlon_to_hv_tile(latitude, longitude):
 #   Output: list of tiles.
 #
 def get_modis_tiles_list(mapset):
-
     tiles_list = ['h01v01', 'h01v02']
     return tiles_list
 
@@ -1997,7 +1966,6 @@ def get_modis_tiles_list(mapset):
 #   Output: none
 #
 def element_to_list(input_arg):
-
     # Is it a list or a tuple ?
     if type(input_arg) in (type([]), type(())):
         return input_arg
@@ -2017,7 +1985,6 @@ def element_to_list(input_arg):
 #   Output: none
 #
 def list_to_element(input_arg):
-
     # Is it a list or a tuple
     if type(input_arg) in (type([]), type(())):
         if len(input_arg) > 1:
@@ -2038,7 +2005,6 @@ def list_to_element(input_arg):
 #   Output: none
 #
 def files_temp_ajacent(file_t0, step='dekad', extension='.tif'):
-
     # Checks t0 exists
     if not os.path.isfile(file_t0):
         logger.warning('Input file does not exist: %s ' % file_t0)
@@ -2055,9 +2021,10 @@ def files_temp_ajacent(file_t0, step='dekad', extension='.tif'):
 
         dekad_t0 = conv_date_2_dekad(date_t0)
         # Compute/Check file before
-        dekad_m = dekad_t0-1
+        dekad_m = dekad_t0 - 1
         date_m = conv_dekad_2_date(dekad_m)
-        file_m = dir+os.path.sep+set_path_filename(str(date_m), product_code, sub_product_code, mapset, version, extension)
+        file_m = dir + os.path.sep + set_path_filename(str(date_m), product_code, sub_product_code, mapset, version,
+                                                       extension)
 
         if os.path.isfile(file_m):
             file_list.append(file_m)
@@ -2066,9 +2033,10 @@ def files_temp_ajacent(file_t0, step='dekad', extension='.tif'):
 
         # Compute/Check file after
         dekad = conv_date_2_dekad(date_t0)
-        dekad_p = dekad_t0+1
+        dekad_p = dekad_t0 + 1
         date_p = conv_dekad_2_date(dekad_p)
-        file_p = dir+os.path.sep+set_path_filename(str(date_p), product_code, sub_product_code, mapset, version, extension)
+        file_p = dir + os.path.sep + set_path_filename(str(date_p), product_code, sub_product_code, mapset, version,
+                                                       extension)
 
         if os.path.isfile(file_p):
             file_list.append(file_p)
@@ -2093,7 +2061,6 @@ def files_temp_ajacent(file_t0, step='dekad', extension='.tif'):
 #   Output: none
 #
 def previous_files(file_t0, step='dekad', extension='.tif'):
-
     file_list = []
 
     # Extract dir input file
@@ -2110,16 +2077,16 @@ def previous_files(file_t0, step='dekad', extension='.tif'):
         date_m = conv_dekad_2_date(dekad_m)
         file_m = dir + os.path.sep + set_path_filename(str(date_m), product_code, sub_product_code, mapset, version,
                                                        extension)
-#        if os.path.isfile(file_m):
+        #        if os.path.isfile(file_m):
         file_list.append(file_m)
-#        else:
-#            logger.error('File t0-1 does not exist: %s ' % file_m)
+        #        else:
+        #            logger.error('File t0-1 does not exist: %s ' % file_m)
 
         # Compute/Check file after
-        dekad_m2 = dekad_t0 -2
+        dekad_m2 = dekad_t0 - 2
         date_m2 = conv_dekad_2_date(dekad_m2)
         file_m2 = dir + os.path.sep + set_path_filename(str(date_m2), product_code, sub_product_code, mapset, version,
-                                                       extension)
+                                                        extension)
 
         if os.path.isfile(file_m2):
             file_list.append(file_m2)
@@ -2142,13 +2109,11 @@ def previous_files(file_t0, step='dekad', extension='.tif'):
 #   Output: none
 #
 def get_machine_mac_address():
-
     return ':'.join(re.findall('..', '%012x' % uuid.getnode()))
 
 
 def get_eumetcast_info(eumetcast_id):
-
-    filename = es_constants.es2globals.get_eumetcast_processed_list_prefix+str(eumetcast_id)+'.info'
+    filename = es_constants.es2globals.get_eumetcast_processed_list_prefix + str(eumetcast_id) + '.info'
     info = load_obj_from_pickle(filename)
     return info
 
@@ -2163,9 +2128,8 @@ def get_eumetcast_info(eumetcast_id):
 #   Output: none
 #
 def save_netcdf_scaling(sds, preproc_file):
-
     # Define variable filename
-    var_file=os.path.dirname(preproc_file)+os.path.sep+'scaling.txt'
+    var_file = os.path.dirname(preproc_file) + os.path.sep + 'scaling.txt'
 
     # Open SDS
     try:
@@ -2192,7 +2156,7 @@ def save_netcdf_scaling(sds, preproc_file):
 
     # Save scale_factor and scale_offset to file
     try:
-        fd = open(var_file,'w')
+        fd = open(var_file, 'w')
         fd.write('Scale_factor = {0} \n'.format(scale_factor))
         fd.write('Scale_offset = {0}'.format(scale_offset))
         fd.close()
@@ -2212,13 +2176,12 @@ def save_netcdf_scaling(sds, preproc_file):
 #   Output: none
 #
 def read_netcdf_scaling(preproc_file):
-
     # Define variable filename
-    var_file=os.path.dirname(preproc_file)+os.path.sep+'scaling.txt'
+    var_file = os.path.dirname(preproc_file) + os.path.sep + 'scaling.txt'
 
     # Save scale_factor and scale_offset to file
     try:
-        my_file = open(var_file,'r')
+        my_file = open(var_file, 'r')
         for line in my_file:
             if 'Scale_factor' in line:
                 scale_factor = float(line.split('=')[1])
@@ -2240,30 +2203,28 @@ def read_netcdf_scaling(preproc_file):
 #   Output: none
 #
 def write_vrt_georef(output_dir, band_file, n_lines=None, n_cols=None, lat_file=None, long_file=None):
-
     # Check/complete arguments
     if lat_file is None:
-        lat_file='latitude.tif'
+        lat_file = 'latitude.tif'
     if long_file is None:
-        long_file='longitude.tif'
+        long_file = 'longitude.tif'
     if n_lines is None:
-        n_lines=1217
+        n_lines = 1217
     if n_cols is None:
-        n_cols=14952
-
+        n_cols = 14952
 
     # Define variable filename
-    var_file=os.path.dirname(band_file)+os.path.sep+'scaling.txt'
+    var_file = os.path.dirname(band_file) + os.path.sep + 'scaling.txt'
 
-    file_vrt = output_dir + os.path.sep+ 'reflectance.vrt'
-    un_proj_filepath = output_dir + os.path.sep+ band_file
-    with open(file_vrt,'w') as outFile:
+    file_vrt = output_dir + os.path.sep + 'reflectance.vrt'
+    un_proj_filepath = output_dir + os.path.sep + band_file
+    with open(file_vrt, 'w') as outFile:
         # TODO: parametrize the line below with n_lines/cols
-        outFile.write('<VRTDataset rasterXSize="'+str(n_lines)+'" rasterYSize="'+str(n_cols)+'">\n')
+        outFile.write('<VRTDataset rasterXSize="' + str(n_lines) + '" rasterYSize="' + str(n_cols) + '">\n')
         outFile.write('    <Metadata domain="GEOLOCATION">\n')
-        outFile.write('        <MDI key="X_DATASET">'+output_dir+ os.path.sep+'longitude.tif</MDI>\n')
+        outFile.write('        <MDI key="X_DATASET">' + output_dir + os.path.sep + 'longitude.tif</MDI>\n')
         outFile.write('        <MDI key="X_BAND">1</MDI>\n')
-        outFile.write('        <MDI key="Y_DATASET">'+output_dir+ os.path.sep+'latitude.tif</MDI>\n')
+        outFile.write('        <MDI key="Y_DATASET">' + output_dir + os.path.sep + 'latitude.tif</MDI>\n')
         outFile.write('        <MDI key="Y_BAND">1</MDI>\n')
         outFile.write('        <MDI key="PIXEL_OFFSET">0</MDI>\n')
         outFile.write('        <MDI key="LINE_OFFSET">0</MDI>\n')
@@ -2274,7 +2235,7 @@ def write_vrt_georef(output_dir, band_file, n_lines=None, n_cols=None, lat_file=
         outFile.write('        <Metadata />\n')
         outFile.write('        <SimpleSource>\n')
         outFile.write('            <MDI key="LINE_STEP">1</MDI>\n')
-        outFile.write('            <SourceFilename>'+un_proj_filepath+'</SourceFilename>\n')
+        outFile.write('            <SourceFilename>' + un_proj_filepath + '</SourceFilename>\n')
         outFile.write('            <SourceBand>1</SourceBand>\n')
         outFile.write('        </SimpleSource>\n')
         outFile.write('    </VRTRasterBand>\n')
@@ -2303,7 +2264,6 @@ def write_vrt_georef(output_dir, band_file, n_lines=None, n_cols=None, lat_file=
 #   Output: none
 #
 def write_graph_xml_band_math_subset(output_dir, band_name, expression):
-
     # Check/complete arguments
     if band_name is None:
         band_name = 'CHL_NN'
@@ -2312,9 +2272,9 @@ def write_graph_xml_band_math_subset(output_dir, band_name, expression):
     #     expression = '(WQSF_msb_ANNOT_ABSO_D or WQSF_msb_ANNOT_MIXR1 or WQSF_msb_ANNOT_DROUT or WQSF_msb_ANNOT_TAU06 or WQSF_msb_RWNEG_O2 or WQSF_msb_RWNEG_O3 or WQSF_msb_RWNEG_O4 or WQSF_msb_RWNEG_O6 or WQSF_msb_RWNEG_O5 or WQSF_msb_RWNEG_O7 or WQSF_msb_RWNEG_O8 or WQSF_lsb_AC_FAIL or WQSF_lsb_WHITECAPS) ? NaN : '+band_name
 
     if expression is None:
-        expression = 'l2p_flags_cloud ? NaN : '+band_name
+        expression = 'l2p_flags_cloud ? NaN : ' + band_name
 
-    file_xml = output_dir + os.path.sep+ band_name  + os.path.sep+ 'graph_xml_subset.xml'
+    file_xml = output_dir + os.path.sep + band_name + os.path.sep + 'graph_xml_subset.xml'
 
     with open(file_xml, 'w') as outFile:
         outFile.write('<graph id="Graph">\n')
@@ -2323,7 +2283,7 @@ def write_graph_xml_band_math_subset(output_dir, band_name, expression):
         outFile.write('    <operator>Read</operator>\n')
         outFile.write('    <sources/>\n')
         outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
-        outFile.write('      <file>'+output_dir+ os.path.sep+'xfdumanifest.xml</file>\n')
+        outFile.write('      <file>' + output_dir + os.path.sep + 'xfdumanifest.xml</file>\n')
         outFile.write('    </parameters>\n')
         outFile.write('  </node>\n')
         outFile.write('  <node id="BandMaths">\n')
@@ -2334,10 +2294,10 @@ def write_graph_xml_band_math_subset(output_dir, band_name, expression):
         outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
         outFile.write('     <targetBands>\n')
         outFile.write('        <targetBand>\n')
-        outFile.write('          <name>'+band_name+'_MASKED</name>\n')
+        outFile.write('          <name>' + band_name + '_MASKED</name>\n')
         outFile.write('          <type>float32</type>\n')
         outFile.write(
-            '          <expression>'+expression+'</expression>\n')
+            '          <expression>' + expression + '</expression>\n')
         # outFile.write(
         #     '          <expression>(WQSF_msb_ANNOT_ABSO_D or WQSF_msb_ANNOT_MIXR1 or WQSF_msb_ANNOT_DROUT or WQSF_msb_ANNOT_TAU06 or WQSF_msb_RWNEG_O2 or WQSF_msb_RWNEG_O3 or WQSF_msb_RWNEG_O4 or WQSF_msb_RWNEG_O6 or WQSF_msb_RWNEG_O5 or WQSF_msb_RWNEG_O7 or WQSF_msb_RWNEG_O8 or WQSF_lsb_AC_FAIL or WQSF_lsb_WHITECAPS) ? NaN : '+band_name+'</expression>\n')
         outFile.write('          <description/>\n')
@@ -2354,7 +2314,7 @@ def write_graph_xml_band_math_subset(output_dir, band_name, expression):
         outFile.write('     <sourceProduct refid="BandMaths"/>\n')
         outFile.write('    </sources>\n')
         outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
-        outFile.write('      <sourceBands>'+band_name+'_MASKED</sourceBands>\n')
+        outFile.write('      <sourceBands>' + band_name + '_MASKED</sourceBands>\n')
         outFile.write('      <region>0,0,1217,14952</region>\n')
         outFile.write(
             '     <geoRegion>POLYGON ((-33.23047637939453 41.53836441040039, 65.0774154663086 41.53836441040039, 65.0774154663086 -42.923343658447266, -33.23047637939453 -42.923343658447266, -33.23047637939453 41.53836441040039, -33.23047637939453 41.53836441040039))</geoRegion>\n')
@@ -2371,7 +2331,7 @@ def write_graph_xml_band_math_subset(output_dir, band_name, expression):
         outFile.write('      <sourceProduct refid="Subset"/>\n')
         outFile.write('    </sources>\n')
         outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
-        outFile.write('      <file>'+output_dir+ os.path.sep+ band_name + os.path.sep+'band_subset.tif</file>\n')
+        outFile.write('      <file>' + output_dir + os.path.sep + band_name + os.path.sep + 'band_subset.tif</file>\n')
         outFile.write('      <formatName>GeoTIFF</formatName>\n')
         outFile.write('    </parameters>\n')
         outFile.write('  </node>\n')
@@ -2401,12 +2361,11 @@ def write_graph_xml_band_math_subset(output_dir, band_name, expression):
 #   Output: none
 #
 def write_graph_xml_subset(input_file, output_dir, band_name):
-
     # Check/complete arguments
     if band_name is None:
         band_name = 'CHL_NN'
 
-    file_xml = output_dir + os.path.sep+ band_name  + os.path.sep+ 'graph_xml_subset.xml'
+    file_xml = output_dir + os.path.sep + band_name + os.path.sep + 'graph_xml_subset.xml'
 
     with open(file_xml, 'w') as outFile:
         outFile.write('<graph id="Graph">\n')
@@ -2415,7 +2374,7 @@ def write_graph_xml_subset(input_file, output_dir, band_name):
         outFile.write('    <operator>Read</operator>\n')
         outFile.write('    <sources/>\n')
         outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
-        outFile.write('      <file>'+input_file+'</file>\n')
+        outFile.write('      <file>' + input_file + '</file>\n')
         outFile.write('    </parameters>\n')
         outFile.write('  </node>\n')
         outFile.write('  <node id="Subset">\n')
@@ -2424,7 +2383,7 @@ def write_graph_xml_subset(input_file, output_dir, band_name):
         outFile.write('      <sourceProduct refid="Read"/>\n')
         outFile.write('    </sources>\n')
         outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
-        outFile.write('      <sourceBands>'+band_name+'</sourceBands>\n')
+        outFile.write('      <sourceBands>' + band_name + '</sourceBands>\n')
         # outFile.write('      <region>0,0,1217,15037</region>\n')
         outFile.write('      <region>0,0,1217,14952</region>\n')
         # outFile.write(
@@ -2445,7 +2404,7 @@ def write_graph_xml_subset(input_file, output_dir, band_name):
         outFile.write('      <sourceProduct refid="Subset"/>\n')
         outFile.write('    </sources>\n')
         outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
-        outFile.write('      <file>'+output_dir+ os.path.sep+ band_name + os.path.sep+'band_subset.tif</file>\n')
+        outFile.write('      <file>' + output_dir + os.path.sep + band_name + os.path.sep + 'band_subset.tif</file>\n')
         outFile.write('      <formatName>GeoTIFF</formatName>\n')
         outFile.write('    </parameters>\n')
         outFile.write('  </node>\n')
@@ -2472,7 +2431,6 @@ def write_graph_xml_subset(input_file, output_dir, band_name):
 #   Output: none
 #
 def write_graph_xml_reproject(output_dir, nodata_value):
-
     # Check/complete arguments
     if nodata_value is None:
         nodata_value = 'NaN'
@@ -2486,7 +2444,7 @@ def write_graph_xml_reproject(output_dir, nodata_value):
         outFile.write('    <operator>Read</operator>\n')
         outFile.write('    <sources/>\n')
         outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
-        outFile.write('      <file>'+output_dir+ os.path.sep+'band_subset.tif</file>\n')
+        outFile.write('      <file>' + output_dir + os.path.sep + 'band_subset.tif</file>\n')
         outFile.write('    </parameters>\n')
         outFile.write('  </node>\n')
         outFile.write('  <node id="Reproject">\n')
@@ -2517,7 +2475,7 @@ def write_graph_xml_reproject(output_dir, nodata_value):
         outFile.write('      <tileSizeY/>\n')
         outFile.write('      <orthorectify>false</orthorectify>\n')
         outFile.write('      <elevationModelName/>\n')
-        outFile.write('      <noDataValue>'+str(nodata_value)+'</noDataValue>\n')
+        outFile.write('      <noDataValue>' + str(nodata_value) + '</noDataValue>\n')
         outFile.write('     <includeTiePointGrids>false</includeTiePointGrids>\n')
         outFile.write('      <addDeltaBands>false</addDeltaBands>\n')
         outFile.write('    </parameters>\n')
@@ -2528,7 +2486,7 @@ def write_graph_xml_reproject(output_dir, nodata_value):
         outFile.write('      <sourceProduct refid="Reproject"/>\n')
         outFile.write('    </sources>\n')
         outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
-        outFile.write('      <file>'+output_dir+ os.path.sep+'reprojected.tif</file>\n')
+        outFile.write('      <file>' + output_dir + os.path.sep + 'reprojected.tif</file>\n')
         outFile.write('      <formatName>GeoTIFF</formatName>\n')
         outFile.write('    </parameters>\n')
         outFile.write('  </node>\n')
@@ -2555,12 +2513,11 @@ def write_graph_xml_reproject(output_dir, nodata_value):
 #   Output: none
 #
 def write_graph_xml_terrain_correction_oilspill(output_dir, input_file, band_name, output_file):
-
     # Check/complete arguments
     if band_name is None:
         band_name = 'Amplitude_VV,Intensity_VV'
 
-    file_xml = output_dir + os.path.sep+ band_name  + os.path.sep+ 'graph_xml_terrain_correction_oilspill.xml'
+    file_xml = output_dir + os.path.sep + band_name + os.path.sep + 'graph_xml_terrain_correction_oilspill.xml'
 
     with open(file_xml, 'w') as outFile:
         outFile.write('<graph id="Graph">\n')
@@ -2731,14 +2688,13 @@ def write_graph_xml_terrain_correction_oilspill(output_dir, input_file, band_nam
 #   Output: none
 #
 def write_graph_xml_wd_gee(output_dir, input_file, band_name, output_file):
-
     # Check/complete arguments
     if band_name is None:
         band_name = 'band_1'
 
-    rescaled_exp = band_name+" * 100"
+    rescaled_exp = band_name + " * 100"
 
-    file_xml = output_dir + os.path.sep+ band_name  + os.path.sep+ 'graph_xml_wd_gee.xml'
+    file_xml = output_dir + os.path.sep + band_name + os.path.sep + 'graph_xml_wd_gee.xml'
 
     with open(file_xml, 'w') as outFile:
         outFile.write('<graph id="Graph">\n')
@@ -2814,9 +2770,8 @@ def write_graph_xml_wd_gee(output_dir, input_file, band_name, output_file):
 
 
 def day_length(day, latitude):
-
-    axis=23.439*N.pi
-    dl=axis
+    axis = 23.439 * N.pi
+    dl = axis
     return dl
 
 
@@ -2842,6 +2797,7 @@ def is_date_current_month(year_month_day):
 
     return current_month
 
+
 ######################################################################################
 #                            PROCESSING CHAINS
 ######################################################################################
@@ -2856,34 +2812,33 @@ class ProcLists(object):
                          sprod,
                          group,
                          descriptive_name='',
-                         description = '',
-                         frequency_id = '',
-                         date_format = '',
-                         scale_factor = None,
-                         scale_offset = None,
-                         nodata = None,
-                         unit = None,
+                         description='',
+                         frequency_id='',
+                         date_format='',
+                         scale_factor=None,
+                         scale_offset=None,
+                         nodata=None,
+                         unit=None,
                          data_type_id=None,
-                         masked = '',
-                         timeseries_role = '10d',
+                         masked='',
+                         timeseries_role='10d',
                          final=False,
                          # display_index=None,
                          active_default=True):
-
         self.list_subprods.append(ProcSubprod(sprod,
                                               group,
                                               final,
                                               descriptive_name=descriptive_name,
-                                              description = description,
-                                              frequency_id = frequency_id,
-                                              date_format = date_format,
+                                              description=description,
+                                              frequency_id=frequency_id,
+                                              date_format=date_format,
                                               scale_factor=scale_factor,
                                               scale_offset=scale_offset,
                                               nodata=nodata,
                                               unit=unit,
                                               data_type_id=data_type_id,
-                                              masked = masked,
-                                              timeseries_role = timeseries_role,
+                                              masked=masked,
+                                              timeseries_role=timeseries_role,
                                               # display_index = display_index,
                                               active_default=True))
         return sprod
@@ -2907,26 +2862,27 @@ class ProcLists(object):
     #
     #     return False
     #
+
+
 class ProcSubprod(object):
     def __init__(self,
                  sprod,
                  group,
                  final=False,
                  descriptive_name='',
-                 description = '',
-                 frequency_id = '',
-                 date_format = '',
+                 description='',
+                 frequency_id='',
+                 date_format='',
                  scale_factor=None,
                  scale_offset=None,
                  nodata=None,
                  unit=None,
                  data_type_id=None,
-                 masked = '',
-                 timeseries_role = '',
+                 masked='',
+                 timeseries_role='',
                  # display_index=None,
                  active_default=True,
                  active_depend=False):
-
         self.sprod = sprod
         self.group = group
         self.descriptive_name = descriptive_name
@@ -2942,32 +2898,32 @@ class ProcSubprod(object):
         self.timeseries_role = timeseries_role
         # self.display_index = display_index
         self.final = final
-        self.active_default=active_default
-        self.active_user = False                            # In the product table, it applies only to Native prods
+        self.active_default = active_default
+        self.active_user = False  # In the product table, it applies only to Native prods
         self.active_depend = active_depend
 
     def print_out(self):
-        print ('Subproduct  : {}'.format(self.sprod))
-        print ('Group       : {}'.format(self.group))
-        print ('Descr. Name : {}'.format(self.descriptive_name))
-        print ('Description : {}'.format(self.description))
-        print ('Frequency   : {}'.format(self.frequency_id))
-        print ('Date Format : {}'.format(self.date_format))
-        print ('Scale Factor: {}'.format(self.scale_factor))
-        print ('No Data     : {}'.format(self.nodata))
-        print ('Unit        : {}'.format(self.unit))
-        print ('Data Type   : {}'.format(self.data_type_id))
-        print ('Masked      : {}'.format(self.masked))
-        print ('TS role     : {}'.format(self.timeseries_role))
+        print('Subproduct  : {}'.format(self.sprod))
+        print('Group       : {}'.format(self.group))
+        print('Descr. Name : {}'.format(self.descriptive_name))
+        print('Description : {}'.format(self.description))
+        print('Frequency   : {}'.format(self.frequency_id))
+        print('Date Format : {}'.format(self.date_format))
+        print('Scale Factor: {}'.format(self.scale_factor))
+        print('No Data     : {}'.format(self.nodata))
+        print('Unit        : {}'.format(self.unit))
+        print('Data Type   : {}'.format(self.data_type_id))
+        print('Masked      : {}'.format(self.masked))
+        print('TS role     : {}'.format(self.timeseries_role))
         # print ('DisplayIndex: {}'.format(self.display_index))
-        print ('Final       : {}'.format(self.final))
+        print('Final       : {}'.format(self.final))
         # print ('active_default: {}'.format(self.active_default))
-        print ('Active_user : {}'.format(self.active_user))
+        print('Active_user : {}'.format(self.active_user))
         # print ('active_depend: {}'.format(self.active_depend))
 
 
 class ProcSubprodGroup(object):
     def __init__(self, group, active_default=True):
         self.group = group
-        self.active_default=active_default
+        self.active_default = active_default
         self.active_user = True

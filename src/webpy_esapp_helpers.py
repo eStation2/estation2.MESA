@@ -73,6 +73,18 @@ logger = log.my_logger(__name__)
 WEBPY_COOKIE_NAME = "webpy_session_id"
 
 
+def getProductAcquisition(activated):
+    products = querydb.get_products_acquisition(activated=activated)
+    # if params.activated or not params.activated:
+    #     products = querydb.get_products_acquisition(activated=params.activated)
+    # else:
+    #     products = querydb.get_products_acquisition()
+    # products = querydb.get_products(activated=params.activated)
+    products_json = functions.tojson(products)
+    products_json = '{"success":"true", "total":' + str(products.__len__()) + ',"products":[' + products_json + ']}'
+    return products_json
+
+
 def GetLogos():
     logos_dict_all = []
     logos = querydb.get_logos()
@@ -291,7 +303,7 @@ def __checkCreateSubproductDir(productcode, version):
 def UpdateProduct(productcode, version, activate):
     result = querydb.activate_deactivate_product(productcode=productcode,
                                                  version=version,
-                                                 activate=activate, force=True)
+                                                 activate=activate)
 
     if result:
         if activate:
