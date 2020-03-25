@@ -35,15 +35,15 @@ class TestFrequency(unittest.TestCase):
         self.assertRaises(WrongFrequencyType, Frequency, *(1, Frequency.UNIT.DEKAD, '-' + Frequency.TYPE.PER))
 
     def test_dataformat_default_1(self):
-        frequency =  Frequency(1, Frequency.UNIT.DEKAD, Frequency.TYPE.PER)
+        frequency = Frequency(1, Frequency.UNIT.DEKAD, Frequency.TYPE.PER)
         self.assertEqual(frequency.dateformat, Frequency.DATEFORMAT.DATE)
 
     def test_dataformat_default_2(self):
-        frequency =  Frequency(4, Frequency.UNIT.HOUR, Frequency.TYPE.PER)
+        frequency = Frequency(4, Frequency.UNIT.HOUR, Frequency.TYPE.PER)
         self.assertEqual(frequency.dateformat, Frequency.DATEFORMAT.DATETIME)
 
     def test_dataformat_default_3(self):
-        frequency =  Frequency(9, Frequency.UNIT.YEAR, Frequency.TYPE.EVERY)
+        frequency = Frequency(9, Frequency.UNIT.YEAR, Frequency.TYPE.EVERY)
         self.assertEqual(frequency.dateformat, Frequency.DATEFORMAT.DATE)
 
     # Test the single file frequency
@@ -109,8 +109,8 @@ class TestFrequency(unittest.TestCase):
         to_date = datetime.date(2014, 12, 31)
         dates = frequency.get_dates(from_date, to_date)
         templates = frequency.get_internet_dates(dates, "/%Y/%m/%d/DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0/c_gls_DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc")
-        self.assertEqual(templates[0], '/%Y/%m/%d/DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0/c_gls_DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc')
-        self.assertEqual(templates[1], '/%Y/%m/%d/DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0/c_gls_DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc')
+        self.assertEqual(templates[0], '/2014/01/10/DMP-RT6_201401100000_GLOBE_PROBAV_V2.0/c_gls_DMP-RT6_201401100000_GLOBE_PROBAV_V2.0.1.nc')
+        self.assertEqual(templates[1], '/2014/01/20/DMP-RT6_201401200000_GLOBE_PROBAV_V2.0/c_gls_DMP-RT6_201401200000_GLOBE_PROBAV_V2.0.1.nc')
 
     def test_get_internet_dates_add_days(self):
         #%{+/-<Nt><strftime>} = +/- N delta days/hours/
