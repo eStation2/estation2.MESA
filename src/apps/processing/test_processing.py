@@ -242,26 +242,26 @@ def my_proc_tamsat_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None,
 #   ---------------------------------------------------------------------
 # fewsnet-rfe
 #   ---------------------------------------------------------------------
-from apps.processing.processing_std_precip import *
-def my_proc_fewsnet_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False):
-    # Create the list of dates -> returns empty if start==end==None
-    #start_date='20010101'
-    #end_date='20141221'
-    #starting_dates = proc_functions.get_list_dates_for_dataset('fewsnet-rfe', '10d', '2.0', start_date=start_date, end_date=end_date)
-    starting_dates = None
-    args = {'pipeline_run_level':pipe_run, \
-            'pipeline_printout_level':pipe_print, \
-            'pipeline_printout_graph_level': 0, \
-            'prod': 'fewsnet-rfe',\
-            'starting_sprod':'10d',\
-            'starting_dates': starting_dates,\
-            'mapset': 'FEWSNET-Africa-8km',\
-            'version':'2.0',
-            'logfile':'log-fewsnet.log'}
-
-    res_queue = None
-    proc_lists=processing_std_precip_prods_only(res_queue,**args)
-    print (proc_lists)
+# from apps.processing.processing_std_precip import *
+# def my_proc_fewsnet_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False):
+#     # Create the list of dates -> returns empty if start==end==None
+#     #start_date='20010101'
+#     #end_date='20141221'
+#     #starting_dates = proc_functions.get_list_dates_for_dataset('fewsnet-rfe', '10d', '2.0', start_date=start_date, end_date=end_date)
+#     starting_dates = None
+#     args = {'pipeline_run_level':pipe_run, \
+#             'pipeline_printout_level':pipe_print, \
+#             'pipeline_printout_graph_level': 0, \
+#             'prod': 'fewsnet-rfe',\
+#             'starting_sprod':'10d',\
+#             'starting_dates': starting_dates,\
+#             'mapset': 'FEWSNET-Africa-8km',\
+#             'version':'2.0',
+#             'logfile':'log-fewsnet.log'}
+#
+#     res_queue = None
+#     proc_lists=processing_std_precip_prods_only(res_queue,**args)
+#     print (proc_lists)
 
 def my_proc_fewsnet_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False):
 
@@ -282,7 +282,8 @@ def my_proc_fewsnet_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None
             'logfile':'log-fewsnet.log'}
 
     res_queue = None
-    proc_lists=processing_std_precip_stats_only(res_queue,**args)
+    # proc_lists=processing_std_precip_stats_only(res_queue,**args)
+    proc_lists=processing_std_precip_prods_only(res_queue,**args)
     print (proc_lists)
 
 #   ---------------------------------------------------------------------
@@ -877,13 +878,13 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 # test_subprocess_swi(pipe_run=3, pipe_print=0, touch_files_only=False)
 # test_subprocess_vgt_lai(pipe_run=0, pipe_print=4, touch_files_only=False)
 # test_subprocess_vgt_fcover(pipe_run=3, pipe_print=0, touch_files_only=False)
-# test_subprocess_vgt_fapar(pipe_run=0, pipe_print=4, touch_files_only=False)
+test_subprocess_vgt_fapar(pipe_run=4, pipe_print=0, touch_files_only=False)
 # my_proc_std_ndvi(pipe_run=3, pipe_print=0, touch_files_only=False)
 #my_proc_ndvi_merge(pipe_run=0, pipe_print=3, touch_files_only=False)
 # my_proc_pml_modis_fronts(pipe_run=3, pipe_print=0, touch_files_only=False)
 #my_proc_std_fronts(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_std_modis_chla(pipe_run=0, pipe_print=3, touch_files_only=False)
-#my_proc_std_modis_sst(pipe_run=0, pipe_print=3, touch_files_only=False)
+# my_proc_std_modis_sst(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_std_modis_par(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_std_modis_kd490(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_modis_pp(pipe_run=0, pipe_print=4, touch_files_only=False)
@@ -911,7 +912,7 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 #my_proc_vgt_dmp(pipe_run=4, pipe_print=0, start_date='19990101', end_date='20171231', touch_files_only=False)
 #my_proc_std_ba(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None, touch_files_only=False)
 #my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=False)
-test_proc_modis_chla_opfish(pipe_run=3, pipe_print=0, touch_files_only=False)
+# test_proc_modis_chla_opfish(pipe_run=3, pipe_print=0, touch_files_only=False)
 #   ---------------------------------------------------------------------
 #   OFF-LINE Tests (on raster-math functions)
 #   ---------------------------------------------------------------------
