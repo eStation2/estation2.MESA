@@ -26,7 +26,7 @@ class TestMapsets(unittest.TestCase):
 
     def test_mapset_not_existent(self):
         kwargs = {'mapset_code':"---mapset---"}
-        self.assertRaisesRegexp(NoMapsetFound, "(?i).*found.*mapset.*", Mapset, **kwargs)
+        self.assertRaisesRegex(NoMapsetFound, "(?i).*found.*mapset.*", Mapset, **kwargs)
 
     def test_mapset(self):
         kwargs = {'mapset_code':"SPOTV-Africa-1km"}
