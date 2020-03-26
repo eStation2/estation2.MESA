@@ -31,7 +31,6 @@ import re
 import datetime
 import shutil
 import time
-import subprocess
 
 from time import sleep
 
@@ -41,9 +40,7 @@ from config import es_constants
 from database import querydb
 from lib.python import functions
 from apps.productmanagement import datasets
-from apps.tools import motu_api
-from apps.tools import jeodpp_api
-from apps.tools import coda_eum_api
+from lib.python.api import coda_eum_api, jeodpp_api, motu_api
 
 logger = log.my_logger(__name__)
 
