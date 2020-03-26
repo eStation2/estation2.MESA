@@ -3,15 +3,9 @@ from __future__ import division
 from __future__ import unicode_literals
 from __future__ import absolute_import
 
-from builtins import int
 from future import standard_library
 standard_library.install_aliases()
-from builtins import str
-from past.utils import old_div
-from config import es_constants
-from apps.acquisition.get_internet import *
 from apps.acquisition.get_eumetcast import *
-from apps.tools import coda_eum_api
 
 import unittest
 import shutil
@@ -153,7 +147,7 @@ def get_one_source(internet_source, target_dir=None):
             elif internet_type == 'jeodpp':
                 # Create the full filename from a 'template' which contains
                 # To be moved to the top
-                from apps.tools import jeodpp_api
+                from lib.python.api import jeodpp_api
 
                 ongoing_list = []
                 ongoing_list_filename = es_constants.get_internet_processed_list_prefix + str(
@@ -193,7 +187,7 @@ def get_one_source(internet_source, target_dir=None):
                                     # HTTP request to JEODPP follow here once the request is success add the oid to ongoing list
                                     current_product_id = filename.split(':')[0]
                                     current_product_band = filename.split(':')[1]
-                                    created_ongoing_link = jeodpp_api.create_jeodpp_job(base_url=str(internet_source['url']), product_id=current_product_id, band=current_product_band,usr_pwd=usr_pwd, https_params=str(internet_source['https_params']))
+                                    created_ongoing_link = jeodpp_api.create_jeodpp_job(base_url=str(internet_source['url']), product_id=current_product_id, band=current_product_band, usr_pwd=usr_pwd, https_params=str(internet_source['https_params']))
                                     if created_ongoing_link is not None:
                                         ongoing_list.append(created_ongoing_link)
 
@@ -212,7 +206,7 @@ def get_one_source(internet_source, target_dir=None):
                                 if each_product_id == ongoing_product_id:
                                     ongoing_job_id = ongoing.split(':')[2]
                                     job_status = jeodpp_api.get_jeodpp_job_status(base_url=str(internet_source['url']),
-                                                                                            job_id=ongoing_job_id, usr_pwd=usr_pwd, https_params=str(internet_source['https_params']))
+                                                                                  job_id=ongoing_job_id, usr_pwd=usr_pwd, https_params=str(internet_source['https_params']))
                                     if job_status:
                                         listtodownload.append(ongoing)
 
@@ -233,7 +227,7 @@ def get_one_source(internet_source, target_dir=None):
                                                 processed_list.append(ongoing)
                                                 ongoing_list.remove(ongoing)
                                                 ongoing_job_id = ongoing.split(':')[2]
-                                                deleted = jeodpp_api.delete_results_jeodpp_job(base_url=str(internet_source['url']),job_id=ongoing_job_id, usr_pwd=usr_pwd,https_params=str(internet_source['https_params']))
+                                                deleted = jeodpp_api.delete_results_jeodpp_job(base_url=str(internet_source['url']), job_id=ongoing_job_id, usr_pwd=usr_pwd, https_params=str(internet_source['https_params']))
                                     except:
                                         logger_spec.warning("Problem while Downloading Product: %s.", str(each_product_id))
                     functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
@@ -1527,7 +1521,7 @@ class TestGetInternet(unittest.TestCase):
             }
 
             # Direct test ! True: #
-            if True: #self.direct_download:
+            if self.direct_download:
                 filename = os.path.split(file_to_check)[1]
                 remote_url = str(internet_source.url + '/' + file_to_check)
                 download_link = 'https://coda.eumetsat.int/odata/v1/Products(\'{0}\')/$value'.format(os.path.split(file_to_check)[0])
