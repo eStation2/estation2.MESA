@@ -2276,7 +2276,7 @@ def write_graph_xml_band_math_subset(output_dir, band_name, expression):
 
     file_xml = output_dir + os.path.sep + band_name + os.path.sep + 'graph_xml_subset.xml'
 
-    with open(file_xml, 'w') as outFile:
+    with open(file_xml, 'wb') as outFile:
         outFile.write('<graph id="Graph">\n')
         outFile.write('  <version>1.0</version>\n')
         outFile.write('  <node id="Read">\n')
