@@ -1485,10 +1485,10 @@ class TestIngestion(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def test_ingest_cpc_soilmoisture(self):
 
-        filename='w.201609.mon'
-        shutil.copy('/data/processing/exchange/'+filename,'/data/ingest/'+filename)
-        date_fileslist = glob.glob('/data/ingest/w.201609.mon')
-        in_date = '201201'
+        filename='w30.202002.mon'
+        #shutil.copy('/data/processing/exchange/'+filename,'/data/ingest/'+filename)
+        date_fileslist = glob.glob('/data/ingest/w30.202002.mon')
+        in_date = '202002'
         productcode = 'cpc-sm'
         productversion = '1.0'
         subproductcode = 'sm'
