@@ -3,15 +3,9 @@ from __future__ import division
 from __future__ import unicode_literals
 from __future__ import absolute_import
 
-from builtins import int
 from future import standard_library
 standard_library.install_aliases()
-from builtins import str
-from past.utils import old_div
-from config import es_constants
-from apps.acquisition.get_internet import *
 from apps.acquisition.get_eumetcast import *
-from apps.tools import coda_eum_api
 
 import unittest
 import shutil
