@@ -44,6 +44,7 @@ from apps.productmanagement import datasets
 from apps.tools import motu_api
 from apps.tools import jeodpp_api
 from apps.tools import coda_eum_api
+from lib.python import functions
 
 logger = log.my_logger(__name__)
 
@@ -1061,8 +1062,6 @@ def wget_file_from_url(remote_url_file, target_dir, target_file=None, userpwd=''
     finally:
         shutil.rmtree(tmpdir)
 
-
-
 # ######################################################################################
 # #   get_json_from_url
 # #   Purpose: download and save locally a file
@@ -1126,7 +1125,7 @@ def wget_file_from_url(remote_url_file, target_dir, target_file=None, userpwd=''
 #   Date: 2014/09/01
 #   Inputs: none
 #   Arguments: dry_run -> if set, read tables and report activity ONLY
-def loop_get_internet(dry_run=False, test_one_source=False):
+def loop_get_internet(dry_run=False, test_one_source=False, my_source=None):
 
     global processed_list_filename, processed_list
     global processed_info_filename, processed_info
@@ -1137,22 +1136,29 @@ def loop_get_internet(dry_run=False, test_one_source=False):
 
     logger.info("Starting retrieving data from INTERNET.")
 
-    while True:
+    b_loop = True               # to exit loops in testing mode
+    b_error = False             # checking files download - for testing mode
+
+    while b_loop:
         output_dir = es_constants.get_internet_output_dir
         logger.debug("Check if the Ingest Server input directory : %s exists.", output_dir)
         if not os.path.exists(output_dir):
             # ToDo: create output_dir - ingest directory
             logger.fatal("The Ingest Server input directory : %s doesn't exists.", output_dir)
-            exit(1)
+            if test_one_source:
+                return 1
+            else:
+                exit(1)
 
         if not os.path.exists(es_constants.processed_list_int_dir):
             os.mkdir(es_constants.processed_list_int_dir)
 
-        while 1:
+        while b_loop:
 
             # Check internet connection (or continue)
             if not functions.internet_on():
                 logger.error("The computer is not currently connected to the internet. Wait 1 minute.")
+                b_error = True
                 time.sleep(60)
 
             else:                
@@ -1169,10 +1175,16 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                     # Loop over active triggers
                     for internet_source in internet_sources_list:
                       try:
+                        # In case of test_one_source, skip all other sources
+                        if test_one_source:
+                            if (internet_source.internet_id != test_one_source):
+                                logger.debug("Running in test mode, and source is not %s. Continue.", test_one_source)
+                                continue
+                            else:
+                                # Overwrite DB definitions with the passed object (if defined - for testing purposes)
+                                if my_source:
+                                    internet_source = my_source
 
-                        if test_one_source and (internet_source.internet_id != test_one_source):
-                            logger.info("Running in test mode, and source is not %s. Continue.", test_one_source)
-                            continue
                         execute_trigger = True
                         # Get this from the pads database table (move from internet_source 'pull_frequency' to the pads table,
                         # so that it can be exploited by eumetcast triggers as well). It is in minute
@@ -1253,6 +1265,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                     current_list = get_list_matching_files(str(internet_source.url), str(usr_pwd), str(internet_source.include_files_expression), internet_type, end_date=end_date)
                                 except:
                                     logger.error("Error in creating file lists. Continue")
+                                    b_error = True
                                     continue
 
                             elif internet_type == 'ftp_tmpl':
@@ -1265,6 +1278,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                                                 str(internet_source.frequency_id),str(usr_pwd), str(internet_source.files_filter_expression) )
                                 except:
                                     logger.error("Error in creating date lists. Continue")
+                                    b_error = True
                                     continue
 
 
@@ -1278,6 +1292,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                                                   str(internet_source.frequency_id))
                                 except:
                                     logger.error("Error in creating date lists. Continue")
+                                    b_error = True
                                     continue
 
                             elif internet_type == 'http_multi_tmpl':
@@ -1291,6 +1306,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                                                   multi_template=True)
                                 except:
                                     logger.error("Error in creating date lists. Continue")
+                                    b_error = True
                                     continue
 
 
@@ -1304,6 +1320,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                                                 str(internet_source.frequency_id))
                                 except:
                                     logger.error("Error in creating date lists. Continue")
+                                    b_error = True
                                     continue
 
                             elif internet_type == 'http_tmpl_theia':
@@ -1318,6 +1335,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                                                 password)
                                 except:
                                     logger.error("Error in creating date lists. Continue")
+                                    b_error = True
                                     continue
 
                             elif internet_type == 'motu_client':
@@ -1335,6 +1353,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
 
                                 except:
                                     logger.error("Error in creating motu_client lists. Continue")
+                                    b_error = True
                                     continue
 
                             elif internet_type == 'jeodpp':
@@ -1397,6 +1416,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                 except:
                                                     logger_spec.warning(
                                                         "Problem while creating Job request to JEODPP: %s.", filename)
+                                                    b_error = True
                                     # functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
                                     if len(ongoing_list) > 0:
                                         logger_spec.info("Loop over the downloadable list files.")
@@ -1451,6 +1471,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                                     logger_spec.warning("Problem while deleting Product job id: %s.",str(each_product_id)+str(ongoing_job_id))
                                                     except:
                                                         logger_spec.warning("Problem while Downloading Product: %s.",str(each_product_id))
+                                                        b_error = True
                                     functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
                                     # functions.dump_obj_to_pickle(ongoing_info, ongoing_info_filename)
                                     #  Processed list will be added atlast
@@ -1460,6 +1481,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
 
                                 except:
                                     logger.error("Error in JEODPP Internet service. Continue")
+                                    b_error = True
 
                                 finally:
                                     logger.info("JEODPP Internet service completed")
@@ -1498,6 +1520,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
 
                                 except:
                                     logger.error("Error in creating http_coda_eum lists. Continue")
+                                    b_error = True
                                     continue
 
 
@@ -1506,6 +1529,7 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                 try:
                                     current_list = get_list_matching_files_dir_local(str(internet_source.url),str(internet_source.include_files_expression))
                                 except:
+                                    b_error = True
                                     logger.error("Error in creating date lists. Continue")
                                     continue
 
@@ -1585,8 +1609,10 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                                     processed_list.append(filename)
                                                 else:
                                                     logger_spec.warning("File %s not copied: ", filename)
+                                                    b_error = True
                                              except:
-                                               logger_spec.warning("Problem while copying file: %s.", filename)
+                                                logger_spec.warning("Problem while copying file: %s.", filename)
+                                                b_error = True
                                      else:
                                          logger_spec.info('Dry_run is set: do not get files')
 
@@ -1594,14 +1620,19 @@ def loop_get_internet(dry_run=False, test_one_source=False):
                                 functions.dump_obj_to_pickle(processed_list, processed_list_filename)
                                 functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
-                        sleep(float(user_def_sleep))
+                        if test_one_source:
+                            b_loop = False
+                        else:
+                            sleep(float(user_def_sleep))
                       # Loop over sources
                       except Exception as inst:
                         logger.error("Error while processing source %s. Continue" % internet_source.descriptive_name)
+                        b_error = True
                     sleep(float(user_def_sleep))
-
-    exit(0)
-
+    if not test_one_source:
+        exit(0)
+    else:
+        return b_error
 ######################################################################################
 #   get_list_matching_files_dir_local
 #   Purpose: return the list of matching files from the local filesystem ( ONLY used in test/development)
