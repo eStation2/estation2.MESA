@@ -33,6 +33,121 @@ req_dir=es_constants.es2globals['requests_dir']
 
 class TestCreateArchives(unittest.TestCase):
 
+    # Type 1: only product/version defined
+    def test_requests_1(self):
+
+        test_json_dump = req_dir + 'dump_my_json_1.req'
+        mapsetcode = None
+        subproductcode = None
+
+        # The case below FAILS !! -> to be double-checked
+        # productcode = 'lsasaf-lst'
+        # version = 'undefined'
+
+        # productcode = 'vgt-ndvi'
+        # version = 'sv2-pv2.2'
+        # mapsetcode = 'SPOTV-Africa-1km'
+        # # mapsetcode = 'SPOTV-IGAD-1km'
+        # # subproductcode = 'ndvi-linearx2'
+
+        productcode = 'olci-wrr'
+        version = 'V02.0'
+        mapsetcode = 'SPOTV-Africa-1km'
+        subproductcode = None
+
+        request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
+        request_json = json.dumps(request,
+                                  ensure_ascii=False,
+                                  sort_keys=True,
+                                  indent=4,
+                                  separators=(', ', ': '))
+
+        with open(test_json_dump, 'w+') as f:
+            f.write(request_json)
+        f.close()
+
+        print(test_json_dump)
+
+    # Type 2: product/version/mapset defined
+    def test_requests_2(self):
+
+        req_dir = es_constants.es2globals['requests_dir']
+        test_json_dump = req_dir + '/dump_my_json_2.req'
+        productcode = 'vgt-ndvi'
+        # version = 'sv2-pv2.1'
+        version = 'spot-v2'
+        mapsetcode = 'SPOTV-Africa-1km'
+        subproductcode = None
+        request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
+        request_json = json.dumps(request,
+                                  ensure_ascii=False,
+                                  sort_keys=True,
+                                  indent=4,
+                                  separators=(', ', ': '))
+
+        with open(test_json_dump, 'w+') as f:
+            f.write(request_json)
+        f.close()
+
+        print(request_json)
+
+    # Type 3: product/version/mapset/subproduct defined
+    def test_requests_3(self):
+
+        req_dir = es_constants.es2globals['requests_dir']
+        test_json_dump = req_dir + '/dump_my_json_2.req'
+        productcode = 'vgt-ndvi'
+        version = 'spot-v1'
+        mapsetcode = 'SPOTV-Africa-1km'
+        subproductcode = 'ndv'
+        request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
+        request_json = json.dumps(request,
+                                  ensure_ascii=False,
+                                  sort_keys=True,
+                                  indent=4,
+                                  separators=(', ', ': '))
+
+        with open(test_json_dump, 'w+') as f:
+            f.write(request_json)
+        f.close()
+
+        print(request_json)
+
+    def test_requests_4(self):
+        getparams = {
+            'level': 'dataset',
+            'productcode': 'lsasaf-lst',
+            'version': 'undefined',
+            'mapsetcode': 'MSG-satellite-3km',
+            'subproductcode': 'lst'
+        }
+        productcode = None
+        version = None
+        mapsetcode = None
+        subproductcode = None
+
+        if getparams['level'] == 'product':
+            productcode = getparams['productcode']
+            version = getparams['version']
+        elif getparams['level'] == 'mapset':
+            productcode = getparams['productcode']
+            version = getparams['version']
+            mapsetcode = getparams['mapsetcode']
+        elif getparams['level'] == 'dataset':
+            productcode = getparams['productcode']
+            version = getparams['version']
+            mapsetcode = getparams['mapsetcode']
+            subproductcode = getparams['subproductcode']
+
+        request = requests.create_request(productcode, version, mapsetcode=mapsetcode, subproductcode=subproductcode)
+        request_json = json.dumps(request,
+                                  # ensure_ascii=False,
+                                  sort_keys=True,
+                                  indent=4,
+                                  separators=(', ', ': '))
+
+        print(request_json)
+
     # Create a .bsx archive by defining 'manually' the missing files ('ad-hoc')
     # It does not go through the 'request' creation.
 
