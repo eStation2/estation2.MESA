@@ -386,12 +386,14 @@ def get_one_source(internet_source, target_dir=None):
 
 
 class TestGetInternet(unittest.TestCase):
-    Unitest_pattern = True
-    direct_download = False
+    def setUp(self):
+        self.Unitest_pattern = True
+        self.direct_download = False
+
     #   ---------------------------------------------------------------------------
     #   Vegetation - WSI CROP
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttp_WSI_CROP(self):
+    def testRemoteHttp_WSI_CROP(self):
         source_active = False
         internet_id = 'JRC:MARS:WSI:CROP'
         start_date = -15
@@ -434,7 +436,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #   Vegetation - WSI PASTURE
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttp_WSI_PASTURE(self):
+    def testRemoteHttp_WSI_PASTURE(self):
         source_active = False
         internet_id='JRC:MARS:WSI:PASTURE'
         start_date=-15
@@ -477,7 +479,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #   Vegetation - DMP RTO
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttps_DMP_RTO(self):
+    def testRemoteHttps_DMP_RTO(self):
         source_active = False
         internet_id = 'PDF:GLS:PROBA-V2.0:DMP_RT0'
         start_date=-15
@@ -524,7 +526,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #   Vegetation - DMP RT6
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttps_DMP(self):
+    def testRemoteHttps_DMP(self):
         source_active = False
         internet_id = 'PDF:GLS:PROBA-V2.0:DMP'
         start_date=20191010
@@ -570,7 +572,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #   Vegetation - FAPAR RT6
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttps_FAPAR(self):
+    def testRemoteHttps_FAPAR(self):
         source_active = False
         internet_id = 'PDF:GLS:PROBA-V2.0:FAPAR'
         start_date = 20191010
@@ -618,7 +620,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #   Vegetation - FCOVER RT6
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttps_FCOVER(self):
+    def testRemoteHttps_FCOVER(self):
         source_active = False
         internet_id = 'PDF:GLS:PROBA-V2.0:FCOVER'
         start_date = 20191010
@@ -667,7 +669,7 @@ class TestGetInternet(unittest.TestCase):
     #   Vegetation - LAI RT6
     #   ---------------------------------------------------------------------------
 
-    def TestRemoteHttps_LAI(self):
+    def testRemoteHttps_LAI(self):
         source_active = False
         internet_id = 'PDF:GLS:PROBA-V2.0:LAI'
         start_date = 20191010
@@ -717,7 +719,7 @@ class TestGetInternet(unittest.TestCase):
     #   Vegetation - NDVI
     #   ---------------------------------------------------------------------------
 
-    def TestRemoteHttps_NDVI(self):
+    def testRemoteHttps_NDVI(self):
         source_active = False
         internet_id = 'PDF:GLS:PROBA-V2.2:NDVI'
         start_date = 20200201
@@ -766,7 +768,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #   Vegetation - NDVI 300m
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttps_NDVI300(self):
+    def testRemoteHttps_NDVI300(self):
         source_active = False
         internet_id='PDF:VITO:PROBA-V1:NDVI300'
         start_date = 20200101
@@ -813,7 +815,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #   Rainfall - ARC2
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttp_ARC2(self):
+    def testRemoteHttp_ARC2(self):
         source_active = False
         internet_id = 'CPC:NOAA:RAIN:ARC2'
         start_date = 20200101
@@ -860,7 +862,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #   Rainfall - CHIRPS PREL
     #   ---------------------------------------------------------------------------
-    def TestRemoteFtp_CHIRPS_PREL(self):
+    def testRemoteFtp_CHIRPS_PREL(self):
         source_active = False
         internet_id='UCSB:CHIRPS:PREL:DEKAD'
         start_date = 20200101
@@ -903,7 +905,7 @@ class TestGetInternet(unittest.TestCase):
      #   ---------------------------------------------------------------------------
     #   Rainfall -  CHIRP (id: UCSB:CHIRP:DEKAD) NOT USED IN ESTATION
     #   ---------------------------------------------------------------------------
-    def TestRemoteFtp_CHIRP(self):
+    def testRemoteFtp_CHIRP(self):
         # Retrieve a list of CHIRP
         remote_url='ftp://chg-ftpout.geog.ucsb.edu/pub/org/chg/products/CHIRP/pentads/'
         usr_pwd='anonymous:anonymous'
@@ -917,7 +919,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #    Rainfall - CHIRPS (id:  UCSB:CHIRPS:DEKAD:2.0)
     #   ---------------------------------------------------------------------------
-    def TestRemoteFtp_CHIRPS_2_0(self):
+    def testRemoteFtp_CHIRPS_2_0(self):
         # Retrieve a list of CHIRP
         remote_url='ftp://chg-ftpout.geog.ucsb.edu/pub/org/chg/products/CHIRPS-2.0/global_dekad/tifs/'
         usr_pwd='anonymous:anonymous'
@@ -931,7 +933,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #    Rainfall - Fewsnet 2
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttp_FEWSNET_2(self):
+    def testRemoteHttp_FEWSNET_2(self):
         source_active = False
         internet_id = 'USGS:EARLWRN:FEWSNET'
         start_date = 20200101
@@ -977,7 +979,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #    Rainfall - JRC MARS SPI 3MON
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttp_MARS_SPI_3MON(self):
+    def testRemoteHttp_MARS_SPI_3MON(self):
         source_active = False
         internet_id = 'JRC:MARS:SPI:3MON'
         start_date = 20200101
@@ -1024,7 +1026,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #    Rainfall - JRC MARS SPI 1MON
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttp_MARS_SPI_1MON(self):
+    def testRemoteHttp_MARS_SPI_1MON(self):
         source_active = False
         internet_id = 'JRC:MARS:SPI:1MON'
         start_date = 20200101
@@ -1070,7 +1072,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #    Rainfall - TAMSAT 3
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttp_TAMSAT_3(self):
+    def testRemoteHttp_TAMSAT_3(self):
         source_active = False
         internet_id='READINGS:TAMSAT:3.0:10D:NC'
         start_date = 20200101
@@ -1163,7 +1165,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #    FIRE - PROBA BA 300
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttps_BA300(self):
+    def testRemoteHttps_BA300(self):
         source_active = False
         internet_id = 'PDF:GLS:PROBA-V1.1:BA300'
         start_date = 20200101
@@ -1210,7 +1212,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #    OCEANOGRAPHY - MODIS CHLA
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttp_MODIS_CHL(self):
+    def testRemoteHttp_MODIS_CHL(self):
         source_active = False
         internet_id='GSFC:CGI:MODIS:CHLA:1D'
         start_date = 20200101
@@ -1258,7 +1260,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #    OCEANOGRAPHY - MODIS KD490
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttp_MODIS_KD490(self):
+    def testRemoteHttp_MODIS_KD490(self):
         source_active = False
         internet_id='GSFC:CGI:MODIS:KD490:1D'
         start_date = 20200101
@@ -1306,7 +1308,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #    OCEANOGRAPHY - MODIS PAR
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttp_MODIS_PAR(self):
+    def testRemoteHttp_MODIS_PAR(self):
         source_active = False
         internet_id='GSFC:CGI:MODIS:PAR:1D'
         start_date = 20200101
@@ -1354,7 +1356,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #    OCEANOGRAPHY - PML MODIS SST
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttps_PML_MODIS_SST(self):
+    def testRemoteHttps_PML_MODIS_SST(self):
         source_active = False
         internet_id = 'PML:SST:1D'
         start_date = 20200101
@@ -1399,7 +1401,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #    OCEANOGRAPHY - PML MODIS CHL
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttps_PML_MODIS_CHL(self):
+    def testRemoteHttps_PML_MODIS_CHL(self):
         source_active = False
         internet_id = 'PML:CHL:1D'
         start_date = 20200101
@@ -1491,7 +1493,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #    OCEANOGRAPHY - Sentinel 3 OLCI WRR
     #   ---------------------------------------------------------------------------
-    def TestLocal_CODA_EUM_OLCI(self):
+    def testLocal_CODA_EUM_OLCI(self):
         source_active = False
         internet_id='CODA:EUM:S3A:OLCI:WRR'
         start_date = 20200310
@@ -1541,7 +1543,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #    OCEANOGRAPHY - Sentinel 3 SLSTR WST
     #   ---------------------------------------------------------------------------
-    def TestLocal_CODA_EUM_SLSTR(self):
+    def testLocal_CODA_EUM_SLSTR(self):
         source_active = False
         internet_id='CODA:EUM:S3A:SLSTR:WST'
         start_date = 20200310
@@ -1592,7 +1594,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #    Miscellaneous - ASCAT SWI
     #   ---------------------------------------------------------------------------
-    def TestLocal_ASCAT_SWI(self):
+    def testLocal_ASCAT_SWI(self):
         source_active = False
         internet_id='PDF:GLS:METOP:ASCAT-V3.1:SWI'
         start_date = 20200210
@@ -1645,7 +1647,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #    Miscellaneous - CPC SM
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttp_CPC_SM(self):
+    def testRemoteHttp_CPC_SM(self):
         source_active = False
         internet_id='CPC:NCEP:NOAA:SM'
         start_date = 20200210
@@ -1697,7 +1699,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #    Miscellaneous - JEODPP SENTINEL 2
     #   ---------------------------------------------------------------------------
-    def TestRemoteJEODPP_S2LIC(self):
+    def testRemoteJEODPP_S2LIC(self):
         source_active = False
         internet_id = 'JRC:JEODPP:S2:L1C'
         start_date = 20200210
@@ -1751,7 +1753,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #   INLAND WATER - WATERLEVEL
     #   ---------------------------------------------------------------------------
-    def TestRemoteHttps_WATERLEVEL(self):
+    def testRemoteHttps_WATERLEVEL(self):
         source_active = False
         internet_id='THEIA:HYDRO:LEGOS:WATERLEVEL'
         start_date = 20200210
@@ -1800,16 +1802,16 @@ class TestGetInternet(unittest.TestCase):
             else:
                 result = get_one_source(my_source)
 
-    def TestGetInfo(self):
-
-        eum_id = 'EO:EUM:DAT:MSG:LST-SEVIRI'
-        info = get_eumetcast_info(eum_id)
-
-    def TestLocalDir(self):
-        local_dir='/data/eumetcast_S3/'
-        regex='S3A*'
-        list = get_list_matching_files_dir_local(local_dir, regex)
-        self.assertTrue(1)
+    # def TestGetInfo(self):
+    #
+    #     eum_id = 'EO:EUM:DAT:MSG:LST-SEVIRI'
+    #     info = get_eumetcast_info(eum_id)
+    #
+    # def TestLocalDir(self):
+    #     local_dir='/data/eumetcast_S3/'
+    #     regex='S3A*'
+    #     list = get_list_matching_files_dir_local(local_dir, regex)
+    #     self.assertTrue(1)
 
 
     #   ---------------------------------------------------------------------------
@@ -2536,5 +2538,9 @@ class TestGetInternet(unittest.TestCase):
     #     # Check last 90 days (check list length = 9)
     #     result = get_one_source(my_source)
 
+# if __name__ == '__main__':
+#         unittest.main()
+
+suite_get_internet = unittest.TestLoader().loadTestsFromTestCase(TestGetInternet)
 if __name__ == '__main__':
-        unittest.main()
+    unittest.TextTestRunner(verbosity=2).run(suite_get_internet)
