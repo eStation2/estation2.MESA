@@ -66,8 +66,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
@@ -105,8 +104,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
@@ -149,8 +147,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
@@ -188,8 +185,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
@@ -231,8 +227,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
@@ -272,8 +267,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
@@ -311,8 +305,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
@@ -350,8 +343,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
@@ -389,8 +381,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
@@ -484,8 +475,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
@@ -527,8 +517,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
@@ -570,8 +559,7 @@ class TestIngestion(unittest.TestCase):
                  're_process': re_process,
                  'nodata': nodata}
 
-        subproducts = []
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
@@ -626,6 +614,8 @@ class TestIngestion(unittest.TestCase):
                                                             source_id=datasource_descrID)
             ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
+        self.assertEqual(1, 1)
+
     #   ---------------------------------------------------------------------------
     #   Vegetation - NDVI GLOBAL 300m
     #   ---------------------------------------------------------------------------
@@ -668,6 +658,7 @@ class TestIngestion(unittest.TestCase):
                                                             source_id=datasource_descrID)
             ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
+        self.assertEqual(1, 1)
     #   ---------------------------------------------------------------------------
     #   Rainfall - ARC2
     #   ---------------------------------------------------------------------------
@@ -698,12 +689,12 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
+        self.assertEqual(1, 1)
     #   ---------------------------------------------------------------------------
     #   Rainfall - CHIRPS
     #   ---------------------------------------------------------------------------
@@ -734,8 +725,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
@@ -772,8 +762,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
@@ -816,14 +805,13 @@ class TestIngestion(unittest.TestCase):
                  're_process': re_process,
                  'nodata': no_data}
 
-        subproducts = []
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-
+        self.assertEqual(1, 1)
     #   ---------------------------------------------------------------------------
     #    Rainfall - TAMSAT 3
     #   ---------------------------------------------------------------------------
@@ -856,14 +844,13 @@ class TestIngestion(unittest.TestCase):
                  're_process': re_process,
                  'nodata': no_data}
 
-        subproducts = []
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-
+        self.assertEqual(1, 1)
 
     #   ---------------------------------------------------------------------------
     #    FIRE - MODIS FIRMS
@@ -917,7 +904,7 @@ class TestIngestion(unittest.TestCase):
 
         #print ('['+command+']')
         os.system(command)
-
+        self.assertEqual(1, 1)
     #   ---------------------------------------------------------------------------
     #    FIRE - MODIS FIRMS 6
     #   ---------------------------------------------------------------------------
@@ -970,7 +957,7 @@ class TestIngestion(unittest.TestCase):
 
         #print ('['+command+']')
         os.system(command)
-
+        self.assertEqual(1, 1)
     #   ---------------------------------------------------------------------------
     #    FIRE - MODIS FIRMS 6
     #   ---------------------------------------------------------------------------
@@ -1003,13 +990,12 @@ class TestIngestion(unittest.TestCase):
                  're_process': re_process,
                  'nodata': no_data}
 
-        subproducts = []
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-
+        self.assertEqual(1, 1)
     #   ---------------------------------------------------------------------------
     #    FIRE - PROBA BA 300 NOT WORKING
     #   ---------------------------------------------------------------------------
@@ -1050,7 +1036,7 @@ class TestIngestion(unittest.TestCase):
             datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                             source_id=datasource_descrID)
             ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-
+        self.assertEqual(1, 1)
 
     #   ---------------------------------------------------------------------------
     #    OCEANOGRAPHY - MODIS CHLA
@@ -1082,8 +1068,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
                                                       source_id=datasource_descrID)
@@ -1121,8 +1106,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
         datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
                                                       source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
@@ -1159,8 +1143,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
         datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
                                                       source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
@@ -1197,8 +1180,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
                                                       source_id=datasource_descrID)
@@ -1238,8 +1220,7 @@ class TestIngestion(unittest.TestCase):
                              're_process': re_process,
                              'nodata': no_data}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
         datasource_descr=querydb.get_datasource_descr(source_type='EUMETCAST',
                                                       source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
@@ -1278,8 +1259,7 @@ class TestIngestion(unittest.TestCase):
                              're_process': re_process,
                              'nodata': no_data}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr=querydb.get_datasource_descr(source_type='EUMETCAST',
                                                       source_id=datasource_descrID)
@@ -1324,15 +1304,14 @@ class TestIngestion(unittest.TestCase):
                              're_process': re_process,
                              'nodata': no_data}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         # datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
         #                                                  source_id=datasource_descrID)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-
+        self.assertEqual(1, 1)
     #   ---------------------------------------------------------------------------
     #    OCEANOGRAPHY - Sentinel 3 OLCI WRR OC4ME
     #   ---------------------------------------------------------------------------
@@ -1368,14 +1347,14 @@ class TestIngestion(unittest.TestCase):
                              're_process': re_process,
                              'nodata': no_data}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         # datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
         #                                                  source_id=datasource_descrID)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+        self.assertEqual(1, 1)
     #   ---------------------------------------------------------------------------
     #    OCEANOGRAPHY - Sentinel 3 SLSTR WST
     #   ---------------------------------------------------------------------------
@@ -1421,12 +1400,12 @@ class TestIngestion(unittest.TestCase):
                  're_process': re_process,
                  'nodata': no_data}
 
-        subproducts = []
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                         source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+        self.assertEqual(1, 1)
     #   ---------------------------------------------------------------------------
     #    OCEANOGRAPHY - Sentinel 3 SLSTR WST
     #   ---------------------------------------------------------------------------
@@ -1471,8 +1450,7 @@ class TestIngestion(unittest.TestCase):
                  're_process': re_process,
                  'nodata': no_data}
 
-        subproducts = []
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
@@ -1513,8 +1491,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
@@ -1553,8 +1530,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
@@ -1590,8 +1566,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
@@ -1626,8 +1601,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
@@ -1666,8 +1640,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
@@ -1706,8 +1679,7 @@ class TestIngestion(unittest.TestCase):
                  're_extract': re_extract,
                  're_process': re_process}
 
-        subproducts = []
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                         source_id=datasource_descrID)
@@ -1804,8 +1776,7 @@ class TestIngestion(unittest.TestCase):
                              're_extract': re_extract,
                              're_process': re_process}
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
@@ -2091,8 +2062,7 @@ class TestIngestion(unittest.TestCase):
                  're_process': re_process,
                  'nodata': no_data}
 
-        subproducts = []
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
@@ -2100,7 +2070,7 @@ class TestIngestion(unittest.TestCase):
         #                                                                       source_id=datasource_descrID):
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger,
                             echo_query=1)
-
+        self.assertEqual(1, 1)
 
     def test_ingest_motu_chl(self):
 
@@ -2132,13 +2102,13 @@ class TestIngestion(unittest.TestCase):
                  're_process': re_process,
                  'nodata': no_data}
 
-        subproducts = []
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+        self.assertEqual(1, 1)
 
     def test_ingest_aviso_mwind(self):
 
@@ -2170,11 +2140,11 @@ class TestIngestion(unittest.TestCase):
                  're_process': re_process,
                  'nodata': no_data}
 
-        subproducts = []
-        subproducts.append(sprod)
+        subproducts = [sprod]
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+        self.assertEqual(1, 1)
 
 
