@@ -3496,7 +3496,7 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
     try:
         tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
                                   dir=es_constants.base_tmp_dir)
-        from scipy import ndimage
+
         output_file_final = output_file
         output_file = tmpdir + os.sep + os.path.basename(output_file)
         ##############
