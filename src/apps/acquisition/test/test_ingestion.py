@@ -2049,6 +2049,7 @@ class TestIngestion(unittest.TestCase):
         #                                                                       source_id=datasource_descrID):
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger,
                             echo_query=1)
+        self.assertEqual(1, 1)
 
     def test_ingest_motu_chl(self):
 
@@ -2085,6 +2086,7 @@ class TestIngestion(unittest.TestCase):
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+        self.assertEqual(1, 1)
 
     def test_ingest_aviso_mwind(self):
 
@@ -2121,3 +2123,6 @@ class TestIngestion(unittest.TestCase):
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+        self.assertEqual(1, 1)
+
+
