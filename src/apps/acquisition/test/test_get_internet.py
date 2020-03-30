@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from __future__ import absolute_import
 
 from future import standard_library
+
 standard_library.install_aliases()
 from apps.acquisition.get_eumetcast import *
 
@@ -11,6 +12,7 @@ import unittest
 import shutil
 
 logger = log.my_logger(__name__)
+
 
 #
 #   Extracted from loo_get_internet to get a single source
@@ -242,7 +244,7 @@ logger = log.my_logger(__name__)
 #
 #                 finally:
 #                     current_list = []
-#                     return current_list
+#                     self.assertEqual(status, 0) current_list
 #
 #             elif internet_type == 'ftp_tmpl':
 #                 # Create the full filename from a 'template' which contains
@@ -387,25 +389,24 @@ logger = log.my_logger(__name__)
 class Source:
     def __init__(self,
                  url=None,
-                 internet_id = None,
-                 defined_by = None,
-                 descriptive_name = None,
-                 description = None,
-                 modified_by = None, 
-                 update_datetime = None, 
-                 user_name = None, 
-                 password = None, 
-                 type = None, 
-                 include_files_expression = None, 
-                 files_filter_expression = None, 
-                 status = None, 
-                 pull_frequency = None, 
-                 datasource_descr_id = None, 
-                 frequency_id = None, 
-                 start_date = None, 
-                 end_date = None, 
-                 https_params = None):
-        
+                 internet_id=None,
+                 defined_by=None,
+                 descriptive_name=None,
+                 description=None,
+                 modified_by=None,
+                 update_datetime=None,
+                 user_name=None,
+                 password=None,
+                 type=None,
+                 include_files_expression=None,
+                 files_filter_expression=None,
+                 status=None,
+                 pull_frequency=None,
+                 datasource_descr_id=None,
+                 frequency_id=None,
+                 start_date=None,
+                 end_date=None,
+                 https_params=None):
         self.url = url
         self.internet_id = internet_id
         self.defined_by = defined_by
@@ -425,13 +426,14 @@ class Source:
         self.start_date = start_date
         self.end_date = end_date
         self.https_params = https_params
-        
+
 
 class TestGetInternet(unittest.TestCase):
-
     pattern = True
     download = False
     direct_download = False
+    target_dir = '/data/tmp'
+
     #   ---------------------------------------------------------------------------
     #   Vegetation - WSI CROP
     #   ---------------------------------------------------------------------------
@@ -443,6 +445,7 @@ class TestGetInternet(unittest.TestCase):
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = 'wsi_hp_crop_20200201.img'
+        include_files_expression = "wsi_hp_crop_%Y%m%d.img"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -452,44 +455,51 @@ class TestGetInternet(unittest.TestCase):
 
         if source_active:
             my_source = Source(internet_id=internet_id,
-                         url = internet_source.url,
-                         descriptive_name = 'MARS HP for crop',
-                         include_files_expression = "wsi_hp_crop_%Y%m%d.hdr",
-                         pull_frequency = internet_source.pull_frequency,
-                         user_name = internet_source.user_name,
-                         password = internet_source.password,
-                         start_date = start_date_dyn,
-                         end_date = end_date_dyn,
-                         frequency_id = internet_source.frequency_id,
-                         type = internet_source.type,
-                         files_filter_expression = internet_source.files_filter_expression,
-                         https_params = internet_source.https_params)
-
+                               url=internet_source.url,
+                               descriptive_name='MARS HP for crop',
+                               include_files_expression=include_files_expression,
+                               pull_frequency=internet_source.pull_frequency,
+                               user_name=internet_source.user_name,
+                               password=internet_source.password,
+                               start_date=start_date_dyn,
+                               end_date=end_date_dyn,
+                               frequency_id=internet_source.frequency_id,
+                               type=internet_source.type,
+                               files_filter_expression=internet_source.files_filter_expression,
+                               https_params=internet_source.https_params)
+            # Direct test !
+            if self.direct_download:
+                filename = 'wsi_hp_crop_20200201.img'
+                remote_url = internet_source.url + '/' + filename
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                           userpwd=internet_source.user_name + ':' + internet_source.password)
+                self.assertEqual(status, 0)
             # Test pattern (with fixed date)
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
-                                                      start_date_fixed,
-                                                      end_date_fixed,
-                                                      str(internet_source.frequency_id),
-                                                      multi_template=True)
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
+                                                  start_date_fixed,
+                                                  end_date_fixed,
+                                                  str(internet_source.frequency_id),
+                                                  multi_template=True)
             if self.pattern:
                 self.assertTrue(file_to_check in list)
 
             # Test download (dynamic dates
             if self.download:
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
-                self.assertEqual(result,0)
+                self.assertEqual(result, 0)
 
     #   ---------------------------------------------------------------------------
     #   Vegetation - WSI PASTURE
     #   ---------------------------------------------------------------------------
     def testRemoteHttp_WSI_PASTURE(self):
         source_active = False
-        internet_id='JRC:MARS:WSI:PASTURE'
+        internet_id = 'JRC:MARS:WSI:PASTURE'
         start_date_fixed = 20200201
         end_date_fixed = 20200321
         start_date_dyn = -45
         end_date_dyn = -30
-        file_to_check='wsi_hp_pasture_20200301.img'
+        file_to_check = 'wsi_hp_pasture_20200301.img'
+        include_files_expression = "wsi_hp_pasture_%Y%m%d.img"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -499,32 +509,40 @@ class TestGetInternet(unittest.TestCase):
 
         if source_active:
             my_source = Source(internet_id=internet_id,
-                         url = internet_source.url,
-                         descriptive_name = 'MARS HP for pasture',
-                         include_files_expression = "wsi_hp_pasture_%Y%m%d.hdr",
-                         pull_frequency = internet_source.pull_frequency,
-                         user_name = internet_source.user_name,
-                         password = internet_source.password,
-                         start_date = start_date_dyn,
-                         end_date = end_date_dyn,
-                         frequency_id = internet_source.frequency_id,
-                         type = internet_source.type,
-                         files_filter_expression = internet_source.files_filter_expression,
-                         https_params = internet_source.https_params)
+                               url=internet_source.url,
+                               descriptive_name='MARS HP for pasture',
+                               include_files_expression=include_files_expression,
+                               pull_frequency=internet_source.pull_frequency,
+                               user_name=internet_source.user_name,
+                               password=internet_source.password,
+                               start_date=start_date_dyn,
+                               end_date=end_date_dyn,
+                               frequency_id=internet_source.frequency_id,
+                               type=internet_source.type,
+                               files_filter_expression=internet_source.files_filter_expression,
+                               https_params=internet_source.https_params)
+
+            # Direct test !
+            if self.direct_download:
+                filename = 'wsi_hp_pasture_20200301.img'
+                remote_url = internet_source.url + '/' + filename
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                           userpwd=internet_source.user_name + ':' + internet_source.password)
+                self.assertEqual(status, 0)
 
             # Test pattern (with fixed date)
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
-                                                      start_date_fixed,
-                                                      end_date_fixed,
-                                                      str(internet_source.frequency_id),
-                                                      multi_template=True)
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
+                                                  start_date_fixed,
+                                                  end_date_fixed,
+                                                  str(internet_source.frequency_id),
+                                                  multi_template=True)
             if self.pattern:
                 self.assertTrue(file_to_check in list)
 
             # Test download (dynamic dates
             if self.download:
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
-                self.assertEqual(result,0)
+                self.assertEqual(result, 0)
 
     #   ---------------------------------------------------------------------------
     #   Vegetation - DMP RTO
@@ -536,7 +554,8 @@ class TestGetInternet(unittest.TestCase):
         end_date_fixed = 20200321
         start_date_dyn = -45
         end_date_dyn = -30
-        file_to_check='/2020/3/10/DMP-RT0_202003100000_GLOBE_PROBAV_V2.0.1/c_gls_DMP-RT0_202003100000_GLOBE_PROBAV_V2.0.1.nc'
+        file_to_check = '/2020/3/10/DMP-RT0_202003100000_GLOBE_PROBAV_V2.0.1/c_gls_DMP-RT0_202003100000_GLOBE_PROBAV_V2.0.1.nc'
+        include_files_expression = "/%Y/%-m/%d/DMP-RT0_%Y%m%d0000_GLOBE_PROBAV_V2.0.1/c_gls_DMP-RT0_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -546,40 +565,40 @@ class TestGetInternet(unittest.TestCase):
 
         if source_active:
             my_source = Source(internet_id=internet_id,
-                         url = internet_source.url,
-                         descriptive_name = 'VITO PDF server - DMP 2.0 Prelimary',
-                         include_files_expression = "/%Y/%-m/%d/DMP-RT0_%Y%m%d0000_GLOBE_PROBAV_V2.0.1/c_gls_DMP-RT0_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc",
-                         pull_frequency = internet_source.pull_frequency,
-                         user_name = internet_source.user_name,
-                         password = internet_source.password,
-                         start_date = start_date_dyn,
-                         end_date = end_date_dyn,
-                         frequency_id = internet_source.frequency_id,
-                         type = internet_source.type,
-                         files_filter_expression = internet_source.files_filter_expression,
-                         https_params = internet_source.https_params)
-
+                               url=internet_source.url,
+                               descriptive_name='VITO PDF server - DMP 2.0 Prelimary',
+                               include_files_expression=include_files_expression,
+                               pull_frequency=internet_source.pull_frequency,
+                               user_name=internet_source.user_name,
+                               password=internet_source.password,
+                               start_date=start_date_dyn,
+                               end_date=end_date_dyn,
+                               frequency_id=internet_source.frequency_id,
+                               type=internet_source.type,
+                               files_filter_expression=internet_source.files_filter_expression,
+                               https_params=internet_source.https_params)
 
             # Direct test !
             if self.direct_download:
                 filename = 'c_gls_DMP-RT0_202003100000_GLOBE_PROBAV_V2.0.1.nc'
-                remote_url = internet_source.url+'/2020/3/10/DMP-RT0_202003100000_GLOBE_PROBAV_V2.0.1/' + filename
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd=internet_source.user_name+':'+internet_source.password)
-                return
+                remote_url = internet_source.url + '/2020/3/10/DMP-RT0_202003100000_GLOBE_PROBAV_V2.0.1/' + filename
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                           userpwd=internet_source.user_name + ':' + internet_source.password)
+                self.assertEqual(status, 0)
 
             # Test pattern (with fixed date)
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
-                                                      start_date_fixed,
-                                                      end_date_fixed,
-                                                      str(internet_source.frequency_id),
-                                                      multi_template=False)
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
+                                                  start_date_fixed,
+                                                  end_date_fixed,
+                                                  str(internet_source.frequency_id),
+                                                  multi_template=False)
             if self.pattern:
                 self.assertTrue(file_to_check in list)
 
             # Test download (dynamic dates
             if self.download:
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
-                self.assertEqual(result,0)
+                self.assertEqual(result, 0)
 
     #   ---------------------------------------------------------------------------
     #   Vegetation - DMP RT6
@@ -591,7 +610,8 @@ class TestGetInternet(unittest.TestCase):
         end_date_fixed = 20191210
         start_date_dyn = -45
         end_date_dyn = -30
-        file_to_check='/2019/11/10/DMP-RT6_201911100000_GLOBE_PROBAV_V2.0.1/c_gls_DMP-RT6_201911100000_GLOBE_PROBAV_V2.0.1.nc'
+        file_to_check = '/2019/11/10/DMP-RT6_201911100000_GLOBE_PROBAV_V2.0.1/c_gls_DMP-RT6_201911100000_GLOBE_PROBAV_V2.0.1.nc'
+        include_files_expression = "/%Y/%-m/%d/DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1/c_gls_DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -601,38 +621,39 @@ class TestGetInternet(unittest.TestCase):
 
         if source_active:
             my_source = Source(internet_id=internet_id,
-                         url = internet_source.url,
-                         descriptive_name = 'VITO PDF server - DMP 2.0',
-                         include_files_expression = "/%Y/%-m/%d/DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1/c_gls_DMP-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc",
-                         pull_frequency = internet_source.pull_frequency,
-                         user_name = internet_source.user_name,
-                         password = internet_source.password,
-                         start_date = start_date_dyn,
-                         end_date = end_date_dyn,
-                         frequency_id = internet_source.frequency_id,
-                         type = internet_source.type,
-                         files_filter_expression = internet_source.files_filter_expression,
-                         https_params = internet_source.https_params)
+                               url=internet_source.url,
+                               descriptive_name='VITO PDF server - DMP 2.0',
+                               include_files_expression=include_files_expression,
+                               pull_frequency=internet_source.pull_frequency,
+                               user_name=internet_source.user_name,
+                               password=internet_source.password,
+                               start_date=start_date_dyn,
+                               end_date=end_date_dyn,
+                               frequency_id=internet_source.frequency_id,
+                               type=internet_source.type,
+                               files_filter_expression=internet_source.files_filter_expression,
+                               https_params=internet_source.https_params)
 
             # Direct test !
             if self.direct_download:
                 filename = 'c_gls_DMP-RT6_201801100000_GLOBE_PROBAV_V2.0.1.nc'
-                remote_url = internet_source.url+'/2018/1/10/DMP-RT6_201801100000_GLOBE_PROBAV_V2.0.1/' + filename
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd=internet_source.user_name+':'+internet_source.password)
-                return
+                remote_url = internet_source.url + '/2018/1/10/DMP-RT6_201801100000_GLOBE_PROBAV_V2.0.1/' + filename
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                           userpwd=internet_source.user_name + ':' + internet_source.password)
+                self.assertEqual(status, 0)
             # Test pattern (with fixed date)
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
-                                                      start_date_fixed,
-                                                      end_date_fixed,
-                                                      str(internet_source.frequency_id),
-                                                      multi_template=False)
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
+                                                  start_date_fixed,
+                                                  end_date_fixed,
+                                                  str(internet_source.frequency_id),
+                                                  multi_template=False)
             if self.pattern:
                 self.assertTrue(file_to_check in list)
 
             # Test download (dynamic dates
             if self.download:
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
-                self.assertEqual(result,0)
+                self.assertEqual(result, 0)
 
     #   ---------------------------------------------------------------------------
     #   Vegetation - FAPAR RT6
@@ -645,6 +666,7 @@ class TestGetInternet(unittest.TestCase):
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = '/2019/11/10/FAPAR-RT6_201911100000_GLOBE_PROBAV_V2.0.1/c_gls_FAPAR-RT6_201911100000_GLOBE_PROBAV_V2.0.1.nc'
+        include_files_expression = "/%Y/%-m/%d/FAPAR-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1/c_gls_FAPAR-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -656,7 +678,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='VITO PDF server - FAPAR 2.0 (offline retrieval)',
-                               include_files_expression="/%Y/%-m/%d/FAPAR-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1/c_gls_FAPAR-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -670,12 +692,13 @@ class TestGetInternet(unittest.TestCase):
             # Direct test !
             if self.direct_download:
                 filename = 'c_gls_FAPAR-RT6_201911100000_GLOBE_PROBAV_V2.0.1.nc'
-                remote_url = internet_source.url+'/2019/11/10/FAPAR-RT6_201911100000_GLOBE_PROBAV_V2.0.1/' + filename
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd=internet_source.user_name+':'+internet_source.password)
-                return
+                remote_url = internet_source.url + '/2019/11/10/FAPAR-RT6_201911100000_GLOBE_PROBAV_V2.0.1/' + filename
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                           userpwd=internet_source.user_name + ':' + internet_source.password)
+                self.assertEqual(status, 0)
 
             # Test pattern (with fixed date)
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
                                                   start_date_fixed,
                                                   end_date_fixed,
                                                   str(internet_source.frequency_id),
@@ -687,6 +710,7 @@ class TestGetInternet(unittest.TestCase):
             if self.download:
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
                 self.assertEqual(result, 0)
+
     #   ---------------------------------------------------------------------------
     #   Vegetation - FCOVER RT6
     #   ---------------------------------------------------------------------------
@@ -698,6 +722,7 @@ class TestGetInternet(unittest.TestCase):
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = '/2019/11/10/FCOVER-RT6_201911100000_GLOBE_PROBAV_V2.0.1/c_gls_FCOVER-RT6_201911100000_GLOBE_PROBAV_V2.0.1.nc'
+        include_files_expression = "/%Y/%-m/%d/FCOVER-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1/c_gls_FCOVER-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -709,7 +734,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='VITO PDF server - FCOVER 2.0 (offline retrieval)',
-                               include_files_expression="/%Y/%-m/%d/FCOVER-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1/c_gls_FCOVER-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -723,12 +748,13 @@ class TestGetInternet(unittest.TestCase):
             # Direct test !
             if self.direct_download:
                 filename = 'c_gls_FCOVER-RT6_201911100000_GLOBE_PROBAV_V2.0.1.nc'
-                remote_url = internet_source.url+'/2019/11/10/FCOVER-RT6_201911100000_GLOBE_PROBAV_V2.0.1/' + filename
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd=internet_source.user_name+':'+internet_source.password)
-                return
+                remote_url = internet_source.url + '/2019/11/10/FCOVER-RT6_201911100000_GLOBE_PROBAV_V2.0.1/' + filename
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                           userpwd=internet_source.user_name + ':' + internet_source.password)
+                self.assertEqual(status, 0)
 
             # Test pattern (with fixed date)
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
                                                   start_date_fixed,
                                                   end_date_fixed,
                                                   str(internet_source.frequency_id),
@@ -752,6 +778,7 @@ class TestGetInternet(unittest.TestCase):
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = '/2019/11/10/LAI-RT6_201911100000_GLOBE_PROBAV_V2.0.1/c_gls_LAI-RT6_201911100000_GLOBE_PROBAV_V2.0.1.nc'
+        include_files_expression = "/%Y/%-m/%d/LAI-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1/c_gls_LAI-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -763,7 +790,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='VITO PDF server - LAI 2.0 (offline retrieval)',
-                               include_files_expression="/%Y/%-m/%d/LAI-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1/c_gls_LAI-RT6_%Y%m%d0000_GLOBE_PROBAV_V2.0.1.nc",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -778,12 +805,12 @@ class TestGetInternet(unittest.TestCase):
             if self.direct_download:
                 filename = 'c_gls_LAI-RT6_201911100000_GLOBE_PROBAV_V2.0.1.nc'
                 remote_url = internet_source.url + '/2019/11/10/LAI-RT6_201911100000_GLOBE_PROBAV_V2.0.1/' + filename
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename,
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
                                            userpwd=internet_source.user_name + ':' + internet_source.password)
-                return
+                self.assertEqual(status, 0)
 
             # Test pattern (with fixed date)
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
                                                   start_date_fixed,
                                                   end_date_fixed,
                                                   str(internet_source.frequency_id),
@@ -807,6 +834,7 @@ class TestGetInternet(unittest.TestCase):
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = '/2019/11/01/NDVI_201911010000_GLOBE_PROBAV_V2.2.1/c_gls_NDVI_201911010000_GLOBE_PROBAV_V2.2.1.nc'
+        include_files_expression = "/%Y/%-m/%d/NDVI_%Y%m%d0000_GLOBE_PROBAV_V2.2.1/c_gls_NDVI_%Y%m%d0000_GLOBE_PROBAV_V2.2.1.nc"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -818,7 +846,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='VITO PDF server - NDVI 2.0 (offline retrieval)',
-                               include_files_expression="/%Y/%-m/%d/NDVI_%Y%m%d0000_GLOBE_PROBAV_V2.2.1/c_gls_NDVI_%Y%m%d0000_GLOBE_PROBAV_V2.2.1.nc",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -833,12 +861,12 @@ class TestGetInternet(unittest.TestCase):
             if self.direct_download:
                 filename = 'c_gls_NDVI_202003010000_GLOBE_PROBAV_V2.2.1.nc'
                 remote_url = internet_source.url + '/2020/03/01/NDVI_202003010000_GLOBE_PROBAV_V2.2.1/' + filename
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename,
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
                                            userpwd=internet_source.user_name + ':' + internet_source.password)
-                return
+                self.assertEqual(status, 0)
 
             # Test pattern (with fixed date)
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
                                                   start_date_fixed,
                                                   end_date_fixed,
                                                   str(internet_source.frequency_id),
@@ -856,12 +884,13 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def testRemoteHttps_NDVI300(self):
         source_active = False
-        internet_id='PDF:VITO:PROBA-V1:NDVI300'
+        internet_id = 'PDF:VITO:PROBA-V1:NDVI300'
         start_date_fixed = 20200101
         end_date_fixed = 20200310
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = '/2020/02/01/PV_S10_TOC_NDVI-20200201_333M_V101/PROBAV_S10_TOC_X19Y05_20200201_333M_NDVI_V101_NDVI.tif'
+        include_files_expression = "/%Y/%m/%d/PV_S10_TOC_NDVI-%Y%m%d_333M_V101/PROBAV_S10_TOC_@@@@_%Y%m%d_333M_NDVI_V101_NDVI.tif"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -873,7 +902,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='VITO PDF server - NDVI 300m',
-                               include_files_expression="/%Y/%m/%d/PV_S10_TOC_NDVI-%Y%m%d_333M_V101/PROBAV_S10_TOC_@@@@_%Y%m%d_333M_NDVI_V101_NDVI.tif",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -886,17 +915,20 @@ class TestGetInternet(unittest.TestCase):
 
             # Direct test !
             if self.direct_download:
-                filename='PROBAV_S10_TOC_X19Y05_20200201_333M_NDVI_V101_NDVI.tif'
-                remote_url = internet_source.url+file_to_check
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd=internet_source.user_name + ':' + internet_source.password, https_params='Referer: '+str(internet_source.url)+os.path.dirname(filename)+'?mode=tif')
-                return
+                filename = 'PROBAV_S10_TOC_X19Y05_20200201_333M_NDVI_V101_NDVI.tif'
+                remote_url = internet_source.url + file_to_check
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                           userpwd=internet_source.user_name + ':' + internet_source.password,
+                                           https_params='Referer: ' + str(internet_source.url) + os.path.dirname(
+                                               filename) + '?mode=tif')
+                self.assertEqual(status, 0)
 
             # Test pattern (with fixed date)
-            list = build_list_matching_files_tmpl_vito(str(internet_source.url), internet_source.include_files_expression,
-                                                  start_date_fixed,
-                                                  end_date_fixed,
-                                                  str(internet_source.frequency_id),
-                                                      )
+            list = build_list_matching_files_tmpl_vito(str(internet_source.url), include_files_expression,
+                                                       start_date_fixed,
+                                                       end_date_fixed,
+                                                       str(internet_source.frequency_id),
+                                                       )
             if self.pattern:
                 self.assertTrue(file_to_check in list)
 
@@ -916,6 +948,7 @@ class TestGetInternet(unittest.TestCase):
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = 'africa_arc.20200120.tif.zip'
+        include_files_expression = "africa_arc.%Y%m%d.tif.zip"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -927,7 +960,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='ARC-2 rain from CPC-NASA',
-                               include_files_expression="africa_arc.%Y%m%d.tif.zip",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -940,13 +973,14 @@ class TestGetInternet(unittest.TestCase):
 
             # Direct test !
             if self.direct_download:
-                filename='africa_arc.20200120.tif.zip'
-                remote_url = internet_source.url+file_to_check
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd=internet_source.user_name + ':' + internet_source.password)
-                return
+                filename = 'africa_arc.20200120.tif.zip'
+                remote_url = internet_source.url + file_to_check
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                           userpwd=internet_source.user_name + ':' + internet_source.password)
+                self.assertEqual(status, 0)
 
             # Test pattern (with fixed date)
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
                                                   start_date_fixed,
                                                   end_date_fixed,
                                                   str(internet_source.frequency_id),
@@ -964,12 +998,13 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def testRemoteFtp_CHIRPS_PREL(self):
         source_active = False
-        internet_id='UCSB:CHIRPS:PREL:DEKAD'
+        internet_id = 'UCSB:CHIRPS:PREL:DEKAD'
         start_date_fixed = 20200101
         end_date_fixed = 20200310
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = 'chirps-v2.0.2020.02.3.tif'
+        include_files_expression = "chirps-v2.0.20[12].*.tif$"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -981,7 +1016,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='CHIRPS preliminary precipitation, dekad type, globally, V2.0',
-                               include_files_expression="chirps-v2.0.20[12].*.tif$",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -994,13 +1029,16 @@ class TestGetInternet(unittest.TestCase):
 
             # Direct test ! True: #
             if self.direct_download:
-                filename='chirps-v2.0.2020.02.3.tif'
-                remote_url = internet_source.url+file_to_check
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd=internet_source.user_name + ':' + internet_source.password)
-                return
+                filename = 'chirps-v2.0.2020.02.3.tif'
+                remote_url = internet_source.url + file_to_check
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                           userpwd=internet_source.user_name + ':' + internet_source.password)
+                self.assertEqual(status, 0)
 
             # Test pattern (with fixed date)
-            list = get_list_matching_files(str(internet_source.url), internet_source.user_name + ':' + internet_source.password, internet_source.include_files_expression, internet_source.type)
+            list = get_list_matching_files(str(internet_source.url),
+                                           internet_source.user_name + ':' + internet_source.password,
+                                           include_files_expression, internet_source.type)
             if self.pattern:
                 self.assertTrue(file_to_check in list)
 
@@ -1009,8 +1047,7 @@ class TestGetInternet(unittest.TestCase):
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
                 self.assertEqual(result, 0)
 
-
-     #   ---------------------------------------------------------------------------
+    #   ---------------------------------------------------------------------------
     #   Rainfall -  CHIRP (id: UCSB:CHIRP:DEKAD) NOT USED IN ESTATION
     #   ---------------------------------------------------------------------------
     # def testRemoteFtp_CHIRP(self):
@@ -1029,12 +1066,13 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def testRemoteFtp_CHIRPS_2_0(self):
         source_active = False
-        internet_id='UCSB:CHIRPS:DEKAD:2.0'
+        internet_id = 'UCSB:CHIRPS:DEKAD:2.0'
         start_date_fixed = 20200101
         end_date_fixed = 20200310
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = 'chirps-v2.0.2020.01.1.tif.gz'
+        include_files_expression = "chirps-v2.0.20[12].*.tif.gz"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -1046,7 +1084,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='CHIRPS final precipitation, dekad type, globally, V2.0',
-                               include_files_expression="chirps-v2.0.20[12].*.tif.gz",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -1059,13 +1097,16 @@ class TestGetInternet(unittest.TestCase):
 
             # Direct test ! True: #
             if self.direct_download:
-                filename='chirps-v2.0.2020.01.1.tif.gz'
-                remote_url = internet_source.url+file_to_check
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd=internet_source.user_name + ':' + internet_source.password)
-                return
+                filename = 'chirps-v2.0.2020.01.1.tif.gz'
+                remote_url = internet_source.url + file_to_check
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                           userpwd=internet_source.user_name + ':' + internet_source.password)
+                self.assertEqual(status, 0)
 
             # Test pattern (with fixed date)
-            list = get_list_matching_files(str(internet_source.url), internet_source.user_name + ':' + internet_source.password, internet_source.include_files_expression, internet_source.type)
+            list = get_list_matching_files(str(internet_source.url),
+                                           internet_source.user_name + ':' + internet_source.password,
+                                           include_files_expression, internet_source.type)
             if self.pattern:
                 self.assertTrue(file_to_check in list)
 
@@ -1085,6 +1126,7 @@ class TestGetInternet(unittest.TestCase):
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = 'a20031rb.zip'
+        include_files_expression = "a%y%m%{dkm}rb.zip"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -1096,7 +1138,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='FEWSNET Rainfall Estimate for Africa',
-                               include_files_expression="a%y%m%{dkm}rb.zip",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -1109,12 +1151,12 @@ class TestGetInternet(unittest.TestCase):
 
             # Direct test !
             if self.direct_download:
-                filename='a20031rb.zip'
-                remote_url = str(internet_source.url+file_to_check)
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename)
-                return
+                filename = 'a20031rb.zip'
+                remote_url = str(internet_source.url + file_to_check)
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename)
+                self.assertEqual(status, 0)
             # Test pattern (with fixed date)
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
                                                   start_date_fixed,
                                                   end_date_fixed,
                                                   str(internet_source.frequency_id),
@@ -1126,6 +1168,7 @@ class TestGetInternet(unittest.TestCase):
             if self.download:
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
                 self.assertEqual(result, 0)
+
     #   ---------------------------------------------------------------------------
     #    Rainfall - JRC MARS SPI 3MON
     #   ---------------------------------------------------------------------------
@@ -1137,6 +1180,7 @@ class TestGetInternet(unittest.TestCase):
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = 'spi3_20200201.img'
+        include_files_expression = "spi3_%Y%m%d.img,spi3_%Y%m%d.hdr"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -1148,7 +1192,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='JRC MARS SPI 3-month time scale',
-                               include_files_expression="spi3_%Y%m%d.img,spi3_%Y%m%d.hdr",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -1161,12 +1205,12 @@ class TestGetInternet(unittest.TestCase):
 
             # Direct test !
             if self.direct_download:
-                filename='spi3_20200201.img'
-                remote_url = str(internet_source.url+file_to_check)
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename)
-                return
+                filename = 'spi3_20200201.img'
+                remote_url = str(internet_source.url + file_to_check)
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename)
+                self.assertEqual(status, 0)
             # Test pattern (with fixed date)
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
                                                   start_date_fixed,
                                                   end_date_fixed,
                                                   str(internet_source.frequency_id),
@@ -1179,7 +1223,6 @@ class TestGetInternet(unittest.TestCase):
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
                 self.assertEqual(result, 0)
 
-
     #   ---------------------------------------------------------------------------
     #    Rainfall - JRC MARS SPI 1MON
     #   ---------------------------------------------------------------------------
@@ -1191,6 +1234,7 @@ class TestGetInternet(unittest.TestCase):
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = 'spi1_20200201.img'
+        include_files_expression = "spi1_%Y%m%d.img,spi1_%Y%m%d.hdr"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -1202,7 +1246,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='JRC MARS SPI 1-month time scale',
-                               include_files_expression="spi1_%Y%m%d.img,spi1_%Y%m%d.hdr",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -1215,13 +1259,13 @@ class TestGetInternet(unittest.TestCase):
 
             # Direct test !
             if self.direct_download:
-                filename='spi1_20200201.img'
-                remote_url = str(internet_source.url+file_to_check)
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename)
-                return
+                filename = 'spi1_20200201.img'
+                remote_url = str(internet_source.url + file_to_check)
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename)
+                self.assertEqual(status, 0)
 
             # Test pattern (with fixed date)
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
                                                   start_date_fixed,
                                                   end_date_fixed,
                                                   str(internet_source.frequency_id),
@@ -1239,12 +1283,13 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def testRemoteHttp_TAMSAT_3(self):
         source_active = False
-        internet_id='READINGS:TAMSAT:3.0:10D:NC'
+        internet_id = 'READINGS:TAMSAT:3.0:10D:NC'
         start_date_fixed = 20200101
         end_date_fixed = 20200310
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = 'TAMSAT3/2020/02/rfe2020_02-dk1.v3.nc'
+        include_files_expression = "TAMSAT3/%Y/%m/rfe%Y_%m-dk%{dkm}.v3.nc"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -1256,7 +1301,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='TAMSAT Version 3.0 data from Readings website',
-                               include_files_expression="TAMSAT3/%Y/%m/rfe%Y_%m-dk%{dkm}.v3.nc",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -1269,12 +1314,12 @@ class TestGetInternet(unittest.TestCase):
 
             # Direct test !
             if self.direct_download:
-                filename='rfe2020_02-dk1.v3.nc'
-                remote_url = str(internet_source.url+file_to_check)
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename)
-                return
+                filename = 'rfe2020_02-dk1.v3.nc'
+                remote_url = str(internet_source.url + file_to_check)
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename)
+                self.assertEqual(status, 0)
             # Test pattern (with fixed date)
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
                                                   start_date_fixed,
                                                   end_date_fixed,
                                                   str(internet_source.frequency_id),
@@ -1292,12 +1337,13 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def test_RemoteHttps_MODIS_FIRMS_6(self):
         source_active = False
-        internet_id='MODAPS:EOSDIS:FIRMS:NASA:HTTP'
+        internet_id = 'MODAPS:EOSDIS:FIRMS:NASA:HTTP'
         start_date_fixed = 20200101
         end_date_fixed = 20200310
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = 'MODIS_C6_Global_MCD14DL_NRT_2020060.txt'
+        include_files_expression = "MODIS_C6_Global_MCD14DL_NRT_%Y%j.txt"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -1309,7 +1355,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='MODAPS NRT3 server at EOSDIS/NASA',
-                               include_files_expression="MODIS_C6_Global_MCD14DL_NRT_%Y%j.txt",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -1322,12 +1368,14 @@ class TestGetInternet(unittest.TestCase):
 
             # Direct test !
             if self.direct_download:
-                filename='MODIS_C6_Global_MCD14DL_NRT_2020060.txt'
-                remote_url = str(internet_source.url+'/'+file_to_check)
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd=internet_source.user_name + ':' + internet_source.password, https_params=internet_source.https_params)
-                return
+                filename = 'MODIS_C6_Global_MCD14DL_NRT_2020060.txt'
+                remote_url = str(internet_source.url + '/' + file_to_check)
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                           userpwd=internet_source.user_name + ':' + internet_source.password,
+                                           https_params=internet_source.https_params)
+                self.assertEqual(status, 0)
             # Test pattern (with fixed date)
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
                                                   start_date_fixed,
                                                   end_date_fixed,
                                                   str(internet_source.frequency_id),
@@ -1351,6 +1399,7 @@ class TestGetInternet(unittest.TestCase):
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = '/2020/2/10/BA300_202002100000_GLOBE_PROBAV_V1.1.1/c_gls_BA300_202002100000_GLOBE_PROBAV_V1.1.1.nc'
+        include_files_expression = "/%Y/%-m/%d/BA300_%Y%m%d0000_GLOBE_PROBAV_V1.1.1/c_gls_BA300_%Y%m%d0000_GLOBE_PROBAV_V1.1.1.nc"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -1362,7 +1411,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='VITO PDF server - BA 1.1.1 300m',
-                               include_files_expression="/%Y/%-m/%d/BA300_%Y%m%d0000_GLOBE_PROBAV_V1.1.1/c_gls_BA300_%Y%m%d0000_GLOBE_PROBAV_V1.1.1.nc",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -1375,13 +1424,14 @@ class TestGetInternet(unittest.TestCase):
 
             # Direct test ! True: #
             if self.direct_download:
-                filename='c_gls_BA300_202002100000_GLOBE_PROBAV_V1.1.1.nc'
-                remote_url = str(internet_source.url+'/'+file_to_check)
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd=internet_source.user_name + ':' + internet_source.password)
-                return
+                filename = 'c_gls_BA300_202002100000_GLOBE_PROBAV_V1.1.1.nc'
+                remote_url = str(internet_source.url + '/' + file_to_check)
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                           userpwd=internet_source.user_name + ':' + internet_source.password)
+                self.assertEqual(status, 0)
 
             # Test pattern (with fixed date)
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
                                                   start_date_fixed,
                                                   end_date_fixed,
                                                   str(internet_source.frequency_id),
@@ -1399,12 +1449,13 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def testRemoteHttp_MODIS_CHL(self):
         source_active = False
-        internet_id='GSFC:CGI:MODIS:CHLA:1D'
+        internet_id = 'GSFC:CGI:MODIS:CHLA:1D'
         start_date_fixed = 20200101
         end_date_fixed = 20200310
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = 'A2020060.L3m_DAY_CHL_chlor_a_4km.nc'
+        include_files_expression = "A%Y%j.L3m_DAY_CHL_chlor_a_4km.nc"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -1416,7 +1467,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='MODIS 4km Chla Daily',
-                               include_files_expression="A%Y%j.L3m_DAY_CHL_chlor_a_4km.nc",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -1431,11 +1482,12 @@ class TestGetInternet(unittest.TestCase):
             if self.direct_download:
                 filename = 'A2020060.L3m_DAY_CHL_chlor_a_4km.nc'
                 remote_url = str(internet_source.url + '/' + file_to_check)
-                status = wget_file_from_url(remote_url, '/tmp/', target_file=filename,
-                                           userpwd=internet_source.user_name + ':' + internet_source.password, https_params=internet_source.https_params)
-                return
+                status = wget_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                            userpwd=internet_source.user_name + ':' + internet_source.password,
+                                            https_params=internet_source.https_params)
+                self.assertEqual(status, 0)
 
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
                                                   start_date_fixed,
                                                   end_date_fixed,
                                                   str(internet_source.frequency_id),
@@ -1447,17 +1499,19 @@ class TestGetInternet(unittest.TestCase):
             if self.download:
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
                 self.assertEqual(result, 0)
+
     #   ---------------------------------------------------------------------------
     #    OCEANOGRAPHY - MODIS KD490
     #   ---------------------------------------------------------------------------
     def testRemoteHttp_MODIS_KD490(self):
         source_active = False
-        internet_id='GSFC:CGI:MODIS:KD490:1D'
+        internet_id = 'GSFC:CGI:MODIS:KD490:1D'
         start_date_fixed = 20200101
         end_date_fixed = 20200310
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = 'A2020060.L3m_DAY_KD490_Kd_490_4km.nc'
+        include_files_expression = "A%Y%j.L3m_DAY_KD490_Kd_490_4km.nc"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -1469,7 +1523,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='MODIS 4km Kd490 Daily',
-                               include_files_expression="A%Y%j.L3m_DAY_KD490_Kd_490_4km.nc",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -1484,11 +1538,12 @@ class TestGetInternet(unittest.TestCase):
             if self.direct_download:
                 filename = 'A2020060.L3m_DAY_KD490_Kd_490_4km.nc'
                 remote_url = str(internet_source.url + '/' + file_to_check)
-                status = wget_file_from_url(remote_url, '/tmp/', target_file=filename,
-                                           userpwd=internet_source.user_name + ':' + internet_source.password, https_params=internet_source.https_params)
-                return
+                status = wget_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                            userpwd=internet_source.user_name + ':' + internet_source.password,
+                                            https_params=internet_source.https_params)
+                self.assertEqual(status, 0)
 
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
                                                   start_date_fixed,
                                                   end_date_fixed,
                                                   str(internet_source.frequency_id),
@@ -1506,12 +1561,13 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def testRemoteHttp_MODIS_PAR(self):
         source_active = False
-        internet_id='GSFC:CGI:MODIS:PAR:1D'
+        internet_id = 'GSFC:CGI:MODIS:PAR:1D'
         start_date_fixed = 20200101
         end_date_fixed = 20200310
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = 'A2020060.L3m_DAY_PAR_par_4km.nc'
+        include_files_expression = "A%Y%j.L3m_DAY_PAR_par_4km.nc"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -1523,7 +1579,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='MODIS 4km Par Daily',
-                               include_files_expression="A%Y%j.L3m_DAY_PAR_par_4km.nc",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -1538,11 +1594,12 @@ class TestGetInternet(unittest.TestCase):
             if self.direct_download:
                 filename = 'A2020060.L3m_DAY_PAR_par_4km.nc'
                 remote_url = str(internet_source.url + '/' + file_to_check)
-                status = wget_file_from_url(remote_url, '/tmp/', target_file=filename,
-                                           userpwd=internet_source.user_name + ':' + internet_source.password, https_params=internet_source.https_params)
-                return
+                status = wget_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                            userpwd=internet_source.user_name + ':' + internet_source.password,
+                                            https_params=internet_source.https_params)
+                self.assertEqual(status, 0)
 
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
                                                   start_date_fixed,
                                                   end_date_fixed,
                                                   str(internet_source.frequency_id),
@@ -1560,12 +1617,13 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def testRemoteHttp_MODIS_SST(self):
         source_active = False
-        internet_id='GSFC:CGI:MODIS:SST:1D:NEW'
+        internet_id = 'GSFC:CGI:MODIS:SST:1D:NEW'
         start_date_fixed = 20200101
         end_date_fixed = 20200310
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = 'AQUA_MODIS.20200301.L3m.DAY.SST.sst.4km.NRT.nc'
+        include_files_expression = "AQUA_MODIS.%Y%m%d.L3m.DAY.SST.sst.4km.NRT.nc"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -1577,7 +1635,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='MODIS 4km SST Daily',
-                               include_files_expression="AQUA_MODIS.%Y%m%d.L3m.DAY.SST.sst.4km.NRT.nc",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -1592,11 +1650,12 @@ class TestGetInternet(unittest.TestCase):
             if self.direct_download:
                 filename = 'AQUA_MODIS.20200301.L3m.DAY.SST.sst.4km.NRT.nc'
                 remote_url = str(internet_source.url + '/' + file_to_check)
-                status = wget_file_from_url(remote_url, '/tmp/', target_file=filename,
-                                           userpwd=internet_source.user_name + ':' + internet_source.password, https_params=internet_source.https_params)
-                return
+                status = wget_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                            userpwd=internet_source.user_name + ':' + internet_source.password,
+                                            https_params=internet_source.https_params)
+                self.assertEqual(status, 0)
 
-            list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
                                                   start_date_fixed,
                                                   end_date_fixed,
                                                   str(internet_source.frequency_id),
@@ -1620,6 +1679,7 @@ class TestGetInternet(unittest.TestCase):
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = 'PML_CapeVerde_MODIS_sst_3daycomp_20200320_20200322.nc.bz2'
+        include_files_expression = "PML_.*_MODIS_sst_3daycomp.*.nc.bz2"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -1631,7 +1691,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='MODIS/PML SST - Composite Ocean Products - Multimission - AMESD Regions',
-                               include_files_expression="PML_.*_MODIS_sst_3daycomp.*.nc.bz2",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -1646,11 +1706,14 @@ class TestGetInternet(unittest.TestCase):
             if self.direct_download:
                 filename = 'PML_CapeVerde_MODIS_sst_3daycomp_20200310_20200312.nc.bz2'
                 remote_url = str(internet_source.url + '/' + file_to_check)
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename,
-                                           userpwd=internet_source.user_name + ':' + internet_source.password, https_params=internet_source.https_params)
-                return
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                           userpwd=internet_source.user_name + ':' + internet_source.password,
+                                           https_params=internet_source.https_params)
+                self.assertEqual(status, 0)
 
-            list = get_list_matching_files(str(internet_source.url), internet_source.user_name + ':' + internet_source.password, internet_source.include_files_expression, internet_source.type, end_date=end_date_fixed)
+            list = get_list_matching_files(str(internet_source.url),
+                                           internet_source.user_name + ':' + internet_source.password,
+                                           include_files_expression, internet_source.type, end_date=end_date_fixed)
             if self.pattern:
                 self.assertTrue(file_to_check in list)
 
@@ -1658,7 +1721,6 @@ class TestGetInternet(unittest.TestCase):
             if self.download:
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
                 self.assertEqual(result, 0)
-
 
     #   ---------------------------------------------------------------------------
     #    OCEANOGRAPHY - PML MODIS CHL
@@ -1671,6 +1733,7 @@ class TestGetInternet(unittest.TestCase):
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = 'PML_CapeVerde_MODIS_oc_3daycomp_20200320_20200322.nc.bz2'
+        include_files_expression = "PML_.*_MODIS_oc_3daycomp.*.nc.bz2"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -1682,7 +1745,7 @@ class TestGetInternet(unittest.TestCase):
             my_source = Source(internet_id=internet_id,
                                url=internet_source.url,
                                descriptive_name='MODIS/PML CHL - Composite Ocean Products - Multimission - AMESD Regions',
-                               include_files_expression="PML_.*_MODIS_oc_3daycomp.*.nc.bz2",
+                               include_files_expression=include_files_expression,
                                pull_frequency=internet_source.pull_frequency,
                                user_name=internet_source.user_name,
                                password=internet_source.password,
@@ -1697,11 +1760,14 @@ class TestGetInternet(unittest.TestCase):
             if self.direct_download:
                 filename = 'PML_CapeVerde_MODIS_oc_3daycomp_20200308_20200310.nc.bz2'
                 remote_url = str(internet_source.url + '/' + file_to_check)
-                status = get_file_from_url(remote_url, '/tmp/', target_file=filename,
-                                           userpwd=internet_source.user_name + ':' + internet_source.password, https_params=internet_source.https_params)
-                return
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                           userpwd=internet_source.user_name + ':' + internet_source.password,
+                                           https_params=internet_source.https_params)
+                self.assertEqual(status, 0)
 
-            list = get_list_matching_files(str(internet_source.url), internet_source.user_name + ':' + internet_source.password, internet_source.include_files_expression, internet_source.type)
+            list = get_list_matching_files(str(internet_source.url),
+                                           internet_source.user_name + ':' + internet_source.password,
+                                           include_files_expression, internet_source.type)
             if self.pattern:
                 self.assertTrue(file_to_check in list)
 
@@ -1746,10 +1812,10 @@ class TestGetInternet(unittest.TestCase):
     #         if self.direct_download:
     #             filename = 'PML_CapeVerde_MODIS_oc_3daycomp_20200308_20200310.nc.bz2'
     #             remote_url = str(internet_source.url + '/' + file_to_check)
-    #             status = get_file_from_url(remote_url, '/tmp/', target_file=filename,
+    #             status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
     #                                        userpwd=internet_source.user_name + ':' + internet_source.password,
     #                                        https_params=internet_source.https_params)
-    #             return
+    #             self.assertEqual(status, 0)
     #         # Unitest test !
     #         if False: #self.Unitest_pattern:
     #             list = get_list_matching_files(str(internet_source.url),
@@ -1764,7 +1830,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def testLocal_CODA_EUM_OLCI(self):
         source_active = False
-        internet_id='CODA:EUM:S3A:OLCI:WRR'
+        internet_id = 'CODA:EUM:S3A:OLCI:WRR'
         start_date_fixed = 20200301
         end_date_fixed = 20200310
         start_date_dyn = -45
@@ -1792,20 +1858,24 @@ class TestGetInternet(unittest.TestCase):
                                files_filter_expression=internet_source.files_filter_expression,
                                https_params=internet_source.https_params)
 
-
             # Direct test ! True: #
             if self.direct_download:
                 filename = os.path.split(file_to_check)[1]
                 remote_url = str(internet_source.url + '/' + file_to_check)
-                download_link = 'https://coda.eumetsat.int/odata/v1/Products(\'{0}\')/$value'.format(os.path.split(file_to_check)[0])
+                download_link = 'https://coda.eumetsat.int/odata/v1/Products(\'{0}\')/$value'.format(
+                    os.path.split(file_to_check)[0])
                 status = get_file_from_url(str(download_link), target_dir=es_constants.ingest_dir,
-                                           target_file=os.path.basename(filename) + '.zip', userpwd=str(internet_source.user_name + ':' + internet_source.password),
+                                           target_file=os.path.basename(filename) + '.zip',
+                                           userpwd=str(internet_source.user_name + ':' + internet_source.password),
                                            https_params=str(internet_source.https_params))
-                # status = wget_file_from_url(remote_url, '/tmp/', target_file=filename,
+                # status = wget_file_from_url(remote_url, self.target_dir, target_file=filename,
                 #                            userpwd=internet_source.user_name + ':' + internet_source.password, https_params=internet_source.https_params)
-                return
+                self.assertEqual(status, 0)
 
-            list = build_list_matching_files_eum_http(str(internet_source.url), internet_source.include_files_expression, start_date_fixed, end_date_fixed, internet_source.frequency_id, internet_source.user_name, internet_source.password)
+            list = build_list_matching_files_eum_http(str(internet_source.url),
+                                                      internet_source.include_files_expression, start_date_fixed,
+                                                      end_date_fixed, internet_source.frequency_id,
+                                                      internet_source.user_name, internet_source.password)
             if self.pattern:
                 self.assertTrue(file_to_check in list)
 
@@ -1819,7 +1889,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def testLocal_CODA_EUM_SLSTR(self):
         source_active = False
-        internet_id='CODA:EUM:S3A:SLSTR:WST'
+        internet_id = 'CODA:EUM:S3A:SLSTR:WST'
         start_date_fixed = 20200301
         end_date_fixed = 20200310
         start_date_dyn = -45
@@ -1851,15 +1921,20 @@ class TestGetInternet(unittest.TestCase):
             if self.direct_download:
                 filename = os.path.split(file_to_check)[1]
                 remote_url = str(internet_source.url + '/' + file_to_check)
-                download_link = 'https://coda.eumetsat.int/odata/v1/Products(\'{0}\')/$value'.format(os.path.split(file_to_check)[0])
+                download_link = 'https://coda.eumetsat.int/odata/v1/Products(\'{0}\')/$value'.format(
+                    os.path.split(file_to_check)[0])
                 status = get_file_from_url(str(download_link), target_dir=es_constants.ingest_dir,
-                                           target_file=os.path.basename(filename) + '.zip', userpwd=str(internet_source.user_name + ':' + internet_source.password),
+                                           target_file=os.path.basename(filename) + '.zip',
+                                           userpwd=str(internet_source.user_name + ':' + internet_source.password),
                                            https_params=str(internet_source.https_params))
-                # status = wget_file_from_url(remote_url, '/tmp/', target_file=filename,
+                # status = wget_file_from_url(remote_url, self.target_dir, target_file=filename,
                 #                            userpwd=internet_source.user_name + ':' + internet_source.password, https_params=internet_source.https_params)
-                return
+                self.assertEqual(status, 0)
 
-            list = build_list_matching_files_eum_http(str(internet_source.url), internet_source.include_files_expression, start_date, end_date, internet_source.frequency_id, internet_source.user_name, internet_source.password)
+            list = build_list_matching_files_eum_http(str(internet_source.url),
+                                                      internet_source.include_files_expression, start_date_fixed,
+                                                      end_date_fixed, internet_source.frequency_id,
+                                                      internet_source.user_name, internet_source.password)
             if self.pattern:
                 self.assertTrue(file_to_check in list)
 
@@ -1868,13 +1943,12 @@ class TestGetInternet(unittest.TestCase):
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
                 self.assertEqual(result, 0)
 
-
     #   ---------------------------------------------------------------------------
     #    Miscellaneous - ASCAT SWI
     #   ---------------------------------------------------------------------------
     def testLocal_ASCAT_SWI(self):
         source_active = False
-        internet_id='PDF:GLS:METOP:ASCAT-V3.1:SWI'
+        internet_id = 'PDF:GLS:METOP:ASCAT-V3.1:SWI'
         start_date_fixed = 20200101
         end_date_fixed = 20200310
         start_date_dyn = -45
@@ -1905,12 +1979,13 @@ class TestGetInternet(unittest.TestCase):
             if self.direct_download:
                 filename = 'c_gls_SWI_202002101200_GLOBE_ASCAT_V3.1.1.nc'
                 remote_url = str(internet_source.url + '/' + file_to_check)
-                status = get_file_from_url(str(remote_url), target_dir='/tmp/',
-                                           target_file=filename, userpwd=str(internet_source.user_name + ':' + internet_source.password),
+                status = get_file_from_url(str(remote_url), target_dir=self.target_dir,
+                                           target_file=filename,
+                                           userpwd=str(internet_source.user_name + ':' + internet_source.password),
                                            https_params=str(internet_source.https_params))
-                # status = wget_file_from_url(remote_url, '/tmp/', target_file=filename,
+                # status = wget_file_from_url(remote_url, self.target_dir, target_file=filename,
                 #                            userpwd=internet_source.user_name + ':' + internet_source.password, https_params=internet_source.https_params)
-                return
+                self.assertEqual(status, 0)
 
             list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
                                                   start_date_fixed,
@@ -1930,7 +2005,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def testRemoteHttp_CPC_SM(self):
         source_active = False
-        internet_id='CPC:NCEP:NOAA:SM'
+        internet_id = 'CPC:NCEP:NOAA:SM'
         start_date_fixed = 20200101
         end_date_fixed = 20200310
         start_date_dyn = -45
@@ -1962,12 +2037,13 @@ class TestGetInternet(unittest.TestCase):
             if self.direct_download:
                 filename = 'w.202002.mon'
                 remote_url = str(internet_source.url + '/' + file_to_check)
-                status = get_file_from_url(str(remote_url), target_dir='/tmp/',
-                                           target_file=filename, userpwd=str(internet_source.user_name + ':' + internet_source.password),
+                status = get_file_from_url(str(remote_url), target_dir=self.target_dir,
+                                           target_file=filename,
+                                           userpwd=str(internet_source.user_name + ':' + internet_source.password),
                                            https_params=str(internet_source.https_params))
-                # status = wget_file_from_url(remote_url, '/tmp/', target_file=filename,
+                # status = wget_file_from_url(remote_url, self.target_dir, target_file=filename,
                 #                            userpwd=internet_source.user_name + ':' + internet_source.password, https_params=internet_source.https_params)
-                return
+                self.assertEqual(status, 0)
 
             list = build_list_matching_files_tmpl(str(internet_source.url), internet_source.include_files_expression,
                                                   start_date_fixed,
@@ -2019,18 +2095,19 @@ class TestGetInternet(unittest.TestCase):
             if self.direct_download:
                 filename = 'w.202002.mon'
                 remote_url = str(internet_source.url + '/' + file_to_check)
-                status = get_file_from_url(str(remote_url), target_dir='/tmp/',
-                                           target_file=filename, userpwd=str(internet_source.user_name + ':' + internet_source.password),
+                status = get_file_from_url(str(remote_url), target_dir=self.target_dir,
+                                           target_file=filename,
+                                           userpwd=str(internet_source.user_name + ':' + internet_source.password),
                                            https_params=str(internet_source.https_params))
-                # status = wget_file_from_url(remote_url, '/tmp/', target_file=filename,
+                # status = wget_file_from_url(remote_url, self.target_dir, target_file=filename,
                 #                            userpwd=internet_source.user_name + ':' + internet_source.password, https_params=internet_source.https_params)
-                return
+                self.assertEqual(status, 0)
 
             list = build_list_matching_files_jeodpp(str(internet_source.url), internet_source.include_files_expression,
-                                                  start_date_fixed,
-                                                  end_date_fixed,
-                                                  str(internet_source.frequency_id),
-                                                  str('venkavi:NEVZ9n3XDHSXkDzo'))
+                                                    start_date_fixed,
+                                                    end_date_fixed,
+                                                    str(internet_source.frequency_id),
+                                                    str('venkavi:NEVZ9n3XDHSXkDzo'))
             if self.pattern:
                 self.assertTrue(file_to_check in list)
 
@@ -2044,7 +2121,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def testRemoteHttps_WATERLEVEL(self):
         source_active = False
-        internet_id='THEIA:HYDRO:LEGOS:WATERLEVEL'
+        internet_id = 'THEIA:HYDRO:LEGOS:WATERLEVEL'
         start_date_fixed = 20200101
         end_date_fixed = 20200310
         start_date_dyn = -45
@@ -2072,23 +2149,24 @@ class TestGetInternet(unittest.TestCase):
                                files_filter_expression=internet_source.files_filter_expression,
                                https_params=internet_source.https_params)
 
-
             # Direct test ! True: #
             if self.direct_download:
                 file_to_check = 'authdownload?products=R_con_con_s3a_0427_00&sdate=2020-02-01&edate=2020-02-29&format=csv&user=mesa.cwg@gmail.com&pwd=eStation2019/hydroprd_R_con_con_s3a_0427_00_from_2020-02-01_to_2020-02-29.csv'
                 filename = os.path.basename(os.path.split(file_to_check)[1])
-                remote_url = str(internet_source.url+ os.path.sep + os.path.split(file_to_check)[0])
-                status = get_file_from_url(str(remote_url), target_dir='/tmp/',
-                                           target_file=filename, userpwd=str(internet_source.user_name + ':' + internet_source.password),
+                remote_url = str(internet_source.url + os.path.sep + os.path.split(file_to_check)[0])
+                status = get_file_from_url(str(remote_url), target_dir=self.target_dir,
+                                           target_file=filename,
+                                           userpwd=str(internet_source.user_name + ':' + internet_source.password),
                                            https_params=str(internet_source.https_params))
-                return
+                self.assertEqual(status, 0)
 
-            list = build_list_matching_files_tmpl_theia(str(internet_source.url), internet_source.include_files_expression,
-                                                  start_date_fixed,
-                                                  end_date_fixed,
-                                                  str(internet_source.frequency_id),
-                                                  internet_source.user_name,
-                                                  internet_source.password)
+            list = build_list_matching_files_tmpl_theia(str(internet_source.url),
+                                                        internet_source.include_files_expression,
+                                                        start_date_fixed,
+                                                        end_date_fixed,
+                                                        str(internet_source.frequency_id),
+                                                        internet_source.user_name,
+                                                        internet_source.password)
             if self.pattern:
                 self.assertTrue(file_to_check in list)
 
@@ -2107,7 +2185,6 @@ class TestGetInternet(unittest.TestCase):
     #     regex='S3A*'
     #     list = get_list_matching_files_dir_local(local_dir, regex)
     #     self.assertTrue(1)
-
 
     #   ---------------------------------------------------------------------------
     #   Get contents of a remote MODIS BA  (id: UMD:MCD45A1:TIF:51)
@@ -2136,7 +2213,6 @@ class TestGetInternet(unittest.TestCase):
     #     list = get_list_matching_files(remote_url, usr_pwd, full_regex,internet_type)
     #     self.assertTrue(file_to_check in list)
 
-
     #   ---------------------------------------------------------------------------
     #   Test remote ftp NASA_FIRMS (id: USGS:FIRMS)
     #   ---------------------------------------------------------------------------
@@ -2152,7 +2228,6 @@ class TestGetInternet(unittest.TestCase):
     #     list = get_list_matching_files(remote_url, usr_pwd, full_regex, internet_type)
     #
     #     self.assertTrue(file_to_check in list)
-
 
     #   ---------------------------------------------------------------------------
     #   Test remote ftp NOAA GSOD (id: NOAA:GSOD)
@@ -2251,7 +2326,6 @@ class TestGetInternet(unittest.TestCase):
     #
     #     self.assertTrue(file_to_check in list)
 
-
     #   ---------------------------------------------------------------------------
     #   Get list of files from FEWSNET HTTP (id: USGS:EARLWRN:FEWSNET)
     #   ---------------------------------------------------------------------------
@@ -2271,10 +2345,7 @@ class TestGetInternet(unittest.TestCase):
     #     #file_to_check='2015/a15121rb.zip'
     #     #self.assertTrue(file_to_check in files_list)
     #
-    #     status = get_file_from_url(remote_url+files_list[-1],  '/tmp/', target_file=None, userpwd='')
-
-
-
+    #     status = get_file_from_url(remote_url+files_list[-1],  self.target_dir, target_file=None, userpwd='')
 
     # Original test
     # def TestRemoteHttp_FEWSNET(self):
@@ -2313,7 +2384,6 @@ class TestGetInternet(unittest.TestCase):
     #     to_date = ''
     #     files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
     #     self.assertEqual(len(files_list),18)
-
 
     #   ---------------------------------------------------------------------------
     #   Test download of files from GSFC oceandata http site (id:GSFC:OCEAN:MODIS:SST:1D)
@@ -2360,7 +2430,6 @@ class TestGetInternet(unittest.TestCase):
     #     to_date = ''
     #     files_list = build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
     #     self.assertEqual(len(files_list),31)
-
 
     #   ---------------------------------------------------------------------------
     #   Test download of Kd daily data from GSFC oceandata http site (id:GSFC:OCEAN:MODIS:KD:1D)
@@ -2653,7 +2722,7 @@ class TestGetInternet(unittest.TestCase):
     #
     #     # Direct test !
     #     if False:
-    #         return
+    #         self.assertEqual(status, 0)
     #
     #     internet_sources = querydb.get_active_internet_sources()
     #     for s in internet_sources:
@@ -2681,7 +2750,7 @@ class TestGetInternet(unittest.TestCase):
     #
     #     # Direct test !
     #     if False:
-    #         return
+    #         self.assertEqual(status, 0)
     #
     #     internet_sources = querydb.get_active_internet_sources()
     #     for s in internet_sources:
@@ -2707,14 +2776,13 @@ class TestGetInternet(unittest.TestCase):
     #     result = get_one_source(my_source)
     #
 
-
     # def TestLocal_SENTINELSAT(self):
     #
     #     internet_id='SENTINEL2:S2MSI1C:XYZ'
     #
     #     # Direct test !
     #     if False:
-    #         return
+    #         self.assertEqual(status, 0)
     #
     #     internet_sources = querydb.get_active_internet_sources()
     #     for s in internet_sources:
@@ -2738,7 +2806,6 @@ class TestGetInternet(unittest.TestCase):
     #
     #     # Check last 90 days (check list length = 9)
     #     result = get_one_source(my_source)
-
 
     #   ---------------------------------------------------------------------------
     #   Get contents of a remote MODIS BA  (id: UMD:MCD45A1:TIF:51)
@@ -2774,7 +2841,7 @@ class TestGetInternet(unittest.TestCase):
     #
     #     # Direct test !
     #     if False:
-    #         return
+    #         self.assertEqual(status, 0)
     #
     #     internet_sources = querydb.get_active_internet_sources()
     #     for s in internet_sources:
@@ -2808,7 +2875,7 @@ class TestGetInternet(unittest.TestCase):
     #
     #     # Direct test !
     #     if False:
-    #         return
+    #         self.assertEqual(status, 0)
     #
     #     internet_sources = querydb.get_active_internet_sources()
     #     for s in internet_sources:
@@ -2832,6 +2899,7 @@ class TestGetInternet(unittest.TestCase):
     #
     #     # Check last 90 days (check list length = 9)
     #     result = get_one_source(my_source)
+
 
 suite_get_internet = unittest.TestLoader().loadTestsFromTestCase(TestGetInternet)
 if __name__ == '__main__':
