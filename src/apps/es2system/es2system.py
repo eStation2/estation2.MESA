@@ -86,22 +86,27 @@ def get_status_local_machine():
 def save_status_local_machine():
     #   Save a text file containing the status of the local machine
     #
+    status = False
+    try:
+        logger.debug("Entering routine %s " % 'save_status_local_machine')
 
-    logger.debug("Entering routine %s " % 'save_status_local_machine')
+        # Define .txt filename
+        status_system_file = es_constants.es2globals['status_system_file']
 
-    # Define .txt filename
-    status_system_file = es_constants.es2globals['status_system_file']
+        # Get status of all services
+        machine_status = get_status_local_machine()
 
-    # Get status of all services
-    machine_status = get_status_local_machine()
+        # Write to file
+        fid = open(status_system_file, 'w')
 
-    # Write to file
-    fid = open(status_system_file, 'w')
-    for value in machine_status:
-        fid.write('%s = %s \n' % (value, machine_status[value]))
-    fid.close()
+        for value in machine_status:
+            fid.write('%s = %s \n' % (value, machine_status[value]))
+        fid.close()
 
-    return 0
+    except:
+        status = True
+
+    return status
 
 
 def system_data_sync(source, target):
@@ -223,7 +228,6 @@ def system_db_dump(list_dump):
 
             # Check if there is one dump for the current day
             # See Tuleap Ticket #10905 (VGF-MOI-wk1)
-            dump_dir = es_constants.es2globals['db_dump_dir']
             existing_dumps = glob.glob(dump_dir + os.path.sep + 'estationdb_' + dump_schema + '_*')
             match_name = '.*estationdb_' + dump_schema + '_' + now.strftime("%Y-%m-%d-") + '.*.sql'
             matches = [s for s in existing_dumps if re.match(match_name, s)]
@@ -554,8 +558,11 @@ def system_manage_lock(lock_id, action):
     if lock_id == 'All_locks':
         if action == 'Delete':
             for f in os.listdir(dir_lock):
-                if re.search('action*.lock', f):
-                    status = os.remove(os.path.join(dir_lock, f))
+                if re.search('action.*lock', f):
+                    try:
+                        os.remove(os.path.join(dir_lock, f))
+                    except:
+                        status = 1
         else:
             logger.warning("Only delete action is defined for all locks")
     else:
@@ -593,6 +600,7 @@ def clean_temp_dir():
                     shutil.rmtree(f)
         except:
             logger.warning('A directory was deleted by system: %s' % f)
+            return 1
     return 0
 
 
@@ -822,6 +830,7 @@ def loop_system(dry_run=False):
         # Exit in case of dry_run
         if dry_run:
             execute_loop = False
+            return 0
 
         # Sleep some time
         time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))
