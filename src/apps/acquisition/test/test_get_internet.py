@@ -469,7 +469,7 @@ class TestGetInternet(unittest.TestCase):
                                https_params=internet_source.https_params)
             # Direct test !
             if self.direct_download:
-                filename = 'wsi_hp_crop_20200201.img'
+                filename = 'wsi_hp_crop_20200201.hdr'
                 remote_url = internet_source.url + '/' + filename
                 status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
                                            userpwd=internet_source.user_name + ':' + internet_source.password)
@@ -498,7 +498,7 @@ class TestGetInternet(unittest.TestCase):
         end_date_fixed = 20200321
         start_date_dyn = -45
         end_date_dyn = -30
-        file_to_check = 'wsi_hp_pasture_20200301.img'
+        file_to_check = 'wsi_hp_pasture_20200201.img'
         include_files_expression = "wsi_hp_pasture_%Y%m%d.img"
 
         internet_sources = querydb.get_active_internet_sources()
@@ -524,7 +524,7 @@ class TestGetInternet(unittest.TestCase):
 
             # Direct test !
             if self.direct_download:
-                filename = 'wsi_hp_pasture_20200301.img'
+                filename = 'wsi_hp_pasture_20200201.hdr'
                 remote_url = internet_source.url + '/' + filename
                 status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
                                            userpwd=internet_source.user_name + ':' + internet_source.password)
