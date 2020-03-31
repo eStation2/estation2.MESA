@@ -885,8 +885,8 @@ class TestGetInternet(unittest.TestCase):
     def testRemoteHttps_NDVI300(self):
         source_active = False
         internet_id = 'PDF:VITO:PROBA-V1:NDVI300'
-        start_date_fixed = 20200101
-        end_date_fixed = 20200310
+        start_date_fixed = 20200201
+        end_date_fixed = 20200201
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = '/2020/02/01/PV_S10_TOC_NDVI-20200201_333M_V101/PROBAV_S10_TOC_X19Y05_20200201_333M_NDVI_V101_NDVI.tif'
