@@ -741,19 +741,40 @@ def pre_process_merge_tile(subproducts, tmpdir, input_files, my_logger):
         # STEP 1: Merge all input products into a 'tmp' file
         # -------------------------------------------------------------------------
         try:
-            command = es_constants.gdal_merge
-            # command += ' -co \"compress=lzw\"'
-            # command += ' -co \"BIGTIFF=Yes\"'
-            command += ' -init '+str(nodata)
-            command += ' -o ' + output_file
-            command += ' -ot BYTE '
-            for file in input_files:
-                command += ' '+file
-
+            input_files_str = ''
+            for file_add in input_files:
+                input_files_str += ' '
+                input_files_str += file_add
+            # command = 'gdalwarp -srcnodata "{}" -dstnodata "{}" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(scaled_no_data, int(no_data),
+            #      input_files_str, out_tmp_file_gtiff)
+            command = 'gdalwarp '
+            command += ' -co \"COMPRESS=LZW\"'
+            command += ' -srcnodata '+str(nodata)
+            command += ' -dstnodata '+str(nodata)+' '
+            command += input_files_str+' ' + output_file
+            # command += ' -ot BYTE '
+            # for file in input_files:
+            #     command += ' '+file
             my_logger.debug('Command for merging is: ' + command)
             os.system(command)
+            # inter_processed_list.append(clipped_file)
         except:
             pass
+
+        # try:
+        #     command = es_constants.gdal_merge
+        #     # command += ' -co \"compress=lzw\"'
+        #     # command += ' -co \"BIGTIFF=Yes\"'
+        #     command += ' -init '+str(nodata)
+        #     command += ' -o ' + output_file
+        #     command += ' -ot BYTE '
+        #     for file in input_files:
+        #         command += ' '+file
+        #
+        #     my_logger.debug('Command for merging is: ' + command)
+        #     os.system(command)
+        # except:
+        #     pass
 
         # # Rescale the data using gdal_calc( In this case of 300m and 100m rescale is possible with gdal_calc but due the storage problem we are storing it in BYTE
         # mask_layer='/data/processing/vgt-ndvi/proba300-v1.0/rasterize_full_afr_300m.tif'
@@ -3796,15 +3817,26 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
             # Merge the old and new output products into a 'tmp' file
             try:
-                command = es_constants.gdal_merge + ' -n '+str(out_nodata)
-                command += ' -a_nodata '+str(out_nodata)
-                command += ' -co \"compress=lzw\" -o '
-                command += tmp_output_file
-                command += ' '+ my_output_filename+ ' '+output_filename
+                command = 'gdalwarp '
+                command += ' -co \"COMPRESS=LZW\"'
+                command += ' -srcnodata ' + str(out_nodata)
+                command += ' -dstnodata ' + str(out_nodata) + ' -of GTiff '
+                command += my_output_filename + ' ' + output_filename+ ' ' + tmp_output_file
                 my_logger.debug('Command for merging is: ' + command)
                 os.system(command)
+                # inter_processed_list.append(clipped_file)
             except:
                 pass
+            # try:
+            #     command = es_constants.gdal_merge + ' -n '+str(out_nodata)
+            #     command += ' -a_nodata '+str(out_nodata)
+            #     command += ' -co \"compress=lzw\" -o '
+            #     command += tmp_output_file
+            #     command += ' '+ my_output_filename+ ' '+output_filename
+            #     my_logger.debug('Command for merging is: ' + command)
+            #     os.system(command)
+            # except:
+            #     pass
 
             # Write metadata to output
             if old_file_list is not None:
