@@ -1,7 +1,3 @@
-from __future__ import unicode_literals
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 #
 #	purpose: Define all variables for es2
 #	author:  M.Clerici & Jurriaan van 't Klooster
@@ -18,16 +14,21 @@ from __future__ import print_function
 #
 #   This module will be be imported by any other (instead of locals.py -> to be discontinued)
 #
-
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 from future import standard_library
-standard_library.install_aliases()
+
 import os
 import sys
 import configparser
 from osgeo import gdalconst
-#from lib.python import es_logging as log
 
-#logger = log.my_logger(__name__)
+# from lib.python import es_logging as log
+# logger = log.my_logger(__name__)
+
+standard_library.install_aliases()
 
 # Set the mask for log files
 os.umask(0000)
@@ -73,7 +74,7 @@ for setting, value in factorysettings:
     es2globals[setting] = value
     locals()[setting] = value
 
-#for setting in es2globals:
+# for setting in es2globals:
 #    logger.info(setting + ': ' + str(es2globals[setting]))
 
 # ---------------------------------------------------------------

@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from builtins import open
 from builtins import int
 from future import standard_library
+
 standard_library.install_aliases()
 from builtins import map
 from builtins import str
@@ -70,13 +71,13 @@ ingest_dir_in = es_constants.ingest_dir
 ingest_error_dir = es_constants.ingest_error_dir
 data_dir_out = es_constants.processing_dir
 
-def loop_ingestion(dry_run=False, test_one_product=None):
 
-#    Driver of the ingestion process
-#    Reads configuration from the database
-#    Reads the list of files existing in input directory
-#    Loops over file and call the ingestion script
-#    Arguments: dry_run -> if 1, read tables and report activity ONLY
+def loop_ingestion(dry_run=False, test_one_product=None):
+    #    Driver of the ingestion process
+    #    Reads configuration from the database
+    #    Reads the list of files existing in input directory
+    #    Loops over file and call the ingestion script
+    #    Arguments: dry_run -> if 1, read tables and report activity ONLY
 
     logger.info("Entering routine %s" % 'drive_ingestion')
     echo_query = False
@@ -108,7 +109,7 @@ def loop_ingestion(dry_run=False, test_one_product=None):
             # For the current active product ingestion: get all
             product = {"productcode": productcode,
                        "version": productversion}
-            logger.debug("Processing product: %s - version %s" % (productcode,  productversion))
+            logger.debug("Processing product: %s - version %s" % (productcode, productversion))
 
             # Get the list of acquisition sources that are defined for this ingestion 'trigger'
             # (i.e. prod/version)
@@ -119,47 +120,54 @@ def loop_ingestion(dry_run=False, test_one_product=None):
 
             sources_list = querydb.get_product_sources(**native_product)
 
-            logger.debug("For product [%s] N. %s  source is/are found" % (productcode,len(sources_list)))
+            logger.debug("For product [%s] N. %s  source is/are found" % (productcode, len(sources_list)))
 
             systemsettings = functions.getSystemSettings()
 
             if do_ingest_source:
                 for source in sources_list:
 
-                    logger_spec = log.my_logger('apps.ingestion.'+productcode+'.'+productversion)
+                    logger_spec = log.my_logger('apps.ingestion.' + productcode + '.' + productversion)
                     logger.debug("Processing Source type [%s] with id [%s]" % (source.type, source.data_source_id))
                     # Re-initialize the datasource_descr
                     datasource_descr = None
                     files = []
                     # Get the 'filenaming' info (incl. 'area-type') from the acquisition source
                     if source.type == 'EUMETCAST':
-                        datasource_descr = querydb.get_datasource_descr(source_type=source.type, source_id=source.data_source_id)
+                        datasource_descr = querydb.get_datasource_descr(source_type=source.type,
+                                                                        source_id=source.data_source_id)
                         datasource_descr = datasource_descr[0]
                         eumetcast_filter = datasource_descr.filter_expression_jrc
                         # for eumetcast_filter, datasource_descr in querydb.get_datasource_descr(source_type=source.type,
                         #                                                                        source_id=source.data_source_id):
                         # TODO-M.C.: check the most performing options in real-cases
-                        files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(eumetcast_filter, os.path.basename(f))]
+                        files = [os.path.basename(f) for f in glob.glob(ingest_dir_in + '*') if
+                                 re.match(eumetcast_filter, os.path.basename(f))]
                         my_filter_expr = eumetcast_filter
-                        logger.info("Eumetcast Source: looking for files in %s - named like: %s" % (ingest_dir_in, eumetcast_filter))
+                        logger.info("Eumetcast Source: looking for files in %s - named like: %s" % (
+                        ingest_dir_in, eumetcast_filter))
 
                     if source.type == 'INTERNET':
                         # Implement file name filtering for INTERNET data source.
                         # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type=source.type,
                         #                                                                       source_id=source.data_source_id):
-                        datasource_descr = querydb.get_datasource_descr(source_type=source.type, source_id=source.data_source_id)
+                        datasource_descr = querydb.get_datasource_descr(source_type=source.type,
+                                                                        source_id=source.data_source_id)
                         datasource_descr = datasource_descr[0]
                         internet_filter = datasource_descr.files_filter_expression
 
                         # temp_internet_filter = internet_filter.files_filter_expression
                         temp_internet_filter = internet_filter
                         # TODO-M.C.: check the most performing options in real-cases
-                        #files = [f for f in os.listdir(ingest_dir_in) if re.match(temp_internet_filter, f)]
-                        files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(temp_internet_filter, os.path.basename(f))]
+                        # files = [f for f in os.listdir(ingest_dir_in) if re.match(temp_internet_filter, f)]
+                        files = [os.path.basename(f) for f in glob.glob(ingest_dir_in + '*') if
+                                 re.match(temp_internet_filter, os.path.basename(f))]
                         my_filter_expr = temp_internet_filter
-                        logger.info("Internet Source: looking for files in %s - named like: %s" % (ingest_dir_in, temp_internet_filter))
+                        logger.info("Internet Source: looking for files in %s - named like: %s" % (
+                        ingest_dir_in, temp_internet_filter))
                     # See ES2-204
-                    logger_spec.debug("Number of files found for product [%s] is: %s" % (active_product_ingest[0], len(files)))
+                    logger_spec.debug(
+                        "Number of files found for product [%s] is: %s" % (active_product_ingest[0], len(files)))
                     if len(files) > 0:
                         # Get list of ingestions triggers [prod/subprod/mapset]
                         ingestions = querydb.get_ingestion_subproduct(allrecs=False, **product)
@@ -181,7 +189,7 @@ def loop_ingestion(dry_run=False, test_one_product=None):
                             try:
                                 re_process = product_in_info.re_process
                                 re_extract = product_in_info.re_extract
-                                nodata_value=product_in_info.no_data
+                                nodata_value = product_in_info.no_data
                                 sprod = {'subproduct': ingest.subproductcode,
                                          'mapsetcode': ingest.mapsetcode,
                                          're_extract': re_extract,
@@ -189,7 +197,8 @@ def loop_ingestion(dry_run=False, test_one_product=None):
                                          'nodata': nodata_value}
                                 subproducts.append(sprod)
                             except:
-                                logger.warning("Subproduct %s not defined for source %s" % (ingest.subproductcode,datasource_descr.datasource_descr_id))
+                                logger.warning("Subproduct %s not defined for source %s" % (
+                                ingest.subproductcode, datasource_descr.datasource_descr_id))
 
                         # Get the list of unique dates by extracting the date from all files.
                         dates_list = []
@@ -198,17 +207,17 @@ def loop_ingestion(dry_run=False, test_one_product=None):
                         if dates_not_in_filename:
 
                             # Build the list of dates from datasource description
-                            start_datetime=datetime.datetime.strptime(str(datasource_descr.start_date),"%Y%m%d")
+                            start_datetime = datetime.datetime.strptime(str(datasource_descr.start_date), "%Y%m%d")
                             if datasource_descr.end_date is None:
                                 end_datetime = datetime.date.today()
                             else:
-                                end_datetime=datetime.datetime.strptime(str(datasource_descr.end_date),"%Y%m%d")
+                                end_datetime = datetime.datetime.strptime(str(datasource_descr.end_date), "%Y%m%d")
 
-                            all_starting_dates = proc_functions.get_list_dates_for_dataset(product_in_info.productcode,\
-                                                                                       product_in_info.subproductcode,\
-                                                                                       product_in_info.version,\
-                                                                                       start_date=datasource_descr.start_date,
-                                                                                       end_date=datasource_descr.end_date)
+                            all_starting_dates = proc_functions.get_list_dates_for_dataset(product_in_info.productcode, \
+                                                                                           product_in_info.subproductcode, \
+                                                                                           product_in_info.version, \
+                                                                                           start_date=datasource_descr.start_date,
+                                                                                           end_date=datasource_descr.end_date)
 
                             my_dataset = products.Dataset(product_in_info.productcode,
                                                           product_in_info.subproductcode,
@@ -237,10 +246,11 @@ def loop_ingestion(dry_run=False, test_one_product=None):
                                     splitted_fn = re.split(datasource_descr.delimiter, filename)
                                     date_string = splitted_fn[date_position]
                                     if len(date_string) > len(datasource_descr.date_format):
-                                        date_string=date_string[0:len(datasource_descr.date_format)]
+                                        date_string = date_string[0:len(datasource_descr.date_format)]
                                     dates_list.append(date_string)
                                 else:
-                                    dates_list.append(filename[date_position:date_position + len(datasource_descr.date_format)])
+                                    dates_list.append(
+                                        filename[date_position:date_position + len(datasource_descr.date_format)])
 
                             dates_list = set(dates_list)
                             dates_list = sorted(dates_list, reverse=False)
@@ -251,53 +261,64 @@ def loop_ingestion(dry_run=False, test_one_product=None):
                                 date_fileslist = [ingest_dir_in + l for l in files]
                             else:
                                 # Refresh the files list (some files have been deleted)
-                                files = [os.path.basename(f) for f in glob.glob(ingest_dir_in+'*') if re.match(my_filter_expr, os.path.basename(f))]
+                                files = [os.path.basename(f) for f in glob.glob(ingest_dir_in + '*') if
+                                         re.match(my_filter_expr, os.path.basename(f))]
                                 logger_spec.debug("     --> processing date, in native format: %s" % in_date)
                                 # Get the list of existing files for that date
                                 regex = re.compile(".*(" + in_date + ").*")
-                                date_fileslist = [ingest_dir_in + m.group(0) for l in files for m in [regex.search(l)] if m]
+                                date_fileslist = [ingest_dir_in + m.group(0) for l in files for m in [regex.search(l)]
+                                                  if m]
                             # Pass list of files to ingestion routine
-                            if (not dry_run):
+                            if not dry_run:
                                 try:
-                                    result = ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger_spec, echo_query=echo_query)
+                                    result = ingestion(date_fileslist, in_date, product, subproducts, datasource_descr,
+                                                       logger_spec, echo_query=echo_query)
                                 except:
-                                    logger.error("Error in ingestion of file [%s] " % (functions.conv_list_2_string(date_fileslist)))
+                                    logger.error("Error in ingestion of file [%s] " % (
+                                        functions.conv_list_2_string(date_fileslist)))
                                 else:
                                     # Result is None means we are still waiting for some files to be received. Keep files in /data/ingest
                                     # dates_not_in_filename means the input files contains many dates (e.g. GSOD precip)
                                     if result is not None and not dates_not_in_filename:
                                         if source.store_original_data or systemsettings['type_installation'] == 'Server':
-                                        # Special case for mesa-proc @ JRC
-                                        # Copy to 'Archive' directory
-                                            output_directory = data_dir_out + functions.set_path_sub_directory(product['productcode'],
-                                                                                                           sprod['subproduct'],
-                                                                                                           'Native',
-                                                                                                           product['version'],
-                                                                                                           'dummy_mapset_arg' )
+                                            # Special case for mesa-proc @ JRC
+                                            # Copy to 'Archive' directory
+                                            output_directory = data_dir_out + functions.set_path_sub_directory(
+                                                product['productcode'],
+                                                sprod['subproduct'],
+                                                'Native',
+                                                product['version'],
+                                                'dummy_mapset_arg')
                                             functions.check_output_dir(output_directory)
                                             # Archive the files
                                             for file_to_move in date_fileslist:
-                                                logger_spec.debug("     --> now archiving input files: %s" % file_to_move)
-                                                new_location=output_directory+os.path.basename(file_to_move)
+                                                logger_spec.debug(
+                                                    "     --> now archiving input files: %s" % file_to_move)
+                                                new_location = output_directory + os.path.basename(file_to_move)
                                                 try:
                                                     if os.path.isfile(file_to_move):
                                                         shutil.move(file_to_move, new_location)
                                                     else:
-                                                        logger_spec.debug("     --> file to be archived cannot be found: %s" % file_to_move)
+                                                        logger_spec.debug(
+                                                            "     --> file to be archived cannot be found: %s" % file_to_move)
                                                 except:
-                                                    logger_spec.debug("     --> error in archiving file: %s" % file_to_move)
+                                                    logger_spec.debug(
+                                                        "     --> error in archiving file: %s" % file_to_move)
 
                                         else:
                                             # Delete the files
                                             for file_to_remove in date_fileslist:
-                                                logger_spec.debug("     --> now deleting input files: %s" % file_to_remove)
+                                                logger_spec.debug(
+                                                    "     --> now deleting input files: %s" % file_to_remove)
                                                 try:
                                                     if os.path.isfile(file_to_remove):
                                                         os.remove(file_to_remove)
                                                     else:
-                                                        logger_spec.debug("     --> file to be deleted cannot be found: %s" % file_to_remove)
+                                                        logger_spec.debug(
+                                                            "     --> file to be deleted cannot be found: %s" % file_to_remove)
                                                 except:
-                                                    logger_spec.debug("     --> error in deleting file: %s" % file_to_remove)
+                                                    logger_spec.debug(
+                                                        "     --> error in deleting file: %s" % file_to_remove)
 
                             else:
                                 time.sleep(10)
@@ -308,11 +329,10 @@ def loop_ingestion(dry_run=False, test_one_product=None):
 
 
 def ingest_archives_eumetcast(dry_run=False):
-
-#    Ingest the files in format MESA_JRC_<prod>_<sprod>_<date>_<mapset>_<version>
-#    disseminated by JRC through EUMETCast.
-#    Gets the list of products/version/subproducts active for ingestion and for processing
-#    Arguments: dry_run -> if 1, read tables and report activity ONLY
+    #    Ingest the files in format MESA_JRC_<prod>_<sprod>_<date>_<mapset>_<version>
+    #    disseminated by JRC through EUMETCast.
+    #    Gets the list of products/version/subproducts active for ingestion and for processing
+    #    Arguments: dry_run -> if 1, read tables and report activity ONLY
 
     logger.info("Entering routine %s" % 'ingest_archives_eumetcast')
     echo_query = False
@@ -332,16 +352,18 @@ def ingest_archives_eumetcast(dry_run=False):
         # (i.e. prod/version)
         # NOTE: the following implies there is 1 and only 1 '_native' subproduct associated to a 'subproduct';
         native_product = {"productcode": productcode,
-                              "subproductcode": productcode + "_native",
-                              "version": productversion}
+                          "subproductcode": productcode + "_native",
+                          "version": productversion}
         sources_list = querydb.get_product_sources(**native_product)
 
-        logger.debug("For product [%s] N. %s  source is/are found" % (productcode,len(sources_list)))
+        logger.debug("For product [%s] N. %s  source is/are found" % (productcode, len(sources_list)))
 
         ingestions = querydb.get_ingestion_subproduct(allrecs=False, **product)
         for ingest in ingestions:
-            logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (productcode, productversion,ingest.subproductcode,ingest.mapsetcode))
-            ingest_archives_eumetcast_product(productcode, productversion,ingest.subproductcode,ingest.mapsetcode,dry_run=dry_run)
+            logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (
+            productcode, productversion, ingest.subproductcode, ingest.mapsetcode))
+            ingest_archives_eumetcast_product(productcode, productversion, ingest.subproductcode, ingest.mapsetcode,
+                                              dry_run=dry_run)
 
     # Get all active processing chains [product/version/algo/mapset].
     active_processing_chains = querydb.get_active_processing_chains()
@@ -354,48 +376,50 @@ def ingest_archives_eumetcast(dry_run=False):
             version = processed_product.version
             subproductcode = processed_product.subproductcode
             mapset = processed_product.mapsetcode
-            logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (productcode, version,subproductcode,mapset))
-            ingest_archives_eumetcast_product(productcode, version,subproductcode,mapset,dry_run=dry_run)
-
+            logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (
+            productcode, version, subproductcode, mapset))
+            ingest_archives_eumetcast_product(productcode, version, subproductcode, mapset, dry_run=dry_run)
 
     # Get the list of files that have been treated
-    working_dir=es_constants.es2globals['base_tmp_dir']+os.path.sep+'ingested_files'
-    trace_files=glob.glob(working_dir+os.path.sep+'*tbd')
-    if len(trace_files)> 0:
+    working_dir = es_constants.es2globals['base_tmp_dir'] + os.path.sep + 'ingested_files'
+    trace_files = glob.glob(working_dir + os.path.sep + '*tbd')
+    if len(trace_files) > 0:
         for trace in trace_files:
-            filename=os.path.basename(trace).strip('.tdb')
-            file_path=es_constants.es2globals['ingest_dir']+os.path.sep+filename
+            filename = os.path.basename(trace).strip('.tdb')
+            file_path = es_constants.es2globals['ingest_dir'] + os.path.sep + filename
             logger.debug("Removing file %s/" % file_path)
             if os.path.isfile(file_path):
                 os.remove(file_path)
             # Remove trace file also
             os.remove(trace)
 
-def ingest_archives_eumetcast_product(product_code, version, subproduct_code, mapset_id, dry_run=False,input_dir=None, no_delete=False):
 
-#    Ingest all files of type MESA_JRC_ for a give prod/version/subprod/mapset
-#    Note that mapset is the 'target' mapset
-#    input_dir = if None -> looks in ingest_dir (default for EUMETCast dissemination)
-#                if defined -> looks in the specific location (for Historical Archives)
-#
+def ingest_archives_eumetcast_product(product_code, version, subproduct_code, mapset_id, dry_run=False, input_dir=None,
+                                      no_delete=False):
+    #    Ingest all files of type MESA_JRC_ for a give prod/version/subprod/mapset
+    #    Note that mapset is the 'target' mapset
+    #    input_dir = if None -> looks in ingest_dir (default for EUMETCast dissemination)
+    #                if defined -> looks in the specific location (for Historical Archives)
+    #
 
     # Manage the input_dir option
     if input_dir is None:
         input_dir = es_constants.es2globals['ingest_dir']
 
-    logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (product_code, version, subproduct_code, mapset_id))
+    logger.debug("Looking for product [%s]/version [%s]/subproducts [%s]/mapset [%s]" % (
+    product_code, version, subproduct_code, mapset_id))
     # match_regex = es_constants.es2globals['prefix_eumetcast_files'] + product_code + '_' + subproduct_code + '_*_' + version + '*'
     match_regex = '*' + product_code + '_' + subproduct_code + '_*_' + version + '*'
 
     logger.debug("Looking in directory: %s" % input_dir)
     # Get the list of matching files in /data/ingest
-    available_files=[]
+    available_files = []
     for root, dirnames, filenames in os.walk(input_dir):
         for filename in fnmatch.filter(filenames, match_regex):
             available_files.append(os.path.join(root, filename))
 
     # Call the ingestion routine
-    if len(available_files)>0:
+    if len(available_files) > 0:
         for in_file in available_files:
             if dry_run:
                 logger.info("Found file: %s" % in_file)
@@ -407,25 +431,25 @@ def ingest_archives_eumetcast_product(product_code, version, subproduct_code, ma
 
 
 def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_logger, echo_query=False):
-#   Manages ingestion of 1/more file/files for a given date
-#   Arguments:
-#       input_files: input file full names
-#       product: product description name (for DB insertions)
-#       subproducts: list of subproducts to be ingested. Contains dictionaries such as:
-#
-#                sprod = {'subproduct': subproductcode,
-#                         'mapsetcode': mapsetcode,
-#                         're_extract': regexp to identify files to extract from .zip (only for zip archives)
-#                         're_process': regexp to identify files to be processed (there might be ancillary files)}
-#
-#       datasource_descr: datasource description object (incl. native_mapset, compose_area_method, ..)
-#       my_logger: trigger-specific logger
-#
-#   Returns:
-#       0 -> ingestion OK; files to be removed/stored
-#       1 -> ingestion wrong; files to be copied to /data/ingest.wrong
-#       None -> some mandatory files are missing: wait and do not touch files
-#
+    #   Manages ingestion of 1/more file/files for a given date
+    #   Arguments:
+    #       input_files: input file full names
+    #       product: product description name (for DB insertions)
+    #       subproducts: list of subproducts to be ingested. Contains dictionaries such as:
+    #
+    #                sprod = {'subproduct': subproductcode,
+    #                         'mapsetcode': mapsetcode,
+    #                         're_extract': regexp to identify files to extract from .zip (only for zip archives)
+    #                         're_process': regexp to identify files to be processed (there might be ancillary files)}
+    #
+    #       datasource_descr: datasource description object (incl. native_mapset, compose_area_method, ..)
+    #       my_logger: trigger-specific logger
+    #
+    #   Returns:
+    #       0 -> ingestion OK; files to be removed/stored
+    #       1 -> ingestion wrong; files to be copied to /data/ingest.wrong
+    #       None -> some mandatory files are missing: wait and do not touch files
+    #
     my_logger.info("Entering routine %s for prod: %s and date: %s" % ('ingestion', product['productcode'], in_date))
 
     preproc_type = datasource_descr.preproc_type
@@ -467,8 +491,8 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
             my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
             # Move files to 'error/storage' directory
             for error_file in input_files:
-                if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
-                    shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
+                if os.path.isfile(ingest_error_dir + os.path.basename(error_file)):
+                    shutil.os.remove(ingest_error_dir + os.path.basename(error_file))
                 try:
                     shutil.move(error_file, ingest_error_dir)
                 except:
@@ -478,12 +502,12 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
             raise NameError('Caught Error in preprocessing routine')
 
         # Error occurred and was detected in pre_process routine
-        if str(composed_file_list)=='1':
+        if str(composed_file_list) == '1':
             my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
             # Move files to 'error/storage' directory
             for error_file in input_files:
-                if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
-                    shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
+                if os.path.isfile(ingest_error_dir + os.path.basename(error_file)):
+                    shutil.os.remove(ingest_error_dir + os.path.basename(error_file))
                 try:
                     shutil.move(error_file, ingest_error_dir)
                 except:
@@ -495,14 +519,15 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
         composed_file_list = input_files
 
     try:
-        ingest_file(composed_file_list, in_date, product, subproducts, datasource_descr, my_logger, in_files=input_files,
-                echo_query=echo_query)
+        ingest_file(composed_file_list, in_date, product, subproducts, datasource_descr, my_logger,
+                    in_files=input_files,
+                    echo_query=echo_query)
     except:
         my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
         # Move files to 'error/storage' directory
         for error_file in input_files:
-            if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
-                shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
+            if os.path.isfile(ingest_error_dir + os.path.basename(error_file)):
+                shutil.os.remove(ingest_error_dir + os.path.basename(error_file))
             try:
                 shutil.move(error_file, ingest_error_dir)
             except:
@@ -523,14 +548,14 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
     return 0
 
 
-def pre_process_msg_mpe (subproducts, tmpdir, input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process msg_mpe files
-#   4 expected segments as input
-#   Returns: pre_processed_list -> list of preprocessed files (to go on with ingestion)
-#            None: waiting for additional files (keep existing files in /data/ingest)
-#            Raise Exception: something went wrong (move existing files to /data/ingest.wrong)
-#                             This applies also when there are <4 files, older than 1 day)
+def pre_process_msg_mpe(subproducts, tmpdir, input_files, my_logger):
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process msg_mpe files
+    #   4 expected segments as input
+    #   Returns: pre_processed_list -> list of preprocessed files (to go on with ingestion)
+    #            None: waiting for additional files (keep existing files in /data/ingest)
+    #            Raise Exception: something went wrong (move existing files to /data/ingest.wrong)
+    #                             This applies also when there are <4 files, older than 1 day)
 
     # Output list of pre-processed files
     pre_processed_list = []
@@ -547,7 +572,7 @@ def pre_process_msg_mpe (subproducts, tmpdir, input_files, my_logger):
         # Check the datetime of input files: store the delta-days of the latest file
         min_delta_days = 10
         for ifile in input_files:
-            mod_time_delta =  datetime.datetime.today()- datetime.datetime.fromtimestamp(os.path.getmtime(ifile))
+            mod_time_delta = datetime.datetime.today() - datetime.datetime.fromtimestamp(os.path.getmtime(ifile))
             if mod_time_delta.days < min_delta_days:
                 min_delta_days = mod_time_delta.days
         my_logger.debug('Min delta days found is {0}'.format(min_delta_days))
@@ -592,12 +617,12 @@ def pre_process_msg_mpe (subproducts, tmpdir, input_files, my_logger):
     return pre_processed_list
 
 
-def pre_process_mpe_umarf (subproducts, tmpdir, input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process msg_mpe files in UMARF format
-#   Typical filename is MSG3-SEVI-MSGMPEG-0100-0100-20160331234500.000000000Z-20160331235848-1193222.grb.gz
-#   Returns: pre_processed_list -> list of preprocessed files (to go on with ingestion)
-#            Raise Exception: something went wrong (move existing files to /data/ingest.wrong)
+def pre_process_mpe_umarf(subproducts, tmpdir, input_files, my_logger):
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process msg_mpe files in UMARF format
+    #   Typical filename is MSG3-SEVI-MSGMPEG-0100-0100-20160331234500.000000000Z-20160331235848-1193222.grb.gz
+    #   Returns: pre_processed_list -> list of preprocessed files (to go on with ingestion)
+    #            Raise Exception: something went wrong (move existing files to /data/ingest.wrong)
 
     # Output list of pre-processed files
     pre_processed_list = []
@@ -615,7 +640,7 @@ def pre_process_mpe_umarf (subproducts, tmpdir, input_files, my_logger):
 
         # Read the .grb and convert to gtiff (GDAL does not do it properly)
 
-        with open(out_tmp_grib_file,'wb') as f_out, gzip.open(input_file,'rb') as f_in:                 # Create ZipFile object
+        with open(out_tmp_grib_file, 'wb') as f_out, gzip.open(input_file, 'rb') as f_in:  # Create ZipFile object
             shutil.copyfileobj(f_in, f_out)
 
         grbs = pygrib.open(out_tmp_grib_file)
@@ -634,13 +659,13 @@ def pre_process_mpe_umarf (subproducts, tmpdir, input_files, my_logger):
     return pre_processed_list
 
 
-def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process MODIS HDF4 tiled files
-#
-#   TODO-M.C.: add a mechanism to check input_files vs. mapsets ??
-#              Optimize by avoiding repetition of the gdal_merge for the same sub_product, different mapset ?
-#
+def pre_process_modis_hdf4_tile(subproducts, tmpdir, input_files, my_logger):
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process MODIS HDF4 tiled files
+    #
+    #   TODO-M.C.: add a mechanism to check input_files vs. mapsets ??
+    #              Optimize by avoiding repetition of the gdal_merge for the same sub_product, different mapset ?
+    #
     # Prepare the output file list
     pre_processed_list = []
     # Build a list of subdatasets to be extracted
@@ -693,10 +718,10 @@ def pre_process_modis_hdf4_tile (subproducts, tmpdir , input_files, my_logger):
 
 
 def pre_process_merge_tile(subproducts, tmpdir, input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process Merge tiled files from PROBAV 100 and 300 meters
-#   Uses Gdal_merge to merge the file and gdal_translate to compress the file and assign BIGTIFF NO
-#
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process Merge tiled files from PROBAV 100 and 300 meters
+    #   Uses Gdal_merge to merge the file and gdal_translate to compress the file and assign BIGTIFF NO
+    #
     # Prepare the output file list
     pre_processed_list = []
     inter_processed_list = []
@@ -733,9 +758,9 @@ def pre_process_merge_tile(subproducts, tmpdir, input_files, my_logger):
         #         pass
         #
         # OUTPUT FILES
-        output_file         = tmpdir+os.path.sep + 'merge_output.tif'
+        output_file = tmpdir + os.path.sep + 'merge_output.tif'
         output_file_vrt = tmpdir + os.path.sep + 'merge_output_rescaled.vrt'
-        output_file_compressed  = tmpdir+os.path.sep + 'merge_output_compressed.tif'
+        output_file_compressed = tmpdir + os.path.sep + 'merge_output_compressed.tif'
 
         # -------------------------------------------------------------------------
         # STEP 1: Merge all input products into a 'tmp' file
@@ -744,11 +769,11 @@ def pre_process_merge_tile(subproducts, tmpdir, input_files, my_logger):
             command = es_constants.gdal_merge
             # command += ' -co \"compress=lzw\"'
             # command += ' -co \"BIGTIFF=Yes\"'
-            command += ' -init '+str(nodata)
+            command += ' -init ' + str(nodata)
             command += ' -o ' + output_file
             command += ' -ot BYTE '
             for file in input_files:
-                command += ' '+file
+                command += ' ' + file
 
             my_logger.debug('Command for merging is: ' + command)
             os.system(command)
@@ -766,9 +791,9 @@ def pre_process_merge_tile(subproducts, tmpdir, input_files, my_logger):
             command += ' -co \"compress=lzw\"'
             command += ' -co \"BIGTIFF=No\"'
             command += ' -ot BYTE '
-            command += ' '+output_file
+            command += ' ' + output_file
             # command += ' ' + output_file_vrt #To be changed if rescaling is done
-            command += ' '+output_file_compressed
+            command += ' ' + output_file_compressed
 
             my_logger.debug('Command for compress is: ' + command)
             os.system(command)
@@ -785,13 +810,13 @@ def pre_process_merge_tile(subproducts, tmpdir, input_files, my_logger):
     return pre_processed_list
 
 
-def pre_process_retile_vito (subproducts, tmpdir, input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process Merge tiled files
-#
-#   TODO-M.C.: add a mechanism to check input_files vs. mapsets ??
-#              Optimize by avoiding repetition of the gdal_merge for the same sub_product, different mapset ?
-#
+def pre_process_retile_vito(subproducts, tmpdir, input_files, my_logger):
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process Merge tiled files
+    #
+    #   TODO-M.C.: add a mechanism to check input_files vs. mapsets ??
+    #              Optimize by avoiding repetition of the gdal_merge for the same sub_product, different mapset ?
+    #
     # Prepare the output file list
     pre_processed_list = []
     # # Build a list of subdatasets to be extracted
@@ -811,43 +836,42 @@ def pre_process_retile_vito (subproducts, tmpdir, input_files, my_logger):
     # Loop over input file to create VRT files
     if len(input_files) > 1:
         for input_file in input_files:
-            out_vrt_file = tmpdir + os.path.sep+ os.path.split(input_file)[-1]+ ".vrt"
+            out_vrt_file = tmpdir + os.path.sep + os.path.split(input_file)[-1] + ".vrt"
             # convert_vrt_cmd = "gdalwarp -of vrt -ot Float32 "+ input_file + " " + input_file +".vrt"
             convert_vrt_cmd = "gdal_translate -of vrt -ot Float32 " + input_file + " " + out_vrt_file
             os.system(convert_vrt_cmd)
 
         # List all the vrt file and store in text file
         text_file_ls = tmpdir + os.path.sep + "list.txt"
-        os.system("ls "+tmpdir+"/*.vrt >" + text_file_ls)
+        os.system("ls " + tmpdir + "/*.vrt >" + text_file_ls)
 
         # Merge all the vrt files with gdalbuildvrt
-        merged_vrt_file = tmpdir + os.path.sep+ "merged_vrt.vrt"#tmpdir + os.path.sep + "merged_vrt.vrt"
-        os.system("gdalbuildvrt -input_file_list " + text_file_ls + " "+ merged_vrt_file)
+        merged_vrt_file = tmpdir + os.path.sep + "merged_vrt.vrt"  # tmpdir + os.path.sep + "merged_vrt.vrt"
+        os.system("gdalbuildvrt -input_file_list " + text_file_ls + " " + merged_vrt_file)
 
         # Create retile dir functions.check_output_dir(output_dir)
         output_retile_dir = tmpdir + os.path.sep + "retiled"
         functions.check_output_dir(output_retile_dir)
 
         # Convert merged vrt file to Gtiff file with the compression
-        cmd_retile = "gdal_retile.py -v -ps 16384 16384 -co \"TILED=YES\" -co \"COMPRESS=LZW\" -targetDir "+output_retile_dir+" "+tmpdir+"/*.vrt"
+        cmd_retile = "gdal_retile.py -v -ps 16384 16384 -co \"TILED=YES\" -co \"COMPRESS=LZW\" -targetDir " + output_retile_dir + " " + tmpdir + "/*.vrt"
         os.system(cmd_retile)
         pre_processed_list.append(glob.glob(output_retile_dir))
 
         for retile_file in glob.glob(output_retile_dir):
-            gdal_calc_cmd = "gdal_calc.py --format=VRT --type Int16 -A "+retile_file+" --calc=\"(A*0.004-0.08)*1000\" --outfile=/data/ingest/test_calc_int16.vrt"
+            gdal_calc_cmd = "gdal_calc.py --format=VRT --type Int16 -A " + retile_file + " --calc=\"(A*0.004-0.08)*1000\" --outfile=/data/ingest/test_calc_int16.vrt"
 
     else:
         pre_processed_list.append(input_files[0])
-            # sds_tmp = None
+        # sds_tmp = None
 
     return pre_processed_list
 
 
-
-def drive_pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Drive the Pre-process LSASAF HDF5 files
-#
+def drive_pre_process_lsasaf_hdf5(subproducts, tmpdir, input_files, my_logger):
+    # -------------------------------------------------------------------------------------------------------
+    #   Drive the Pre-process LSASAF HDF5 files
+    #
     # This is a quick fix of the gdal 1.9.2 bug on closing HDF files (see http://trac.osgeo.org/gdal/ticket/5103)
     # Since the files cannot be closed, and end up in reaching the max-number of open files (1024) we
     # call the routine as a detached process
@@ -857,7 +881,7 @@ def drive_pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger):
     proc_dir = __import__("apps.acquisition")
     proc_pck = getattr(proc_dir, "acquisition")
     proc_mod = getattr(proc_pck, module_name)
-    proc_func= getattr(proc_mod, function_name)
+    proc_func = getattr(proc_mod, function_name)
     out_queue = Queue()
 
     # Check the input files (corrupted would stop the detached process)
@@ -885,10 +909,10 @@ def drive_pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger):
     return pre_processed_list
 
 
-def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_queue):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process LSASAF HDF5 files
-#
+def pre_process_lsasaf_hdf5(subproducts, tmpdir, input_files, my_logger, out_queue):
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process LSASAF HDF5 files
+    #
     # It receives in input the list of the (.bz2) files (e.g. NAfr, SAfr)
     # It unzips the files to tmpdir, extracts relevant sds from hdf, does the merging in original proj.
     # Note that it 'replicates' the file_list for each target mapset
@@ -908,8 +932,8 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
         if re.match('.*\.bz2', ifile):
             try:
                 my_logger.debug('Decompressing bz2 file: ' + ifile)
-                bz2file = bz2.BZ2File(ifile)                    # Create ZipFile object
-                data = bz2file.read()                           # Get the list of its contents
+                bz2file = bz2.BZ2File(ifile)  # Create ZipFile object
+                data = bz2file.read()  # Get the list of its contents
                 filename = os.path.basename(ifile)
                 filename = filename.replace('.bz2', '')
                 myfile_path = os.path.join(tmpdir, filename)
@@ -964,11 +988,11 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
                     write_ds_to_geotiff(sds_tmp, outputfile)
                     sds_tmp = None
             hdf = None
-            #close_hdf_dataset(unzipped_file)
+            # close_hdf_dataset(unzipped_file)
         except:
             my_logger.error('Error in extracting SDS')
             hdf = None
-            #close_hdf_dataset(unzipped_file)
+            # close_hdf_dataset(unzipped_file)
             out_queue.put('')
             return 1
             # raise Exception('Error in extracting SDS')
@@ -995,13 +1019,13 @@ def pre_process_lsasaf_hdf5(subproducts, tmpdir , input_files, my_logger, out_qu
     return 0
 
 
-def pre_process_pml_netcdf(subproducts, tmpdir , input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process PML NETCDF files
-#
-# It receives in input the list of the (.bz2) files (windows)
-# It unzips the files to tmpdir and does the merging in original proj, for each datasets
-#
+def pre_process_pml_netcdf(subproducts, tmpdir, input_files, my_logger):
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process PML NETCDF files
+    #
+    # It receives in input the list of the (.bz2) files (windows)
+    # It unzips the files to tmpdir and does the merging in original proj, for each datasets
+    #
     unzipped_input_files = []
 
     # Prepare the output file list
@@ -1019,8 +1043,8 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files, my_logger):
         # Unzip to tmpdir and add to list
         if re.match('.*\.bz2', ifile):
             my_logger.debug('Decompressing bz2 file: ' + ifile)
-            bz2file = bz2.BZ2File(ifile)                    # Create ZipFile object
-            data = bz2file.read()                           # Get the list of its contents
+            bz2file = bz2.BZ2File(ifile)  # Create ZipFile object
+            data = bz2file.read()  # Get the list of its contents
             filename = os.path.basename(ifile)
             filename = filename.replace('.bz2', '')
             myfile_path = os.path.join(tmpdir, filename)
@@ -1028,7 +1052,7 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files, my_logger):
             myfile.write(data)
             myfile.close()
             bz2file.close()
-            unzipped_input_files.append(myfile_path)        # It contains a list of .nc
+            unzipped_input_files.append(myfile_path)  # It contains a list of .nc
 
     # Build a list of subdatasets to be extracted
     list_to_extr = []
@@ -1059,7 +1083,7 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files, my_logger):
                     sds_tmp = None
                     geotiff_files.append(myfile_path)
         else:
-          # No subdatasets: e.g. SST -> read directly the .nc
+            # No subdatasets: e.g. SST -> read directly the .nc
             filename = os.path.basename(input_file) + '.geotiff'
             myfile_path = os.path.join(tmpdir, filename)
             write_ds_to_geotiff(netcdf, myfile_path)
@@ -1075,7 +1099,7 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files, my_logger):
             out_tmp_file_gtiff = tmpdir + os.path.sep + id_subproduct + '_' + id_mapset + '.tif.merged'
 
             # Take gdal_merge.py from es2globals
-            command = es_constants.gdal_merge + ' -init '+ str(nodata_value)+' -co \"compress=lzw\" -ot Float32 -o '
+            command = es_constants.gdal_merge + ' -init ' + str(nodata_value) + ' -co \"compress=lzw\" -ot Float32 -o '
             command += out_tmp_file_gtiff
             for file_add in geotiff_files:
                 command += ' '
@@ -1087,16 +1111,16 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files, my_logger):
     return pre_processed_list
 
 
-def pre_process_netcdf(subproducts, tmpdir , input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process NETCDF files (e.g. MODIS Global since July 2015)
-#
-# It receives in input the netcdf file (1 ONLY)
-# It does the extraction of relevant datasets
-#
-# Note: modified on 19.4.16 to return a list of files (one foreach subproduct-mapset)
-# Note: modified on 26.7.16 to save in tmp_dir the scale factor and offset, to be re-used in ingestion
-#       This is related to the change in MODIS-Global Daily SST of the scale factor
+def pre_process_netcdf(subproducts, tmpdir, input_files, my_logger):
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process NETCDF files (e.g. MODIS Global since July 2015)
+    #
+    # It receives in input the netcdf file (1 ONLY)
+    # It does the extraction of relevant datasets
+    #
+    # Note: modified on 19.4.16 to return a list of files (one foreach subproduct-mapset)
+    # Note: modified on 26.7.16 to save in tmp_dir the scale factor and offset, to be re-used in ingestion
+    #       This is related to the change in MODIS-Global Daily SST of the scale factor
 
     # Prepare the output file list
     pre_processed_list = []
@@ -1164,10 +1188,10 @@ def pre_process_netcdf(subproducts, tmpdir , input_files, my_logger):
     return geotiff_files
 
 
-def pre_process_unzip(subproducts, tmpdir , input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process ZIPPED files
-#
+def pre_process_unzip(subproducts, tmpdir, input_files, my_logger):
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process ZIPPED files
+    #
     out_tmp_gtiff_file = []
     #  zipped files containing one or more HDF4
     if isinstance(input_files, list):
@@ -1179,8 +1203,8 @@ def pre_process_unzip(subproducts, tmpdir , input_files, my_logger):
 
     logger.debug('Unzipping/processing: .zip case')
     if zipfile.is_zipfile(input_file):
-        zip_file = zipfile.ZipFile(input_file)              # Create ZipFile object
-        zip_list = zip_file.namelist()                      # Get the list of its contents
+        zip_file = zipfile.ZipFile(input_file)  # Create ZipFile object
+        zip_list = zip_file.namelist()  # Get the list of its contents
         # Loop over subproducts and extract associated files
         for sprod in subproducts:
 
@@ -1190,7 +1214,7 @@ def pre_process_unzip(subproducts, tmpdir , input_files, my_logger):
 
             for files in zip_list:
                 my_logger.debug('File in the .zip archive is: ' + files)
-                if re.match(re_extract, files):        # Check it matches one of sprods -> extract from zip
+                if re.match(re_extract, files):  # Check it matches one of sprods -> extract from zip
                     filename = os.path.basename(files)
                     data = zip_file.read(files)
                     myfile_path = os.path.join(tmpdir, filename)
@@ -1207,16 +1231,15 @@ def pre_process_unzip(subproducts, tmpdir , input_files, my_logger):
         my_logger.error("File %s is not a valid zipfile. Exit", input_files)
         raise Exception("File %s is not a valid zipfile. Exit", input_files)
 
-
         # TODO-M.C.:Check all datasets have been found (len(intermFile) ==len(subprods)))
 
     return out_tmp_gtiff_file
 
 
-def pre_process_tarzip(subproducts, tmpdir , input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process .tgz files (e.g. WD-GEE)
-#
+def pre_process_tarzip(subproducts, tmpdir, input_files, my_logger):
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process .tgz files (e.g. WD-GEE)
+    #
     out_tmp_gtiff_file = []
     #  should be a single file
     if isinstance(input_files, list):
@@ -1228,9 +1251,9 @@ def pre_process_tarzip(subproducts, tmpdir , input_files, my_logger):
 
     logger.debug('Extracting from .tgz: .tarzip case')
     if tarfile.is_tarfile(input_file):
-        tar_file = tarfile.open(input_file,'r:*')           # Open the .tgz
+        tar_file = tarfile.open(input_file, 'r:*')  # Open the .tgz
         tar_file.extractall(path=tmpdir)
-        out_tmp_gtiff_file=glob.glob(tmpdir+os.path.sep+'*.tif')
+        out_tmp_gtiff_file = glob.glob(tmpdir + os.path.sep + '*.tif')
 
         tar_file.close()
 
@@ -1243,10 +1266,10 @@ def pre_process_tarzip(subproducts, tmpdir , input_files, my_logger):
     return out_tmp_gtiff_file
 
 
-def pre_process_tarzip_wd_gee(subproducts, tmpdir , input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process .tgz files (e.g. WD-GEE)
-#
+def pre_process_tarzip_wd_gee(subproducts, tmpdir, input_files, my_logger):
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process .tgz files (e.g. WD-GEE)
+    #
     out_tmp_gtiff_file = []
     #  should be a single file
     # if isinstance(input_files, list):
@@ -1263,7 +1286,7 @@ def pre_process_tarzip_wd_gee(subproducts, tmpdir , input_files, my_logger):
         if sprod != 0:
             mapset_code = sprod['mapsetcode']
 
-        fake_file_needed = True   # False only if the product exists and untared
+        fake_file_needed = True  # False only if the product exists and untared
         for index, input_file in enumerate(input_files):
             file = os.path.basename(input_file)
             input_file_mapset = file.split('_')[5]
@@ -1271,9 +1294,9 @@ def pre_process_tarzip_wd_gee(subproducts, tmpdir , input_files, my_logger):
             if str(mapset_code) == str(input_file_mapset):
                 logger.debug('Extracting from .tgz: .tarzip case')
                 if tarfile.is_tarfile(input_file):
-                    tar_file = tarfile.open(input_file,'r:*')           # Open the .tgz
+                    tar_file = tarfile.open(input_file, 'r:*')  # Open the .tgz
                     tar_file.extractall(path=tmpdir)
-                    append_file_list = glob.glob(tmpdir+os.path.sep+'*'+input_file_mapset+'*.tif')
+                    append_file_list = glob.glob(tmpdir + os.path.sep + '*' + input_file_mapset + '*.tif')
                     if len(append_file_list) > 0:
                         append_file = glob.glob(tmpdir + os.path.sep + '*' + input_file_mapset + '*.tif')[0]
                     out_tmp_gtiff_file.append(append_file)
@@ -1288,14 +1311,15 @@ def pre_process_tarzip_wd_gee(subproducts, tmpdir , input_files, my_logger):
 
         if fake_file_needed:
             out_tmp_gtiff_file.append('/fake_link/')
-                # TODO-M.C.:Check all datasets have been found (len(intermFile) ==len(subprods)))
+            # TODO-M.C.:Check all datasets have been found (len(intermFile) ==len(subprods)))
 
     return out_tmp_gtiff_file
 
-def pre_process_bzip2 (subproducts, tmpdir, input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process bzip2 files
-#
+
+def pre_process_bzip2(subproducts, tmpdir, input_files, my_logger):
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process bzip2 files
+    #
     interm_files_list = []
 
     # Make sure it is a list (if only a string is returned, it loops over chars)
@@ -1307,8 +1331,8 @@ def pre_process_bzip2 (subproducts, tmpdir, input_files, my_logger):
 
     for input_file in list_input_files:
         my_logger.info('Unzipping/processing: .bz2 case')
-        bz2file = bz2.BZ2File(input_file)               # Create ZipFile object
-        data = bz2file.read()                            # Get the list of its contents
+        bz2file = bz2.BZ2File(input_file)  # Create ZipFile object
+        data = bz2file.read()  # Get the list of its contents
         filename = os.path.basename(input_file)
         filename = filename.replace('.bz2', '')
         myfile_path = os.path.join(tmpdir, filename)
@@ -1324,23 +1348,23 @@ def pre_process_bzip2 (subproducts, tmpdir, input_files, my_logger):
     return interm_files_list
 
 
-def pre_process_gzip (subproducts, tmpdir, input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process gzip files
-#
+def pre_process_gzip(subproducts, tmpdir, input_files, my_logger):
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process gzip files
+    #
     interm_files_list = []
 
     # Make sure it is a list (if only a string is returned, it loops over chars)
     if isinstance(input_files, list):
         list_input_files = input_files
     else:
-        list_input_files=[]
+        list_input_files = []
         list_input_files.append(input_files)
 
     for input_file in list_input_files:
         my_logger.info('Unzipping/processing: .gzip case')
-        gzipfile = gzip.open(input_file)                 # Create ZipFile object
-        data = gzipfile.read()                           # Get the list of its contents
+        gzipfile = gzip.open(input_file)  # Create ZipFile object
+        data = gzipfile.read()  # Get the list of its contents
         filename = os.path.basename(input_file)
         filename = filename.replace('.gz', '')
         myfile_path = os.path.join(tmpdir, filename)
@@ -1357,9 +1381,9 @@ def pre_process_gzip (subproducts, tmpdir, input_files, my_logger):
 
 
 def pre_process_bz2_hdf4(subproducts, tmpdir, input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process HDF4 files bz2 zipped
-#   First unzips, then extract relevant subdatasets
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process HDF4 files bz2 zipped
+    #   First unzips, then extract relevant subdatasets
 
     # prepare the output as an empty list
     interm_files_list = []
@@ -1380,8 +1404,8 @@ def pre_process_bz2_hdf4(subproducts, tmpdir, input_files, my_logger):
     # Bz2 unzips to my_bunzip2_file
     # TODO-M.C.: re-use the method above ??
     for input_file in list_input_files:
-        bz2file = bz2.BZ2File(input_file)               # Create ZipFile object
-        data = bz2file.read()                           # Get the list of its contents
+        bz2file = bz2.BZ2File(input_file)  # Create ZipFile object
+        data = bz2file.read()  # Get the list of its contents
         filename = os.path.basename(input_file)
         filename = filename.replace('.bz2', '')
         my_bunzip2_file = os.path.join(tmpdir, filename)
@@ -1400,7 +1424,7 @@ def pre_process_bz2_hdf4(subproducts, tmpdir, input_files, my_logger):
             for output_to_extr in list_to_extr:
                 for subdataset in sdslist:
                     id_subdataset = subdataset.split(':')[-1]
-                    if id_subdataset==output_to_extr:
+                    if id_subdataset == output_to_extr:
                         outputfile = tmpdir + os.path.sep + filename + "_" + id_subdataset + '_' + '.tif'
                         sds_tmp = gdal.Open(subdataset)
                         write_ds_to_geotiff(sds_tmp, outputfile)
@@ -1417,9 +1441,9 @@ def pre_process_bz2_hdf4(subproducts, tmpdir, input_files, my_logger):
 
 
 def pre_process_georef_netcdf(subproducts, native_mapset_code, tmpdir, input_files):
-# -------------------------------------------------------------------------------------------------------
-#   Convert netcdf to GTIFF (and assign geo-referencing)
-#   This is treated as a special case, being not possible to 'update' geo-ref info in the netcdf
+    # -------------------------------------------------------------------------------------------------------
+    #   Convert netcdf to GTIFF (and assign geo-referencing)
+    #   This is treated as a special case, being not possible to 'update' geo-ref info in the netcdf
 
     # prepare the output as an empty list
     interm_files_list = []
@@ -1447,11 +1471,11 @@ def pre_process_georef_netcdf(subproducts, native_mapset_code, tmpdir, input_fil
 
 
 def pre_process_hdf5_zip(subproducts, tmpdir, input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process HDF5 zipped files (e.g. g2_biopar products)
-#   Only one zipped file is expected, containing more files (.h5, .xls, .txt, .xml, ..)
-#   Only the .h5 is normally extracted. Then, the relevant SDSs extracted and converted to geotiff.
-#
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process HDF5 zipped files (e.g. g2_biopar products)
+    #   Only one zipped file is expected, containing more files (.h5, .xls, .txt, .xml, ..)
+    #   Only the .h5 is normally extracted. Then, the relevant SDSs extracted and converted to geotiff.
+    #
 
     # prepare the output as an empty list
     interm_files_list = []
@@ -1459,8 +1483,8 @@ def pre_process_hdf5_zip(subproducts, tmpdir, input_files, my_logger):
     # Build a list of subdatasets to be extracted
     sds_to_process = []
     for sprod in subproducts:
-       # if sprod != 0:
-            sds_to_process.append(sprod['re_process'])
+        # if sprod != 0:
+        sds_to_process.append(sprod['re_process'])
 
     # Make sure input is a list (if only a string is received, it loops over chars)
     if isinstance(input_files, list):
@@ -1473,8 +1497,8 @@ def pre_process_hdf5_zip(subproducts, tmpdir, input_files, my_logger):
     for input_file in list_input_files:
 
         if zipfile.is_zipfile(input_file):
-            zip_file = zipfile.ZipFile(input_file)              # Create ZipFile object
-            zip_list = zip_file.namelist()                      # Get the list of its contents
+            zip_file = zipfile.ZipFile(input_file)  # Create ZipFile object
+            zip_list = zip_file.namelist()  # Get the list of its contents
 
             # Loop over subproducts and extract associated files
             for sprod in subproducts:
@@ -1485,7 +1509,7 @@ def pre_process_hdf5_zip(subproducts, tmpdir, input_files, my_logger):
 
                 for files in zip_list:
                     my_logger.debug('File in the .zip archive is: ' + files)
-                    if re.match(re_extract, files):        # Check it matches one of sprods -> extract from zip
+                    if re.match(re_extract, files):  # Check it matches one of sprods -> extract from zip
                         filename = os.path.basename(files)
                         data = zip_file.read(files)
                         myfile_path = os.path.join(tmpdir, filename)
@@ -1529,11 +1553,11 @@ def pre_process_hdf5_zip(subproducts, tmpdir, input_files, my_logger):
 
 
 def pre_process_hdf5_gls(subproducts, tmpdir, input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process HDF5 zipped files (specifically for g_cls files from VITO)
-#   Only one zipped file is expected, containing more files (.nc, .xls, .txt, .xml, ..)
-#   Only the .nc is normally extracted. Then, the relevant SDSs extracted and converted to geotiff.
-#
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process HDF5 zipped files (specifically for g_cls files from VITO)
+    #   Only one zipped file is expected, containing more files (.nc, .xls, .txt, .xml, ..)
+    #   Only the .nc is normally extracted. Then, the relevant SDSs extracted and converted to geotiff.
+    #
 
     # prepare the output as an empty list
     interm_files_list = []
@@ -1541,8 +1565,8 @@ def pre_process_hdf5_gls(subproducts, tmpdir, input_files, my_logger):
     # Build a list of subdatasets to be extracted
     sds_to_process = []
     for sprod in subproducts:
-       # if sprod != 0:
-            sds_to_process.append(sprod['re_process'])
+        # if sprod != 0:
+        sds_to_process.append(sprod['re_process'])
 
     # Make sure input is a list (if only a string is received, it loops over chars)
     if isinstance(input_files, list):
@@ -1555,8 +1579,8 @@ def pre_process_hdf5_gls(subproducts, tmpdir, input_files, my_logger):
     for input_file in list_input_files:
 
         if zipfile.is_zipfile(input_file):
-            zip_file = zipfile.ZipFile(input_file)              # Create ZipFile object
-            zip_list = zip_file.namelist()                      # Get the list of its contents
+            zip_file = zipfile.ZipFile(input_file)  # Create ZipFile object
+            zip_list = zip_file.namelist()  # Get the list of its contents
 
             # Loop over subproducts and extract associated files
             for sprod in subproducts:
@@ -1567,7 +1591,7 @@ def pre_process_hdf5_gls(subproducts, tmpdir, input_files, my_logger):
 
                 for files in zip_list:
                     my_logger.debug('File in the .zip archive is: ' + files)
-                    if re.match(re_extract, files):        # Check it matches one of sprods -> extract from zip
+                    if re.match(re_extract, files):  # Check it matches one of sprods -> extract from zip
                         filename = os.path.basename(files)
                         data = zip_file.read(files)
                         myfile_path = os.path.join(tmpdir, filename)
@@ -1582,11 +1606,10 @@ def pre_process_hdf5_gls(subproducts, tmpdir, input_files, my_logger):
             my_logger.error("File %s is not a valid zipfile. Exit", input_files)
             return 1
 
-
         # Loop over datasets and extract the one in the list
         for output_sds in sds_to_process:
             # Open directly the SDS with the HDF interface (the NETCDF one goes in segfault)
-            my_sds_hdf='HDF5:'+my_unzip_file+'://'+output_sds
+            my_sds_hdf = 'HDF5:' + my_unzip_file + '://' + output_sds
             sds_in = gdal.Open(my_sds_hdf)
 
             outputfile = tmpdir + os.path.sep + filename + '.tif'
@@ -1598,10 +1621,10 @@ def pre_process_hdf5_gls(subproducts, tmpdir, input_files, my_logger):
 
 
 def pre_process_hdf5_gls_nc(subproducts, tmpdir, input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process HDF5 non-zipped files (specifically for g_cls files from VITO)
-#   It is the 'simplified' version of the pre_process_hdf5_gls method above, for the 'Global' files
-#
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process HDF5 non-zipped files (specifically for g_cls files from VITO)
+    #   It is the 'simplified' version of the pre_process_hdf5_gls method above, for the 'Global' files
+    #
 
     # prepare the output as an empty list
     interm_files_list = []
@@ -1609,8 +1632,8 @@ def pre_process_hdf5_gls_nc(subproducts, tmpdir, input_files, my_logger):
     # Build a list of subdatasets to be extracted
     sds_to_process = []
     for sprod in subproducts:
-       # if sprod != 0:
-            sds_to_process.append(sprod['re_process'])
+        # if sprod != 0:
+        sds_to_process.append(sprod['re_process'])
 
     # Make sure input is a list (if only a string is received, it loops over chars)
     if isinstance(input_files, list):
@@ -1625,7 +1648,7 @@ def pre_process_hdf5_gls_nc(subproducts, tmpdir, input_files, my_logger):
         # Loop over datasets and extract the one in the list
         for output_sds in sds_to_process:
             # Open directly the SDS with the HDF interface (the NETCDF one goes in segfault)
-            my_sds_hdf='HDF5:'+input_file+'://'+output_sds
+            my_sds_hdf = 'HDF5:' + input_file + '://' + output_sds
             sds_in = gdal.Open(my_sds_hdf)
 
             outputfile = tmpdir + os.path.sep + os.path.basename(input_file) + '.tif'
@@ -1637,14 +1660,14 @@ def pre_process_hdf5_gls_nc(subproducts, tmpdir, input_files, my_logger):
 
 
 def pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process the Global_MCD14DL product retrieved from ftp://nrt1.modaps.eosdis.nasa.gov/FIRMS/Global
-#   The columns are already there, namely: latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,
-#                                          confidence,version,bright_t31,frp
-#   NOTE: being the 'rasterization' a two-step process (here, w/o knowing the target-mapset, and in ingest-file)
-#         during the tests a 'shift has been seen (due to the re-projection in ingest_file). We therefore ensure here
-#         the global raster to be 'aligned' with the WGS84_Africa_1km (i.e. the SPOT-VGT grid)
-#
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process the Global_MCD14DL product retrieved from ftp://nrt1.modaps.eosdis.nasa.gov/FIRMS/Global
+    #   The columns are already there, namely: latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,
+    #                                          confidence,version,bright_t31,frp
+    #   NOTE: being the 'rasterization' a two-step process (here, w/o knowing the target-mapset, and in ingest-file)
+    #         during the tests a 'shift has been seen (due to the re-projection in ingest_file). We therefore ensure here
+    #         the global raster to be 'aligned' with the WGS84_Africa_1km (i.e. the SPOT-VGT grid)
+    #
 
     # prepare the output as an empty list
     interm_files_list = []
@@ -1653,17 +1676,17 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger):
     file_mcd14dl = input_files[0]
     logger.debug('Pre-processing file: %s' % file_mcd14dl)
     pix_size = '0.008928571428571'
-    file_vrt = tmpdir+os.path.sep+"firms_file.vrt"
-    file_csv = tmpdir+os.path.sep+"firms_file.csv"
-    file_tif = tmpdir+os.path.sep+"firms_file.tif"
-    out_layer= "firms_file"
-    file_shp = tmpdir+os.path.sep+out_layer+".shp"
+    file_vrt = tmpdir + os.path.sep + "firms_file.vrt"
+    file_csv = tmpdir + os.path.sep + "firms_file.csv"
+    file_tif = tmpdir + os.path.sep + "firms_file.tif"
+    out_layer = "firms_file"
+    file_shp = tmpdir + os.path.sep + out_layer + ".shp"
 
     # Write the 'vrt' file
-    with open(file_vrt,'w') as outFile:
+    with open(file_vrt, 'w') as outFile:
         outFile.write('<OGRVRTDataSource>\n')
         outFile.write('    <OGRVRTLayer name="firms_file">\n')
-        outFile.write('        <SrcDataSource>'+file_csv+'</SrcDataSource>\n')
+        outFile.write('        <SrcDataSource>' + file_csv + '</SrcDataSource>\n')
         outFile.write('        <OGRVRTLayer name="firms_file" />\n')
         outFile.write('        <GeometryType>wkbPoint</GeometryType>\n')
         outFile.write('        <LayerSRS>WGS84</LayerSRS>\n')
@@ -1672,14 +1695,14 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger):
         outFile.write('</OGRVRTDataSource>\n')
 
     # Generate the csv file with header
-    with open(file_csv,'w') as outFile:
-        #outFile.write('latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp')
+    with open(file_csv, 'w') as outFile:
+        # outFile.write('latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp')
         with open(file_mcd14dl, 'r') as input_file:
             outFile.write(input_file.read())
 
     # Execute the ogr2ogr command
-    command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
-    my_logger.debug('Command is: '+command)
+    command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' ' + file_vrt
+    my_logger.debug('Command is: ' + command)
     try:
         os.system(command)
     except:
@@ -1687,13 +1710,13 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger):
         return 1
 
     # Convert from shapefile to rasterfile
-    command = 'gdal_rasterize  -l ' + out_layer + ' -burn 1 '\
-            + ' -tr ' + str(pix_size) + ' ' + str(pix_size) \
-            + ' -co "compress=LZW" -of GTiff -ot Byte '     \
-            + ' -te -179.995535714286 -89.995535714286 179.995535714286 89.995535714286 ' \
-            +file_shp+' '+file_tif
+    command = 'gdal_rasterize  -l ' + out_layer + ' -burn 1 ' \
+              + ' -tr ' + str(pix_size) + ' ' + str(pix_size) \
+              + ' -co "compress=LZW" -of GTiff -ot Byte ' \
+              + ' -te -179.995535714286 -89.995535714286 179.995535714286 89.995535714286 ' \
+              + file_shp + ' ' + file_tif
 
-    my_logger.debug('Command is: '+command)
+    my_logger.debug('Command is: ' + command)
     try:
         os.system(command)
     except:
@@ -1706,44 +1729,44 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger):
 
 
 def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my_logger):
-# --------------------------PROCESS IS DONE ONLY IN DEVELOPEMENT MACHINE CANT BE USED IN MESA-PROC-------------------
-#   Merges the various tiles of the .tif files retrieved from GEE application and remove the bigtif tag.
-#   Additionally, writes to the 'standard' mapset 'WD-GEE-ECOWAS-AVG', which MUST be indicated as
-#   'native-mapset' for the datasource
-#   Here below gdal options used for testing (they refer to ECOWAS-AVG mapset):
-#
-#   gdalwarp format:
-#       -te -17.5290058 4.2682552 24.0006488 27.3132762
-#       -tr 0.000269494585236 0.000269494585236
+    # --------------------------PROCESS IS DONE ONLY IN DEVELOPEMENT MACHINE CANT BE USED IN MESA-PROC-------------------
+    #   Merges the various tiles of the .tif files retrieved from GEE application and remove the bigtif tag.
+    #   Additionally, writes to the 'standard' mapset 'WD-GEE-ECOWAS-AVG', which MUST be indicated as
+    #   'native-mapset' for the datasource
+    #   Here below gdal options used for testing (they refer to ECOWAS-AVG mapset):
+    #
+    #   gdalwarp format:
+    #       -te -17.5290058 4.2682552 24.0006488 27.3132762
+    #       -tr 0.000269494585236 0.000269494585236
 
-#   gdal_merge.py format:
-#       -ps 0.000269494585236 0.000269494585236
-#       -ul_lr -17.5290058 27.3132762 24.0006488 4.2682552
+    #   gdal_merge.py format:
+    #       -ps 0.000269494585236 0.000269494585236
+    #       -ul_lr -17.5290058 27.3132762 24.0006488 4.2682552
     region = 'IGAD'
 
     # Get date from file name
-    input_file_name  = os.path.basename(input_files[0])
+    input_file_name = os.path.basename(input_files[0])
     # date = '20181201'
     sprod = subproducts[0]
     sprod_code = str(sprod.get('subproduct'))
 
     if sprod_code == 'avg':
-        #typical file name is JRC-WBD-AVG-CA_1985-2015_0601-0000000000-0000000000.tif
-        date = input_file_name.split('_')[2]    #0601-0000000000-0000000000.tif
+        # typical file name is JRC-WBD-AVG-CA_1985-2015_0601-0000000000-0000000000.tif
+        date = input_file_name.split('_')[2]  # 0601-0000000000-0000000000.tif
         date = date.split('-')[0]
         region_code = input_file_name.split('_')[0]
         region_code = region_code.split('-')[3]
     else:
-        #JRC-WBD_NA_20190101-0000000000-0000000000.tif
+        # JRC-WBD_NA_20190101-0000000000-0000000000.tif
         date = input_file_name.split('_')[2]  # 0601-0000000000-0000000000.tif
         date = date.split('-')[0]
         region_code = input_file_name.split('_')[1]
         # region_code = region_code.split('-')[3]
 
     if region_code == 'ICPAC':
-        region='IGAD'
+        region = 'IGAD'
         # ullr_xy=' -17.5290058 27.3132762 24.0006488 4.2682552 '      # ECOWAS
-        ullr_xy=' 21.8145086965016 23.1455424529815 51.4155244442228 -11.7612826888632 '      # IGAD
+        ullr_xy = ' 21.8145086965016 23.1455424529815 51.4155244442228 -11.7612826888632 '  # IGAD
         # output_tar = '/data/ingest/MESA_JRC_wd-gee_avg_' + date + '_WD-GEE-' + region + '-AVG_1.0.tgz'  # for avg
         # output_tar='/data/ingest/MESA_JRC_wd-gee_occurr_'+date+'_WD-GEE-'+region+'-AVG_1.0.tgz'    # for occurr
         file_naming = 'MESA_JRC_wd-gee_' + sprod_code + '_' + date + '_WD-GEE-' + region + '-AVG_1.0'
@@ -1770,7 +1793,7 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         ullr_xy = ' -25.3589014815236 4.26852473555073 15.9958511066742 25.0002041885746 '
         file_naming = 'MESA_JRC_wd-gee_' + sprod_code + '_' + date + '_WD-GEE-' + region + '-AVG_1.0'
 
-    else :
+    else:
         region = 'ECOWAS'
         ullr_xy = ' -17.5290058 27.3132762 24.0006488 4.2682552 '  # ECOWAS
         # ullr_xy = ' 21.8145086965016 23.1455424529815 51.4155244442228 -11.7612826888632 '  # IGAD
@@ -1779,20 +1802,19 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         file_naming = 'MESA_JRC_wd-gee_' + sprod_code + '_' + date + '_WD-GEE-' + region + '-AVG_1.0'
         # output_tar = '/data/ingest/'+file_naming+'.tgz'
 
-
-    output_tar = '/data/ingest/'+file_naming+'.tgz'
+    output_tar = '/data/ingest/' + file_naming + '.tgz'
     # Prepare the output as an empty list
     interm_files_list = []
 
     # Get the ID of the files associated to such subproduct
     for sprod in subproducts:
-        match_regex = '*'+sprod['re_extract']+'*'
+        match_regex = '*' + sprod['re_extract'] + '*'
 
     # Make sure it is a list (if only a string is returned, it loops over chars)
     if isinstance(input_files, list):
         list_input_files = input_files
     else:
-        list_input_files=[]
+        list_input_files = []
         list_input_files.append(input_files)
 
     # Check if they match the regex
@@ -1804,11 +1826,10 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
     if len(good_input_files) == 0:
         return []
     # Does check the number of files ?
-    output_file         = tmpdir+os.path.sep + 'merge_output.tif'
+    output_file = tmpdir + os.path.sep + 'merge_output.tif'
     output_file_vrt = tmpdir + os.path.sep + 'merge_output_rescaled.vrt'
     # output_file_mapset  = tmpdir+os.path.sep + 'merge_output_WD-GEE-'+region+'-AVG.tif'
     output_file_mapset = tmpdir + os.path.sep + file_naming + '.tif'
-
 
     # -------------------------------------------------------------------------
     # STEP 1: Merge all input products into a 'tmp' file
@@ -1821,7 +1842,7 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         command += ' -o ' + output_file
         command += ' -ot BYTE '
         for file in good_input_files:
-            command += ' '+file
+            command += ' ' + file
 
         my_logger.debug('Command for merging is: ' + command)
         os.system(command)
@@ -1840,9 +1861,9 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         command += ' -co \"compress=lzw\"'
         command += ' -co \"BIGTIFF=No\"'
         command += ' -ot BYTE '
-        command += ' '+output_file
+        command += ' ' + output_file
         # command += ' ' + output_file_vrt #To be changed if rescaling is done
-        command += ' '+output_file_mapset
+        command += ' ' + output_file_mapset
 
         my_logger.debug('Command for re-project is: ' + command)
         os.system(command)
@@ -1851,8 +1872,9 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
     except:
         pass
 
-    #Manually save tar file in the /data/ingest and send it to mesa-proc for the processing
-    command = 'tar -cvzf '+output_tar+' -C ' + os.path.dirname(output_file_mapset) + ' ' + os.path.basename(output_file_mapset)
+    # Manually save tar file in the /data/ingest and send it to mesa-proc for the processing
+    command = 'tar -cvzf ' + output_tar + ' -C ' + os.path.dirname(output_file_mapset) + ' ' + os.path.basename(
+        output_file_mapset)
     # command = 'tar -cvzf /data/ingest/MESA_JRC_wd-gee_occurr_20190801_WD-GEE-ECOWAS-AVG_1.0.tgz -C ' + os.path.dirname(output_file_mapset) + ' ' + os.path.basename(output_file_mapset)
     my_logger.debug('Command for tar the file is: ' + command)
     os.system(command)
@@ -1862,10 +1884,10 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
     return []
 
 
-def pre_process_ecmwf_mars(subproducts, tmpdir , input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process SPIRITS ECMWF files
-#
+def pre_process_ecmwf_mars(subproducts, tmpdir, input_files, my_logger):
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process SPIRITS ECMWF files
+    #
 
     #  Zipped files containing an .img and and .hdr file
     if isinstance(input_files, list):
@@ -1878,10 +1900,10 @@ def pre_process_ecmwf_mars(subproducts, tmpdir , input_files, my_logger):
     logger.debug('Unzipping/processing: ecmwf case')
 
     #  Extract .img and and .hdr file, and store .img name
-    img_ext='.*.img'
+    img_ext = '.*.img'
     if zipfile.is_zipfile(input_file):
-        zip_file = zipfile.ZipFile(input_file)              # Create ZipFile object
-        zip_list = zip_file.namelist()                      # Get the list of its contents
+        zip_file = zipfile.ZipFile(input_file)  # Create ZipFile object
+        zip_list = zip_file.namelist()  # Get the list of its contents
         for files in zip_list:
             my_logger.debug('File in the .zip archive is: ' + files)
             filename = os.path.basename(files)
@@ -1891,7 +1913,7 @@ def pre_process_ecmwf_mars(subproducts, tmpdir , input_files, my_logger):
             myfile.write(data)
             myfile.close()
             if re.match(img_ext, filename):
-               out_tmp_img_file = myfile_path
+                out_tmp_img_file = myfile_path
         zip_file.close()
 
     else:
@@ -1900,9 +1922,9 @@ def pre_process_ecmwf_mars(subproducts, tmpdir , input_files, my_logger):
 
     #  Convert from .img to GTIFF
     if os.path.isfile(out_tmp_img_file):
-        output_file = out_tmp_img_file.replace('.img','.tif')
+        output_file = out_tmp_img_file.replace('.img', '.tif')
         orig_ds = gdal.Open(out_tmp_img_file)
-        write_ds_to_geotiff(orig_ds,output_file)
+        write_ds_to_geotiff(orig_ds, output_file)
         orig_ds = None
     else:
         my_logger.error("No .img file found in zipfile. Exit")
@@ -1912,9 +1934,9 @@ def pre_process_ecmwf_mars(subproducts, tmpdir , input_files, my_logger):
 
 
 def pre_process_envi_to_geotiff(subproducts, tmpdir, input_files, my_logger):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process ENVI files
-#
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process ENVI files
+    #
     #  input_files containing an .img and and .hdr file
     if isinstance(input_files, list):
         if len(input_files) != 2:
@@ -1935,7 +1957,7 @@ def pre_process_envi_to_geotiff(subproducts, tmpdir, input_files, my_logger):
     filename_img = os.path.basename(input_file_img)
     # filename_hdr = filename_img.split('.')[0]+'.hdr'
     filename_hdr = os.path.basename(input_file_hdr)
-    filename_tif = filename_img.split('.')[0]+'.tif'
+    filename_tif = filename_img.split('.')[0] + '.tif'
     # input_file_hdr = os.path.join(os.path.dirname(input_file_img), filename_hdr)
 
     if not os.path.isfile(input_file_hdr):
@@ -1950,7 +1972,7 @@ def pre_process_envi_to_geotiff(subproducts, tmpdir, input_files, my_logger):
     if os.path.isfile(tmp_img_file_path):
         output_file = os.path.join(tmpdir, filename_tif)
         orig_ds = gdal.Open(tmp_img_file_path)
-        write_ds_to_geotiff(orig_ds,output_file)
+        write_ds_to_geotiff(orig_ds, output_file)
         orig_ds = None
     else:
         my_logger.error("No .img file found in zipfile. Exit")
@@ -1958,11 +1980,11 @@ def pre_process_envi_to_geotiff(subproducts, tmpdir, input_files, my_logger):
 
     return output_file
 
+
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process CPC files TYPE (binary, 720 x 360, global at 0.5 degree resolution)
 #   See: http://www.cpc.ncep.noaa.gov/soilmst/leaky_glb.htm
-def pre_process_cpc_binary(subproducts, tmpdir , input_files, my_logger):
-
+def pre_process_cpc_binary(subproducts, tmpdir, input_files, my_logger):
     logger.debug('Unzipping/processing: CPC_BINARY case')
 
     n_lines = 360
@@ -1977,16 +1999,15 @@ def pre_process_cpc_binary(subproducts, tmpdir , input_files, my_logger):
         input_file = input_files
 
     if os.path.isfile(input_file):
-
         # Open and read the file as float32
 
-        fid = open(input_file,"r")
-        data = N.fromfile(fid,dtype=N.float32)
+        fid = open(input_file, "r")
+        data = N.fromfile(fid, dtype=N.float32)
 
         # Byte swap (big -> little endian) + flip UD
-        data2 = data.byteswap().reshape(n_lines,n_cols)
+        data2 = data.byteswap().reshape(n_lines, n_cols)
         data = N.flipud(data2)
-        data_180=N.concatenate((data[...,360:720],data[...,0:360]),axis=1)
+        data_180 = N.concatenate((data[..., 360:720], data[..., 0:360]), axis=1)
 
         # Re-arrange from -180 to 180 longitude
 
@@ -2002,30 +2023,30 @@ def pre_process_cpc_binary(subproducts, tmpdir , input_files, my_logger):
 
 
 def pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=None):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process the GSOD yearly files (from ftp://ftp.ncdc.noaa.gov/pub/data/gsod/)
-#   The file contains measurements from a single gauge station, with all available dates for the year
-#   Typical file name is like 998499-99999-2016.op.gz, and contains columns:
-#   STN--- WBAN   YEARMODA    TEMP       DEWP      SLP        STP       VISIB      WDSP     MXSPD   GUST    MAX     MIN   PRCP   SNDP   FRSHTT
-#   998499 99999  20160101    25.2 24  9999.9  0  9999.9  0  9999.9  0  999.9  0   10.2 24   15.9  999.9    30.0    20.1*  0.00I 999.9  000000
-#
-#   The precipitation value is in inches and hundredths, followed by a flag, as below:
-#
-#      A = 1 report of 6-hour precipitation amount.
-#      B = Summation of 2 reports of 6-hour precipitation amount.
-#      C = Summation of 3 reports of 6-hour precipitation amount.
-#      D = Summation of 4 reports of 6-hour precipitation amount.
-#      E = 1 report of 12-hour precipitation amount.
-#      F = Summation of 2 reports of 12-hour precipitation amount.
-#      G = 1 report of 24-hour precipitation amount.
-#      H = Station reported '0' as the amount for the day (eg, from 6-hour reports),
-#          but also reported at least one occurrence of precipitation in hourly
-#          observations--this could indicate a trace occurred, but should be considered
-#          as incomplete data for the day.
-#      I = Station did not report any precip data for the day and did not report any
-#          occurrences of precipitation in its hourly observations--it's still possible that
-#          precip occurred but was not reported.
-#
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process the GSOD yearly files (from ftp://ftp.ncdc.noaa.gov/pub/data/gsod/)
+    #   The file contains measurements from a single gauge station, with all available dates for the year
+    #   Typical file name is like 998499-99999-2016.op.gz, and contains columns:
+    #   STN--- WBAN   YEARMODA    TEMP       DEWP      SLP        STP       VISIB      WDSP     MXSPD   GUST    MAX     MIN   PRCP   SNDP   FRSHTT
+    #   998499 99999  20160101    25.2 24  9999.9  0  9999.9  0  9999.9  0  999.9  0   10.2 24   15.9  999.9    30.0    20.1*  0.00I 999.9  000000
+    #
+    #   The precipitation value is in inches and hundredths, followed by a flag, as below:
+    #
+    #      A = 1 report of 6-hour precipitation amount.
+    #      B = Summation of 2 reports of 6-hour precipitation amount.
+    #      C = Summation of 3 reports of 6-hour precipitation amount.
+    #      D = Summation of 4 reports of 6-hour precipitation amount.
+    #      E = 1 report of 12-hour precipitation amount.
+    #      F = Summation of 2 reports of 12-hour precipitation amount.
+    #      G = 1 report of 24-hour precipitation amount.
+    #      H = Station reported '0' as the amount for the day (eg, from 6-hour reports),
+    #          but also reported at least one occurrence of precipitation in hourly
+    #          observations--this could indicate a trace occurred, but should be considered
+    #          as incomplete data for the day.
+    #      I = Station did not report any precip data for the day and did not report any
+    #          occurrences of precipitation in its hourly observations--it's still possible that
+    #          precip occurred but was not reported.
+    #
 
     # Definitions: use 1km pixel size and global coverage
     pixel_size = '0.008928571428571'
@@ -2033,38 +2054,37 @@ def pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=None):
     interm_files_list = []
 
     # Arrange to create the .shp file as well
-    es2_data_dir = es_constants.es2globals['processing_dir']+os.path.sep
-    ext=es_constants.ES2_OUTFILE_EXTENSION
+    es2_data_dir = es_constants.es2globals['processing_dir'] + os.path.sep
+    ext = es_constants.ES2_OUTFILE_EXTENSION
 
     shp_prod_ident_noext = functions.set_path_filename_no_date('gsod-rain', \
-                                                         subproducts[0]['subproduct'],\
-                                                         subproducts[0]['mapsetcode'],
-                                                         '1.0', '')
+                                                               subproducts[0]['subproduct'], \
+                                                               subproducts[0]['mapsetcode'],
+                                                               '1.0', '')
     shp_prod_ident = shp_prod_ident_noext + '.shp'
-    shp_output_dir = es2_data_dir+functions.set_path_sub_directory('gsod-rain',\
-                                                                    subproducts[0]['subproduct'],
-                                                                    'Ingest',
-                                                                    '1.0',
+    shp_output_dir = es2_data_dir + functions.set_path_sub_directory('gsod-rain', \
+                                                                     subproducts[0]['subproduct'],
+                                                                     'Ingest',
+                                                                     '1.0',
                                                                      subproducts[0]['mapsetcode'])
 
-
-    shp_output_file = shp_output_dir+os.path.sep+str(in_date)+shp_prod_ident
+    shp_output_file = shp_output_dir + os.path.sep + str(in_date) + shp_prod_ident
 
     logger.debug('First pre-processing file: %s' % input_files[0])
     # Local definitions
-    f_stations = '/eStation2/static/sadc_regional_stations.csv'      # TEMP ?????? -> move to a variable/argument
-    file_csv = tmpdir+os.path.sep+"gsod_file.csv"
-    file_out = tmpdir+os.path.sep+"gsod_raster.tif"
-    out_layer= "gsod_file"
+    f_stations = '/eStation2/static/sadc_regional_stations.csv'  # TEMP ?????? -> move to a variable/argument
+    file_csv = tmpdir + os.path.sep + "gsod_file.csv"
+    file_out = tmpdir + os.path.sep + "gsod_raster.tif"
+    out_layer = "gsod_file"
 
-    file_shp = tmpdir+os.path.sep+out_layer+".shp"
+    file_shp = tmpdir + os.path.sep + out_layer + ".shp"
 
     # Write the 'vrt' file
-    file_vrt = tmpdir+os.path.sep+"gsod_file.vrt"
-    with open(file_vrt,'w') as outFile:
+    file_vrt = tmpdir + os.path.sep + "gsod_file.vrt"
+    with open(file_vrt, 'w') as outFile:
         outFile.write('<OGRVRTDataSource>\n')
         outFile.write('    <OGRVRTLayer name="gsod_file">\n')
-        outFile.write('        <SrcDataSource>'+file_csv+'</SrcDataSource>\n')
+        outFile.write('        <SrcDataSource>' + file_csv + '</SrcDataSource>\n')
         outFile.write('        <OGRVRTLayer name="gsod_file" />\n')
         outFile.write('        <GeometryType>wkbPoint</GeometryType>\n')
         outFile.write('        <LayerSRS>WGS84</LayerSRS>\n')
@@ -2074,11 +2094,11 @@ def pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=None):
 
     # Unzip all input files in tmpdir
     for infile in input_files:
-        command='gunzip -c '+infile+' > '+tmpdir+os.path.sep+os.path.basename(infile)
+        command = 'gunzip -c ' + infile + ' > ' + tmpdir + os.path.sep + os.path.basename(infile)
         try:
             os.system(command)
         except:
-            my_logger.error('Error in unzipping file: '+infile)
+            my_logger.error('Error in unzipping file: ' + infile)
             pass
 
     # Define the dates to consider (format YYYYMMDD) -> Should consider existing dates !!
@@ -2089,26 +2109,26 @@ def pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=None):
     for mydate in list_dates:
 
         # Create a .txt file for each date
-        outfile=tmpdir+os.path.sep+str(mydate)+'.gsod.all.stations.txt'
-        command='grep -h '+mydate+' '+tmpdir+os.path.sep+'*.op* >>'+outfile
+        outfile = tmpdir + os.path.sep + str(mydate) + '.gsod.all.stations.txt'
+        command = 'grep -h ' + mydate + ' ' + tmpdir + os.path.sep + '*.op* >>' + outfile
         try:
             os.system(command)
         except:
-            my_logger.error('Error in creating outfile: '+outfile)
+            my_logger.error('Error in creating outfile: ' + outfile)
             pass
 
-        f_meas=outfile
+        f_meas = outfile
 
         # Read co-ordinates of all stations
-        stations_list=[]
-        f = open(f_stations,'rt')
+        stations_list = []
+        f = open(f_stations, 'rt')
         reader = csv.reader(f, delimiter=',')
         for row in reader:
             stations_list.append(row)
         f.close()
 
         # Create dictionary for translating station -> Lat/Lon
-        dict_latlon = {'empty_key':'empty_value'}
+        dict_latlon = {'empty_key': 'empty_value'}
         # File downloaded from GBOC
         # for station in stations_list:
         #     #USAF   WBAN  STATION NAME                  CTRY ST CALL  LAT     LON      ELEV(M) BEGIN    END
@@ -2125,7 +2145,7 @@ def pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=None):
 
         # File received from Thembani
         for station in stations_list:
-            #USAF   WBAN  STATION NAME                  CTRY ST CALL  LAT     LON      ELEV(M) BEGIN    END
+            # USAF   WBAN  STATION NAME                  CTRY ST CALL  LAT     LON      ELEV(M) BEGIN    END
             station_id = station[0]
             try:
                 station_lat = float(station[1])
@@ -2137,11 +2157,11 @@ def pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=None):
                 station_lon = None
 
             if station_lat is not None and station_lon is not None:
-                dict_latlon[station_id]=str(station_lat)+','+str(station_lon)
+                dict_latlon[station_id] = str(station_lat) + ',' + str(station_lon)
 
         # Read measures file, and convert to csv file
-        f = open(f_meas,'rt')
-        fout = open(file_csv,'w')
+        f = open(f_meas, 'rt')
+        fout = open(file_csv, 'w')
         fout.write('latitude,longitude,precipitation,flag \n')
 
         reader = csv.reader(f)
@@ -2152,15 +2172,15 @@ def pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=None):
             if float(precipitation) != 99.99:
                 try:
                     lat_lon = dict_latlon[station_id]
-                    fout.write('%16s,%8s \n' % (lat_lon,precipitation))
+                    fout.write('%16s,%8s \n' % (lat_lon, precipitation))
                 except:
                     pass
         f.close()
         fout.close()
 
     # Convert from csv to Shape (ogr2ogr command)
-    command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
-    my_logger.debug('Command is: '+command)
+    command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' ' + file_vrt
+    my_logger.debug('Command is: ' + command)
     try:
         os.system(command)
     except:
@@ -2174,21 +2194,21 @@ def pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=None):
     extensions.append('.shp')
     extensions.append('.shx')
 
-    for ext in  range(len(extensions)):
+    for ext in range(len(extensions)):
         extension = extensions[ext]
-        print (tmpdir + os.path.sep + "gsod_file" + extension)
-        print (shp_output_dir + os.path.sep + str(in_date) + shp_prod_ident_noext + extension)
-        shutil.copyfile(tmpdir+os.path.sep+"gsod_file"+extension,\
-                        shp_output_dir+os.path.sep+str(in_date)+shp_prod_ident_noext+extension)
+        print(tmpdir + os.path.sep + "gsod_file" + extension)
+        print(shp_output_dir + os.path.sep + str(in_date) + shp_prod_ident_noext + extension)
+        shutil.copyfile(tmpdir + os.path.sep + "gsod_file" + extension, \
+                        shp_output_dir + os.path.sep + str(in_date) + shp_prod_ident_noext + extension)
 
     # Convert from shapefile to rasterfile
-    command = 'gdal_rasterize  -l ' + out_layer + ' -a precipitat '\
-            + ' -tr ' + str(pixel_size) + ' ' + str(pixel_size) \
-            + ' -co "compress=LZW" -of GTiff -ot Float32 '     \
-            + ' -te  ' + te_global \
-            +file_shp+' '+file_out
+    command = 'gdal_rasterize  -l ' + out_layer + ' -a precipitat ' \
+              + ' -tr ' + str(pixel_size) + ' ' + str(pixel_size) \
+              + ' -co "compress=LZW" -of GTiff -ot Float32 ' \
+              + ' -te  ' + te_global \
+              + file_shp + ' ' + file_out
 
-    my_logger.debug('Command is: '+command)
+    my_logger.debug('Command is: ' + command)
     try:
         os.system(command)
     except:
@@ -2201,16 +2221,15 @@ def pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=None):
 
 
 def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=None, zipped=False):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
-#   Returns -1 if nothing has to be done on the passed files
-#
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
+    #   Returns -1 if nothing has to be done on the passed files
+    #
 
     # Prepare the output file list
     pre_processed_list = []
 
     list_input_files = []
-
 
     # Make sure input is a list (if only a string is received, it loops over chars)
     if isinstance(input_files, list):
@@ -2238,7 +2257,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
         if zipped:
             # Unzip the .tar file in 'tmpdir'
             command = 'unzip ' + input_file + ' -d ' + tmpdir + os.path.sep  # ' --strip-components 1'
-            print (command)
+            print(command)
             status = os.system(command)
             # TODO: Change the code to OS independent
             # from zipfile import ZipFile
@@ -2248,7 +2267,7 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
         else:
             # Unzip the .tar file in 'tmpdir'
             command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep  # ' --strip-components 1'
-            print (command)
+            print(command)
             status = os.system(command)
             # TODO: Change the code to OS independent
             # import tarfile
@@ -2286,21 +2305,21 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             # ------------------------------------------------------------------------------------------
             # Write a graph xml and subset the product for specific band, also applying flags
             # ------------------------------------------------------------------------------------------
-            #functions.write_graph_xml_subset(output_dir=tmpdir_untar, band_name=re_process)
+            # functions.write_graph_xml_subset(output_dir=tmpdir_untar, band_name=re_process)
             # if subproductcode == 'chl-oc4me-filtered':
             #     expression = '(WQSF_lsb_CLOUD or WQSF_lsb_CLOUD_AMBIGUOUS or WQSF_lsb_CLOUD_MARGIN or WQSF_lsb_INVALID or WQSF_lsb_COSMETIC or WQSF_lsb_SATURATED or WQSF_lsb_SUSPECT or WQSF_lsb_HISOLZEN or WQSF_lsb_HIGHGLINT or WQSF_lsb_SNOW_ICE or WQSF_msb_ANNOT_ABSO_D or WQSF_lsb_OC4ME_FAIL or WQSF_msb_ANNOT_MIXR1 or WQSF_msb_ANNOT_DROUT or WQSF_msb_ANNOT_TAU06 or WQSF_msb_RWNEG_O2 or WQSF_msb_RWNEG_O3 or WQSF_msb_RWNEG_O4 or WQSF_msb_RWNEG_O5 or WQSF_msb_RWNEG_O6 or WQSF_msb_RWNEG_O7 or WQSF_msb_RWNEG_O8 or WQSF_lsb_AC_FAIL or WQSF_lsb_WHITECAPS) ? NaN : CHL_OC4ME'
             # else:
             #     expression='(WQSF_lsb_CLOUD or WQSF_lsb_CLOUD_AMBIGUOUS or WQSF_lsb_CLOUD_MARGIN or WQSF_lsb_INVALID or WQSF_lsb_COSMETIC or WQSF_lsb_SATURATED or WQSF_lsb_SUSPECT or WQSF_lsb_HISOLZEN or WQSF_lsb_HIGHGLINT or WQSF_lsb_SNOW_ICE) ? NaN : CHL_OC4ME'
             expression = '(WQSF_lsb_CLOUD or WQSF_lsb_CLOUD_AMBIGUOUS or WQSF_lsb_CLOUD_MARGIN or WQSF_lsb_INVALID or WQSF_lsb_COSMETIC or WQSF_lsb_SATURATED or WQSF_lsb_SUSPECT or WQSF_lsb_HISOLZEN or WQSF_lsb_HIGHGLINT or WQSF_lsb_SNOW_ICE or WQSF_msb_ANNOT_ABSO_D or WQSF_lsb_OC4ME_FAIL or WQSF_msb_ANNOT_MIXR1 or WQSF_msb_ANNOT_DROUT or WQSF_msb_ANNOT_TAU06 or WQSF_msb_RWNEG_O2 or WQSF_msb_RWNEG_O3 or WQSF_msb_RWNEG_O4 or WQSF_msb_RWNEG_O5 or WQSF_msb_RWNEG_O6 or WQSF_msb_RWNEG_O7 or WQSF_msb_RWNEG_O8 or WQSF_lsb_AC_FAIL or WQSF_lsb_WHITECAPS) ? NaN : CHL_OC4ME'
-            functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process, expression= expression)     #'l2p_flags_cloud ? NaN : sea_surface_temperature')
-            #functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process)
-
+            functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process,
+                                                       expression=expression)  # 'l2p_flags_cloud ? NaN : sea_surface_temperature')
+            # functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process)
 
             graph_xml_subset = tmpdir_untar_band + os.path.sep + 'graph_xml_subset.xml'
             output_subset_tif = tmpdir_untar_band + os.path.sep + 'band_subset.tif'
 
-            command = es_constants.gpt_exec+' '+ graph_xml_subset
-            status=os.system(command)
+            command = es_constants.gpt_exec + ' ' + graph_xml_subset
+            status = os.system(command)
             # ToDo : check the status or use try/except
             if os.path.exists(output_subset_tif):
                 functions.write_graph_xml_reproject(output_dir=tmpdir_untar_band, nodata_value=scaled_no_data)
@@ -2308,13 +2327,13 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
                 graph_xml_reproject = tmpdir_untar_band + os.path.sep + 'graph_xml_reproject.xml'
                 output_reproject_tif = tmpdir_untar_band + os.path.sep + 'reprojected.tif'
 
-                command_reproject = es_constants.gpt_exec+' '+ graph_xml_reproject
+                command_reproject = es_constants.gpt_exec + ' ' + graph_xml_reproject
                 # print (command_reproject)
                 os.system(command_reproject)
 
                 if os.path.exists(output_reproject_tif):
                     output_vrt = tmpdir_untar_band + os.path.sep + 'single_band_vrt.vrt'
-                    command_translate = 'gdal_translate -b 1 -a_nodata '+scaled_no_data+' -of VRT '+output_reproject_tif+ ' '+output_vrt
+                    command_translate = 'gdal_translate -b 1 -a_nodata ' + scaled_no_data + ' -of VRT ' + output_reproject_tif + ' ' + output_vrt
                     os.system(command_translate)
                     interm_files_list.append(output_vrt)
 
@@ -2323,14 +2342,15 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             my_logger.debug('No any file overlapping the ROI. Return')
             return -1
 
-        if len(interm_files_list) > 1 :
-            out_tmp_file_gtiff = tmpdir + os.path.sep + re_process+'_merged.tif'
+        if len(interm_files_list) > 1:
+            out_tmp_file_gtiff = tmpdir + os.path.sep + re_process + '_merged.tif'
             input_files_str = ''
             for file_add in interm_files_list:
                 input_files_str += ' '
                 input_files_str += file_add
-            command = 'gdalwarp -srcnodata "{}" -dstnodata "{}" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(scaled_no_data, int(no_data),
-                 input_files_str, out_tmp_file_gtiff)
+            command = 'gdalwarp -srcnodata "{}" -dstnodata "{}" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
+                scaled_no_data, int(no_data),
+                input_files_str, out_tmp_file_gtiff)
             # command = 'gdalwarp -srcnodata "103.69266" -dstnodata "1000" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
             #     input_files_str, out_tmp_file_gtiff)
             my_logger.info('Command for merging is: ' + command)
@@ -2343,16 +2363,15 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
 
 
 def pre_process_snap_subset_nc(subproducts, tmpdir, input_files, my_logger, in_date=None):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process the netcdf using snap - subset and merge the tiles
-#   Returns -1 if nothing has to be done on the passed files
-#
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process the netcdf using snap - subset and merge the tiles
+    #   Returns -1 if nothing has to be done on the passed files
+    #
 
     # Prepare the output file list
     pre_processed_list = []
 
     list_input_files = []
-
 
     # Make sure input is a list (if only a string is received, it loops over chars)
     if isinstance(input_files, list):
@@ -2386,7 +2405,7 @@ def pre_process_snap_subset_nc(subproducts, tmpdir, input_files, my_logger, in_d
     for sprod in subproducts:
         interm_files_list = []
         # In each unzipped folder pre-process the dataset and store the list of files to be merged
-        count =  1
+        count = 1
         for input_file in temp_list_input_files:
 
             # Define the re_expr for extracting files
@@ -2416,15 +2435,15 @@ def pre_process_snap_subset_nc(subproducts, tmpdir, input_files, my_logger, in_d
             # ------------------------------------------------------------------------------------------
             # Write a graph xml and subset the product for specific band, also applying flags
             # ------------------------------------------------------------------------------------------
-            functions.write_graph_xml_subset(input_file=input_file, output_dir=tmpdir_output, band_name=bandname)     #'l2p_flags_cloud ? NaN : sea_surface_temperature')
-            #functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process)
+            functions.write_graph_xml_subset(input_file=input_file, output_dir=tmpdir_output,
+                                             band_name=bandname)  # 'l2p_flags_cloud ? NaN : sea_surface_temperature')
+            # functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process)
 
-
-            graph_xml_subset = tmpdir_output_band  + os.path.sep + 'graph_xml_subset.xml'
+            graph_xml_subset = tmpdir_output_band + os.path.sep + 'graph_xml_subset.xml'
             output_subset_tif = tmpdir_output_band + os.path.sep + 'band_subset.tif'
 
-            command = es_constants.gpt_exec+' '+ graph_xml_subset   #es_constants.gpt_exec
-            status=os.system(command)
+            command = es_constants.gpt_exec + ' ' + graph_xml_subset  # es_constants.gpt_exec
+            status = os.system(command)
 
             # pre_processed_list.append(output_subset_tif)
             # # ToDo : check the status or use try/except
@@ -2436,14 +2455,15 @@ def pre_process_snap_subset_nc(subproducts, tmpdir, input_files, my_logger, in_d
             my_logger.debug('No any file overlapping the ROI. Return')
             return -1
 
-        if len(interm_files_list) > 1 :
-            out_tmp_file_gtiff = tmpdir + os.path.sep + re_process+'_merged.tif'
+        if len(interm_files_list) > 1:
+            out_tmp_file_gtiff = tmpdir + os.path.sep + re_process + '_merged.tif'
             input_files_str = ''
             for file_add in interm_files_list:
                 input_files_str += ' '
                 input_files_str += file_add
             command = 'gdalwarp -srcnodata "{}" -dstnodata "{}" -ot Float32 {} {}'.format(int(no_data), int(no_data),
-                 input_files_str, out_tmp_file_gtiff)
+                                                                                          input_files_str,
+                                                                                          out_tmp_file_gtiff)
             # command = 'gdalwarp -srcnodata "103.69266" -dstnodata "1000" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
             #     input_files_str, out_tmp_file_gtiff)
             my_logger.info('Command for merging is: ' + command)
@@ -2456,16 +2476,15 @@ def pre_process_snap_subset_nc(subproducts, tmpdir, input_files, my_logger, in_d
 
 
 def pre_process_netcdf_VGT300(subproducts, tmpdir, input_files, my_logger, in_date=None):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process the PROBV300 product from VGT
-#   Returns -1 if nothing has to be done on the passed files
-#
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process the PROBV300 product from VGT
+    #   Returns -1 if nothing has to be done on the passed files
+    #
 
     # Prepare the output file list
     pre_processed_list = []
 
     list_input_files = []
-
 
     # Make sure input is a list (if only a string is received, it loops over chars)
     if isinstance(input_files, list):
@@ -2526,15 +2545,15 @@ def pre_process_netcdf_VGT300(subproducts, tmpdir, input_files, my_logger, in_da
             # ------------------------------------------------------------------------------------------
             # Write a graph xml and subset the product for specific band, also applying flags
             # ------------------------------------------------------------------------------------------
-            functions.write_graph_xml_subset(input_file=input_file, output_dir=tmpdir, band_name=re_process)     #'l2p_flags_cloud ? NaN : sea_surface_temperature')
-            #functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process)
-
+            functions.write_graph_xml_subset(input_file=input_file, output_dir=tmpdir,
+                                             band_name=re_process)  # 'l2p_flags_cloud ? NaN : sea_surface_temperature')
+            # functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process)
 
             graph_xml_subset = tmpdir_output_band + os.path.sep + 'graph_xml_subset.xml'
             output_subset_tif = tmpdir_output_band + os.path.sep + 'band_subset.tif'
 
-            command = es_constants.gpt_exec+' '+ graph_xml_subset   #es_constants.gpt_exec
-            status=os.system(command)
+            command = es_constants.gpt_exec + ' ' + graph_xml_subset  # es_constants.gpt_exec
+            status = os.system(command)
 
             pre_processed_list.append(output_subset_tif)
             # # ToDo : check the status or use try/except
@@ -2791,21 +2810,21 @@ def pre_process_netcdf_VGT300(subproducts, tmpdir, input_files, my_logger, in_da
 
 
 def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=None, zipped=False):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process the Sentinel 3 Level 2 product from SLSTR - WST
-#
-#   Description: the current implementation is based on GPT, and includes the following steps
-#
-#       1. Unzipping into a temp dir
-#       2. Write a 'subset' graph xml in order to:
-#           a. Subset geographically:
-#           b. Band subset (SST only)
-#           c. Apply a flag (band math)
-#       3. Write a reprojection ..
-#       4. Merge by applying input and output nodata (-n -54.53 -a_nodata -32768)
-#
-#   NOTE: now we mask by using l2p_flags_cloud ('True' means cloud detected -> reject)
-#
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process the Sentinel 3 Level 2 product from SLSTR - WST
+    #
+    #   Description: the current implementation is based on GPT, and includes the following steps
+    #
+    #       1. Unzipping into a temp dir
+    #       2. Write a 'subset' graph xml in order to:
+    #           a. Subset geographically:
+    #           b. Band subset (SST only)
+    #           c. Apply a flag (band math)
+    #       3. Write a reprojection ..
+    #       4. Merge by applying input and output nodata (-n -54.53 -a_nodata -32768)
+    #
+    #   NOTE: now we mask by using l2p_flags_cloud ('True' means cloud detected -> reject)
+    #
 
     # Prepare the output file list
     pre_processed_list = []
@@ -2838,7 +2857,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
         if zipped:
             # Unzip the .tar file in 'tmpdir'
             command = 'unzip ' + input_file + ' -d ' + tmpdir + os.path.sep  # ' --strip-components 1'
-            print (command)
+            print(command)
             status = os.system(command)
             # TODO: Change the code to OS independent
             # from zipfile import ZipFile
@@ -2848,7 +2867,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
         else:
             # Unzip the .tar file in 'tmpdir'
             command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep  # ' --strip-components 1'
-            print (command)
+            print(command)
             status = os.system(command)
             # TODO: Change the code to OS independent
             # import tarfile
@@ -2884,14 +2903,15 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
             # ------------------------------------------------------------------------------------------
             # Write a graph xml and subset the product for specific band
             # ------------------------------------------------------------------------------------------
-            #functions.write_graph_xml_subset(output_dir=tmpdir_untar, band_name=re_process)
-            #functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process, expression='l2p_flags_cloud ? NaN : sea_surface_temperature')
-            functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process, expression='(quality_level_acceptable_quality or quality_level_best_quality) ? sea_surface_temperature : NaN')
+            # functions.write_graph_xml_subset(output_dir=tmpdir_untar, band_name=re_process)
+            # functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process, expression='l2p_flags_cloud ? NaN : sea_surface_temperature')
+            functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process,
+                                                       expression='(quality_level_acceptable_quality or quality_level_best_quality) ? sea_surface_temperature : NaN')
             graph_xml_subset = tmpdir_untar_band + os.path.sep + 'graph_xml_subset.xml'
             output_subset_tif = tmpdir_untar_band + os.path.sep + 'band_subset.tif'
 
-            command = es_constants.gpt_exec+' '+ graph_xml_subset
-            print (command)
+            command = es_constants.gpt_exec + ' ' + graph_xml_subset
+            print(command)
             os.system(command)
 
             if os.path.exists(output_subset_tif):
@@ -2902,7 +2922,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
                 output_reproject_tif = tmpdir_untar_band + os.path.sep + 'reprojected.tif'
 
                 command_reproject = es_constants.gpt_exec + ' ' + graph_xml_reproject
-                print (command_reproject)
+                print(command_reproject)
                 os.system(command_reproject)
 
                 if os.path.exists(output_reproject_tif):
@@ -2916,8 +2936,9 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
             my_logger.debug('No any file overlapping the ROI. Return')
             return -1
 
-        if len(interm_files_list) > 1 :
-            command = es_constants.gdal_merge + ' -n '+ scaled_no_data+' -a_nodata '+ str(int(no_data))+' -ot Float32 ' + ' -o '  # -co \"compress=lzw\" -ot Float32  -n -32768 -a_nodata -32768
+        if len(interm_files_list) > 1:
+            command = es_constants.gdal_merge + ' -n ' + scaled_no_data + ' -a_nodata ' + str(
+                int(no_data)) + ' -ot Float32 ' + ' -o '  # -co \"compress=lzw\" -ot Float32  -n -32768 -a_nodata -32768
 
             out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
 
@@ -2932,7 +2953,6 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
         else:
             pre_processed_list.append(interm_files_list[0])
     return pre_processed_list
-
 
     # ------------------------------------------------------------------------------------------------------------
     # The part below is the GDAL (rather then GPT) implementation, which we keep for possible re-use in the future.
@@ -2952,7 +2972,6 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
     # pre_processed_list.append(out_tmp_file_gtiff)
     #
     # return pre_processed_list
-
 
     # command='tar -xvf '+input_file+' -C '+tmpdir+os.path.sep +' --strip-components 1'
     # print (command)
@@ -3078,10 +3097,10 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
 
 
 def pre_process_oilspill_detection_sentinel1(subproducts, tmpdir, input_files, my_logger, in_date=None):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process the Sentinel 1 GRD product IW VV
-#   Returns -1 if nothing has to be done on the passed files
-#
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process the Sentinel 1 GRD product IW VV
+    #   Returns -1 if nothing has to be done on the passed files
+    #
 
     # Prepare the output file list
     pre_processed_list = []
@@ -3091,11 +3110,10 @@ def pre_process_oilspill_detection_sentinel1(subproducts, tmpdir, input_files, m
         interm_files_list = []
 
         for input_file in input_files:
-
             # In each unzipped folder pre-process the dataset and store the list of files to be merged
 
             # Define the re_expr for extracting files
-            bandname = sprod['re_extract']  #Amplitude_VV,Intensity_VV
+            bandname = sprod['re_extract']  # Amplitude_VV,Intensity_VV
             re_process = sprod['re_process']
             no_data = sprod['nodata']
             # TODO scale nodata value from GPT has to be computed based on the product
@@ -3108,10 +3126,10 @@ def pre_process_oilspill_detection_sentinel1(subproducts, tmpdir, input_files, m
             output_tif = tmpdir + os.path.sep + 'band_subset.tif'
 
             functions.write_graph_xml_terrain_correction_oilspill(tmpdir, input_file, re_process, output_tif)
-            #functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process)
+            # functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process)
 
-            command = es_constants.gpt_exec+' '+ graph_xml_terrain_correction_oilspill
-            status=os.system(command)
+            command = es_constants.gpt_exec + ' ' + graph_xml_terrain_correction_oilspill
+            status = os.system(command)
             # ToDo : check the status or use try/except
             interm_files_list.append(output_tif)
 
@@ -3120,14 +3138,15 @@ def pre_process_oilspill_detection_sentinel1(subproducts, tmpdir, input_files, m
             my_logger.debug('No any file overlapping the ROI. Return')
             return -1
 
-        if len(interm_files_list) > 1 :
+        if len(interm_files_list) > 1:
             out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
             input_files_str = ''
             for file_add in interm_files_list:
                 input_files_str += ' '
                 input_files_str += file_add
-            command = 'gdalwarp -srcnodata "{}" -dstnodata "{}" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(scaled_no_data, int(no_data),
-                 input_files_str, out_tmp_file_gtiff)
+            command = 'gdalwarp -srcnodata "{}" -dstnodata "{}" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
+                scaled_no_data, int(no_data),
+                input_files_str, out_tmp_file_gtiff)
             # command = 'gdalwarp -srcnodata "103.69266" -dstnodata "1000" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
             #     input_files_str, out_tmp_file_gtiff)
             my_logger.info('Command for merging is: ' + command)
@@ -3140,16 +3159,16 @@ def pre_process_oilspill_detection_sentinel1(subproducts, tmpdir, input_files, m
 
 
 def pre_process_aviso_mwind(subproducts, tmpdir, input_files, my_logger, in_date=None):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process the Aviso Mwind
-#
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process the Aviso Mwind
+    #
     interm_files_list = []
 
     # Make sure it is a list (if only a string is returned, it loops over chars)
     if isinstance(input_files, list):
         list_input_files = input_files
     else:
-        list_input_files=[]
+        list_input_files = []
         list_input_files.append(input_files)
 
     if isinstance(list_input_files, list):
@@ -3157,10 +3176,10 @@ def pre_process_aviso_mwind(subproducts, tmpdir, input_files, my_logger, in_date
             raise Exception('More than 1 file passed: %i ' % len(list_input_files))
     input_file = list_input_files[0]
 
-    #for input_file in list_input_files:
+    # for input_file in list_input_files:
     my_logger.info('Unzipping/processing: .gzip case')
-    gzipfile = gzip.open(input_file)                 # Create ZipFile object
-    data = gzipfile.read()                           # Get the list of its contents
+    gzipfile = gzip.open(input_file)  # Create ZipFile object
+    data = gzipfile.read()  # Get the list of its contents
     filename = os.path.basename(input_file)
     filename = filename.replace('.gz', '')
     myfile_path = os.path.join(tmpdir, filename)
@@ -3222,17 +3241,17 @@ def pre_process_aviso_mwind(subproducts, tmpdir, input_files, my_logger, in_date
                 #     # Just append the last filename once again
                 #     geotiff_files.append(myfile_path)
                 # else:
-                    # No subdatasets: e.g. SST -> read directly the .nc
+                # No subdatasets: e.g. SST -> read directly the .nc
                 filename = os.path.basename(input_file) + '.geotiff'
                 myfile_path = os.path.join(tmpdir, filename)
                 write_ds_to_geotiff(netcdf, myfile_path)
                 geotiff_files.append(myfile_path)
                 # previous_id_subdataset = id_subdataset
-                    # MC 26.07.2016: read/store scaling
-                    # try:
-                    #     status = functions.save_netcdf_scaling(sds_tmp, myfile_path)
-                    # except:
-                    #     logger.warning('Error in reading scaling')
+                # MC 26.07.2016: read/store scaling
+                # try:
+                #     status = functions.save_netcdf_scaling(sds_tmp, myfile_path)
+                # except:
+                #     logger.warning('Error in reading scaling')
 
             netcdf = None
 
@@ -3240,47 +3259,47 @@ def pre_process_aviso_mwind(subproducts, tmpdir, input_files, my_logger, in_date
 
 
 def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger, in_date=None):
-# -------------------------------------------------------------------------------------------------------
-#   Pre-process one or more input files by:
-#   1. Unzipping (optionally extracting one out of many layers - SDSs)
-#   2. Extract one or more datasets from a zip file, or a multi-layer file (e.g. HDF)
-#   3. Merging different segments/regions/tiles (compose area)
-#   4. Format conversion to GTIFF
-#   5. Apply geo-reference (native_mapset)
-#
-#   Input: one or more input files in the 'native' format, for a single data and a single mapset
-#   Output: one or more files (1 foreach subproduct), geo-referenced in GTIFF
-#
-#   Arguments:
-#       preproc_type:    type of preprocessing
-#           MSG_MPE: 4 segments to be composed into a grib
-#           MODIS_HDF4_TILE: hv-modis tiles, in hdf4 formats, containing 1+ SDSs
-#           LSASAF_HDF5: landsaf region (Euro/SAme/SAfr/NAfr), HDF5 containing 1+ SDSs
-#           PML_NETCDF: ocean product from PML in netcdf.
-#           UNZIP: .zipped files containing more file, to be filtered by using sprod['re_extract'].
-#           MODIS_SST_HDF4: MODIS SST files, in HDF4 (multi-SDS) b2zipped.
-#           BZIP2: .bz2 zipped files (containing 1 file only).
-#           GEOREF: only georeference, by assigning native mapset
-#           HDF5_UNZIP: zipped files containing HDF5 (see g2_BIOPAR)
-#           NASA_FIRMS: convert from csv to GTiff
-#           NETCDF: netcdf datasets (e.g. MODIS Ocean products)
-#           ECMWF: zipped file containing an .img and .hdr
-#           CPC_BINARY: binary file in big-endian
-#           BINARY: .bil product (e.g. GEOWRSI)
-#           ENVI_2_GTIFF: convert ENVI files(.img,.hdr) to GEOTIF
-#           NETCDF_S3_WRR: S3A OLCI WRR data treatment using SNAP-GPT to do band subset, reproject.
-#           NETCDF_S3_WST: S3A SLSTR WST data treatment using SNAP-GPT to do band subset, reproject.
-#           MERGE_TILE: Merge the tiles from VITO website and convert to nobigtif format
-#           JRC_WBD_GEE: merges the various tiles of the .tif files retrieved from GEE application and remove the bigtif tag(works only in developement machine)
-#       native_mapset_code: id code of the native mapset (from datasource_descr)
-#       subproducts: list of subproducts to be extracted from the file. Contains dictionaries such as:
-#           see ingestion() for full description
-#       input_files: list of input files
-#   Returned:
-#       output_file: temporary created output file[s]
-#       None: wait for additional files (e.g. MSG_MPE - in 4 segments)
-#       -1: nothing to do on the passed files (e.g. for S3A night-files or out-of-ROI).
-#
+    # -------------------------------------------------------------------------------------------------------
+    #   Pre-process one or more input files by:
+    #   1. Unzipping (optionally extracting one out of many layers - SDSs)
+    #   2. Extract one or more datasets from a zip file, or a multi-layer file (e.g. HDF)
+    #   3. Merging different segments/regions/tiles (compose area)
+    #   4. Format conversion to GTIFF
+    #   5. Apply geo-reference (native_mapset)
+    #
+    #   Input: one or more input files in the 'native' format, for a single data and a single mapset
+    #   Output: one or more files (1 foreach subproduct), geo-referenced in GTIFF
+    #
+    #   Arguments:
+    #       preproc_type:    type of preprocessing
+    #           MSG_MPE: 4 segments to be composed into a grib
+    #           MODIS_HDF4_TILE: hv-modis tiles, in hdf4 formats, containing 1+ SDSs
+    #           LSASAF_HDF5: landsaf region (Euro/SAme/SAfr/NAfr), HDF5 containing 1+ SDSs
+    #           PML_NETCDF: ocean product from PML in netcdf.
+    #           UNZIP: .zipped files containing more file, to be filtered by using sprod['re_extract'].
+    #           MODIS_SST_HDF4: MODIS SST files, in HDF4 (multi-SDS) b2zipped.
+    #           BZIP2: .bz2 zipped files (containing 1 file only).
+    #           GEOREF: only georeference, by assigning native mapset
+    #           HDF5_UNZIP: zipped files containing HDF5 (see g2_BIOPAR)
+    #           NASA_FIRMS: convert from csv to GTiff
+    #           NETCDF: netcdf datasets (e.g. MODIS Ocean products)
+    #           ECMWF: zipped file containing an .img and .hdr
+    #           CPC_BINARY: binary file in big-endian
+    #           BINARY: .bil product (e.g. GEOWRSI)
+    #           ENVI_2_GTIFF: convert ENVI files(.img,.hdr) to GEOTIF
+    #           NETCDF_S3_WRR: S3A OLCI WRR data treatment using SNAP-GPT to do band subset, reproject.
+    #           NETCDF_S3_WST: S3A SLSTR WST data treatment using SNAP-GPT to do band subset, reproject.
+    #           MERGE_TILE: Merge the tiles from VITO website and convert to nobigtif format
+    #           JRC_WBD_GEE: merges the various tiles of the .tif files retrieved from GEE application and remove the bigtif tag(works only in developement machine)
+    #       native_mapset_code: id code of the native mapset (from datasource_descr)
+    #       subproducts: list of subproducts to be extracted from the file. Contains dictionaries such as:
+    #           see ingestion() for full description
+    #       input_files: list of input files
+    #   Returned:
+    #       output_file: temporary created output file[s]
+    #       None: wait for additional files (e.g. MSG_MPE - in 4 segments)
+    #       -1: nothing to do on the passed files (e.g. for S3A night-files or out-of-ROI).
+    #
 
     my_logger.info("Input files pre-processing by using method: %s" % preproc_type)
 
@@ -3288,56 +3307,56 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 
     try:
         if preproc_type == 'MSG_MPE':
-            interm_files = pre_process_msg_mpe (subproducts, tmpdir , input_files, my_logger)
+            interm_files = pre_process_msg_mpe(subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'MPE_UMARF':
-            interm_files = pre_process_mpe_umarf (subproducts, tmpdir , input_files, my_logger)
+            interm_files = pre_process_mpe_umarf(subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'MODIS_HDF4_TILE':
-            interm_files = pre_process_modis_hdf4_tile (subproducts, tmpdir, input_files, my_logger)
+            interm_files = pre_process_modis_hdf4_tile(subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'MERGE_TILE':
-            interm_files = pre_process_merge_tile (subproducts, tmpdir, input_files, my_logger)
+            interm_files = pre_process_merge_tile(subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'LSASAF_HDF5':
-            interm_files = drive_pre_process_lsasaf_hdf5 (subproducts, tmpdir, input_files, my_logger)
+            interm_files = drive_pre_process_lsasaf_hdf5(subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'PML_NETCDF':
-            interm_files = pre_process_pml_netcdf (subproducts, tmpdir, input_files, my_logger)
+            interm_files = pre_process_pml_netcdf(subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'UNZIP':
-            interm_files = pre_process_unzip (subproducts, tmpdir, input_files, my_logger)
+            interm_files = pre_process_unzip(subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'BZIP2':
-            interm_files = pre_process_bzip2 (subproducts, tmpdir, input_files, my_logger)
+            interm_files = pre_process_bzip2(subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'GEOREF_NETCDF':
             interm_files = pre_process_georef_netcdf(subproducts, native_mapset_code, tmpdir, input_files)
             georef_already_done = True
 
         elif preproc_type == 'BZ2_HDF4':
-            interm_files = pre_process_bz2_hdf4 (subproducts, tmpdir, input_files, my_logger)
+            interm_files = pre_process_bz2_hdf4(subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'HDF5_ZIP':
-            interm_files = pre_process_hdf5_zip (subproducts, tmpdir, input_files, my_logger)
+            interm_files = pre_process_hdf5_zip(subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'HDF5_GLS':
-            interm_files = pre_process_hdf5_gls (subproducts, tmpdir, input_files, my_logger)
+            interm_files = pre_process_hdf5_gls(subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'HDF5_GLS_NC':
             interm_files = pre_process_hdf5_gls_nc(subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'NASA_FIRMS':
-            interm_files = pre_process_nasa_firms (subproducts, tmpdir, input_files, my_logger)
+            interm_files = pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'GZIP':
-            interm_files = pre_process_gzip (subproducts, tmpdir, input_files, my_logger)
+            interm_files = pre_process_gzip(subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'NETCDF':
-            interm_files = pre_process_netcdf (subproducts, tmpdir, input_files, my_logger)
+            interm_files = pre_process_netcdf(subproducts, tmpdir, input_files, my_logger)
 
         elif preproc_type == 'JRC_WBD_GEE':
-            interm_files = pre_process_wdb_gee (subproducts, native_mapset_code, tmpdir, input_files, my_logger)
+            interm_files = pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my_logger)
             georef_already_done = True
 
         elif preproc_type == 'ECMWF_MARS':
@@ -3353,7 +3372,8 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
             interm_files = pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
 
         elif preproc_type == 'NETCDF_S3_WRR_ZIP':
-            interm_files = pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=in_date, zipped=True)
+            interm_files = pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=in_date,
+                                                     zipped=True)
 
         elif preproc_type == 'NETCDF_S3_WRR':
             interm_files = pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
@@ -3365,7 +3385,8 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
             interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
 
         elif preproc_type == 'NETCDF_S3_WST_ZIP':
-            interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date, zipped=True)
+            interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date,
+                                                     zipped=True)
 
         elif preproc_type == 'TARZIP':
             interm_files = pre_process_tarzip(subproducts, tmpdir, input_files, my_logger)
@@ -3439,35 +3460,36 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
     return list_interm_files
 
 
-def ingest_file(interm_files_list, in_date, product, subproducts, datasource_descr, my_logger, in_files='', echo_query=False):
-# -------------------------------------------------------------------------------------------------------
-#   Ingest one or more files (a file for each subproduct)
-#   Arguments:
-#       interm_files_list: input file full name (1 per subproduct)
-#       date: product date
-#       product: product description name (for DB insertions)
-#       subproducts: list of subproducts to be extracted from the file. Contains dictionaries as described in
-#           ingestion() header
-#       datasource_descr: from the corresponding DB table (all info on input-file naming)
-#       in_files[option]: list of input files
-#       echo_query[option]: force print-out from query_db functions
-#
-#   NOTE: mapset management: mapset is the geo-reference information associated to datasets
-#         There is a  'native_mapset' - associated to the input product and
-#                     'target_mapset' - defined (optionally) by the user
-#
-#         'native_mapset': comes from the table -> 'datasource_description'
-#                          if it is 'default', they georeferencing is read directly from input file
-#
-#         'target_mapset": comes from table 'ingestion' ('mapsetcode')
-#                          MUST be specified.
+def ingest_file(interm_files_list, in_date, product, subproducts, datasource_descr, my_logger, in_files='',
+                echo_query=False):
+    # -------------------------------------------------------------------------------------------------------
+    #   Ingest one or more files (a file for each subproduct)
+    #   Arguments:
+    #       interm_files_list: input file full name (1 per subproduct)
+    #       date: product date
+    #       product: product description name (for DB insertions)
+    #       subproducts: list of subproducts to be extracted from the file. Contains dictionaries as described in
+    #           ingestion() header
+    #       datasource_descr: from the corresponding DB table (all info on input-file naming)
+    #       in_files[option]: list of input files
+    #       echo_query[option]: force print-out from query_db functions
+    #
+    #   NOTE: mapset management: mapset is the geo-reference information associated to datasets
+    #         There is a  'native_mapset' - associated to the input product and
+    #                     'target_mapset' - defined (optionally) by the user
+    #
+    #         'native_mapset': comes from the table -> 'datasource_description'
+    #                          if it is 'default', they georeferencing is read directly from input file
+    #
+    #         'target_mapset": comes from table 'ingestion' ('mapsetcode')
+    #                          MUST be specified.
 
     version_undef = 'undefined'
     my_logger.info("Entering routine %s for product %s - date %s" % ('ingest_file', product['productcode'], in_date))
 
     # Test the file/files exists  (if the file doesn't exists but if the file list is more than 1 then it proceed to next step
     for infile in interm_files_list:
-        if not os.path.isfile(infile) and len(interm_files_list)<=1 :
+        if not os.path.isfile(infile) and len(interm_files_list) <= 1:
             my_logger.error('Input file: %s does not exist' % infile)
             return 1
 
@@ -3487,7 +3509,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
     for intermFile in interm_files_list:
 
         # This case was implemented as the successor of "Test teh file/files exists" since if the file doesnot exist but list is more than 1 we dont throw in the previous case but here that particular error is catched
-        if not os.path.isfile(intermFile):     #if intermFile == '/fake_link/':
+        if not os.path.isfile(intermFile):  # if intermFile == '/fake_link/':
             ii += 1
             continue
 
@@ -3525,7 +3547,8 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         in_data_type_gdal = conv_data_type_to_gdal(in_data_type)
 
         # Get information from 'product' table
-        args = {"productcode": product['productcode'], "subproductcode": subproducts[ii]['subproduct'], "version":product['version']}
+        args = {"productcode": product['productcode'], "subproductcode": subproducts[ii]['subproduct'],
+                "version": product['version']}
         product_info = querydb.get_product_out_info(**args)
         product_info = functions.list_to_element(product_info)
 
@@ -3585,20 +3608,20 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         if datasource_descr.date_format == 'YYYYMM':
             # Convert from YYYYMM -> YYYYMMDD
-            output_date_str = str(in_date)+'01'
+            output_date_str = str(in_date) + '01'
 
         if output_date_str == -1:
-            output_date_str = in_date+'_DATE_ERROR_'
+            output_date_str = in_date + '_DATE_ERROR_'
         else:
             if out_date_format == 'YYYYMMDDHHMM':
                 if functions.is_date_yyyymmddhhmm(output_date_str):
                     out_date_str_final = output_date_str
-                elif  functions.is_date_yyyymmdd(output_date_str):
-                    out_date_str_final = output_date_str+'0000'
+                elif functions.is_date_yyyymmdd(output_date_str):
+                    out_date_str_final = output_date_str + '0000'
             elif out_date_format == 'YYYYMMDD':
                 if functions.is_date_yyyymmdd(output_date_str):
                     out_date_str_final = output_date_str
-                elif  functions.is_date_yyyymmddhhmm(output_date_str):
+                elif functions.is_date_yyyymmddhhmm(output_date_str):
                     out_date_str_final = output_date_str[0:8]
             elif out_date_format == 'MMDD':
                 if functions.is_date_mmdd(output_date_str):
@@ -3612,7 +3635,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
                                                                            subproducts[ii]['subproduct'],
                                                                            'Ingest',
                                                                            product['version'],
-                                                                           mapset_id,)
+                                                                           mapset_id, )
         my_logger.debug('Output Directory is: %s' % output_directory)
         try:
             if not os.path.exists(output_directory):
@@ -3634,34 +3657,34 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # -------------------------------------------------------------------------
 
         native_mapset_code = datasource_descr.native_mapset
-        orig_ds = gdal.Open(intermFile, gdal.GA_ReadOnly)           # Why in ROnly !??? it generates an error below
+        orig_ds = gdal.Open(intermFile, gdal.GA_ReadOnly)  # Why in ROnly !??? it generates an error below
         native_mapset = mapset.MapSet()
         native_mapset.assigndb(native_mapset_code)
 
         if not native_mapset.is_wbd():
-          if native_mapset_code != 'default':
-            orig_cs = osr.SpatialReference(wkt=native_mapset.spatial_ref.ExportToWkt())
-            #orig_cs.ImportFromWkt(native_mapset.spatial_ref)                     # ???
-            orig_geo_transform = native_mapset.geo_transform
-            orig_size_x = native_mapset.size_x
-            orig_size_y = native_mapset.size_y
+            if native_mapset_code != 'default':
+                orig_cs = osr.SpatialReference(wkt=native_mapset.spatial_ref.ExportToWkt())
+                # orig_cs.ImportFromWkt(native_mapset.spatial_ref)                     # ???
+                orig_geo_transform = native_mapset.geo_transform
+                orig_size_x = native_mapset.size_x
+                orig_size_y = native_mapset.size_y
 
-            # Complement orig_ds info (necessary to Re-project)
-            try:
-                orig_ds.SetGeoTransform(native_mapset.geo_transform)
-                orig_ds.SetProjection(orig_cs.ExportToWkt())
-            except:
-                my_logger.debug('Cannot set the geo-projection .. Continue')
-          else:
-            try:
-                # Read geo-reference from input file
-                orig_cs = osr.SpatialReference()
-                orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
-                orig_geo_transform = orig_ds.GetGeoTransform()
-                orig_size_x = orig_ds.RasterXSize
-                orig_size_y = orig_ds.RasterYSize
-            except:
-                my_logger.debug('Cannot read geo-reference from file .. Continue')
+                # Complement orig_ds info (necessary to Re-project)
+                try:
+                    orig_ds.SetGeoTransform(native_mapset.geo_transform)
+                    orig_ds.SetProjection(orig_cs.ExportToWkt())
+                except:
+                    my_logger.debug('Cannot set the geo-projection .. Continue')
+            else:
+                try:
+                    # Read geo-reference from input file
+                    orig_cs = osr.SpatialReference()
+                    orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
+                    orig_geo_transform = orig_ds.GetGeoTransform()
+                    orig_size_x = orig_ds.RasterXSize
+                    orig_size_y = orig_ds.RasterYSize
+                except:
+                    my_logger.debug('Cannot read geo-reference from file .. Continue')
 
         # TODO-M.C.: add a test on the mapset_id in DB table !
         trg_mapset = mapset.MapSet()
@@ -3681,14 +3704,15 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         merge_existing_output = False
         # Check if the output file already exists
-        if os.path.isfile(output_filename) and datasource_descr.area_type in ['tile','region'] and not trg_mapset.is_wbd():
+        if os.path.isfile(output_filename) and datasource_descr.area_type in ['tile',
+                                                                              'region'] and not trg_mapset.is_wbd():
 
             merge_existing_output = True
             # In case of merge, output_filename is generated first in 'tmp_dir', otherwise in final dir
-            my_output_filename = tmp_dir + os.path.sep+os.path.basename(output_filename)
+            my_output_filename = tmp_dir + os.path.sep + os.path.basename(output_filename)
 
             # Prepare a tmp file in tmp_dir (for merging)
-            tmp_output_file = tmp_dir + os.path.sep+os.path.basename(output_filename)+'.tmp'
+            tmp_output_file = tmp_dir + os.path.sep + os.path.basename(output_filename) + '.tmp'
             sds_meta_old = metadata.SdsMetadata()
             sds_meta_old.read_from_file(output_filename)
             old_file_list = sds_meta_old.get_item('eStation2_input_files')
@@ -3699,70 +3723,70 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         # Do re-projection, or write to GTIFF file
         if not native_mapset.is_wbd():
-          if reprojection == 1:
+            if reprojection == 1:
 
-            my_logger.debug('Doing re-projection to target mapset: %s' % trg_mapset.short_name)
-            # Get target SRS from mapset
-            out_cs = trg_mapset.spatial_ref
-            out_size_x = trg_mapset.size_x
-            out_size_y = trg_mapset.size_y
+                my_logger.debug('Doing re-projection to target mapset: %s' % trg_mapset.short_name)
+                # Get target SRS from mapset
+                out_cs = trg_mapset.spatial_ref
+                out_size_x = trg_mapset.size_x
+                out_size_y = trg_mapset.size_y
 
-            # Create target in memory
-            mem_driver = gdal.GetDriverByName('MEM')
+                # Create target in memory
+                mem_driver = gdal.GetDriverByName('MEM')
 
-            # Assign mapset to dataset in memory
-            mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, in_data_type_gdal)
-            mem_ds.SetGeoTransform(trg_mapset.geo_transform)
-            mem_ds.SetProjection(out_cs.ExportToWkt())
-            # Initialize output to Output Nodata value (for PML SST UoG region)
-            mem_ds.GetRasterBand(1).Fill(out_nodata)
+                # Assign mapset to dataset in memory
+                mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, in_data_type_gdal)
+                mem_ds.SetGeoTransform(trg_mapset.geo_transform)
+                mem_ds.SetProjection(out_cs.ExportToWkt())
+                # Initialize output to Output Nodata value (for PML SST UoG region)
+                mem_ds.GetRasterBand(1).Fill(out_nodata)
 
-            # Manage data type - if it is different input/output
-            out_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
-            out_ds.SetGeoTransform(trg_mapset.geo_transform)
-            out_ds.SetProjection(out_cs.ExportToWkt())
+                # Manage data type - if it is different input/output
+                out_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
+                out_ds.SetGeoTransform(trg_mapset.geo_transform)
+                out_ds.SetProjection(out_cs.ExportToWkt())
 
-            # Apply Reproject-Image to the memory-driver
-            orig_wkt = orig_cs.ExportToWkt()
-            res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
-                                      es_constants.ES2_OUTFILE_INTERP_METHOD)
+                # Apply Reproject-Image to the memory-driver
+                orig_wkt = orig_cs.ExportToWkt()
+                res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
+                                          es_constants.ES2_OUTFILE_INTERP_METHOD)
 
-            my_logger.debug('Re-projection to target done.')
+                my_logger.debug('Re-projection to target done.')
 
-            # Read from the dataset in memory
-            out_data = mem_ds.ReadAsArray()
+                # Read from the dataset in memory
+                out_data = mem_ds.ReadAsArray()
 
-            # Apply rescale to data
-            scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
-                                       out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger,
-                                       in_scale_type)
+                # Apply rescale to data
+                scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
+                                           out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger,
+                                           in_scale_type)
 
-            # Create a copy to output_file
-            trg_ds = out_driver.CreateCopy(my_output_filename, out_ds, 0, [es_constants.ES2_OUTFILE_OPTIONS])
-            trg_ds.GetRasterBand(1).WriteArray(scaled_data)
+                # Create a copy to output_file
+                trg_ds = out_driver.CreateCopy(my_output_filename, out_ds, 0, [es_constants.ES2_OUTFILE_OPTIONS])
+                trg_ds.GetRasterBand(1).WriteArray(scaled_data)
 
-          else:
+            else:
 
-            my_logger.debug('Doing only rescaling/format conversion')
+                my_logger.debug('Doing only rescaling/format conversion')
 
-            # Read from input file
-            band = orig_ds.GetRasterBand(1)
-            my_logger.debug('Band Type='+gdal.GetDataTypeName(band.DataType))
-            out_data = band.ReadAsArray(0, 0, orig_size_x, orig_size_y)
+                # Read from input file
+                band = orig_ds.GetRasterBand(1)
+                my_logger.debug('Band Type=' + gdal.GetDataTypeName(band.DataType))
+                out_data = band.ReadAsArray(0, 0, orig_size_x, orig_size_y)
 
-            # No reprojection, only format-conversion
-            trg_ds = out_driver.Create(my_output_filename, orig_size_x, orig_size_y, 1, out_data_type_gdal,
-                                       [es_constants.ES2_OUTFILE_OPTIONS])
-            trg_ds.SetProjection(orig_ds.GetProjectionRef())
-            trg_ds.SetGeoTransform(orig_geo_transform)
+                # No reprojection, only format-conversion
+                trg_ds = out_driver.Create(my_output_filename, orig_size_x, orig_size_y, 1, out_data_type_gdal,
+                                           [es_constants.ES2_OUTFILE_OPTIONS])
+                trg_ds.SetProjection(orig_ds.GetProjectionRef())
+                trg_ds.SetGeoTransform(orig_geo_transform)
 
-            # Apply rescale to data
-            scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
-                                       out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger,
-                                       in_scale_type)
-            trg_ds.GetRasterBand(1).WriteArray(scaled_data)
+                # Apply rescale to data
+                scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
+                                           out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger,
+                                           in_scale_type)
+                trg_ds.GetRasterBand(1).WriteArray(scaled_data)
 
-            orig_ds = None
+                orig_ds = None
 
         # else:
         #     # Do only renaming (and exit)
@@ -3781,52 +3805,52 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
         # Check not WD-GEE
         if not trg_mapset.is_wbd():
-          # Write metadata, if not merging is needed
-          if not merge_existing_output:
-            sds_meta.assign_input_files(in_files)
-            sds_meta.write_to_ds(trg_ds)
+            # Write metadata, if not merging is needed
+            if not merge_existing_output:
+                sds_meta.assign_input_files(in_files)
+                sds_meta.write_to_ds(trg_ds)
 
-            # Close output file
-            trg_ds = None
-            sds_meta.assign_input_files(in_files)
-
-          else:
-            # Close output file
-            trg_ds = None
-
-            # Merge the old and new output products into a 'tmp' file
-            try:
-                command = es_constants.gdal_merge + ' -n '+str(out_nodata)
-                command += ' -a_nodata '+str(out_nodata)
-                command += ' -co \"compress=lzw\" -o '
-                command += tmp_output_file
-                command += ' '+ my_output_filename+ ' '+output_filename
-                my_logger.debug('Command for merging is: ' + command)
-                os.system(command)
-            except:
-                pass
-
-            # Write metadata to output
-            if old_file_list is not None:
-                # Merge the old and new file list (note that old list is a string !)
-                final_list = sds_meta.merge_input_file_lists(old_file_list, in_files)
-                sds_meta.assign_input_files(final_list)
-            else:
+                # Close output file
+                trg_ds = None
                 sds_meta.assign_input_files(in_files)
 
-            sds_meta.write_to_file(tmp_output_file)
+            else:
+                # Close output file
+                trg_ds = None
 
-            # Save the .tmp as output
-            if os.path.isfile(output_filename):
-                os.remove(output_filename)
-            shutil.move(tmp_output_file,output_filename)
+                # Merge the old and new output products into a 'tmp' file
+                try:
+                    command = es_constants.gdal_merge + ' -n ' + str(out_nodata)
+                    command += ' -a_nodata ' + str(out_nodata)
+                    command += ' -co \"compress=lzw\" -o '
+                    command += tmp_output_file
+                    command += ' ' + my_output_filename + ' ' + output_filename
+                    my_logger.debug('Command for merging is: ' + command)
+                    os.system(command)
+                except:
+                    pass
+
+                # Write metadata to output
+                if old_file_list is not None:
+                    # Merge the old and new file list (note that old list is a string !)
+                    final_list = sds_meta.merge_input_file_lists(old_file_list, in_files)
+                    sds_meta.assign_input_files(final_list)
+                else:
+                    sds_meta.assign_input_files(in_files)
+
+                sds_meta.write_to_file(tmp_output_file)
+
+                # Save the .tmp as output
+                if os.path.isfile(output_filename):
+                    os.remove(output_filename)
+                shutil.move(tmp_output_file, output_filename)
 
         # WD-GEE case
         else:
             sds_meta.assign_input_files(in_files)
             sds_meta.assign_input_files(os.path.basename(intermFile))
             sds_meta.write_to_file(intermFile)
-            shutil.copy(intermFile,output_filename)
+            shutil.copy(intermFile, output_filename)
 
         # -------------------------------------------------------------------------
         # Upsert into DB table 'products_data'
@@ -3838,26 +3862,27 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
 
 def ingest_file_vers_1_0(input_file, in_date, product_def, target_mapset, my_logger, product_in_info, echo_query=False):
-# -------------------------------------------------------------------------------------------------------
-#   Convert 1 file from 1.0 to 2.0 eStation format
-#   Arguments:
-#       input_file: input file full name (1 per subproduct)
-#       in_date: product date
-#       product_def: definition of the 2.0 product. It contains:
-#                   productcode
-#                   subproductcode
-#                   version
-#                   type: Ingest/Derived
-#
-#       echo_query[option]: force print-out from query_db functions
-#
-#   NOTE: mapset management: mapset is the geo-reference information associated to datasets
-#         The input product is already georeferenced: case 'default'
-#         'target_mapset": comes from table 'ingestion' ('mapsetcode')
-#                          MUST be specified.
+    # -------------------------------------------------------------------------------------------------------
+    #   Convert 1 file from 1.0 to 2.0 eStation format
+    #   Arguments:
+    #       input_file: input file full name (1 per subproduct)
+    #       in_date: product date
+    #       product_def: definition of the 2.0 product. It contains:
+    #                   productcode
+    #                   subproductcode
+    #                   version
+    #                   type: Ingest/Derived
+    #
+    #       echo_query[option]: force print-out from query_db functions
+    #
+    #   NOTE: mapset management: mapset is the geo-reference information associated to datasets
+    #         The input product is already georeferenced: case 'default'
+    #         'target_mapset": comes from table 'ingestion' ('mapsetcode')
+    #                          MUST be specified.
 
     version_undef = 'undefined'
-    my_logger.info("Entering routine %s for product %s - date %s" % ('ingest_file_vers_1_0', product_def['productcode'], in_date))
+    my_logger.info(
+        "Entering routine %s for product %s - date %s" % ('ingest_file_vers_1_0', product_def['productcode'], in_date))
 
     # Test the file exists
     if not os.path.isfile(input_file):
@@ -3885,7 +3910,8 @@ def ingest_file_vers_1_0(input_file, in_date, product_def, target_mapset, my_log
     in_data_type_gdal = conv_data_type_to_gdal(in_data_type)
 
     # Get information from 'product' table
-    args = {"productcode": product_def['productcode'], "subproductcode": product_def['subproductcode'], "version":product_def['version']}
+    args = {"productcode": product_def['productcode'], "subproductcode": product_def['subproductcode'],
+            "version": product_def['version']}
     product_info = querydb.get_product_out_info(**args)
     product_info = functions.list_to_element(product_info)
 
@@ -3911,7 +3937,7 @@ def ingest_file_vers_1_0(input_file, in_date, product_def, target_mapset, my_log
                                                                        product_def['subproductcode'],
                                                                        product_def['type'],
                                                                        product_def['version'],
-                                                                       mapset_id,)
+                                                                       mapset_id, )
     my_logger.debug('Output Directory is: %s' % output_directory)
     try:
         if not os.path.exists(output_directory):
@@ -3963,7 +3989,7 @@ def ingest_file_vers_1_0(input_file, in_date, product_def, target_mapset, my_log
 
         # Read from input file
         band = orig_ds.GetRasterBand(1)
-        my_logger.debug('Band Type='+gdal.GetDataTypeName(band.DataType))
+        my_logger.debug('Band Type=' + gdal.GetDataTypeName(band.DataType))
         out_data = band.ReadAsArray(0, 0, orig_size_x, orig_size_y)
 
         # No reprojection, only format-conversion
@@ -4000,18 +4026,18 @@ def ingest_file_vers_1_0(input_file, in_date, product_def, target_mapset, my_log
 
 
 def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete=False):
-# -------------------------------------------------------------------------------------------------------
-#   Ingest a file of type MESA_JRC_
-#   Arguments:
-#       input_file: input file full name
-#       target_mapset: target mapset
-#       no_delete: do not delete input file (for external medium)
-#
-#   Since 30/10/17: manages .zipped files, ending with extension .gz.tif (see ES2-96)
-#
+    # -------------------------------------------------------------------------------------------------------
+    #   Ingest a file of type MESA_JRC_
+    #   Arguments:
+    #       input_file: input file full name
+    #       target_mapset: target mapset
+    #       no_delete: do not delete input file (for external medium)
+    #
+    #   Since 30/10/17: manages .zipped files, ending with extension .gz.tif (see ES2-96)
+    #
 
     logger.info("Entering routine %s for file %s" % ('ingest_file_archive', input_file))
-    extension='.tif'
+    extension = '.tif'
 
     # Test the file/files exists
     if not os.path.isfile(input_file):
@@ -4028,16 +4054,16 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
             raise NameError('Error in creating tmpdir')
 
         # unzip the file
-        output_filename = os.path.basename(input_file).replace('gz.tif','tif')
+        output_filename = os.path.basename(input_file).replace('gz.tif', 'tif')
 
-        command='gunzip -c '+input_file+' > '+tmpdir+os.path.sep+output_filename
+        command = 'gunzip -c ' + input_file + ' > ' + tmpdir + os.path.sep + output_filename
         try:
             os.system(command)
         except:
             logger.error('Cannot gunzip file ' + os.path.basename(input_file) + '. Exit')
             raise NameError('Error in unzipping file')
 
-        my_input_file = tmpdir+os.path.sep+output_filename
+        my_input_file = tmpdir + os.path.sep + output_filename
         b_unzipped = True
         extension = '.gz.tif'
     else:
@@ -4053,8 +4079,9 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
     sds_meta_in.read_from_file(my_input_file)
 
     # Extract info from input file
-    if re.match(es_constants.es2globals['prefix_eumetcast_files']+'.*.tif', os.path.basename(input_file)):
-        [str_date, product_code, sub_product_code, mapsetid, version] = functions.get_all_from_filename_eumetcast(my_input_file)
+    if re.match(es_constants.es2globals['prefix_eumetcast_files'] + '.*.tif', os.path.basename(input_file)):
+        [str_date, product_code, sub_product_code, mapsetid, version] = functions.get_all_from_filename_eumetcast(
+            my_input_file)
     else:
         [str_date, product_code, sub_product_code, mapsetid, version] = functions.get_all_from_filename(my_input_file)
 
@@ -4062,29 +4089,29 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
     sub_dir = sds_meta_in.get_item('eStation2_subdir')
     product_type = functions.get_product_type_from_subdir(sub_dir)
 
-
     if re.match(es_constants.es2globals['prefix_eumetcast_files'] + '.*.tif', os.path.basename(input_file)):
-        output_file = es_constants.es2globals['processing_dir']+ \
-                          functions.convert_name_from_eumetcast(my_input_file, product_type, with_dir=True, new_mapset=target_mapsetid)
+        output_file = es_constants.es2globals['processing_dir'] + \
+                      functions.convert_name_from_eumetcast(my_input_file, product_type, with_dir=True,
+                                                            new_mapset=target_mapsetid)
     else:
         output_file = es_constants.es2globals['processing_dir'] + \
                       functions.convert_name_from_archive(my_input_file, product_type, with_dir=True,
-                                                            new_mapset=target_mapsetid)
+                                                          new_mapset=target_mapsetid)
 
     # make sure output dir exists
     output_dir = os.path.split(output_file)[0]
     functions.check_output_dir(output_dir)
 
     # Compare input-target mapset
-    if target_mapsetid==mapsetid:
+    if target_mapsetid == mapsetid:
 
         # Check if the target file exist ... and delete it in case
         if os.path.isfile(output_file):
             os.remove(output_file)
         # Copy file to output
-        shutil.copyfile(my_input_file,output_file)
+        shutil.copyfile(my_input_file, output_file)
         # Open output dataset for writing metadata
-        #trg_ds = gdal.Open(output_file)
+        # trg_ds = gdal.Open(output_file)
 
     else:
 
@@ -4135,7 +4162,7 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
         # Apply Reproject-Image to the memory-driver
         orig_wkt = orig_cs.ExportToWkt()
         res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
-                                      es_constants.ES2_OUTFILE_INTERP_METHOD)
+                                  es_constants.ES2_OUTFILE_INTERP_METHOD)
 
         logger.debug('Re-projection to target done.')
 
@@ -4167,10 +4194,10 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
     # Create a file for deleting from ingest (at the end)
     # -------------------------------------------------------------------------
 
-    working_dir=es_constants.es2globals['base_tmp_dir']+os.path.sep+'ingested_files'
+    working_dir = es_constants.es2globals['base_tmp_dir'] + os.path.sep + 'ingested_files'
     functions.check_output_dir(working_dir)
     if no_delete == False:
-        trace_file=working_dir+os.path.sep+os.path.basename(input_file)+'.tbd'
+        trace_file = working_dir + os.path.sep + os.path.basename(input_file) + '.tbd'
         logger.debug('Trace for deleting ingested file %s' % trace_file)
         with open(trace_file, 'a'):
             os.utime(trace_file, None)
@@ -4183,15 +4210,15 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
 
 
 def write_ds_to_geotiff(dataset, output_file):
-#
-#   Writes to geotiff file an osgeo.gdal.Dataset object
-#   Args:
-#       dataset: osgeo.gdal dataset (open and georeferenced)
-#       output_file: target output file
-#   Usage: e.g. for converting MODIS HDF4 tiled SDS to temporary  geotiff files
-#
-#   TODO-M.C.: add checks on the input dataset
-#
+    #
+    #   Writes to geotiff file an osgeo.gdal.Dataset object
+    #   Args:
+    #       dataset: osgeo.gdal dataset (open and georeferenced)
+    #       output_file: target output file
+    #   Usage: e.g. for converting MODIS HDF4 tiled SDS to temporary  geotiff files
+    #
+    #   TODO-M.C.: add checks on the input dataset
+    #
     # Read from input ds
     orig_cs = osr.SpatialReference()
     orig_cs.ImportFromWkt(dataset.GetProjectionRef())
@@ -4215,16 +4242,16 @@ def write_ds_to_geotiff(dataset, output_file):
 
 
 def write_ds_and_mapset_to_geotiff(dataset, mapset, output_file):
-#
-#   Writes to geotiff file an osgeo.gdal.Dataset object
-#   Args:
-#       dataset: osgeo.gdal dataset (open and georeferenced)
-#       mapset: 'native' mapset to be assigned to the output
-#       output_file: target output file
-#
-#   Usage: e.g. for 'geo-referencing' TAMSAT data, while writing them to geotiff format
-#
-#
+    #
+    #   Writes to geotiff file an osgeo.gdal.Dataset object
+    #   Args:
+    #       dataset: osgeo.gdal dataset (open and georeferenced)
+    #       mapset: 'native' mapset to be assigned to the output
+    #       output_file: target output file
+    #
+    #   Usage: e.g. for 'geo-referencing' TAMSAT data, while writing them to geotiff format
+    #
+    #
     # Read info from input mapset
     orig_geo_transform = mapset.geo_transform
     orig_size_x = mapset.size_x
@@ -4249,13 +4276,13 @@ def write_ds_and_mapset_to_geotiff(dataset, mapset, output_file):
 
 
 def mosaic_lsasaf_msg(in_files, output_file, format):
-#
-#   Puts together the LSASAF regions (in the original 'disk' projection)
-#   Args:
-#       in_files: input filenames
-#       output_file: target output file
-#
-   # Note: noData==-1 for LSASAF Products (both ET and LST)
+    #
+    #   Puts together the LSASAF regions (in the original 'disk' projection)
+    #   Args:
+    #       in_files: input filenames
+    #       output_file: target output file
+    #
+    # Note: noData==-1 for LSASAF Products (both ET and LST)
     NO_DATA_LSASAF_PRODS = -1
 
     # definitions: Euro, NAfr, SAfr, Same -> MUST match with filenaming
@@ -4294,7 +4321,7 @@ def mosaic_lsasaf_msg(in_files, output_file, format):
             if data_type_ref is None:
                 data_type_ref = dataType
             elif data_type_ref != dataType:
-                print ("Files do not have the same type!")
+                print("Files do not have the same type!")
                 return 1
 
     # output matrix dimensions
@@ -4338,28 +4365,28 @@ def mosaic_lsasaf_msg(in_files, output_file, format):
 
 def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max, out_data_type,
                  out_scale_factor, out_offset, out_nodata, my_logger, in_scale_type):
-#
-#   Format/scale the output data taking into account input/output properties
-#   Args:
-#       in_data: input data array (numpy array)
-#       in_scale_factor: scale factor to be applied to input data
-#       in_offset: offset to be applied to input data
-#           Note: PhysVal = DN * scale_factor + offset
-#
-#       in_nodata: nodata value applied to input data
-#       in_mask_min: min range of values not to be converted to physical values
-#                    In the output, it is converted to nodata
-#       in_mask_max: max range of values not to be converted to physical values
-#                    In the output, it is converted to nodata
-#       out_data_type: output data type (byte, int16, uint16, ...)
-#       out_scale_factor: scale factor applied to the output
-#       out_offset: offset applied to the output -> should be 0
-#           Note: PhysVal = NumValue * scale_factor + offset
-#
-#       out_nodata: output nodata (should depend on out_data_type only)
-#
-#   Returns: output data
-#
+    #
+    #   Format/scale the output data taking into account input/output properties
+    #   Args:
+    #       in_data: input data array (numpy array)
+    #       in_scale_factor: scale factor to be applied to input data
+    #       in_offset: offset to be applied to input data
+    #           Note: PhysVal = DN * scale_factor + offset
+    #
+    #       in_nodata: nodata value applied to input data
+    #       in_mask_min: min range of values not to be converted to physical values
+    #                    In the output, it is converted to nodata
+    #       in_mask_max: max range of values not to be converted to physical values
+    #                    In the output, it is converted to nodata
+    #       out_data_type: output data type (byte, int16, uint16, ...)
+    #       out_scale_factor: scale factor applied to the output
+    #       out_offset: offset applied to the output -> should be 0
+    #           Note: PhysVal = NumValue * scale_factor + offset
+    #
+    #       out_nodata: output nodata (should depend on out_data_type only)
+    #
+    #   Returns: output data
+    #
 
     # Check input
     if not isinstance(in_data, N.ndarray):
@@ -4390,7 +4417,8 @@ def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in
     # # ES2-385 If input scale factor , offset and output scale factor, offsets are the same then return trg_data as in_data
     if in_scale_factor == out_scale_factor and in_offset == out_offset:
         trg_data = in_data
-        my_logger.info('Skip rescaling because input scale factor , offset and output scale factor, offsets are the same')
+        my_logger.info(
+            'Skip rescaling because input scale factor , offset and output scale factor, offsets are the same')
 
         # Assign output nodata to in_nodata and mask range
         if idx_nodata.any():
@@ -4410,8 +4438,8 @@ def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in
     else:
         phys_value = in_data
 
-    if in_scale_type=='log10':
-        phys_value =  N.power(10,phys_value)
+    if in_scale_type == 'log10':
+        phys_value = N.power(10, phys_value)
 
     # Assign to the output array
     # Option 2: ES2-385 Check if Output rescaling has to be done
@@ -4434,10 +4462,11 @@ def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in
 
     return trg_data
 
+
 #
-#   Converts the string data type to numpy types
-#   type: data type in wkt-estation format (inherited from 1.X)
-#   Refs. see e.g. http://docs.scipy.org/doc/numpy/user/basics.types.html
+# Converts the string data type to numpy types
+# type: "data type in wkt-estation format (inherited from 1.X)"
+# Refs. see e.g. http://docs.scipy.org/doc/numpy/user/basics.types.html
 #
 def conv_data_type_to_numpy(type):
     if type == 'Byte':
@@ -4458,6 +4487,7 @@ def conv_data_type_to_numpy(type):
         return 'complex64'
     else:
         return 'int16'
+
 
 #
 #   Converts the string data type to GDAL types
@@ -4483,4 +4513,3 @@ def conv_data_type_to_gdal(type):
         return gdal.GDT_CFloat64
     else:
         return gdal.GDT_Int16
-

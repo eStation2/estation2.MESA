@@ -1056,21 +1056,27 @@ def conv_yymmk_2_yyyymmdd(yymmk):
 #   Output: date (YYYYMMDD), otherwise -1
 #
 def conv_yyyydmmdk_2_yyyymmdd(yymmk):
-    year = int(str(yymmk)[0:4])
-    month = str(yymmk)[5:7]
-    dekad = int(str(yymmk)[8:9])
-    if dekad == 1:
-        day = '01'
-    elif dekad == 2:
-        day = '11'
-    elif dekad == 3:
-        day = '21'
-    else:
-        date_yyyymmdd = -1
+    try:
+        year = int(str(yymmk)[0:4])
+        month = str(yymmk)[5:7]
+        dekad = int(str(yymmk)[8:9])
+        if dekad == 1:
+            day = '01'
+        elif dekad == 2:
+            day = '11'
+        elif dekad == 3:
+            day = '21'
+        else:
+            day = False
 
-    # date_tmp = datetime.datetime(year=year, month=month, day=day)
-    date_yyyymmdd = str(year) + month + day
-    return date_yyyymmdd
+        if day:
+            # date_tmp = datetime.datetime(year=year, month=month, day=day)
+            date_yyyymmdd = str(year) + month + day
+            return date_yyyymmdd
+        else:
+            return -1
+    except:
+        return -1
 
 
 ######################################################################################
@@ -1188,7 +1194,7 @@ def conv_list_2_string(inlist):
             for ifile in inlist:
                 file_string += ifile + ';'
     except:
-        pass
+        return False
     return file_string
 
 
@@ -1666,11 +1672,13 @@ def check_output_dir(output_dir):
             os.makedirs(my_dir)
         except:
             logger.error("Cannot create directory %s" % my_dir)
+            return False
 
         logger.info("Output directory %s created" % my_dir)
 
     else:
         logger.debug("Output directory %s already exists" % my_dir)
+    return True
 
 
 ######################################################################################
@@ -1682,11 +1690,11 @@ def check_output_dir(output_dir):
 #   Output: none
 #
 def create_sym_link(src_file, trg_file, force=False):
-    # Does the source file already exist ?
+    # Does the source file exist ?
     if not os.path.isfile(src_file):
         logger.info('Source file does not exist. Exit')
         return 1
-    # Does the target file already exist ?
+    # Does the target file already exist and is a symbolic link?
     if os.path.exists(trg_file):
         if os.path.islink(trg_file):
             if force:

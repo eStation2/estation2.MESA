@@ -2,17 +2,19 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 from __future__ import division
-
 from future import standard_library
-standard_library.install_aliases()
+
 import unittest, time
 import gdal, ogr, osr, os
 from datetime import date
-from apps.analysis.getTimeseries import getTimeseries, getFilesList
 from multiprocessing import *
 
+from apps.analysis.getTimeseries import getTimeseries, getFilesList
 
-class TestTS(unittest.TestCase):
+standard_library.install_aliases()
+
+
+class TestGetTimeseries(unittest.TestCase):
 
     # ES2-271/288
     x_min = ' -1.875'
@@ -356,3 +358,6 @@ class TestTS(unittest.TestCase):
         # # self.assertEquals(len(list_values_green), 12)
 
 
+suite_gettimeseries = unittest.TestLoader().loadTestsFromTestCase(TestGetTimeseries)
+if __name__ == '__main__':
+    unittest.TextTestRunner(verbosity=2).run(suite_gettimeseries)

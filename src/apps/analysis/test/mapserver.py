@@ -2,15 +2,14 @@ from __future__ import unicode_literals
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
 from future import standard_library
-standard_library.install_aliases()
+
 from config import es_constants
 import mapscript
 
-MapserverVersion = mapscript.msGetVersion()
-#print MapserverVersion
+standard_library.install_aliases()
 
+MapserverVersion = mapscript.msGetVersion()
 
 def getmap():
     productfile = '/data/processing/vgt_ndvi/WGS84_Africa_1km/tif/ndv/20130701_vgt_ndvi_ndv_WGS84_Africa_1km.tif'
@@ -19,11 +18,11 @@ def getmap():
 
     # create a new mapfile from scratch
     productmap = mapscript.mapObj(es_constants.template_mapfile)
-    #productmap.save('temp.map')
+    # productmap.save('temp.map')
     productmap.setSize(736, 782)
     productmap.setExtent(-4863270.2540311385, -7205400.673576976, 9538688.86734863, 8096680.892889029)
     productmap.units = mapscript.MS_DD
-    #productmap.imagecolor.setRGB(255, 255, 255)
+    # productmap.imagecolor.setRGB(255, 255, 255)
 
     # create a layer for the raster
     layer = mapscript.layerObj(productmap)
