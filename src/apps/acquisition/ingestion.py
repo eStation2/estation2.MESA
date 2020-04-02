@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from builtins import open
 from builtins import int
 from future import standard_library
+
 standard_library.install_aliases()
 from builtins import map
 from builtins import str
@@ -308,11 +309,10 @@ def loop_ingestion(dry_run=False, test_one_product=None):
 
 
 def ingest_archives_eumetcast(dry_run=False):
-
-#    Ingest the files in format MESA_JRC_<prod>_<sprod>_<date>_<mapset>_<version>
-#    disseminated by JRC through EUMETCast.
-#    Gets the list of products/version/subproducts active for ingestion and for processing
-#    Arguments: dry_run -> if 1, read tables and report activity ONLY
+    #    Ingest the files in format MESA_JRC_<prod>_<sprod>_<date>_<mapset>_<version>
+    #    disseminated by JRC through EUMETCast.
+    #    Gets the list of products/version/subproducts active for ingestion and for processing
+    #    Arguments: dry_run -> if 1, read tables and report activity ONLY
 
     logger.info("Entering routine %s" % 'ingest_archives_eumetcast')
     echo_query = False
@@ -733,9 +733,9 @@ def pre_process_merge_tile(subproducts, tmpdir, input_files, my_logger):
         #         pass
         #
         # OUTPUT FILES
-        output_file         = tmpdir+os.path.sep + 'merge_output.tif'
+        output_file = tmpdir + os.path.sep + 'merge_output.tif'
         output_file_vrt = tmpdir + os.path.sep + 'merge_output_rescaled.vrt'
-        output_file_compressed  = tmpdir+os.path.sep + 'merge_output_compressed.tif'
+        output_file_compressed = tmpdir + os.path.sep + 'merge_output_compressed.tif'
 
         # -------------------------------------------------------------------------
         # STEP 1: Merge all input products into a 'tmp' file
@@ -1825,7 +1825,7 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
     if len(good_input_files) == 0:
         return []
     # Does check the number of files ?
-    output_file         = tmpdir+os.path.sep + 'merge_output.tif'
+    output_file = tmpdir + os.path.sep + 'merge_output.tif'
     output_file_vrt = tmpdir + os.path.sep + 'merge_output_rescaled.vrt'
     # output_file_mapset  = tmpdir+os.path.sep + 'merge_output_WD-GEE-'+region+'-AVG.tif'
     output_file_mapset = tmpdir + os.path.sep + file_naming + '.tif'
@@ -1842,7 +1842,7 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         command += ' -o ' + output_file
         command += ' -ot BYTE '
         for file in good_input_files:
-            command += ' '+file
+            command += ' ' + file
 
         my_logger.debug('Command for merging is: ' + command)
         os.system(command)
@@ -4468,9 +4468,9 @@ def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in
     return trg_data
 
 #
-#   Converts the string data type to numpy types
-#   type: data type in wkt-estation format (inherited from 1.X)
-#   Refs. see e.g. http://docs.scipy.org/doc/numpy/user/basics.types.html
+# Converts the string data type to numpy types
+# type: "data type in wkt-estation format (inherited from 1.X)"
+# Refs. see e.g. http://docs.scipy.org/doc/numpy/user/basics.types.html
 #
 def conv_data_type_to_numpy(type):
     if type == 'Byte':

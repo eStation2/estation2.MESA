@@ -39,6 +39,14 @@ class CrudDB(object):
         #db.execute("SET search_path TO products")
 
         #Initialize DB and create a hashmap of table name and associated ORM mapper class
+        # TODO:The mapper.extension parameter will be removed in a future release.
+        # <string>:2: SADeprecationWarning: MapperExtension is deprecated in favor of the MapperEvents listener interface.
+        # The mapper.extension parameter will be removed in a future release.
+        # /usr/local/lib/python3.6/dist-packages/sqlalchemy/orm/deprecated_interfaces.py:62: SADeprecationWarning: MapperExtension.instrument_class is deprecated.
+        # The MapperExtension class will be removed in a future release.
+        # Please transition to the @event interface, using @event.listens_for(mapped_class, 'instrument_class').
+        #   cls._adapt_listener_methods(self, listener, ("instrument_class",))
+
         metadata = sqlalchemy.MetaData(db, schema=self.schema)
         #retrieve database table information dynamically
         metadata.reflect()

@@ -1,18 +1,18 @@
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import absolute_import
-from __future__ import division
 #
 #	purpose: Define the metadata class
 #	author:  M. Clerici
 #	date:	 31.03.2014
 #   descr:	 Defines members and methods of the metadata class
 #
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
 from future import standard_library
-standard_library.install_aliases()
 from builtins import str
 from past.builtins import basestring
 from builtins import object
+
 import os
 import datetime
 import os.path
@@ -26,48 +26,53 @@ from .functions import *
 from lib.python import es_logging as log
 from lib.python import functions
 from database import querydb_meta
+
+standard_library.install_aliases()
+
 logger = log.my_logger(__name__)
 
-# TODO-M.C.: Add all the attributes of 'mapset' and 'category_id' ? so that the contents of the db tables can be created (if not existing on the target station) from metadata ?
+# TODO-M.C.: Add all the attributes of 'mapset' and 'category_id' ?
+#  so that the contents of the db tables can be created (if not existing on the target station) from metadata ?
 
-sds_metadata = { 'eStation2_es2_version': '',               # 0. eStation 2 version (the fields below might depend on es2_version)
+sds_metadata = {'eStation2_es2_version': '',  # 0. eStation 2 version (the fields below might depend on es2_version)
 
-                                                            # ------------------  Mapset        ----------------------
-                 'eStation2_mapset': '',                    # 1. Mapsetcode
+                # ------------------  Mapset        ----------------------
+                'eStation2_mapset': '',  # 1. Mapsetcode
 
-                                                            # ------------------  As in the 'product' table ----------------------
-                 'eStation2_product': '',                   # 2. productcode
-                 'eStation2_subProduct': '',                # 3. subproductcode
-                 'eStation2_product_version': '',           # 4. product version (e.g. MODIS Collection 4 or 5; by default is undefined -> '')
+                # ------------------  As in the 'product' table ----------------------
+                'eStation2_product': '',  # 2. productcode
+                'eStation2_subProduct': '',  # 3. subproductcode
+                'eStation2_product_version': '',
+                # 4. product version (e.g. MODIS Collection 4 or 5; by default is undefined -> '')
 
-                 'eStation2_defined_by': '',                # 5. JRC or User
-                 'eStation2_category': '',                  # 6. Product category (TODO-M.C.: double-check wrt INSPIRE)
-                 'eStation2_descr_name': '',                # 7. Product Descriptive Name
-                 'eStation2_description': '',               # 8. Product Description
-                 'eStation2_provider': '',                  # 9. Product provider (NASA, EUMETSAT, VITO, ..)
+                'eStation2_defined_by': '',  # 5. JRC or User
+                'eStation2_category': '',  # 6. Product category (TODO-M.C.: double-check wrt INSPIRE)
+                'eStation2_descr_name': '',  # 7. Product Descriptive Name
+                'eStation2_description': '',  # 8. Product Description
+                'eStation2_provider': '',  # 9. Product provider (NASA, EUMETSAT, VITO, ..)
 
-                 'eStation2_date_format': '',               # 10. Date format (YYYYMMDDHHMM, YYYYMMDD or MMDD)
-                 'eStation2_frequency': '',                 # 11. Product frequency (as in db table 'frequency')
+                'eStation2_date_format': '',  # 10. Date format (YYYYMMDDHHMM, YYYYMMDD or MMDD)
+                'eStation2_frequency': '',  # 11. Product frequency (as in db table 'frequency')
 
-                 'eStation2_scaling_factor': '',            # 12. Scaling factors
-                 'eStation2_scaling_offset': '',            # 13. Scaling offset
-                 'eStation2_unit': '',                      # 14. physical unit (none for pure numbers, e.g. NDVI)
-                 'eStation2_nodata': '',                    # 15. nodata value
-                 'eStation2_subdir': '',                    # 16. subdir in the eStation data tree (redundant - to be removed ??)
+                'eStation2_scaling_factor': '',  # 12. Scaling factors
+                'eStation2_scaling_offset': '',  # 13. Scaling offset
+                'eStation2_unit': '',  # 14. physical unit (none for pure numbers, e.g. NDVI)
+                'eStation2_nodata': '',  # 15. nodata value
+                'eStation2_subdir': '',  # 16. subdir in the eStation data tree (redundant - to be removed ??)
 
-                                                            # ------------------  File Specific ----------------------
-                 'eStation2_date': '',                      # 17. Date of the product
+                # ------------------  File Specific ----------------------
+                'eStation2_date': '',  # 17. Date of the product
 
-                                                            # ------------------  File/Machine Specific ----------------------
-                 'eStation2_input_files': '',               # 18. Input files used for computation
-                 'eStation2_comp_time': '',                 # 19. Time of computation
-                 'eStation2_mac_address': '',               # 20. Machine MAC address
+                # ------------------  File/Machine Specific ----------------------
+                'eStation2_input_files': '',  # 18. Input files used for computation
+                'eStation2_comp_time': '',  # 19. Time of computation
+                'eStation2_mac_address': '',  # 20. Machine MAC address
 
-                                                            # ------------------  Fixed         ----------------------
-                 'eStation2_conversion': ''                 # 21. Rule for converting DN to physical values (free text)
+                # ------------------  Fixed         ----------------------
+                'eStation2_conversion': ''  # 21. Rule for converting DN to physical values (free text)
 
+                }
 
-}
 
 class SdsMetadata(object):
 
@@ -105,46 +110,46 @@ class SdsMetadata(object):
         sds_metadata['eStation2_parameters'] = 'None'
 
     def write_to_ds(self, dataset):
-    #
-    #   Writes  metadata to a target dataset (already opened gdal dataset)
-    #   Args:
-    #       dataset: osgeo.gdal dataset (open and georeferenced)
+        #
+        #   Writes  metadata to a target dataset (already opened gdal dataset)
+        #   Args:
+        #       dataset: osgeo.gdal dataset (open and georeferenced)
 
         # Check argument ok
-        if not isinstance(dataset,gdal.Dataset):
+        if not isinstance(dataset, gdal.Dataset):
             logger.error('The argument should be an open GDAL Dataset. Exit')
         else:
             # Go through the metadata list and write to sds
             for key, value in list(sds_metadata.items()):
                 # Check length of value
                 if len(str(value)) > 1000:
-                    wrt_value=str(value)[0:1000]+' + others ...'
+                    wrt_value = str(value)[0:1000] + ' + others ...'
                 else:
-                    wrt_value=str(value)
+                    wrt_value = str(value)
                 dataset.SetMetadataItem(key, wrt_value)
 
     def write_to_file(self, filepath):
-    #
-    #   Writes  metadata to a target file
-    #   Args:
-    #       dataset: osgeo.gdal dataset (open and georeferenced)
+        #
+        #   Writes  metadata to a target file
+        #   Args:
+        #       dataset: osgeo.gdal dataset (open and georeferenced)
 
         # Check the output file exist
         if not os.path.isfile(filepath):
-             logger.error('Output file does not exist %s' % filepath)
+            logger.error('Output file does not exist %s' % filepath)
         else:
             # Open output file
             sds = gdal.Open(filepath, gdalconst.GA_Update)
             self.write_to_ds(sds)
 
     def read_from_ds(self, dataset):
-    #
-    #   Read metadata structure from an opened file
-    #   Args:
-    #       dataset: osgeo.gdal dataset (open and georeferenced)
+        #
+        #   Read metadata structure from an opened file
+        #   Args:
+        #       dataset: osgeo.gdal dataset (open and georeferenced)
 
         # Check argument ok
-        if not isinstance(dataset,gdal.Dataset):
+        if not isinstance(dataset, gdal.Dataset):
             logger.error('The argument should be an open GDAL Dataset. Exit')
         else:
 
@@ -158,46 +163,47 @@ class SdsMetadata(object):
                     logger.error('Error in reading metadata item %s' % key)
 
     def read_from_file(self, filepath):
-    #
-    #   Read metadata structure from a source file
-    #   Args:
-    #       filepath: full file path (dir+name)
+        #
+        #   Read metadata structure from a source file
+        #   Args:
+        #       filepath: full file path (dir+name)
 
         # Check the file exists
         if not os.path.isfile(filepath):
             logger.error('Input file does not exist %s' % filepath)
         else:
             # Open it and read metadata
-            infile=gdal.Open(filepath)
+            infile = gdal.Open(filepath)
             self.read_from_ds(infile)
 
             # Close the file
-            infile= None
+            infile = None
 
     def assign_es2_version(self):
-    #
-    #   Assign the es2_version
+        #
+        #   Assign the es2_version
         sds_metadata['eStation2_es2_version'] = es_constants.es2_sw_version
 
     def assign_comput_time_now(self):
-    #
-    #   Assign current time to 'comp_time'
+        #
+        #   Assign current time to 'comp_time'
 
-        curr_time=datetime.datetime.now()
-        str_datetime=curr_time.strftime("%Y-%m-%d %H:%M:%S")
-        sds_metadata['eStation2_comp_time']=str_datetime
+        curr_time = datetime.datetime.now()
+        str_datetime = curr_time.strftime("%Y-%m-%d %H:%M:%S")
+        sds_metadata['eStation2_comp_time'] = str_datetime
 
     def assign_from_product(self, product, subproduct, version):
-    #
+        #
         try:
-            product_out_info = querydb_meta.get_product_out_info(productcode=product,subproductcode=subproduct,version=version)
+            product_out_info = querydb_meta.get_product_out_info(productcode=product, subproductcode=subproduct,
+                                                                 version=version)
         except:
             logger.error('The product is not defined in the DB')
             return 1
 
         product_out_info = functions.list_to_element(product_out_info)
 
-    #   Assign prod/subprod/version
+        #   Assign prod/subprod/version
         sds_metadata['eStation2_product'] = str(product)
         sds_metadata['eStation2_subProduct'] = str(subproduct)
         if isinstance(version, str) or isinstance(version, str):
@@ -218,8 +224,8 @@ class SdsMetadata(object):
         sds_metadata['eStation2_nodata'] = product_out_info.nodata
 
     def assign_product_elemets(self, product, subproduct, version):
-    #
-    #   Assign prod/subprod/version
+        #
+        #   Assign prod/subprod/version
         sds_metadata['eStation2_product'] = str(product)
         sds_metadata['eStation2_subProduct'] = str(subproduct)
 
@@ -229,40 +235,40 @@ class SdsMetadata(object):
             sds_metadata['eStation2_product_version'] = 'undefined'
 
     def assign_date(self, date):
-    #
-    #   Assign date of the product
+        #
+        #   Assign date of the product
         sds_metadata['eStation2_date'] = str(date)
 
     def assign_mapset(self, mapset_code):
-    #
-    #   Assign mapset
+        #
+        #   Assign mapset
         sds_metadata['eStation2_mapset'] = str(mapset_code)
 
     def assign_subdir_from_fullpath(self, full_directory):
-    #
-    #   Assign subdir
+        #
+        #   Assign subdir
         subdir = functions.get_subdir_from_path_full(full_directory)
         sds_metadata['eStation2_subdir'] = str(subdir)
 
     def assign_subdir(self, subdirectory):
-    #
-    #   Assign subdir
+        #
+        #   Assign subdir
         sds_metadata['eStation2_subdir'] = str(subdirectory)
 
     def assign_input_files(self, input_files):
-    #
-    #   Assign input file list
+        #
+        #   Assign input file list
         file_string = ''
-        if isinstance(input_files,basestring):
-            file_string+=os.path.basename(input_files)+';'
+        if isinstance(input_files, basestring):
+            file_string += os.path.basename(input_files) + ';'
         else:
             for ifile in input_files:
-                file_string+=os.path.basename(ifile)+';'
+                file_string += os.path.basename(ifile) + ';'
         sds_metadata['eStation2_input_files'] = file_string
 
     def merge_input_file_lists(self, old_list, input_files):
-    #
-    #   Merge new list to the existing one (which is a string)
+        #
+        #   Merge new list to the existing one (which is a string)
 
         true_list = old_list.split(';')
         true_list_not_empty = []
@@ -275,41 +281,40 @@ class SdsMetadata(object):
         return true_list_not_empty
 
     def assign_scaling(self, scaling_factor, scaling_offset, nodata, unit):
-    #
-    #   Assign scaling
+        #
+        #   Assign scaling
         sds_metadata['eStation2_scaling_factor'] = str(scaling_factor)
         sds_metadata['eStation2_scaling_offset'] = str(scaling_offset)
         sds_metadata['eStation2_nodata'] = str(nodata)
         sds_metadata['eStation2_unit'] = str(unit)
 
     def assign_nodata(self, nodata):
-    #
-    #   Assign scaling
+        #
+        #   Assign scaling
         sds_metadata['eStation2_nodata'] = str(nodata)
 
     def assign_single_paramater(self, parameter_key, parameter_value):
-    # ES2-293 ES2-292
-    #   Assign Single Parameter
+        # ES2-293 ES2-292
+        #   Assign Single Parameter
         sds_metadata[parameter_key] = str(parameter_value)
 
     def assign_scl_factor(self, scl_factor):
-    #
-    #   Assign scaling
+        #
+        #   Assign scaling
         sds_metadata['eStation2_scaling_factor'] = str(scl_factor)
 
     def assign_parameters(self, parameters):
-    #
-    #   Assign parameters (defined specifically for SST-FRONTS detection)
-        parameters_string=''
+        #
+        #   Assign parameters (defined specifically for SST-FRONTS detection)
+        parameters_string = ''
         for key, value in sorted(parameters.items()):
-            parameters_string+='{}={}; '.format(key,value)
+            parameters_string += '{}={}; '.format(key, value)
 
         sds_metadata['eStation2_parameters'] = parameters_string
 
-
     def get_item(self, itemname):
 
-        value='metadata item not found'
+        value = 'metadata item not found'
         try:
             value = sds_metadata[itemname]
         except:
@@ -319,10 +324,10 @@ class SdsMetadata(object):
 
     def get_target_filepath(self, input_file):
 
-    # Given a .GTiff file, reads its metadata and build-up the target fullpath
-    # Input filename does not need to be in the eStation2 format, everything read from metadata
+        # Given a .GTiff file, reads its metadata and build-up the target fullpath
+        # Input filename does not need to be in the eStation2 format, everything read from metadata
 
-    # Check the file exists
+        # Check the file exists
         if os.path.isfile(input_file):
             try:
                 self.read_from_file(input_file)
@@ -330,14 +335,14 @@ class SdsMetadata(object):
                 logger.warning('Error in loading from file %s . Exit' % input_file)
 
             target_subdir = sds_metadata['eStation2_subdir']
-            target_dir=es_constants.es2globals['processing_dir']+target_subdir
-            target_name=functions.set_path_filename(sds_metadata['eStation2_date'],
-                                                    sds_metadata['eStation2_product'],
-                                                    sds_metadata['eStation2_subProduct'],
-                                                    sds_metadata['eStation2_mapset'],
-                                                    sds_metadata['eStation2_product_version'],
-                                                    '.tif')
-            fullpath = target_dir+target_name
+            target_dir = es_constants.es2globals['processing_dir'] + target_subdir
+            target_name = functions.set_path_filename(sds_metadata['eStation2_date'],
+                                                      sds_metadata['eStation2_product'],
+                                                      sds_metadata['eStation2_subProduct'],
+                                                      sds_metadata['eStation2_mapset'],
+                                                      sds_metadata['eStation2_product_version'],
+                                                      '.tif')
+            fullpath = target_dir + target_name
             return fullpath
         else:
             logger.warning('File %s does not exist. Exit' % input_file)
@@ -345,9 +350,9 @@ class SdsMetadata(object):
 
     def get_nodata_value(self, input_file):
 
-    # Given a .GTiff file, reads its metadata and extract NoData value
+        # Given a .GTiff file, reads its metadata and extract NoData value
 
-    # Check the file exists
+        # Check the file exists
         if os.path.isfile(input_file):
             try:
                 self.read_from_file(input_file)
@@ -362,9 +367,9 @@ class SdsMetadata(object):
 
     def get_scaling_values(self, input_file):
 
-    # Given a .GTiff file, reads its metadata and extract NoData value
+        # Given a .GTiff file, reads its metadata and extract NoData value
 
-    # Check the file exists
+        # Check the file exists
         if os.path.isfile(input_file):
             try:
                 self.read_from_file(input_file)
@@ -379,11 +384,9 @@ class SdsMetadata(object):
             return None
 
     def print_out(self):
-    #
-    #   Writes to std output
+        #
+        #   Writes to std output
 
         # Go through the metadata list and write to sds
         for key, value in list(sds_metadata.items()):
             print((key, value))
-
-

@@ -1,7 +1,3 @@
-from __future__ import unicode_literals
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 ####################################################################################################################
 #	purpose: Define functions to access and query the postgresql db
 #	author:  Jurriaan van 't Klooster
@@ -9,8 +5,12 @@ from __future__ import print_function
 #   descr:	 Functions to access and query the DB using SQLSoup and SQLAlchemy as Database Abstraction Layer and ORM.
 ####################################################################################################################
 
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 from future import standard_library
-standard_library.install_aliases()
+
 import sys
 import traceback
 # import sqlsoup
@@ -20,6 +20,9 @@ from sqlalchemy.sql import func, select, or_, and_, desc, asc, expression
 
 from lib.python import es_logging as log
 from database import connectdb
+
+standard_library.install_aliases()
+
 logger = log.my_logger(__name__)
 
 
@@ -51,7 +54,7 @@ def get_product_out_info(allrecs=False, productcode='', subproductcode='', versi
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_product_out_info: Database query error!\n -> {}".format(exceptionvalue))
-        #raise Exception("get_product_out_info: Database query error!\n ->%s" % exceptionvalue)
+        # raise Exception("get_product_out_info: Database query error!\n ->%s" % exceptionvalue)
     finally:
         if db.session:
             db.session.close()

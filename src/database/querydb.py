@@ -3,6 +3,9 @@
 #	author:  Jurriaan van 't Klooster
 #	date:	 20.03.2014
 #   descr:	 Functions to access and query the DB using SQLSoup and SQLAlchemy as Database Abstraction Layer and ORM.
+#
+#   IMPORTANT!
+#   For every new query function created in this file, create a unittest function in ./test/test_querydb.py
 ####################################################################################################################
 
 from __future__ import print_function
@@ -27,7 +30,6 @@ from database import crud
 from config import es_constants
 from lib.python import functions
 
-
 standard_library.install_aliases()
 logger = log.my_logger(__name__)
 
@@ -49,6 +51,7 @@ def get_logos():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_logos: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -66,6 +69,7 @@ def get_last_map_tpl_id(userid, workspaceid):
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         logger.error("get_last_map_tpl_id: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -83,6 +87,7 @@ def get_last_graph_tpl_id(userid, workspaceid):
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         logger.error("get_last_graph_tpl_id: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -100,6 +105,7 @@ def get_workspace_maps(workspaceid, userid):
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         logger.error("get_workspace_maps: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -117,6 +123,7 @@ def get_workspace_graphs(workspaceid, userid):
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         logger.error("get_workspace_graphs: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -133,6 +140,7 @@ def get_user_workspaces(userid):
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         logger.error("get_user_workspaces: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -151,7 +159,7 @@ def getCreatedUserWorkspace(userid, workspacename):
         result = dbschema_analysis.execute(query)
         result = result.fetchall()
 
-        query2 = "SELECT currval(pg_get_serial_sequence('analysis.user_workspaces','workspaceid')) as lastworkspaceid;"
+        # query2 = "SELECT currval(pg_get_serial_sequence('analysis.user_workspaces','workspaceid')) as lastworkspaceid;"
         result2 = dbschema_analysis.execute(query)
         result2 = result2.fetchall()
         lastworkspaceid = -1
@@ -168,6 +176,7 @@ def getCreatedUserWorkspace(userid, workspacename):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("getCreatedUserWorkspace: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -271,7 +280,7 @@ def activate_deactivate_product(productcode='', version='', activate=False):
         query = "SELECT * FROM products.activate_deactivate_product('" + productcode + "', '" \
                 + version + "', " + str(activate).upper() + "); COMMIT;"
 
-        db.execute(query)
+        result = db.execute(query)
 
         return True
 
@@ -307,6 +316,7 @@ def get_product_default_legend_steps(productcode, version, subproductcode):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_product_default_legend_steps: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -328,6 +338,7 @@ def get_user_map_templates(userid):
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         logger.error("get_user_map_templates: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -344,6 +355,7 @@ def getusers():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("getusers: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -361,6 +373,7 @@ def checklogin(login=None):
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         logger.error("checklogin: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -405,6 +418,7 @@ def get_user_graph_templates(userid):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_user_graph_templates: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -533,6 +547,7 @@ def get_product_timeseries_drawproperties(product, userid='', istemplate='false'
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_product_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -694,8 +709,6 @@ def get_graph_yaxes(graph_tpl_id='-1'):
     global dbschema_analysis
 
     try:
-        graph_yaxes = []
-
         query = " SELECT * FROM analysis.user_graph_tpl_yaxes " + \
                 " WHERE graph_tpl_id = " + str(graph_tpl_id)
 
@@ -707,6 +720,7 @@ def get_graph_yaxes(graph_tpl_id='-1'):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_graph_yaxes: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -731,12 +745,14 @@ def get_graph_tsdrawprops(graph_tpl_id):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_graph_tsdrawprops: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
 
 
-def get_product_yaxe(product, userid='', istemplate='false', graph_type='', graph_tpl_id='-1', graph_tpl_name='default'):
+def get_product_yaxe(product, userid='', istemplate='false', graph_type='', graph_tpl_id='-1',
+                     graph_tpl_name='default'):
     global dbschema_analysis
 
     try:
@@ -776,6 +792,7 @@ def get_product_yaxe(product, userid='', istemplate='false', graph_type='', grap
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_product_yaxe: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -787,7 +804,6 @@ def get_timeseries_yaxes(products, userid='', istemplate='false', graph_type='',
     global dbschema_analysis
 
     try:
-        timeseries_yaxes = []
         if userid != '':
             if graph_tpl_name == 'default' and graph_tpl_id == '-1' and istemplate == 'false':
                 graph_tpl_id = getDefaultUserGraphTemplateID(userid, graph_type)
@@ -830,6 +846,7 @@ def get_timeseries_yaxes(products, userid='', istemplate='false', graph_type='',
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_timeseries_yaxes: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -908,9 +925,9 @@ def update_yaxe(yaxe_info):
             yaxe['unit'] = yaxe_info['unit']
 
         if yaxe_info['opposite'] == "false":
-            yaxe['opposite'] = 'f'
+            yaxe['opposite'] = False
         else:
-            yaxe['opposite'] = 't'
+            yaxe['opposite'] = True
 
         yaxe['aggregation_type'] = yaxe_info['aggregation_type']
 
@@ -1133,6 +1150,7 @@ def get_timeseries_drawproperties(params):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -1408,6 +1426,7 @@ def get_graph_drawproperties(params):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_graph_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -1474,7 +1493,6 @@ def __get_chart_drawproperties(charttype='default'):
 
 def update_user_graph_tpl_drawproperties(graphdrawprobs, graphtpl_info):
     global dbschema_analysis
-    status = False
     crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
 
     try:
@@ -1504,7 +1522,7 @@ def update_user_graph_tpl_drawproperties(graphdrawprobs, graphtpl_info):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("update_user_graph_tpl_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
-        return status
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -1582,6 +1600,7 @@ def get_layers():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_layers: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -1609,6 +1628,7 @@ def get_legend_totals(legendid):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_legend_totals: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -1628,6 +1648,7 @@ def get_spirits():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_spirits: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -1695,6 +1716,7 @@ def get_enabled_ingest_derived_of_product(productcode, version, mapsetcode=None)
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_enabled_ingest_derived_of_product: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -1702,7 +1724,6 @@ def get_enabled_ingest_derived_of_product(productcode, version, mapsetcode=None)
 
 def update_eumetcast_source_info(eumetcastsourceinfo, datasourcedescrinfo):
     global db
-    status = False
     try:
 
         query1 = "UPDATE products.datasource_description SET " + \
@@ -1725,10 +1746,10 @@ def update_eumetcast_source_info(eumetcastsourceinfo, datasourcedescrinfo):
                  "  native_mapset = '" + datasourcedescrinfo['native_mapset'] + "' " + \
                  " WHERE datasource_descr_id = '" + eumetcastsourceinfo['orig_eumetcast_id'] + "' "
 
-        result = db.execute(query1)
+        db.execute(query1)
         db.commit()
 
-        query = "UPDATE products.internet_source SET " + \
+        query = "UPDATE products.eumetcast_source SET " + \
                 "  eumetcast_id = '" + eumetcastsourceinfo['eumetcast_id'] + "', " + \
                 "  filter_expression_jrc = '" + eumetcastsourceinfo['filter_expression_jrc'] + "', " + \
                 "  description = '" + eumetcastsourceinfo['description'] + "', " + \
@@ -1737,27 +1758,23 @@ def update_eumetcast_source_info(eumetcastsourceinfo, datasourcedescrinfo):
                 "  datasource_descr_id = '" + eumetcastsourceinfo['datasource_descr_id'] + "' " + \
                 " WHERE eumetcast_id = '" + eumetcastsourceinfo['orig_eumetcast_id'] + "' "
 
-        result = db.execute(query)
+        db.execute(query)
         db.commit()
 
-        status = True
-
-        return status
+        return True
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("update_eumetcast_source_info: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
-        return status
 
 
 def update_internet_source_info(internetsourceinfo, datasourcedescrinfo):
     global db
-    status = False
     try:
-
         query1 = "UPDATE products.datasource_description SET " + \
                  "  datasource_descr_id = '" + datasourcedescrinfo['datasource_descr_id'] + "', " + \
                  "  format_type = '" + datasourcedescrinfo['format_type'] + "', " + \
@@ -1778,7 +1795,7 @@ def update_internet_source_info(internetsourceinfo, datasourcedescrinfo):
                  "  native_mapset = '" + datasourcedescrinfo['native_mapset'] + "' " + \
                  " WHERE datasource_descr_id = '" + internetsourceinfo['orig_internet_id'] + "' "
 
-        result = db.execute(query1)
+        db.execute(query1)
         db.commit()
 
         query = "UPDATE products.internet_source SET " + \
@@ -1802,25 +1819,22 @@ def update_internet_source_info(internetsourceinfo, datasourcedescrinfo):
                 "  https_params = '" + internetsourceinfo['https_params'] + "' " + \
                 " WHERE internet_id = '" + internetsourceinfo['orig_internet_id'] + "' "
 
-        result = db.execute(query)
+        db.execute(query)
         db.commit()
 
-        status = True
-
-        return status
+        return True
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("update_internet_source_info: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
-        return status
 
 
 def update_product_info(productinfo):
     global db
-    status = False
     try:
         query = "UPDATE products.product SET " + \
                 "  productcode = '" + productinfo['productcode'] + "', " + \
@@ -1851,22 +1865,19 @@ def update_product_info(productinfo):
             db.execute(query)
             db.commit()
 
-        status = True
-
-        return status
+        return True
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("update_product_info: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
-        return status
 
 
 def update_ingest_subproduct_info(productinfo):
     global db
-    status = False
     try:
         query = "UPDATE products.product SET " + \
                 "  productcode = '" + productinfo['productcode'] + "', " + \
@@ -1894,26 +1905,25 @@ def update_ingest_subproduct_info(productinfo):
                 "  AND subproductcode = '" + productinfo['orig_subproductcode'] + "' " + \
                 "  AND version = '" + productinfo['version'] + "' "
 
-        # print (query)
         db.execute(query)
         db.commit()
 
-        status = True
-
-        return status
+        return True
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("update_ingest_subproduct_info: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
-        return status
 
 
 def get_mapsets_for_ingest(productcode, version, subproductcode):
     global db
     try:
+        # Get all the mapsets that are not already defined for the subproduct for ingestion.
+
         # query = " SELECT * FROM products.mapset " \
         query = " SELECT  mapset_new.mapsetcode, " \
                 " 	mapset_new.defined_by, " \
@@ -1935,7 +1945,7 @@ def get_mapsets_for_ingest(productcode, version, subproductcode):
                 " 	mapset_new.footprint_image " \
                 " FROM products.mapset_new AS mapset_new " \
                 " INNER JOIN products.projection AS projection ON mapset_new.proj_code = projection.proj_code " \
-                " INNER JOIN products.resolution AS resolution ON mapset_new.resolutioncode=resolution.resolutioncode "\
+                " INNER JOIN products.resolution AS resolution ON mapset_new.resolutioncode=resolution.resolutioncode " \
                 " INNER JOIN products.bbox ON mapset_new.bboxcode = bbox.bboxcode " \
                 " WHERE mapset_new.mapsetcode not in ( SELECT mapsetcode FROM products.ingestion " \
                 "                                      WHERE productcode = '" + productcode + "' " + \
@@ -1953,6 +1963,7 @@ def get_mapsets_for_ingest(productcode, version, subproductcode):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_mapsets_for_ingest: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -1998,7 +2009,7 @@ def get_mapset(mapsetcode='', allrecs=False):
                 " 	mapset_new.footprint_image " \
                 " FROM products.mapset_new AS mapset_new " \
                 " INNER JOIN products.projection AS projection ON mapset_new.proj_code = projection.proj_code " \
-                " INNER JOIN products.resolution AS resolution ON mapset_new.resolutioncode=resolution.resolutioncode "\
+                " INNER JOIN products.resolution AS resolution ON mapset_new.resolutioncode=resolution.resolutioncode " \
                 " INNER JOIN products.bbox ON mapset_new.bboxcode = bbox.bboxcode "
 
         order_by = " ORDER BY mapset_new.mapsetcode "
@@ -2020,8 +2031,9 @@ def get_mapset(mapsetcode='', allrecs=False):
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
-        raise logger.error("get_mapset: Database query error!\n -> {}".format(exceptionvalue))
+        logger.error("get_mapset: Database query error!\n -> {}".format(exceptionvalue))
         # raise Exception("get_mapset: Database query error!\n ->%s" % exceptionvalue)
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -2044,7 +2056,7 @@ def __get_mapset(mapsetcode='', allrecs=False):
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
-        raise logger.error("get_mapset: Database query error!\n -> {}".format(exceptionvalue))
+        logger.error("get_mapset: Database query error!\n -> {}".format(exceptionvalue))
         # raise Exception("get_mapset: Database query error!\n ->%s" % exceptionvalue)
     finally:
         if db.session:
@@ -2106,6 +2118,7 @@ def get_mapsets():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_mapsets: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -2123,6 +2136,7 @@ def get_projections():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_projections: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -2140,6 +2154,7 @@ def get_resolutions():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_resolutions: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -2157,15 +2172,16 @@ def get_predefined_bboxes():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_resolutions: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
 
 
-def get_categories(all=False):
+def get_categories(allrecs=False):
     global db
     try:
-        if all:
+        if allrecs:
             query = "SELECT * FROM products.product_category ORDER BY category_id"
         else:
             query = "SELECT * FROM products.product_category " + \
@@ -2181,6 +2197,7 @@ def get_categories(all=False):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_categories: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -2198,6 +2215,7 @@ def get_frequencies():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_frequencies: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -2215,6 +2233,7 @@ def get_dateformats():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_dateformats: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -2232,6 +2251,7 @@ def get_datatypes():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_datatypes: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -2251,6 +2271,7 @@ def get_eumetcastsources():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_eumetcastsources: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -2270,6 +2291,7 @@ def get_internetsources():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_internetsources: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -2287,6 +2309,7 @@ def get_themas():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_themas: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -2323,6 +2346,7 @@ def get_i18n(lang='eng'):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_i18n: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -2359,6 +2383,7 @@ def get_languages():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_languages: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -2441,6 +2466,7 @@ def get_timeseries_subproducts(productcode=None, version='undefined', subproduct
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and log the error telling what happened.
         logger.error("get_timeseries_subproducts: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -2497,9 +2523,9 @@ def get_timeseries_products(masked=None):
             where = ""
         else:
             if not masked:
-                where = " and p.masked == 'f' "
+                where = " and p.masked = 'f' "
             else:
-                where = " and p.masked == 't' "
+                where = " and p.masked = 't' "
 
         query += where
         productslist = db.execute(query)
@@ -2546,6 +2572,7 @@ def get_timeseries_products(masked=None):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and log the error telling what happened.
         logger.error("get_timeseries_products: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -2584,6 +2611,7 @@ def get_all_legends():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and log the error telling what happened.
         logger.error("get_all_legends: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -2605,7 +2633,7 @@ def deletelegendsteps(legendid):
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         if False:
-            print (traceback.format_exc())
+            print(traceback.format_exc())
         # Exit the script and log the error telling what happened.
         logger.error("deletelegendsteps: Database query error!\n -> {}".format(exceptionvalue))
         return False
@@ -2634,7 +2662,7 @@ def createlegend(params):
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         if False:
-            print (traceback.format_exc())
+            print(traceback.format_exc())
         # Exit the script and log the error telling what happened.
         logger.error("createlegend: Database query error!\n -> {}".format(exceptionvalue))
         return -1
@@ -2722,6 +2750,7 @@ def get_product_legends(productcode=None, subproductcode=None, version=None):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and log the error telling what happened.
         logger.error("get_product_legends: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -2754,6 +2783,7 @@ def get_legend_assigned_datasets(legendid):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and log the error telling what happened.
         logger.error("get_legend_assigned_datasets: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -2791,6 +2821,7 @@ def export_legend_steps(legendid=None):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and log the error telling what happened.
         logger.error("get_legend_steps: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -2846,6 +2877,7 @@ def get_legend_steps(legendid=None):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and log the error telling what happened.
         logger.error("get_legend_steps: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -2951,6 +2983,7 @@ def get_legend_info(legendid=None):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and log the error telling what happened.
         logger.error("get_legend_info: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if dbschema_analysis.session:
             dbschema_analysis.session.close()
@@ -3031,6 +3064,7 @@ def get_ingestions():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and log the error telling what happened.
         logger.error("get_ingestions: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -3089,6 +3123,7 @@ def get_dataacquisitions():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and log the error telling what happened.
         logger.error("get_dataacquisitions: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -3154,6 +3189,7 @@ def get_products_acquisition(activated=None):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and log the error telling what happened.
         logger.error("get_products_acquisition: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -3167,28 +3203,28 @@ def __get_products_acquisition(activated=None):
 
         pads = db.product_acquisition_data_source._table
         s1 = select([func.COUNT(pads.c.data_source_id).label('totgets'),
-                    pads.c.productcode.label('pads_productcode'),
-                    pads.c.subproductcode.label('pads_subproductcode'),
-                    pads.c.version.label('pads_version')],
-                   group_by=[pads.c.productcode,
-                             pads.c.subproductcode,
-                             pads.c.version],
-                   from_obj=[pads])
+                     pads.c.productcode.label('pads_productcode'),
+                     pads.c.subproductcode.label('pads_subproductcode'),
+                     pads.c.version.label('pads_version')],
+                    group_by=[pads.c.productcode,
+                              pads.c.subproductcode,
+                              pads.c.version],
+                    from_obj=[pads])
 
         s1 = s1.alias('pads')
         db.pads = db.map(s1, primary_key=[pads.c.productcode,
-                                       pads.c.subproductcode,
-                                       pads.c.version])
+                                          pads.c.subproductcode,
+                                          pads.c.version])
 
         subprods = db.product._table
         s2 = select([func.COUNT(subprods.c.subproductcode).label('totsubprods'),
                      subprods.c.productcode.label('subprods_productcode'),
                      # subprods.c.subproductcode.label('subprods_subproductcode'),
                      subprods.c.version.label('subprods_version')],
-                     group_by=[subprods.c.productcode,
-                               # subprods.c.subproductcode,
-                               subprods.c.version],
-                     from_obj=[subprods]).where(and_(subprods.c.product_type != 'Native'))
+                    group_by=[subprods.c.productcode,
+                              # subprods.c.subproductcode,
+                              subprods.c.version],
+                    from_obj=[subprods]).where(and_(subprods.c.product_type != 'Native'))
 
         s2 = s2.alias('subprods')
         db.subprods = db.map(s2, primary_key=[subprods.c.productcode,
@@ -3196,19 +3232,19 @@ def __get_products_acquisition(activated=None):
                                               subprods.c.version])
 
         s3 = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productid'),
-                    p.c.productcode,
-                    p.c.subproductcode,
-                    p.c.version,
-                    p.c.defined_by,
-                    p.c.activated,
-                    p.c.product_type,
-                    func.coalesce(p.c.descriptive_name, '').label('prod_descriptive_name'),
-                    func.coalesce(p.c.description, '').label('description'),
-                    func.coalesce(p.c.provider, '').label('provider'),
-                    p.c.masked,
-                    pc.c.category_id,
-                    pc.c.descriptive_name.label('cat_descr_name'),
-                    pc.c.order_index]).select_from(p.outerjoin(pc, p.c.category_id == pc.c.category_id))
+                     p.c.productcode,
+                     p.c.subproductcode,
+                     p.c.version,
+                     p.c.defined_by,
+                     p.c.activated,
+                     p.c.product_type,
+                     func.coalesce(p.c.descriptive_name, '').label('prod_descriptive_name'),
+                     func.coalesce(p.c.description, '').label('description'),
+                     func.coalesce(p.c.provider, '').label('provider'),
+                     p.c.masked,
+                     pc.c.category_id,
+                     pc.c.descriptive_name.label('cat_descr_name'),
+                     pc.c.order_index]).select_from(p.outerjoin(pc, p.c.category_id == pc.c.category_id))
 
         s3 = s3.alias('pl')
         db.pl = db.map(s3, primary_key=[s3.c.productid])
@@ -3235,7 +3271,7 @@ def __get_products_acquisition(activated=None):
         #                                             db.pl.version == db.pads.pads_version), isouter=True)
 
         productslist2 = db.join(db.pl, db.subprods, and_(db.pl.productcode == db.subprods.subprods_productcode,
-                                           db.pl.version == db.subprods.subprods_version), isouter=True)
+                                                         db.pl.version == db.subprods.subprods_version), isouter=True)
 
         productslist = productslist2.filter(where).order_by(asc(db.pl.c.order_index), asc(db.pl.c.productcode)).all()
 
@@ -3298,9 +3334,11 @@ def get_products(activated=None, masked=None):
 
         if masked is None:
             if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
-                where = and_(pl.c.product_type == 'Native', pl.c.activated == 't')   # , pl.c.defined_by != ''     'JRC-Test'
+                where = and_(pl.c.product_type == 'Native',
+                             pl.c.activated == 't')  # , pl.c.defined_by != ''     'JRC-Test'
             elif activated is False or activated in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
-                where = and_(pl.c.product_type == 'Native', pl.c.activated == 'f')   # , pl.c.defined_by != ''   'JRC-Test'
+                where = and_(pl.c.product_type == 'Native',
+                             pl.c.activated == 'f')  # , pl.c.defined_by != ''   'JRC-Test'
             else:
                 where = and_(pl.c.product_type == 'Native')  # , pl.c.defined_by != ''    'JRC-Test'
         else:
@@ -3323,6 +3361,7 @@ def get_products(activated=None, masked=None):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and log the error telling what happened.
         logger.error("get_products: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -3349,6 +3388,7 @@ def get_frequency(frequency_id=''):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_frequency: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -3384,6 +3424,7 @@ def get_product_out_info(allrecs=False, productcode='', subproductcode='', versi
         # Exit the script and print an error telling what happened.
         logger.error("get_product_out_info: Database query error!\n -> {}".format(exceptionvalue))
         # raise Exception("get_product_out_info: Database query error!\n ->%s" % exceptionvalue)
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -3419,6 +3460,7 @@ def get_product_out_info_connect(allrecs=False, productcode='', subproductcode='
         # Exit the script and print an error telling what happened.
         logger.error("get_product_out_info: Database query error!\n -> {}".format(exceptionvalue))
         # raise Exception("get_product_out_info: Database query error!\n ->%s" % exceptionvalue)
+        return False
     finally:
         if my_db.session:
             my_db.session.close()
@@ -3480,15 +3522,15 @@ def get_product_in_info(allrecs=False, productcode='', subproductcode='', versio
 def get_product_native(productcode='', version='undefined', allrecs=False):
     global db
     try:
-
         if allrecs:
-            query = " SELECT * FROM products.product WHERE product_type == 'Native' ORDER BY productcode ASC"
+            query = " SELECT * FROM products.product WHERE product_type = 'Native' ORDER BY productcode ASC"
         else:
             query = " SELECT * FROM products.product " \
                     " WHERE product_type = 'Native' " \
                     "   AND productcode = '" + productcode + "'" \
                     "   AND version = '" + version + "'" \
                     " ORDER BY productcode ASC"
+
         product = db.execute(query)
         product = product.fetchall()
 
@@ -3525,7 +3567,8 @@ def get_product_native(productcode='', version='undefined', allrecs=False):
 #   Date: 2014/05/16
 #   Input: productcode      - The productcode of the specific product info requested. Default=''
 #          version          - The product version
-#          allrecs          - If True return all products. Default=False
+#          subproductcode   - The subproductcode of the specific subproduct info requested. Default=''
+#          masked           - Only if subproduct is masked (not visible) in the GUI. Default=False
 #   Output: Return the fields of all or a specific product record with product_type='Native' from the table product.
 def get_subproduct(productcode='', version='undefined', subproductcode='', masked=False):
     global db
@@ -3579,8 +3622,7 @@ def get_eumetcast(source_id='', allrecs=False):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_eumetcast: Database query error!\n -> {}".format(exceptionvalue))
-        eumetcasts = []
-        return eumetcasts
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -3596,14 +3638,11 @@ def get_eumetcast(source_id='', allrecs=False):
 #   Input: internet_id      - The internet_id of the specific internet source requested. Default=''
 #          allrecs          - If True return all products. Default=False
 #   Output: Return the fields of all or a specific internet source record from the table internet_source.
-def get_internet(internet_id='', allrecs=False):
+def get_internet(internet_id=''):
     global db
     try:
-        if allrecs:
-            internet = db.internet_source.order_by(asc(db.internet_source.internet_id)).all()
-        else:
-            where = db.internet_source.internet_id == internet_id
-            internet = db.internet_source.filter(where).first()
+        where = db.internet_source.internet_id == internet_id
+        internet = db.internet_source.filter(where).first()
         if internet is None:
             internet = []
         return internet
@@ -3660,6 +3699,7 @@ def get_ingestion_product(allrecs=False, productcode='', version='undefined'):
         # Exit the script and print an error telling what happened.
         logger.error("get_ingestion_product: Database query error!\n -> {}".format(exceptionvalue))
         # raise Exception("get_ingestion_product: Database query error!\n ->%s" % exceptionvalue)
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -3681,8 +3721,8 @@ def get_ingestion_subproduct(allrecs=False, productcode='', version=''):
     try:
         ingestion = []
         if allrecs:
-            if db.ingestion.filter(db.ingestion.activated is True).count() >= 1:
-                ingestion = db.ingestion.filter(db.ingestion.activated is True). \
+            if db.ingestion.filter(db.ingestion.activated).count() >= 1:
+                ingestion = db.ingestion.filter(db.ingestion.activated). \
                     order_by(asc(db.ingestion.productcode)).all()
         else:
             where = and_(db.ingestion.productcode == productcode,
@@ -3698,6 +3738,7 @@ def get_ingestion_subproduct(allrecs=False, productcode='', version=''):
         # Exit the script and print an error telling what happened.
         logger.error("get_ingestion_subproduct: Database query error!\n -> {}".format(exceptionvalue))
         # raise Exception("get_ingestion_subproduct: Database query error!\n ->%s" % exceptionvalue)
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -3736,6 +3777,7 @@ def get_product_sources(productcode='', subproductcode='', version=''):
         # Exit the script and print an error telling what happened.
         logger.error("get_product_sources: Database query error!\n -> {}".format(exceptionvalue))
         # raise Exception("get_product_sources: Database query error!\n ->%s" % exceptionvalue)
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -3762,7 +3804,7 @@ def get_datasource_descr(source_type='', source_id=''):
                     "FROM products.eumetcast_source es JOIN products.datasource_description dsd " + \
                     "  ON es.datasource_descr_id = dsd.datasource_descr_id " + \
                     "WHERE es.datasource_descr_id = '" + source_id + "'"
-        else:   # source_type == 'INTERNET'
+        else:  # source_type == 'INTERNET'
             query = "SELECT ints.*, dsd.* " + \
                     "FROM products.internet_source ints JOIN products.datasource_description dsd " + \
                     "  ON ints.datasource_descr_id = dsd.datasource_descr_id " + \
@@ -3791,6 +3833,7 @@ def get_datasource_descr(source_type='', source_id=''):
         # Exit the script and print an error telling what happened.
         logger.error("get_datasource_descr: Database query error!\n -> {}".format(exceptionvalue))
         # raise Exception("get_ingestion: Database query error!\n ->%s" % exceptionvalue)
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -3837,6 +3880,7 @@ def get_eumetcast_sources():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_eumetcast_sources: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -3908,6 +3952,7 @@ def get_active_internet_sources():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_active_internet_sources: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -4050,6 +4095,7 @@ def get_processingchains_input_products(process_id=None):
         #    print traceback.format_exc()
         # Exit the script and print an error telling what happened.
         logger.error("get_processingchains_input_products: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -4129,6 +4175,7 @@ def get_processingchain_output_products(process_id=None):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_processingchain_output_products: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -4179,6 +4226,7 @@ def get_processing_chains():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_active_processing_chains: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -4199,22 +4247,27 @@ def get_processing_chains():
 #
 def get_active_processing_chains():
     global db
-    active_processing_chains = []
     try:
-        session = db.session
-        process = aliased(db.processing)
 
-        # processinput = session.query(db.process_product).subquery()
+        query = "SELECT * FROM products.processing WHERE activated=TRUE"
 
-        # The columns on the subquery "processinput" are accessible through an attribute called "c"
-        # e.g. es.c.productcode
-        active_processing_chains = session.query(process.process_id,
-                                                 process.defined_by,
-                                                 process.output_mapsetcode,
-                                                 process.derivation_method,
-                                                 process.algorithm,
-                                                 process.priority). \
-            filter(process.activated == True).all()
+        result = dbschema_analysis.execute(query)
+        active_processing_chains = result.fetchall()
+
+        # session = db.session
+        # process = aliased(db.processing)
+        #
+        # # processinput = session.query(db.process_product).subquery()
+        #
+        # # The columns on the subquery "processinput" are accessible through an attribute called "c"
+        # # e.g. es.c.productcode
+        # active_processing_chains = session.query(process.process_id,
+        #                                          process.defined_by,
+        #                                          process.output_mapsetcode,
+        #                                          process.derivation_method,
+        #                                          process.algorithm,
+        #                                          process.priority). \
+        #     filter(process.activated == True).all()
 
         return active_processing_chains
 
@@ -4222,6 +4275,7 @@ def get_active_processing_chains():
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_active_processing_chains: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -4262,7 +4316,7 @@ def get_processing_chain_products(process_id, type='All'):
                                      processinput.c.date_format,
                                      processinput.c.start_date,
                                      processinput.c.end_date). \
-                outerjoin(processinput, process.process_id == processinput.c.process_id)
+                outerjoin(processinput, process.process_id == processinput.c.process_id).all()
 
         elif type == 'input':
             products = session.query(process.process_id,
@@ -4297,6 +4351,7 @@ def get_processing_chain_products(process_id, type='All'):
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
         logger.error("get_processing_chain_products: Database query error!\n -> {}".format(exceptionvalue))
+        return False
     finally:
         if db.session:
             db.session.close()
@@ -4315,21 +4370,21 @@ def get_processing_chain_products(process_id, type='All'):
 #   Output: OK / error
 #
 def update_processing_chain_products(productcode, version, proc_sub_product, input_product_info):
-
     crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
 
+    updatestatus = {'success': False, 'message': ''}
     # 'Hard-coded' definitions
     product_type = 'Derived'
-    defined_by = 'JRC'                  # To be changed looking at system_settings.ini
+    defined_by = 'JRC'  # To be changed looking at system_settings.ini
 
     # Extract info from input_sub_product
-    category_id = input_product_info[0].category_id                     # Always
-    provider = input_product_info[0].provider                           # Always
-    scale_factor = input_product_info[0].scale_factor                   # Possible overwritten by chain
-    scale_offset = input_product_info[0].scale_offset                   # Possible overwritten by chain
-    nodata = input_product_info[0].nodata                               # Possible overwritten by chain
-    unit = input_product_info[0].unit                                   # Possible overwritten by chain
-    data_type_id = input_product_info[0].data_type_id                   # Possible overwritten by chain
+    category_id = input_product_info[0].category_id  # Always
+    provider = input_product_info[0].provider  # Always
+    scale_factor = input_product_info[0].scale_factor  # Possible overwritten by chain
+    scale_offset = input_product_info[0].scale_offset  # Possible overwritten by chain
+    nodata = input_product_info[0].nodata  # Possible overwritten by chain
+    unit = input_product_info[0].unit  # Possible overwritten by chain
+    data_type_id = input_product_info[0].data_type_id  # Possible overwritten by chain
 
     # Assign info from proc_sub_product (chain)
     subproductcode = proc_sub_product.sprod
@@ -4340,7 +4395,7 @@ def update_processing_chain_products(productcode, version, proc_sub_product, inp
     date_format = proc_sub_product.date_format
     masked = proc_sub_product.masked
     timeseries_role = proc_sub_product.timeseries_role
-    activated = proc_sub_product.active_user                            # Should always be false
+    activated = proc_sub_product.active_user  # Should always be false
 
     # Overwrite if defined by the chain (proc_sub_product)
     if proc_sub_product.scale_factor is not None:
@@ -4360,7 +4415,8 @@ def update_processing_chain_products(productcode, version, proc_sub_product, inp
                        'version': version}
 
         if crud_db.read('product', **productinfo):
-            updatestatus = '{"success":true, "message":"Product already exist in products table!"}'
+            updatestatus['success'] = True
+            updatestatus['message'] = 'Product already exist in products table!'
         else:
             try:
                 # Manage product table
@@ -4384,9 +4440,13 @@ def update_processing_chain_products(productcode, version, proc_sub_product, inp
                                'masked': masked,
                                'timeseries_role': timeseries_role}
                 crud_db.create('product', productinfo)
-                updatestatus = '{"success":true, "message":"Product created in products table!"}'
+                updatestatus['success'] = True
+                updatestatus['message'] = 'Product created in products table!'
             except:
-                updatestatus = '{"success":false, "message":"Error in creating prod in products table!"}'
+                updatestatus['success'] = False
+                updatestatus['message'] = 'Error in creating prod in products table!'
+
+        return updatestatus
 
         # # Manage process_product table
         # process_productinfo_pkey = {'process_id': process_id,
@@ -4414,10 +4474,13 @@ def update_processing_chain_products(productcode, version, proc_sub_product, inp
         #     except:
         #         updatestatus = '{"success":false, "message":"Error in creating prod in products table!"}'
 
-    # except:
-    #     exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-    #     # Exit the script and print an error telling what happened.
-    #     logger.error("get_processing_chain_products: Database query error!\n -> {}".format(exceptionvalue))
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("update_processing_chain_products : Database query error!\n -> {}".format(exceptionvalue))
+        updatestatus['success'] = False
+        updatestatus['message'] = 'Database exception error!'
+        return updatestatus
     finally:
         if crud_db:
             crud_db = None
@@ -4620,21 +4683,21 @@ def get_product_active_derived_mapsets(productcode='', subproductcode='', versio
 #          version          - The product version
 #
 #   Output: Return the mapsetcodes of the active and enabled ingestions of a specific product record.
+#
+#   Query not used anymore!
 def get_product_active_mapsets(productcode='', version='undefined'):
     global db
     try:
-        # "   AND activated = TRUE " \
-
         query = " SELECT DISTINCT mapsetcode FROM products.ingestion " \
                 " WHERE productcode = '" + productcode + "'" \
                 "   AND version = '" + version + "'" \
                 "   AND enabled = TRUE " \
-                 " UNION " \
-                 " SELECT DISTINCT mapsetcode " \
-                 " FROM products.process_product " \
-                 " WHERE productcode = '" + productcode + "'" \
-                 " AND version = '" + version + "'" \
-                 " AND activated = TRUE;"
+                " UNION " \
+                " SELECT DISTINCT mapsetcode " \
+                " FROM products.process_product " \
+                " WHERE productcode = '" + productcode + "'" \
+                "   AND version = '" + version + "'" \
+                "   AND activated = TRUE;"
 
         productmapsets = db.execute(query)
         productmapsets = productmapsets.fetchall()
