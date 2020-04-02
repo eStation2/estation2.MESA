@@ -4448,7 +4448,8 @@ def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in
     # Assign to the output array
     # Option 2: ES2-385 Check if Output rescaling has to be done
     if out_scale_factor != 1 or out_offset != 0:
-        trg_data = old_div((phys_value - out_offset), out_scale_factor)
+        # trg_data = old_div((phys_value - out_offset), out_scale_factor)
+        trg_data = (phys_value - out_offset)/ out_scale_factor
     else:
         trg_data = phys_value
 

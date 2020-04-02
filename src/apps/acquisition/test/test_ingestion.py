@@ -113,15 +113,15 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(1, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - DMP V2.0.1 //Made similar process test//
+    #   Vegetation - DMP V2.0.1 //Tested//
     #   ---------------------------------------------------------------------------
     def test_ingest_g_cls_dmp_2_0_1(self):
 
         # Test Copernicus Products version 2.0.1 (for DMP)
         # Products released from VITO in March 2017
 
-        date_fileslist = glob.glob('/data/TestIngestion/c_gls_DMP-RT0_201812310000_GLOBE_PROBAV_V2.0.1.nc')
-        in_date = '20181221'
+        date_fileslist = glob.glob('/data/ingest/c_gls_DMP-RT0_202003200000_GLOBE_PROBAV_V2.0.1.nc')
+        in_date = '20200320'
         productcode = 'vgt-dmp'
         productversion = 'V2.0'
         subproductcode = 'dmp'
@@ -2148,3 +2148,6 @@ class TestIngestion(unittest.TestCase):
     #     self.assertEqual(1, 1)
 
 
+suite_ingestion = unittest.TestLoader().loadTestsFromTestCase(TestIngestion)
+if __name__ == '__main__':
+    unittest.TextTestRunner(verbosity=2).run(suite_ingestion)
