@@ -526,7 +526,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(1, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - NDVI 300m \\not working\\
+    #   Vegetation - NDVI 300m \\working\\
     #   ---------------------------------------------------------------------------
     def test_ingest_probav_ndvi_300(self):
         # Test Copernicus Products version 2.2 (starting with NDVI 2.2.1)
@@ -772,14 +772,14 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(1, 1)
 
     #   ---------------------------------------------------------------------------
-    #    Rainfall - Fewsnet 2 not working
+    #    Rainfall - Fewsnet 2  \\working\\
     #   ---------------------------------------------------------------------------
     def test_ingest_fewsnet_rfe(self):
 
         # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
         #date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/S3A_SL_2_WST/S3A_SL_2_WST____20180306T095629_20180306T095929_20180306T114727_0179_028_307_3420_MAR_O_NR_002.SEN3.tar')
-        date_fileslist = glob.glob('/data/ingest/a99123rb.zip')
-        in_date = '99123'
+        date_fileslist = glob.glob('/data/ingest/a20013rb.zip')
+        in_date = '20013'
         productcode = 'fewsnet-rfe'
         productversion = '2.0'
         subproductcode = '10d'

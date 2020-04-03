@@ -3816,27 +3816,27 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             trg_ds = None
 
             # Merge the old and new output products into a 'tmp' file
-            try:
-                command = 'gdalwarp '
-                command += ' -co \"COMPRESS=LZW\"'
-                command += ' -srcnodata ' + str(out_nodata)
-                command += ' -dstnodata ' + str(out_nodata) + ' -of GTiff '
-                command += my_output_filename + ' ' + output_filename+ ' ' + tmp_output_file
-                my_logger.debug('Command for merging is: ' + command)
-                os.system(command)
-                # inter_processed_list.append(clipped_file)
-            except:
-                pass
             # try:
-            #     command = es_constants.gdal_merge + ' -n '+str(out_nodata)
-            #     command += ' -a_nodata '+str(out_nodata)
-            #     command += ' -co \"compress=lzw\" -o '
-            #     command += tmp_output_file
-            #     command += ' '+ my_output_filename+ ' '+output_filename
+            #     command = 'gdalwarp '
+            #     command += ' -co \"COMPRESS=LZW\"'
+            #     command += ' -srcnodata ' + str(out_nodata)
+            #     command += ' -dstnodata ' + str(out_nodata) + ' -of GTiff '
+            #     command += my_output_filename + ' ' + output_filename+ ' ' + tmp_output_file
             #     my_logger.debug('Command for merging is: ' + command)
             #     os.system(command)
+            #     # inter_processed_list.append(clipped_file)
             # except:
             #     pass
+            try:
+                command = es_constants.gdal_merge + ' -n '+str(out_nodata)
+                command += ' -a_nodata '+str(out_nodata)
+                command += ' -co \"compress=lzw\" -o '
+                command += tmp_output_file
+                command += ' '+ my_output_filename+ ' '+output_filename
+                my_logger.debug('Command for merging is: ' + command)
+                os.system(command)
+            except:
+                pass
 
             # Write metadata to output
             if old_file_list is not None:
