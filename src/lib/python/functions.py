@@ -12,6 +12,7 @@
 # history: 1.0
 #
 # TODO-M.C.: replace, where needed/applicable, datetime()
+# TODO-Jurvtk: All functions need error handling!
 #
 
 # Import standard modules
@@ -77,18 +78,26 @@ def str_to_bool(s):
         return False
 
 
-def is_float(s):
+def str_is_float(s):
     try:
         float(s)
         return True
+        # if isinstance(s, float):
+        #     return True
+        # else:
+        #     return False
     except ValueError:
         return False
 
 
-def is_int(n):
+def str_is_int(n):
     try:
         int(n)
         return True
+        # if isinstance(n, int):
+        #     return True
+        # else:
+        #     return False
     except ValueError:
         return False
 
@@ -167,7 +176,7 @@ def get_remote_system_status(server_address):
         # everything is fine
         # response = urllib.urlopen("http://" + server_address + "/esapp/dashboard/systemstatus")
         result = response.read()
-        status_remote_machine = ast.literal_eval(result)
+        status_remote_machine = ast.literal_eval(result.decode("utf-8"))
         response.close()  # best practice to close the file
     return status_remote_machine
 
@@ -189,7 +198,7 @@ def _check_connection(server_info):
 def check_connection(server_info):
     try:
         # response = os.system("ping -c 1 " + hostname)
-        response = os.system("ping -c 1 -w2 " + server_info + " > /dev/null 2>&1")
+        response = os.system("ping -c 2 -w2 " + server_info + " > /dev/null 2>&1")
         # check the response...
         if response == 0:
             return True
@@ -201,6 +210,8 @@ def check_connection(server_info):
 
 def getStatusPostgreSQL():
     try:
+        # TODO: extend functions.getStatusPostgreSQL() to check the status in the postgres container!
+
         # Get status of postgresql
         command = [es_constants.es2globals['postgresql_executable'], 'status']  # /etc/init.d/postgresql-9.3  on CentOS
         # print command
@@ -371,7 +382,7 @@ def setUserSetting(setting=None, value=None):
             config_usersettings.set('USER_SETTINGS', setting, value)
 
         # Writing our configuration file to 'user_settings.ini' - COMMENTS ARE NOT PRESERVED!
-        with open(usersettingsfilepath, 'wb') as configfile:
+        with open(usersettingsfilepath, 'w') as configfile:
             config_usersettings.write(configfile)
             configfile.close()
 
@@ -615,8 +626,8 @@ def internet_on():  # is_connected():
 ######################################################################################
 
 # Return True if the date is in the correct format
-def checkDateFormat(myString):
-    isDate = re.match('[0-1][0-9]\/[0-3][0-9]\/[1-2][0-9]{3}', myString)
+def checkDateFormat(mystring):
+    isDate = re.match('[0-1][0-9]\/[0-3][0-9]\/[1-2][0-9]{3}', mystring)
     return isDate
 
 
@@ -1253,8 +1264,8 @@ def extract_from_date(str_date):
 #   Purpose: Exclude current year from the data list
 #   Author: Vijay Charan Venkatachalam
 #   Date: 2018/11/23
-#   Input: datelist
-#   Output: list with excluded current yeat
+#   Input: list of filenames starting with date in format YYYYMMDD
+#   Output: list of filenames with excluded the filenames containing the current year
 #
 def exclude_current_year(input_list):
     output_list = []
@@ -1766,7 +1777,7 @@ def restore_obj_from_pickle(obj, filename):
     # Restore/Create Info
     if os.path.exists(filename):
         try:
-            dump_file_info = open(filename, 'r')
+            dump_file_info = open(filename, 'rb')
             tmp_object = pickle.load(dump_file_info)
             logger.debug("Dump file info loaded from %s.", filename)
             obj = tmp_object
@@ -1790,7 +1801,7 @@ def load_obj_from_pickle(filename):
     # Restore/Create Info
     if os.path.exists(filename):
         try:
-            dump_file_info = open(filename, 'r')
+            dump_file_info = open(filename, 'rb')
             obj = pickle.load(dump_file_info)
         except:
             logger.debug("Dump file %s can't be loaded, the file will be removed.", filename)
@@ -1978,8 +1989,7 @@ def element_to_list(input_arg):
     if type(input_arg) in (type([]), type(())):
         return input_arg
     else:
-        my_list = []
-        my_list.append(input_arg)
+        my_list = [input_arg]
     return my_list
 
 
@@ -2121,7 +2131,7 @@ def get_machine_mac_address():
 
 
 def get_eumetcast_info(eumetcast_id):
-    filename = es_constants.es2globals.get_eumetcast_processed_list_prefix + str(eumetcast_id) + '.info'
+    filename = es_constants.es2globals['get_eumetcast_processed_list_prefix'] + str(eumetcast_id) + '.info'
     info = load_obj_from_pickle(filename)
     return info
 
