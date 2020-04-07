@@ -1908,6 +1908,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
 
     import numpy
     from lib.compiled import FrontsUtils
+    from scipy import ndimage
 
     # The edge detection algorithm uses moving windows. To
     # simplify implementation of that code, create a copy of the
@@ -2014,6 +2015,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
     if medianFilterWindowSize is not None:
         # print ' Debug: Applying ',ix,i,' median filter.'
         bufferedImage = FrontsUtils.MedianFilter(bufferedImage, bufferedMask, bufferSize, medianFilterWindowSize)
+        #bufferedImage = ndimage.median_filter(bufferedImage, footprint=N.ones((medianFilterWindowSize, medianFilterWindowSize)))
 
         # If the caller specified that the edges should wrap, copy
         # image values to the buffer strips again, because the image
@@ -2363,6 +2365,8 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
 
         # Apply thinning
         print ("Debug: Applying now thinning")
+        # from skimage.morophology import thin
+        # thin_output = thin(dataOut)
         thin_output = pymorph.thin(dataOut)
         # thin_output = dataOut                              # For TEST only ... make it faster
 
