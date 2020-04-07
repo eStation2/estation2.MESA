@@ -1,0 +1,39 @@
+name: root
+channels:
+  - https://repo.continuum.io/pkgs/free
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.7
+  - pip
+  - pip:
+    - future
+    - urllib3
+    - certifi
+    - configparser
+    - GDAL
+    - geojson
+    - h5netcdf
+    - html2text
+    - Pillow
+    - plotly
+    - matplotlib
+    - nose
+    - numpy
+    - psycopg2-binary
+    - pyproj
+    - requests
+    - ruffus
+    - SQLAlchemy
+    - sqlsoup
+    - scipy
+    - sentinelsat
+    - motuclient
+    - pycurl
+    - reloader
+    - web.py
+    - psutil
+    - request
+    # - pymorph
+    # - pygdal    -> needed only when installing GDAL in virtualenv
+    # - pygrib    -> not used in online version. comment the use in the code!

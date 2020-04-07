@@ -171,15 +171,15 @@ class TestQuerydb(TestCase):
     def test_get_categories(self):
         allrecs = True
 
-        result1 = querydb.get_categories(allrecs)
+        result1 = querydb.get_categories(allrecs=allrecs)
         if result1:
             print_rows(result1)
             self.assertGreater(result1.__len__(), 0)
         else:
             self.assertFalse(True)  # Test fails: result = False because of an exception error!
 
-        allcats = False
-        result2 = querydb.get_categories(allcats)
+        allrecs = False
+        result2 = querydb.get_categories(allrecs=allrecs)
         if result2:
             print_rows(result2)
             self.assertLess(result2.__len__(), result1.__len__())

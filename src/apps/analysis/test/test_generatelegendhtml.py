@@ -4,10 +4,7 @@ from __future__ import unicode_literals
 from __future__ import division
 from future import standard_library
 
-import unittest, time
-import gdal, ogr, osr, os
-from datetime import date
-from multiprocessing import *
+import unittest
 
 from apps.analysis.generateLegendHTML import generateLegendHTML
 
