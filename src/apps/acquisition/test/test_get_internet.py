@@ -1946,7 +1946,7 @@ class TestGetInternet(unittest.TestCase):
 
 
     def testLocal_MOTU(self):
-
+        source_active = False
         internet_id='MOTU:BIO:TDS'
         start_date_fixed = 20200301
         end_date_fixed = 20200310
