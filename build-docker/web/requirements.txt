@@ -7,7 +7,9 @@
 future
 urllib3
 certifi
-ConfigParser
+configparser
+numpy
+pyproj
 GDAL
 geojson
 h5netcdf
@@ -16,9 +18,7 @@ Pillow
 plotly
 matplotlib
 nose
-numpy
 psycopg2-binary
-pyproj
 requests
 ruffus
 SQLAlchemy

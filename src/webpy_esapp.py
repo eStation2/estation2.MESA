@@ -1539,11 +1539,11 @@ class GetCategories(object):
 
     def GET(self):
         params = web.input()
-        all = False
+        allrecs = False
         if params['all'] == 'true':
-            all = True
+            allrecs = True
         categories_dict_all = []
-        categories = querydb.get_categories(all=all)
+        categories = querydb.get_categories(allrecs=allrecs)
 
         if hasattr(categories, "__len__") and categories.__len__() > 0:
             for row in categories:
