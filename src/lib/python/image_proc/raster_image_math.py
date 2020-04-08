@@ -4,11 +4,14 @@ from __future__ import unicode_literals
 from __future__ import absolute_import
 from builtins import int
 from future import standard_library
+
 standard_library.install_aliases()
 from builtins import str
 from builtins import range
 from past.utils import old_div
+
 __author__ = 'clerima'
+
 #
 #	purpose: Define a set of simple mathematical functions for processing raster images
 #	author:  M.Clerici
@@ -59,6 +62,7 @@ import os, re, os.path, time, sys
 # import pymorph
 import tempfile
 import shutil
+
 # Jur: not working in windows version. Conflict with scipy version 1.1.0 and its ndimage functionality.
 # I tried to install scipy version 0.15.1 but need older numpy version 1.19.2 (numpy 1.11.0 is installed)
 # installing numpy 1.19.2 gives problems with installed gdal version 2.1.2)
@@ -83,8 +87,8 @@ def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata
         # Force input to be a list
         input_list = return_as_list(input_file)
 
-        output_file_final =  output_file
-        output_file = tmpdir + os.sep +os.path.basename(output_file)
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -94,7 +98,7 @@ def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata
         if input_nodata is None:
             sds_meta = metadata.SdsMetadata()
             if os.path.exists(input_list[0]):
-                input_nodata=float(sds_meta.get_nodata_value(input_list[0]))
+                input_nodata = float(sds_meta.get_nodata_value(input_list[0]))
             else:
                 logger.info('Test file not existing: do not assign metadata')
 
@@ -196,7 +200,8 @@ def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata
                 if output_stddev != None:
                     outDataStd = N.zeros(ns)
                     if wnz.any():
-                        outDataStd[wnz] = N.sqrt(old_div(stdData[wnz], (counter[wnz])) - N.multiply(outData[wnz], outData[wnz]))
+                        outDataStd[wnz] = N.sqrt(
+                            old_div(stdData[wnz], (counter[wnz])) - N.multiply(outData[wnz], outData[wnz]))
                     if output_nodata != None:
                         wzz = (counter == 0)
                         if wzz.any():
@@ -229,10 +234,10 @@ def do_avg_image(input_file='', output_file='', input_nodata=None, output_nodata
     finally:
         shutil.rmtree(tmpdir)
 
+
 # _____________________________
 def do_stddev_image(input_file='', avg_file='', input_nodata=None, output_nodata=None, output_format=None,
-           output_type=None, options='', output_stddev=''):
-
+                    output_type=None, options='', output_stddev=''):
     # Note: no 'update' functionality is foreseen -> creates output EVERY TIME
     # In this method make sure you pass the output_file as avg_file and output_stddev as output file to ease calculation
     # The method is corrected on 27.06.19 (see ES2-400) with the following logic:
@@ -247,8 +252,8 @@ def do_stddev_image(input_file='', avg_file='', input_nodata=None, output_nodata
         # Force input to be a list
         input_list = return_as_list(input_file)
 
-        output_file_final =  output_stddev
-        output_stddev = tmpdir + os.sep +os.path.basename(output_stddev)
+        output_file_final = output_stddev
+        output_stddev = tmpdir + os.sep + os.path.basename(output_stddev)
 
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -312,28 +317,28 @@ def do_stddev_image(input_file='', avg_file='', input_nodata=None, output_nodata
 
         # Loop over bands
         for ib in range(nb):
-            inavg = avgFID.GetRasterBand(ib+1)
+            inavg = avgFID.GetRasterBand(ib + 1)
 
             # parse image by line
             for il in rangenl:
                 counter = N.zeros(ns)
                 # for all files:
                 for ifile in rangeFile:
-                    data = N.ravel(fid[ifile].GetRasterBand(ib+1).ReadAsArray(0, il, ns, 1).astype(float))
+                    data = N.ravel(fid[ifile].GetRasterBand(ib + 1).ReadAsArray(0, il, ns, 1).astype(float))
                     # if debug:  print data[ipix]  # debug only
                     avgVal = N.ravel(inavg.ReadAsArray(0, il, inavg.XSize, 1).astype(float))
                     # if debug:  print avgVal[ipix] # debug only
                     # variable initialization
                     if (ifile == 0):
                         if input_nodata is None:
-                            stdData = N.multiply(data , data)
+                            stdData = N.multiply(data, data)
                             counter[:] = 1.0
                         else:
-                            wts = (data != input_nodata) *  (avgVal != input_nodata)
+                            wts = (data != input_nodata) * (avgVal != input_nodata)
                             stdData = N.zeros(data.shape)
                             if wts.any():
                                 counter[wts] = 1.0
-                                stdData[wts] = N.multiply(data[wts] - avgVal[wts], data[wts]- avgVal[wts])
+                                stdData[wts] = N.multiply(data[wts] - avgVal[wts], data[wts] - avgVal[wts])
 
                     else:
                         if input_nodata is None:
@@ -343,7 +348,8 @@ def do_stddev_image(input_file='', avg_file='', input_nodata=None, output_nodata
                             wts = (data != input_nodata) * (avgVal != input_nodata)
                             if wts.any():
                                 counter[wts] = counter[wts] + 1.0
-                                stdData[wts] = stdData[wts] + N.multiply(data[wts] - avgVal[wts], data[wts]- avgVal[wts])
+                                stdData[wts] = stdData[wts] + N.multiply(data[wts] - avgVal[wts],
+                                                                         data[wts] - avgVal[wts])
 
                 wnz = (counter != 0)
                 outData = N.zeros(ns)
@@ -357,7 +363,7 @@ def do_stddev_image(input_file='', avg_file='', input_nodata=None, output_nodata
                 outDataStd = N.zeros(ns)
                 outDataStd_2 = N.zeros(ns)
                 if wnz.any():
-                    outDataStd_2[wnz] = old_div(stdData[wnz],(counter[wnz]))
+                    outDataStd_2[wnz] = old_div(stdData[wnz], (counter[wnz]))
                     neg_val = (outDataStd < 0.0)
                     if neg_val.any():
                         logger.error('Unconsistent results. Check AVG is up-to-date. Continue')
@@ -370,7 +376,7 @@ def do_stddev_image(input_file='', avg_file='', input_nodata=None, output_nodata
                         outDataStd[wzz] = output_nodata
 
                 outDataStd.shape = (1, -1)
-                stdDs.GetRasterBand(ib+1).WriteArray(N.array(outDataStd), 0, il)
+                stdDs.GetRasterBand(ib + 1).WriteArray(N.array(outDataStd), 0, il)
 
                 # reshape before writing
                 # outData.shape = (1, -1)
@@ -397,6 +403,7 @@ def do_stddev_image(input_file='', avg_file='', input_nodata=None, output_nodata
     finally:
         shutil.rmtree(tmpdir)
 
+
 # _____________________________
 def do_min_image(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
                  output_type=None, options='', index_file=None):
@@ -412,8 +419,8 @@ def do_min_image(input_file='', output_file='', input_nodata=None, output_nodata
         # Force input to be a list
         input_list = return_as_list(input_file)
 
-        output_file_final =  output_file
-        output_file = tmpdir + os.sep +os.path.basename(output_file)
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -537,6 +544,7 @@ def do_min_image(input_file='', output_file='', input_nodata=None, output_nodata
     finally:
         shutil.rmtree(tmpdir)
 
+
 # _____________________________
 def do_max_image(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
                  output_type=None, options='', index_file=None, min_num_valid=None):
@@ -553,8 +561,8 @@ def do_max_image(input_file='', output_file='', input_nodata=None, output_nodata
         # Force input to be a list
         input_list = return_as_list(input_file)
 
-        output_file_final =  output_file
-        output_file = tmpdir + os.sep +os.path.basename(output_file)
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -685,6 +693,8 @@ def do_max_image(input_file='', output_file='', input_nodata=None, output_nodata
         shutil.move(output_file, output_file_final)
     finally:
         shutil.rmtree(tmpdir)
+
+
 #   _____________________________
 def do_med_image(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
                  output_type=None, options='', min_num_valid=None):
@@ -700,8 +710,8 @@ def do_med_image(input_file='', output_file='', input_nodata=None, output_nodata
         # Force input to be a list
         input_list = return_as_list(input_file)
 
-        output_file_final =  output_file
-        output_file = tmpdir + os.sep +os.path.basename(output_file)
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -796,6 +806,7 @@ def do_med_image(input_file='', output_file='', input_nodata=None, output_nodata
     finally:
         shutil.rmtree(tmpdir)
 
+
 # _____________________________
 def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
                         output_type=None, options=''):
@@ -809,8 +820,8 @@ def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
 
-        output_file_final =  output_file
-        output_file = tmpdir + os.sep +os.path.basename(output_file)
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         # Open input files
         fid0 = gdal.Open(input_file[0], GA_ReadOnly)
@@ -898,6 +909,7 @@ def do_oper_subtraction(input_file='', output_file='', input_nodata=None, output
     finally:
         shutil.rmtree(tmpdir)
 
+
 # _____________________________
 def do_oper_division_perc(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
                           output_type=None, options=''):
@@ -913,8 +925,8 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
 
-        output_file_final =  output_file
-        output_file = tmpdir + os.sep +os.path.basename(output_file)
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         # Open input files
         fid0 = gdal.Open(input_file[0], GA_ReadOnly)
@@ -980,9 +992,8 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
                     dataout = N.zeros(ns).astype(float) + output_nodata
 
                 if wtc.any():
-                    dataout[wtc] = data0[wtc]*100.00/data1[wtc]
+                    dataout[wtc] = data0[wtc] * 100.00 / data1[wtc]
                     # dataout[wtc] = dataout[wtc]
-
 
                 dataout = dataout.round()
                 dataout.shape = (1, -1)
@@ -1002,6 +1013,8 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
         shutil.move(output_file, output_file_final)
     finally:
         shutil.rmtree(tmpdir)
+
+
 # _____________________________
 def do_oper_scalar_multiplication(input_file='', output_file='', scalar=1, input_nodata=None, output_nodata=None,
                                   output_format=None,
@@ -1017,8 +1030,8 @@ def do_oper_scalar_multiplication(input_file='', output_file='', scalar=1, input
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
 
-        output_file_final =  output_file
-        output_file = tmpdir + os.sep +os.path.basename(output_file)
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         # Open input file
         fid0 = gdal.Open(input_file[0], GA_ReadOnly)
@@ -1096,6 +1109,7 @@ def do_oper_scalar_multiplication(input_file='', output_file='', scalar=1, input
     finally:
         shutil.rmtree(tmpdir)
 
+
 # _____________________________
 def do_make_vci(input_file='', min_file='', max_file='', output_file='', input_nodata=None, output_nodata=None,
                 output_format=None,
@@ -1108,8 +1122,8 @@ def do_make_vci(input_file='', min_file='', max_file='', output_file='', input_n
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
 
-        output_file_final =  output_file
-        output_file = tmpdir + os.sep +os.path.basename(output_file)
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         # open files
         fileFID = gdal.Open(input_file, GA_ReadOnly)
@@ -1183,7 +1197,8 @@ def do_make_vci(input_file='', min_file='', max_file='', output_file='', input_n
                 vci = vci + output_nodata
 
             if wtp.any():
-                vci[wtp] = old_div(100.0 * (1.0 * data[wtp] - 1.0 * minVal[wtp]), (1.0 * maxVal[wtp] - 1.0 * minVal[wtp]))
+                vci[wtp] = old_div(100.0 * (1.0 * data[wtp] - 1.0 * minVal[wtp]),
+                                   (1.0 * maxVal[wtp] - 1.0 * minVal[wtp]))
 
             vci = vci.round()
             vci.shape = (1, -1)
@@ -1209,6 +1224,7 @@ def do_make_vci(input_file='', min_file='', max_file='', output_file='', input_n
         shutil.move(output_file, output_file_final)
     finally:
         shutil.rmtree(tmpdir)
+
 
 # _____________________________
 def do_make_baresoil(input_file='', avg_file='', min_file='', max_file='', output_file='', input_nodata=None,
@@ -1241,8 +1257,8 @@ def do_make_baresoil(input_file='', avg_file='', min_file='', max_file='', outpu
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
 
-        output_file_final =  output_file
-        output_file = tmpdir + os.sep +os.path.basename(output_file)
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         # open files
         fileFID = gdal.Open(input_file, GA_ReadOnly)
@@ -1383,6 +1399,7 @@ def do_make_baresoil(input_file='', avg_file='', min_file='', max_file='', outpu
     finally:
         shutil.rmtree(tmpdir)
 
+
 # _____________________________
 def do_mask_image(input_file='', mask_file='', output_file='', output_format=None,
                   output_type=None, options='', mask_value=1, out_value=0):
@@ -1399,8 +1416,8 @@ def do_mask_image(input_file='', mask_file='', output_file='', output_format=Non
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
 
-        output_file_final =  output_file
-        output_file = tmpdir + os.sep +os.path.basename(output_file)
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         # open files
         fileFID = gdal.Open(input_file, GA_ReadOnly)
@@ -1474,6 +1491,7 @@ def do_mask_image(input_file='', mask_file='', output_file='', output_format=Non
     finally:
         shutil.rmtree(tmpdir)
 
+
 # _____________________________
 def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
                 output_type=None, options='', output_stddev=None, scale_factor=None):
@@ -1487,8 +1505,8 @@ def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
 
-        output_file_final =  output_file
-        output_file = tmpdir + os.sep +os.path.basename(output_file)
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         # Open input file
         fid0 = gdal.Open(input_file[0], GA_ReadOnly)
@@ -1622,6 +1640,7 @@ def do_cumulate(input_file='', output_file='', input_nodata=None, output_nodata=
     finally:
         shutil.rmtree(tmpdir)
 
+
 # _____________________________
 def do_compute_perc_diff_vs_avg(input_file='', avg_file='', output_file='', input_nodata=None, output_nodata=None,
                                 output_format=None,
@@ -1637,8 +1656,8 @@ def do_compute_perc_diff_vs_avg(input_file='', avg_file='', output_file='', inpu
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
 
-        output_file_final =  output_file
-        output_file = tmpdir + os.sep +os.path.basename(output_file)
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         # open files
         fileFID = gdal.Open(input_file, GA_ReadOnly)
@@ -1731,6 +1750,7 @@ def do_compute_perc_diff_vs_avg(input_file='', avg_file='', output_file='', inpu
     finally:
         shutil.rmtree(tmpdir)
 
+
 # _____________________________
 def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_file='',
                                   chla_nodata=None, sst_nodata=None, kd_nodata=None, par_nodata=None,
@@ -1744,8 +1764,8 @@ def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_fil
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
         options_list.append(options)
 
-        output_file_final =  output_file
-        output_file = tmpdir + os.sep +os.path.basename(output_file)
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         # open files
         chla_fileID = gdal.Open(chla_file, GA_ReadOnly)
@@ -1815,7 +1835,7 @@ def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_fil
             data_kd_rescal = data_kd * 0.001
 
             valid = (data_chl != chla_nodata) * (data_sst != sst_nodata) * (data_par != par_nodata) * (
-                        data_kd != kd_nodata)
+                    data_kd != kd_nodata)
 
             if valid.any():
 
@@ -1863,6 +1883,7 @@ def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_fil
     finally:
         shutil.rmtree(tmpdir)
 
+
 def DetectEdgesInSingleImage(image, histogramWindowStride, \
                              minTheta, histogramWindowSize, minPopProp, minPopMeanDifference, minSinglePopCohesion,
                              minImageValue, \
@@ -1894,15 +1915,15 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
 
     if masks is not None:
         if maskTests is None:
-            print ('If you provide a list of masks, you must also provide a parallel list of mask tests.')
+            print('If you provide a list of masks, you must also provide a parallel list of mask tests.')
         if maskValues is None:
-            print ('If you provide a list of masks, you must also provide a parallel list of mask values.')
+            print('If you provide a list of masks, you must also provide a parallel list of mask values.')
 
     if medianFilterWindowSize is not None and medianFilterWindowSize % 2 == 0:
-        print ('The median filter window size must be a positive odd integer greater than or equal to 3.')
+        print('The median filter window size must be a positive odd integer greater than or equal to 3.')
 
     if histogramWindowStride > histogramWindowSize:
-        print ('The histogram stride cannot be larger than the histogram window size.')
+        print('The histogram stride cannot be larger than the histogram window size.')
 
     # Import needed modules.
 
@@ -1934,11 +1955,11 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
     # Apply the caller's masks.
 
     if minImageValue is not None:
-        print (' Debug: minImageValue is defined.')
+        print(' Debug: minImageValue is defined.')
         unbufferedMask[:] = numpy.logical_or(unbufferedMask, image < minImageValue)
 
     if maxImageValue is not None:
-        print (' Debug: maxImageValue is defined.')
+        print(' Debug: maxImageValue is defined.')
         unbufferedMask[:] = numpy.logical_or(unbufferedMask, image > maxImageValue)
 
     if masks is not None:
@@ -1964,7 +1985,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
                 unbufferedMask[:] = numpy.logical_or(unbufferedMask, numpy.bitwise_and(masks[i], maskValues[i]) != 0)
 
             else:
-                print (' is not an allowed mask test.')
+                print(' is not an allowed mask test.')
 
     # If the caller specified that the edges should wrap, copy the
     # cells from the left edge of the image (and mask) to the
@@ -2015,7 +2036,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
     if medianFilterWindowSize is not None:
         # print ' Debug: Applying ',ix,i,' median filter.'
         bufferedImage = FrontsUtils.MedianFilter(bufferedImage, bufferedMask, bufferSize, medianFilterWindowSize)
-        #bufferedImage = ndimage.median_filter(bufferedImage, footprint=N.ones((medianFilterWindowSize, medianFilterWindowSize)))
+        # bufferedImage = ndimage.median_filter(bufferedImage, footprint=N.ones((medianFilterWindowSize, medianFilterWindowSize)))
 
         # If the caller specified that the edges should wrap, copy
         # image values to the buffer strips again, because the image
@@ -2061,7 +2082,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
     bufferedWindowStatusCodes = numpy.zeros((rows, cols), dtype='int8')
     bufferedWindowStatusValues = numpy.zeros((rows, cols), dtype='float32')
 
-    print (' Debug: Running histogramming and cohesion algorithm.')
+    print(' Debug: Running histogramming and cohesion algorithm.')
     timeStarted = time.time()
 
     # If we're only using one thread, invoke the C code directly.
@@ -2136,12 +2157,12 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
         threadList = []
         for i in range(threads):
             t = _threading.Thread(name='%i' % i, target=FrontsUtils.CayulaCornillonFronts, args=(
-            bufferedImageList[i], bufferedMaskList[i], bufferedCandidateCountsList[i], bufferedFrontCountsList[i],
-            bufferedWindowStatusCodesList[i], bufferedWindowStatusValuesList[i], bufferSize, histogramWindowSize,
-            histogramWindowStride, minPropNonMaskedCells, minPopProp, minPopMeanDifference, minTheta,
-            minSinglePopCohesion, minGlobalPopCohesion))
+                bufferedImageList[i], bufferedMaskList[i], bufferedCandidateCountsList[i], bufferedFrontCountsList[i],
+                bufferedWindowStatusCodesList[i], bufferedWindowStatusValuesList[i], bufferSize, histogramWindowSize,
+                histogramWindowStride, minPropNonMaskedCells, minPopProp, minPopMeanDifference, minTheta,
+                minSinglePopCohesion, minGlobalPopCohesion))
             t.setDaemon(True)
-            print (' Debug: Starting thread %(id)s to process rows %(start)i to %(end)i.')
+            print(' Debug: Starting thread %(id)s to process rows %(start)i to %(end)i.')
             threadList.append(t)
 
         for i in range(threads):
@@ -2151,7 +2172,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
 
         while len(threadList) > 0:
             threadList[0].join()
-            print (' Debug: Thread %(id)s exited.')
+            print(' Debug: Thread %(id)s exited.')
             del threadList[0]
 
         # Aggregate the arrays computed by the threads into the
@@ -2159,13 +2180,13 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
 
         for i in range(threads - 1):
             bufferedCandidateCounts[i * blockHeight: (i + 1) * blockHeight + bufferSize * 2, :] += \
-            bufferedCandidateCountsList[i][:, :]
+                bufferedCandidateCountsList[i][:, :]
             bufferedFrontCounts[i * blockHeight: (i + 1) * blockHeight + bufferSize * 2, :] += bufferedFrontCountsList[
                                                                                                    i][:, :]
             bufferedWindowStatusCodes[i * blockHeight: (i + 1) * blockHeight + bufferSize * 2, :] += \
-            bufferedWindowStatusCodesList[i][:, :]
+                bufferedWindowStatusCodesList[i][:, :]
             bufferedWindowStatusValues[i * blockHeight: (i + 1) * blockHeight + bufferSize * 2, :] += \
-            bufferedWindowStatusValuesList[i][:, :]
+                bufferedWindowStatusValuesList[i][:, :]
 
         bufferedCandidateCounts[(i + 1) * blockHeight:, :] += bufferedCandidateCountsList[i + 1][:, :]
         bufferedFrontCounts[(i + 1) * blockHeight:, :] += bufferedFrontCountsList[i + 1][:, :]
@@ -2173,7 +2194,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
         bufferedWindowStatusValues[(i + 1) * blockHeight:, :] += bufferedWindowStatusValuesList[i + 1][:, :]
 
     timeEnded = time.time()
-    print ("Debug: Histogram and cohesion algorithm complete. Elapsed time is: %f seconds" % (timeEnded - timeStarted))
+    print("Debug: Histogram and cohesion algorithm complete. Elapsed time is: %f seconds" % (timeEnded - timeStarted))
 
     # If the caller specified that the edges should wrap,
     # CandidateCounts and FrontCounts for the the cells on the
@@ -2223,9 +2244,9 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
                                                                                                   -bufferSize:]
 
         timeEnded = time.time()
-        print ("Debug: Wrap Edges done. Elapsed time is: %f seconds" % (timeEnded - timeStarted))
+        print("Debug: Wrap Edges done. Elapsed time is: %f seconds" % (timeEnded - timeStarted))
     else:
-        print ("Debug: No wrap edged.")
+        print("Debug: No wrap edged.")
 
     # Return successfully.
 
@@ -2240,7 +2261,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
                                    bufferSize:bufferSize + image.shape[1]]
 
     timeEnded = time.time()
-    print ("Debug: Return. Elapsed time is: %f seconds" % (timeEnded - timeStarted))
+    print("Debug: Return. Elapsed time is: %f seconds" % (timeEnded - timeStarted))
     return copy.deepcopy(unbufferedMask), copy.deepcopy(unbufferedImage), copy.deepcopy(
         unbufferedCandidateCounts), copy.deepcopy(unbufferedFrontCounts), copy.deepcopy(
         unbufferedWindowStatusCodes), copy.deepcopy(unbufferedWindowStatusValues)
@@ -2249,7 +2270,6 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
 # _____________________________
 def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, parameters=None,
                          output_nodata=None, output_format=None, output_type=None, options=''):
-
     try:
         tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
                                   dir=es_constants.base_tmp_dir)
@@ -2353,7 +2373,7 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
             DetectEdgesInSingleImage(inDataInt, histogramWindowStride, minTheta, histogramWindowSize, minPopProp,
                                      minPopMeanDifference, minSinglePopCohesion, minImageValue)
 
-        print ("Debug: Applying now Minimum threshold: %i" % minThreshold)
+        print("Debug: Applying now Minimum threshold: %i" % minThreshold)
 
         # Apply minimum threshold (line by line)
         dataOut = N.empty([nl, ns], dtype=bool)
@@ -2364,14 +2384,14 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
             dataOut[il, :] = rowOut[:]
 
         # Apply thinning
-        print ("Debug: Applying now thinning")
+        print("Debug: Applying now thinning")
         # from skimage.morophology import thin
         # thin_output = thin(dataOut)
         thin_output = pymorph.thin(dataOut)
         # thin_output = dataOut                              # For TEST only ... make it faster
 
         # Create and write output band
-        print ("Debug: Writing the output files")
+        print("Debug: Writing the output files")
         if debug:
             outband = outDS.GetRasterBand(1)
             outband.WriteArray(uFrontCounts, 0, 0)
@@ -2385,7 +2405,7 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
 
         # #   ----------------------------------------------------------------------------------------------------
         # #   Writes metadata to output
-        print ("Debug: Assigning metadata")
+        print("Debug: Assigning metadata")
         input_list = []
         input_list.append(input_file)
 
@@ -2402,6 +2422,7 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
         shutil.move(output_file, output_file_final)
     finally:
         shutil.rmtree(tmpdir)
+
 
 # _____________________________
 def do_ts_linear_filter(input_file='', before_file='', after_file='', output_file='', input_nodata=None,
@@ -2477,7 +2498,8 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
                     wtp = N.ravel((data_m1 != 0) * (data_p1 != 0))
                 else:
                     wtp = N.ravel(
-                        (data_m1 != input_nodata) * (data_p1 != input_nodata) * N.ravel((data_m1 != 0) * (data_p1 != 0)))
+                        (data_m1 != input_nodata) * (data_p1 != input_nodata) * N.ravel(
+                            (data_m1 != 0) * (data_p1 != 0)))
 
                 correct = data
                 if wtp.any():
@@ -2495,10 +2517,7 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
 
         #   ----------------------------------------------------------------------------------------------------
         #   Writes metadata to output
-        input_list = []
-        input_list.append(before_file)
-        input_list.append(input_file)
-        input_list.append(after_file)
+        input_list = [before_file, input_file, after_file]
         #   Close outputs
         outDrv = None
         outDS = None
@@ -2513,14 +2532,14 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
     finally:
         shutil.rmtree(tmpdir)
 
+
 def do_rain_onset(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
                   output_type=None, options='', current_dekad=None):
     try:
         tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
                                   dir=es_constants.base_tmp_dir)
         # Manage options
-        options_list = [es_constants.ES2_OUTFILE_OPTIONS]
-        options_list.append(options)
+        options_list = [es_constants.ES2_OUTFILE_OPTIONS, options]
 
         output_file_final = output_file
         output_file = tmpdir + os.sep + os.path.basename(output_file)
@@ -2634,6 +2653,7 @@ def do_rain_onset(input_file='', output_file='', input_nodata=None, output_nodat
     finally:
         shutil.rmtree(tmpdir)
 
+
 # _____________________________
 #   Merge/move wrt processing.py functions
 def ParseType(type):
@@ -2694,7 +2714,6 @@ def ReturnNoData(type):
 
 
 def return_as_list(input_args):
-
     my_list = []
     if isinstance(input_args, list):
         my_list = input_args
@@ -2705,7 +2724,6 @@ def return_as_list(input_args):
 
 
 def do_reproject(inputfile, output_file, native_mapset_name, target_mapset_name):
-
     try:
         tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
                                   dir=es_constants.base_tmp_dir)
@@ -2782,6 +2800,7 @@ def do_reproject(inputfile, output_file, native_mapset_name, target_mapset_name)
         shutil.move(output_file, output_file_final)
     finally:
         shutil.rmtree(tmpdir)
+
 
 #   -------------------------------------------------------------------------------------------
 def getRasterBox(fid, xstart, xend, ystart, yend, band):
@@ -2930,6 +2949,7 @@ def create_surface_area_raster(input_file=None, output_file='', output_format=No
     finally:
         shutil.rmtree(tmpdir)
 
+
 #   -------------------------------------------------------------------------------------------
 def do_raster_stats(fid, fidID, outDS, iband, roi, minId, maxId, nodata, operation, args=None):
     #
@@ -3076,7 +3096,6 @@ def do_raster_stats(fid, fidID, outDS, iband, roi, minId, maxId, nodata, operati
 #
 def do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapset_name, grid_mapset_name,
                       output_format=None, nodata=None, output_type=None, options=None, args=None):
-
     tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
                               dir=es_constants.base_tmp_dir)
 
@@ -3171,6 +3190,7 @@ def do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapse
     finally:
         shutil.rmtree(tmpdir)
 
+
 ################################
 ##  Compute chla gradient   ####
 ## using normal ndimage sobel###
@@ -3183,8 +3203,8 @@ def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_
         tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
                                   dir=es_constants.base_tmp_dir)
 
-        output_file_final =  output_file
-        output_file = tmpdir + os.sep +os.path.basename(output_file)
+        output_file_final = output_file
+        output_file = tmpdir + os.sep + os.path.basename(output_file)
 
         # Manage options
         options_list = [es_constants.ES2_OUTFILE_OPTIONS]
@@ -3282,6 +3302,7 @@ def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_
         shutil.move(output_file, output_file_final)
     finally:
         shutil.rmtree(tmpdir)
+
 
 # ##########################
 #   Compute chla gradient  #
@@ -3492,6 +3513,7 @@ def compute_extrapolated_chla_gradient(input_file='', nodata=None, output_file='
     finally:
         shutil.rmtree(tmpdir)
 
+
 # ##########################
 #  Compute opFish indicator#
 ############################
@@ -3507,7 +3529,8 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         #  constants #
         ##############
 
-        filter_x = N.array([[0.325531532740751, 0.0000,  -0.325531532740751], [0.536710762313292, 0, -0.536710762313292], [0.325531532740751, -0.0000, -0.325531532740751]])
+        filter_x = N.array([[0.325531532740751, 0.0000, -0.325531532740751], [0.536710762313292, 0, -0.536710762313292],
+                            [0.325531532740751, -0.0000, -0.325531532740751]])
         pix_km_dy_mat = 4.633
         filter_y = N.array([[0.3255, 0.5367, 0.3255], [0, 0, 0], [-0.3255, -0.5367, -0.3255]])
 
@@ -3521,29 +3544,29 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
             if 'chl_grad_min' in list(parameters.keys()):
                 chl_grad_min = parameters['chl_grad_min']
             else:
-                chl_grad_min = 0.00032131   #chl_grad_min = 0.00032131  # perc.5th of all species reconstructed OBS by group -- NEW VALUES BY JEON
+                chl_grad_min = 0.00032131  # chl_grad_min = 0.00032131  # perc.5th of all species reconstructed OBS by group -- NEW VALUES BY JEON
 
             if 'chl_grad_int' in list(parameters.keys()):
                 chl_grad_int = parameters['chl_grad_int']
             else:
-                chl_grad_int = 0.021107  #chl_grad_int = 0.021107# linear fit from 0.09 to 1 (minimum mobility of species)
+                chl_grad_int = 0.021107  # chl_grad_int = 0.021107# linear fit from 0.09 to 1 (minimum mobility of species)
 
             if 'chl_feed_min' in list(parameters.keys()):
                 chl_feed_min = parameters['chl_feed_min']
             else:
-                chl_feed_min = 0.08 #chl_feed_min = 0.08  # mgChl/m3 - minimum among species
+                chl_feed_min = 0.08  # chl_feed_min = 0.08  # mgChl/m3 - minimum among species
 
             if 'chl_feed_max' in list(parameters.keys()):
                 chl_feed_max = parameters['chl_feed_max']
             else:
-                chl_feed_max = 11.0 #chl_feed_max = 11.0  # perc.98th green MESOZOOPK, perc.99.3th total MESOZOOPK;
+                chl_feed_max = 11.0  # chl_feed_max = 11.0  # perc.98th green MESOZOOPK, perc.99.3th total MESOZOOPK;
 
             if 'dc' in list(parameters.keys()):
                 dc = parameters['dc']
             else:
-                dc = 0.91  #0.91  # (1-dc = 0.09, it is 0.10 in the Arctic report)
+                dc = 0.91  # 0.91  # (1-dc = 0.09, it is 0.10 in the Arctic report)
 
-   # Compute Juliean calender date
+        # Compute Juliean calender date
         year_month_day = functions.get_date_from_path_full(input_file)
         dayOfYear = functions.conv_date_yyyymmdd_2_doy(year_month_day)
 
@@ -3657,10 +3680,10 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         for il in range(nl):
             nl_lat_value = ymin + (il * pixel_shift_lat)
             d = abs(pixel_shift_lat)  # 0.008928571428571
-            const_d2km = 12363.9869   #12364.35
+            const_d2km = 12363.9869  # 12364.35
             area_deg = d * d * math.cos(old_div(nl_lat_value, 180) * math.pi)
             area_km = old_div((area_deg * const_d2km), pix_km_dy_mat)
-            pix_km_dx_mat[il,:] = area_km
+            pix_km_dx_mat[il, :] = area_km
 
         if sys.platform == 'win32':
             gauss_x = scipy.ndimage.convolve(filtData, filter_x)
@@ -3702,13 +3725,41 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         feed_hab[linear_interp] = sl_hab * N.log(gradNorm[linear_interp]) + in_hab
         feed_hab[gradNorm > chl_grad_int] = 1
 
-        #Force no feeding habitat for these conditions
+        # Force no feeding habitat for these conditions
         feed_hab[filtData < chl_feed_min] = 0
         feed_hab[filtData > chl_feed_max] = 0
-        feed_hab[0, :], feed_hab[1, :], feed_hab[2, :], feed_hab[3, :], feed_hab[4, :], feed_hab[5, :], feed_hab[6, :], feed_hab[7, :], feed_hab[8, :], feed_hab[9, :]  =N.nan, N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan
-        feed_hab[-1, :], feed_hab[-3, :], feed_hab[-2, :], feed_hab[-4, :], feed_hab[-5, :],feed_hab[-6, :], feed_hab[-7, :], feed_hab[-8, :], feed_hab[-9, :], feed_hab[-10, :] =N.nan, N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan
-        feed_hab[:, 0], feed_hab[:, 1], feed_hab[:, 2], feed_hab[:, 3],feed_hab[:, 4], feed_hab[:, 5], feed_hab[:, 6], feed_hab[:, 7], feed_hab[:, 8],feed_hab[:, 9]= N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan
-        feed_hab[:, -1], feed_hab[:, -2], feed_hab[:, -3], feed_hab[:, -4], feed_hab[:, -5],feed_hab[:, -6], feed_hab[:, -7], feed_hab[:, -8], feed_hab[:, -9], feed_hab[:, -10]= N.nan, N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan,N.nan
+        feed_hab[0, :], feed_hab[1, :], feed_hab[2, :], feed_hab[3, :], feed_hab[4, :], feed_hab[5, :], feed_hab[6,
+                                                                                                        :], feed_hab[7,
+                                                                                                            :], feed_hab[
+                                                                                                                8,
+                                                                                                                :], feed_hab[
+                                                                                                                    9,
+                                                                                                                    :] = N.nan, N.nan, N.nan, N.nan, N.nan, N.nan, N.nan, N.nan, N.nan, N.nan
+        feed_hab[-1, :], feed_hab[-3, :], feed_hab[-2, :], feed_hab[-4, :], feed_hab[-5, :], feed_hab[-6, :], feed_hab[
+                                                                                                              -7,
+                                                                                                              :], feed_hab[
+                                                                                                                  -8,
+                                                                                                                  :], feed_hab[
+                                                                                                                      -9,
+                                                                                                                      :], feed_hab[
+                                                                                                                          -10,
+                                                                                                                          :] = N.nan, N.nan, N.nan, N.nan, N.nan, N.nan, N.nan, N.nan, N.nan, N.nan
+        feed_hab[:, 0], feed_hab[:, 1], feed_hab[:, 2], feed_hab[:, 3], feed_hab[:, 4], feed_hab[:, 5], feed_hab[:,
+                                                                                                        6], feed_hab[:,
+                                                                                                            7], feed_hab[
+                                                                                                                :,
+                                                                                                                8], feed_hab[
+                                                                                                                    :,
+                                                                                                                    9] = N.nan, N.nan, N.nan, N.nan, N.nan, N.nan, N.nan, N.nan, N.nan, N.nan
+        feed_hab[:, -1], feed_hab[:, -2], feed_hab[:, -3], feed_hab[:, -4], feed_hab[:, -5], feed_hab[:, -6], feed_hab[
+                                                                                                              :,
+                                                                                                              -7], feed_hab[
+                                                                                                                   :,
+                                                                                                                   -8], feed_hab[
+                                                                                                                        :,
+                                                                                                                        -9], feed_hab[
+                                                                                                                             :,
+                                                                                                                             -10] = N.nan, N.nan, N.nan, N.nan, N.nan, N.nan, N.nan, N.nan, N.nan, N.nan
         ###########################################
         #########  FeedingHabit2OPFish ############
         ###########################################
@@ -3746,9 +3797,9 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
     finally:
         shutil.rmtree(tmpdir)
 
-def clip_landmask_inputdimension(input_file_gdalobj):
 
-    landmask_file = es_constants.es2globals['estation2_layers_dir']+os.path.sep+'landmask_Earth_byte.tif'
+def clip_landmask_inputdimension(input_file_gdalobj):
+    landmask_file = es_constants.es2globals['estation2_layers_dir'] + os.path.sep + 'landmask_Earth_byte.tif'
     created_file_masked = None
 
     if not os.path.isfile(landmask_file):
@@ -3763,10 +3814,11 @@ def clip_landmask_inputdimension(input_file_gdalobj):
     d_lon_max = lrx
     d_lat_max = uly
 
-    output_file_naming = str(abs(int(d_lon_min)))+str(abs(int(d_lat_min)))+str(abs(int(d_lon_max)))+str(abs(int(d_lat_max)))+ '_masked_landmask_byte.tif'
+    output_file_naming = str(abs(int(d_lon_min))) + str(abs(int(d_lat_min))) + str(abs(int(d_lon_max))) + str(
+        abs(int(d_lat_max))) + '_masked_landmask_byte.tif'
     output_masked_tif = es_constants.es2globals['estation2_layers_dir'] + os.path.sep + output_file_naming
 
-    #If already exists then just return the file
+    # If already exists then just return the file
     if os.path.isfile(output_masked_tif):
         created_file_masked = gdal.Open(output_masked_tif, GA_ReadOnly)
         return created_file_masked
@@ -3864,13 +3916,12 @@ def get_daylength(dayOfYear, lat):
     #
     axis = old_div(23.439 * math.pi, 180)
     j_contant = math.pi / 182.625
-    m = 1- math.tan(old_div(lat*math.pi,180)) * math.tan(axis * math.cos(j_contant*dayOfYear))
+    m = 1 - math.tan(old_div(lat * math.pi, 180)) * math.tan(axis * math.cos(j_contant * dayOfYear))
 
-    if m > 2:   #saturate value for artic
+    if m > 2:  # saturate value for artic
         m = 2
     if m < 0:
         m = 0
 
-    b = old_div(math.acos(1-m),math.pi)   # fraction of the day the sun is up
-    return b*24  #hours of sunlight
-
+    b = old_div(math.acos(1 - m), math.pi)  # fraction of the day the sun is up
+    return b * 24  # hours of sunlight

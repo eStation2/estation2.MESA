@@ -9,6 +9,7 @@ services:
     container_name: web
     environment:
       - PYTHONPATH=${PYTHONPATH}
+      - PROJ_LIB=${PROJ_LIB}
     #   http_proxy: "${HTTP_PROXY}"
     #   https_proxy: "${HTTP_PROXY}"
     #   ftp_proxy: "${HTTP_PROXY}"

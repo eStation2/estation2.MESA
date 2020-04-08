@@ -25,7 +25,7 @@ from .functions import *
 # Import eStation2 modules
 from lib.python import es_logging as log
 from lib.python import functions
-from database import querydb_meta
+from database import querydb
 
 standard_library.install_aliases()
 
@@ -195,8 +195,8 @@ class SdsMetadata(object):
     def assign_from_product(self, product, subproduct, version):
         #
         try:
-            product_out_info = querydb_meta.get_product_out_info(productcode=product, subproductcode=subproduct,
-                                                                 version=version)
+            product_out_info = querydb.get_product_out_info(productcode=product, subproductcode=subproduct,
+                                                            version=version)
         except:
             logger.error('The product is not defined in the DB')
             return 1
