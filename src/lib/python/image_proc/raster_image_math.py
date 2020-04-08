@@ -2385,9 +2385,9 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
 
         # Apply thinning
         print("Debug: Applying now thinning")
-        # from skimage.morophology import thin
-        # thin_output = thin(dataOut)
-        thin_output = pymorph.thin(dataOut)
+        from skimage.morophology import thin
+        thin_output = thin(dataOut)
+        # thin_output = pymorph.thin(dataOut)
         # thin_output = dataOut                              # For TEST only ... make it faster
 
         # Create and write output band
