@@ -2,61 +2,73 @@
 # -*- coding: utf8 -*-
 
 # Methods for naming geoserver objects
-
 # Translation table to assign a different LayerName (e.g. for SADC).
 # Entry is 'product'_'subproduct'
+
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import unicode_literals
 from builtins import int
 from future import standard_library
-standard_library.install_aliases()
 from builtins import str
 from builtins import range
 from past.utils import old_div
+
 import os
 import xml.etree.cElementTree as ET
+import subprocess
+import pipes
+import sys
+from sqlalchemy.orm import aliased
+
 from database import querydb
 from lib.python import functions
 from apps.es2system.GeoPortal import geoserverREST
-import subprocess
-import pipes
 from lib.python import es_logging as log
+from database import connectdb
+
+db = connectdb.ConnectDB(schema='products').db
+
+standard_library.install_aliases()
 
 TranslateLayerNames = False
-tempDir='/tmp/eStation2/tempStationTools/'
+tempDir = '/tmp/eStation2/tempStationTools/'
 
 translator = {
-    'vgt-ndvi_vci' : {'category':'AMESD_SADC', 'region':'SAfri', 'version':'v2', 'product':'VCI_______', 'stringType':0},
-    'fewsnet-rfe_10davg':{'category':'AMESD_SADC', 'region':'SAfri', 'version':'2.0', 'product':'LtavgRFE__', 'stringType':0},
-    'tamsat-rfe_10d':{'category':'AMESD_SADC', 'region':'SAfri', 'version':'2.0', 'product':'LtavgRFE__', 'stringType':0}}
+    'vgt-ndvi_vci': {'category': 'AMESD_SADC', 'region': 'SAfri', 'version': 'v2', 'product': 'VCI_______',
+                     'stringType': 0},
+    'fewsnet-rfe_10davg': {'category': 'AMESD_SADC', 'region': 'SAfri', 'version': '2.0', 'product': 'LtavgRFE__',
+                           'stringType': 0},
+    'tamsat-rfe_10d': {'category': 'AMESD_SADC', 'region': 'SAfri', 'version': '2.0', 'product': 'LtavgRFE__',
+                       'stringType': 0}}
 
 logger = log.my_logger(__name__)
 
 
 def fnameTranslator(product, subproduct, date):
     key = '{0}_{1}'.format(product, subproduct)
-    tr = translator[ key ]
+    tr = translator[key]
     if tr['stringType'] == 0:
-        outname = '{0}_{1}_{2}_{3}_{4}.tif'.format( tr['category'], tr['product'], date, tr['region'], tr['version'])
+        outname = '{0}_{1}_{2}_{3}_{4}.tif'.format(tr['category'], tr['product'], date, tr['region'], tr['version'])
     else:
         outname = None
     return outname
 
-# 	Name of the workspace
+
+# Name of the workspace
 def setWorkspaceName(service, product, subproduct, version, mapset, nameType='full'):
+    nameType = nameType.lower().replace('_', '')
 
-    nameType = nameType.lower().replace('_','')
-
-    wrkList = {"full":'{0}_{1}_{2}_{3}_{4}'.format(service, product, subproduct, mapset, version.replace('.', '_')),
-               "serviceproductsubproduct":'{0}_{1}_{2}'.format(service, product, subproduct),
-               "service":service,
-               "product":product,
-               "serviceproduct":"{0}_{1}".format(service, product),
-               "productsubproduct":'{0}_{1}'.format(product, subproduct),
-               "productsubproductmapset":'{0}_{1}_{2}'.format(product, subproduct, mapset),
-               "productsubproductmapsetversion":'{0}_{1}_{2}_{3}'.format(product, subproduct, mapset, version.replace('.','_'))
+    wrkList = {"full": '{0}_{1}_{2}_{3}_{4}'.format(service, product, subproduct, mapset, version.replace('.', '_')),
+               "serviceproductsubproduct": '{0}_{1}_{2}'.format(service, product, subproduct),
+               "service": service,
+               "product": product,
+               "serviceproduct": "{0}_{1}".format(service, product),
+               "productsubproduct": '{0}_{1}'.format(product, subproduct),
+               "productsubproductmapset": '{0}_{1}_{2}'.format(product, subproduct, mapset),
+               "productsubproductmapsetversion": '{0}_{1}_{2}_{3}'.format(product, subproduct, mapset,
+                                                                          version.replace('.', '_'))
                }
 
     if nameType in list(wrkList.keys()):
@@ -64,15 +76,15 @@ def setWorkspaceName(service, product, subproduct, version, mapset, nameType='fu
     else:
         return wrkList["full"]
 
-# 	Name of the coverage
-def setCoverageName(date, product, subproduct, version, mapset):
 
+# Name of the coverage
+def setCoverageName(date, product, subproduct, version, mapset):
     coverageName = '{0}_{1}_{2}_{3}_{4}'.format(date, product, subproduct, mapset, version.replace('.', '_'))
     return coverageName
 
-# 	Name of the layer
-def setLayerName(date, product, subproduct, translate=False):
 
+# Name of the layer
+def setLayerName(date, product, subproduct, translate=False):
     if translate:
         layerName = fnameTranslator(product, subproduct, date)
     else:
@@ -80,36 +92,36 @@ def setLayerName(date, product, subproduct, translate=False):
 
     return layerName
 
-# 	Name of the style associated to prod-version-subproduct
-def setStyleName(product, version, subproduct):
 
-    style_name = '{0}_{1}_{2}'.format(product, version, subproduct).replace('.','_')
+# Name of the style associated to prod-version-subproduct
+def setStyleName(product, version, subproduct):
+    style_name = '{0}_{1}_{2}'.format(product, version, subproduct).replace('.', '_')
     return style_name
 
-# 	Name of the .sld file associated to prod-version-subproduct on the local machine
-def setStyleFilename(product, version, subproduct):
 
-    style_name = setStyleName(product,version,subproduct)
+# Name of the .sld file associated to prod-version-subproduct on the local machine
+def setStyleFilename(product, version, subproduct):
+    style_name = setStyleName(product, version, subproduct)
     return '{0}/{1}.sld'.format(tempDir, style_name)
 
-#	Directory containing raster files on geoserver machine
-def setFileDir(dataRoot, product, subproduct, version, mapset, productType):
 
-    subdir = functions.set_path_sub_directory(product,subproduct,productType,version,mapset)
+# Directory containing raster files on geoserver machine
+def setFileDir(dataRoot, product, subproduct, version, mapset, productType):
+    subdir = functions.set_path_sub_directory(product, subproduct, productType, version, mapset)
     fileDir = '{0}/{1}'.format(dataRoot, subdir)
     return fileDir
 
-#	Name of the raster file on geoserver machine
-def setFileName(date, product, subproduct, mapset, version):
 
+# Name of the raster file on geoserver machine
+def setFileName(date, product, subproduct, mapset, version):
     fileName = '{0}_{1}_{2}_{3}_{4}.tif'.format(date, product, subproduct, mapset, version)
     return fileName
 
+
 # Get the default (or only) legend for a product/subproduct, and write to an .sld file (for geoserver)
 def createSLD(product, version, subproduct, output_file=None):
-
     if output_file is None:
-        output_file = '{0}/{1}_{2}_{3}.sld'.format(tempDir, product,version,subproduct)
+        output_file = '{0}/{1}_{2}_{3}.sld'.format(tempDir, product, version, subproduct)
 
     # make sure /data/temp exists
     # Note 1: see http://stackoverflow.com/questions/273192/how-to-check-if-a-directory-exists-and-create-it-if-necessary
@@ -122,7 +134,7 @@ def createSLD(product, version, subproduct, output_file=None):
                                                   version=version)
 
     # Get scale factor
-    product_info = querydb.get_product_out_info(productcode=product,subproductcode=subproduct,version=version)
+    product_info = querydb.get_product_out_info(productcode=product, subproductcode=subproduct, version=version)
     scale_factor = product_info[0].scale_factor
 
     if hasattr(product_legends, "__len__") and product_legends.__len__() > 0:
@@ -166,7 +178,7 @@ def createSLD(product, version, subproduct, output_file=None):
     # Modify User Style Title
     for child in tree.getiterator():
         if child.tag == 'UserStyle':
-            child.set("Title",legend_name)
+            child.set("Title", legend_name)
 
     # Modify the Steps (and remove remaining ones)
     for child in tree.getiterator():
@@ -180,7 +192,6 @@ def createSLD(product, version, subproduct, output_file=None):
                 return 1
 
             for istep in range(0, num_steps):
-
                 step = legend_steps[istep]
                 # Build the RGB color
                 color_rgb = step.color_rgb.split(' ')
@@ -192,8 +203,8 @@ def createSLD(product, version, subproduct, output_file=None):
                 to_value = old_div(step.to_step, scale_factor)
 
                 # Modify steps
-                ColorMap[istep].set('quantity',str(to_value))
-                ColorMap[istep].set('color',color_html)
+                ColorMap[istep].set('quantity', str(to_value))
+                ColorMap[istep].set('color', color_html)
 
             for istep in range(num_steps, num_CME):
                 del ColorMap[num_steps]
@@ -202,10 +213,11 @@ def createSLD(product, version, subproduct, output_file=None):
 
     return output_file
 
+
 # Register a raster in geoserver, and manage the style as well
 def registerRaster(service, product, subproduct, version, mapset, date, productType, dataRoot):
-
-    workspace = setWorkspaceName(service, product, subproduct, version, mapset, nameType=geoserverREST.geoserverWorkspaceName)
+    workspace = setWorkspaceName(service, product, subproduct, version, mapset,
+                                 nameType=geoserverREST.geoserverWorkspaceName)
     coverage = setCoverageName(date, product, subproduct, version, mapset)
     fileDir = setFileDir(dataRoot, product, subproduct, version, mapset, productType)
     fileName = setFileName(date, product, subproduct, mapset, version)
@@ -223,24 +235,25 @@ def registerRaster(service, product, subproduct, version, mapset, date, productT
 
         if not style_defined:
             # Create locally the SLD file
-            sld=0
+            sld = 0
             sld = createSLD(product, version, subproduct, output_file=sld_file_name)
 
             # Upload to geoserver the style
-            if sld==0:
+            if sld == 0:
                 resultSLD = geoserverREST.createStyle(sld_name, sld_file_name)
             else:
-                logger.warning('CreateSLD failed for prod/subprod/version {0}/{1}/{2}. Exit'.format(product,subproduct,version))
+                logger.warning(
+                    'CreateSLD failed for prod/subprod/version {0}/{1}/{2}. Exit'.format(product, subproduct, version))
 
         # Register the Raster and assign the default style
         geoserverREST.registerRaster(workspace, coverage, filepath, layerName, sld_name)
 
+
 # Returns True if the file exists
 def existsRemote(host, path, user=None):
-
     """Test if a file exists at path on a host accessible with SSH."""
     if user is not None:
-        my_host = '{0}@{1}'.format(user,host)
+        my_host = '{0}@{1}'.format(user, host)
     else:
         my_host = host
 
@@ -250,24 +263,24 @@ def existsRemote(host, path, user=None):
                 ['ssh', my_host, 'test -f {}'.format(pipes.quote(path))])
         else:
             status = subprocess.call(
-                 [geoserverREST.sshKeyAgentParam,'ssh', my_host, 'test', '-f', pipes.quote(path)], shell=True)
+                [geoserverREST.sshKeyAgentParam, 'ssh', my_host, 'test', '-f', pipes.quote(path)], shell=True)
 
     except:
         logger.debug('SSH command failed')
         return False
     else:
         # MC outtext=['file not found','file exists']
-        outtext=['file exists','file not found']
-        print ('status={}, {}'.format(status, outtext[status]))
+        outtext = ['file exists', 'file not found']
+        print('status={}, {}'.format(status, outtext[status]))
 
-    return not(status)
+    return not (status)
+
 
 # Returns True in case of error
 def uploadRemote(host, local_path, target_path, user=None):
-
     if user is not None:
-        #my_host = '{0}@{1}'.format(user, host)
-        my_host = '{0}@{1}'.format(user,host)#VO edit to restLogin
+        # my_host = '{0}@{1}'.format(user, host)
+        my_host = '{0}@{1}'.format(user, host)  # VO edit to restLogin
     else:
         my_host = host
 
@@ -275,11 +288,11 @@ def uploadRemote(host, local_path, target_path, user=None):
     subdir = os.path.dirname(target_path)
     try:
         if geoserverREST.sshKeyAgentParam == '':
-            thisCommand='{0} ssh {1} mkdir -p {2}'.format(geoserverREST.sshKeyAgentParam, my_host, subdir)#VO
+            thisCommand = '{0} ssh {1} mkdir -p {2}'.format(geoserverREST.sshKeyAgentParam, my_host, subdir)  # VO
             status = subprocess.call(thisCommand, shell=True)
         else:
             status = subprocess.call(
-                [geoserverREST.sshKeyAgentParam,'ssh', my_host, 'mkdir -p {0}'.format(subdir)], shell=True)
+                [geoserverREST.sshKeyAgentParam, 'ssh', my_host, 'mkdir -p {0}'.format(subdir)], shell=True)
     except:
         logger.error('UploadRemote SSH command failed to create remote dir. Exit')
         return False
@@ -287,21 +300,23 @@ def uploadRemote(host, local_path, target_path, user=None):
     # Upload file to remote server
     try:
         if geoserverREST.sshKeyAgentParam == '':
-            thisCommand='{0} scp {1} {2}:{3}'.format(geoserverREST.sshKeyAgentParam, local_path, my_host,target_path)#VO
+            thisCommand = '{0} scp {1} {2}:{3}'.format(geoserverREST.sshKeyAgentParam, local_path, my_host,
+                                                       target_path)  # VO
             status = subprocess.call(thisCommand, shell=True)
         else:
             status = subprocess.call(
-                        [geoserverREST.sshKeyAgentParam,'scp', local_path, '{0}:{1}'.format(my_host,target_path)])
+                [geoserverREST.sshKeyAgentParam, 'scp', local_path, '{0}:{1}'.format(my_host, target_path)])
     except:
         logger.error('UploadRemote SSH command failed to copy data. Exit')
         return True
     return False
 
+
 # For a raster, ensure it is uploaded and registered
 def uploadAndRegisterRaster(service, product, subproduct, version, mapset, date, productType, dataRoot):
-
     status = False
-    workspace = setWorkspaceName(service, product, subproduct, version, mapset, nameType=geoserverREST.geoserverWorkspaceName)
+    workspace = setWorkspaceName(service, product, subproduct, version, mapset,
+                                 nameType=geoserverREST.geoserverWorkspaceName)
     coverage = setCoverageName(date, product, subproduct, version, mapset)
     localFileDir = setFileDir(dataRoot, product, subproduct, version, mapset, productType)
     remoteFileDir = setFileDir(geoserverREST.restBaseDir, product, subproduct, version, mapset, productType)
@@ -315,22 +330,24 @@ def uploadAndRegisterRaster(service, product, subproduct, version, mapset, date,
 
     # Check if the style exists, otherwise create it
     if not geoserverREST.isStyle(sld_name):
-        name = createSLD(product,version,subproduct,output_file=sld_file_name)
+        name = createSLD(product, version, subproduct, output_file=sld_file_name)
         try:
-            thisReturned = geoserverREST.createStyle(sld_name,sld_file_name)
+            thisReturned = geoserverREST.createStyle(sld_name, sld_file_name)
         except:
             logger.error('UploadAndRegisterRaster failed to call geoserverREST.createStyle. Exit')
             return False
 
     # Check if file is registered
-    #if not geoserverREST.isRaster(workspace,layerName):
+    # if not geoserverREST.isRaster(workspace,layerName):
     if not geoserverREST.isRaster(workspace, coverage):
         # Ensure file is uploaded
-        if not existsRemote(geoserverREST.restHost,remoteFilepath, user=geoserverREST.sshUser):                         # Here, and below - we should act as sshUser - see ES2-72
-            if uploadRemote(geoserverREST.restHost, localFilepath, remoteFilepath, user=geoserverREST.sshUser):         # the previously done changes by VO are rolled-back
+        if not existsRemote(geoserverREST.restHost, remoteFilepath,
+                            user=geoserverREST.sshUser):  # Here, and below - we should act as sshUser - see ES2-72
+            if uploadRemote(geoserverREST.restHost, localFilepath, remoteFilepath,
+                            user=geoserverREST.sshUser):  # the previously done changes by VO are rolled-back
 
-        # if not existsRemote(geoserverREST.restHost,remoteFilepath, user=geoserverREST.restLogin):                     #VO changed sshUser to restLogin -> wrong (see above)
-            # if uploadRemote(geoserverREST.restHost, localFilepath, remoteFilepath, user=geoserverREST.restLogin):     #VO changed sshUser to restLogin so that it is mesa@197.254.113.174 and not adminuser@197.254.113.117
+                # if not existsRemote(geoserverREST.restHost,remoteFilepath, user=geoserverREST.restLogin):                     #VO changed sshUser to restLogin -> wrong (see above)
+                # if uploadRemote(geoserverREST.restHost, localFilepath, remoteFilepath, user=geoserverREST.restLogin):     #VO changed sshUser to restLogin so that it is mesa@197.254.113.174 and not adminuser@197.254.113.117
                 logger.error('Cannot upload file {0}.'.format(localFilepath))
                 status = True
             else:
@@ -344,6 +361,7 @@ def uploadAndRegisterRaster(service, product, subproduct, version, mapset, date,
             logger.info('File {0} uploaded to remote server'.format(localFilepath))
 
     return status
+
 
 def rgb2html(rgb):
     r = int(rgb[0])
@@ -363,14 +381,8 @@ def rgb2html(rgb):
     color += '00' if len(g) < 2 else '' + g
     color += '00' if len(b) < 2 else '' + b
 
-    return '#'+color
+    return '#' + color
 
-
-import sys, traceback
-from sqlalchemy.orm import aliased
-from database import connectdb
-
-db = connectdb.ConnectDB().db
 
 def get_activated_geoserver():
     global db
@@ -381,13 +393,13 @@ def get_activated_geoserver():
         # The columns on the subquery "processinput" are accessible through an attribute called "c"
         # e.g. es.c.productcode
         active_geoserver = session.query(geoserver.geoserver_id,
-                                                 geoserver.productcode,
-                                                 geoserver.subproductcode,
-                                                 geoserver.version,
-                                                 geoserver.defined_by,
-                                                 geoserver.activated,
-                                                 geoserver.startdate,
-                                                 geoserver.enddate).\
+                                         geoserver.productcode,
+                                         geoserver.subproductcode,
+                                         geoserver.version,
+                                         geoserver.defined_by,
+                                         geoserver.activated,
+                                         geoserver.startdate,
+                                         geoserver.enddate). \
             filter(geoserver.activated == True).all()
 
         return active_geoserver

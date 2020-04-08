@@ -1943,6 +1943,51 @@ class TestGetInternet(unittest.TestCase):
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
                 self.assertEqual(result, 0)
 
+
+
+    def testLocal_MOTU(self):
+        source_active = False
+        internet_id='MOTU:BIO:TDS'
+        start_date_fixed = 20200301
+        end_date_fixed = 20200310
+        start_date_dyn = -5
+        end_date_dyn = 5
+        # file_to_check = '32e61b08-0bcb-4d0a-a06e-f3d499dfb5fc/S3A_SL_2_WST____20200310T073813_20200310T091913_20200311T185257_6059_056_006______MAR_O_NT_003'
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+                source_active = True
+
+        if source_active:
+            my_source = Source(internet_id=internet_id,
+                               url=internet_source.url,
+                               descriptive_name='MOTU',
+                               include_files_expression=internet_source.include_files_expression,
+                               pull_frequency=internet_source.pull_frequency,
+                               user_name=internet_source.user_name,
+                               password=internet_source.password,
+                               start_date=start_date_dyn,
+                               end_date=end_date_dyn,
+                               frequency_id=internet_source.frequency_id,
+                               type=internet_source.type,
+                               files_filter_expression=internet_source.files_filter_expression,
+                               https_params=internet_source.https_params)
+
+        # list = build_list_matching_files_eum_http(str(internet_source.url),
+        #                                           internet_source.include_files_expression, start_date_fixed,
+        #                                           end_date_fixed, internet_source.frequency_id,
+        #                                           internet_source.user_name, internet_source.password)
+        # if self.pattern:
+        #     self.assertTrue(file_to_check in list)
+
+        # Test download (dynamic dates
+        if self.download:
+            result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
+            self.assertEqual(result, 0)
+
+
     #   ---------------------------------------------------------------------------
     #    Miscellaneous - ASCAT SWI
     #   ---------------------------------------------------------------------------
@@ -2115,6 +2160,64 @@ class TestGetInternet(unittest.TestCase):
             if self.download:
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
                 self.assertEqual(result, 0)
+
+    #   ---------------------------------------------------------------------------
+    #    Miscellaneous - SENTINEL SAT API
+    #   ---------------------------------------------------------------------------
+    # def TestLocal_SENTINELSAT(self):
+    #     source_active = False
+    #     internet_id='SENTINEL2:S2MSI1C:XYZ'
+    #     start_date_fixed = 20200101
+    #     end_date_fixed = 20200310
+    #     start_date_dyn = -45
+    #     end_date_dyn = -30
+    #     # file_to_check = 'S2B_MSIL1C_20200218T073949_N0209_R092_T36LZQ_20200218T095106:B12'
+    #
+    #     internet_sources = querydb.get_active_internet_sources()
+    #     for s in internet_sources:
+    #         if s.internet_id == internet_id:
+    #             internet_source = s
+    #             source_active = True
+    #
+    #     if source_active:
+    #         my_source = Source(internet_id=internet_id,
+    #                            url=internet_source.url,
+    #                            descriptive_name='JEODPP',
+    #                            include_files_expression=internet_source.include_files_expression,
+    #                            pull_frequency=internet_source.pull_frequency,
+    #                            user_name=internet_source.user_name,
+    #                            password=internet_source.password,
+    #                            start_date=start_date_dyn,
+    #                            end_date=end_date_dyn,
+    #                            frequency_id=internet_source.frequency_id,
+    #                            type=internet_source.type,
+    #                            files_filter_expression=internet_source.files_filter_expression,
+    #                            https_params=internet_source.https_params)
+    #
+    #         # # Direct test ! True: #
+    #         # if self.direct_download:
+    #         #     filename = 'w.202002.mon'
+    #         #     remote_url = str(internet_source.url + '/' + file_to_check)
+    #         #     status = get_file_from_url(str(remote_url), target_dir=self.target_dir,
+    #         #                                target_file=filename,
+    #         #                                userpwd=str(internet_source.user_name + ':' + internet_source.password),
+    #         #                                https_params=str(internet_source.https_params))
+    #         #     # status = wget_file_from_url(remote_url, self.target_dir, target_file=filename,
+    #         #     #                            userpwd=internet_source.user_name + ':' + internet_source.password, https_params=internet_source.https_params)
+    #         #     self.assertEqual(status, 0)
+    #         #
+    #         # list = build_list_matching_files_jeodpp(str(internet_source.url), internet_source.include_files_expression,
+    #         #                                         start_date_fixed,
+    #         #                                         end_date_fixed,
+    #         #                                         str(internet_source.frequency_id),
+    #         #                                         str('venkavi:NEVZ9n3XDHSXkDzo'))
+    #         # if self.pattern:
+    #         #     self.assertTrue(file_to_check in list)
+    #
+    #         # Test download (dynamic dates
+    #         if self.download:
+    #             result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
+    #             self.assertEqual(result, 0)
 
     #   ---------------------------------------------------------------------------
     #   INLAND WATER - WATERLEVEL
@@ -2743,7 +2846,6 @@ class TestGetInternet(unittest.TestCase):
     #
     #     # Check last 90 days (check list length = 9)
     #     result = get_one_source(my_source)
-
     # def TestLocal_MOTU(self):
     #
     #     internet_id='CMEMS:MOTU:WAV:L4:SWH'
@@ -2776,36 +2878,7 @@ class TestGetInternet(unittest.TestCase):
     #     result = get_one_source(my_source)
     #
 
-    # def TestLocal_SENTINELSAT(self):
-    #
-    #     internet_id='SENTINEL2:S2MSI1C:XYZ'
-    #
-    #     # Direct test !
-    #     if False:
-    #         self.assertEqual(status, 0)
-    #
-    #     internet_sources = querydb.get_active_internet_sources()
-    #     for s in internet_sources:
-    #         if s.internet_id == internet_id:
-    #             internet_source = s
-    #
-    #     # Copy for modifs
-    #     my_source =     {'internet_id': internet_id,
-    #                      'url': internet_source.url,
-    #                      'include_files_expression':internet_source.include_files_expression,
-    #                      'pull_frequency': internet_source.pull_frequency,
-    #                      'user_name':internet_source.user_name,
-    #                      'password':internet_source.password,
-    #                      'start_date':20181102,
-    #                      'end_date': -3,
-    #                      'frequency_id': internet_source.frequency_id,
-    #                      'type':internet_source.type,
-    #                      'files_filter_expression':internet_source.files_filter_expression,
-    #
-    #     }
-    #
-    #     # Check last 90 days (check list length = 9)
-    #     result = get_one_source(my_source)
+
 
     #   ---------------------------------------------------------------------------
     #   Get contents of a remote MODIS BA  (id: UMD:MCD45A1:TIF:51)

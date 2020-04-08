@@ -943,7 +943,7 @@ def update_yaxe(yaxe_info):
 
         graph_tpl_id = yaxe_info['graph_tpl_id']
         if yaxe_info['graph_tpl_name'] == 'default' and yaxe_info['graph_tpl_id'] == '-1' and yaxe_info[
-            'istemplate'] == 'false':
+           'istemplate'] == 'false':
             graph_tpl_id = getDefaultUserGraphTemplateID(yaxe_info['userid'], yaxe_info['graphtype'])
             if not graph_tpl_id:
                 return status
@@ -3408,7 +3408,7 @@ def get_frequency(frequency_id=''):
 #   Output: Return the fields of all or a specific product record from the table product.
 def get_product_out_info(allrecs=False, productcode='', subproductcode='', version='undefined'):
     global db
-    # my_db = connectdb.ConnectDB().db
+
     try:
         if allrecs:
             product_out_info = db.product.order_by(asc(db.product.productcode)).all()
@@ -3444,27 +3444,26 @@ def get_product_out_info(allrecs=False, productcode='', subproductcode='', versi
 #          version          - The version of the specific product info requested. Default='undefined'
 #   Output: Return the fields of all or a specific product record from the table product.
 def get_product_out_info_connect(allrecs=False, productcode='', subproductcode='', version='undefined'):
-    my_db = connectdb.ConnectDB().db
+    global db
     try:
         if allrecs:
-            product_out_info = my_db.product.order_by(asc(db.product.productcode)).all()
+            product_out_info = db.product.order_by(asc(db.product.productcode)).all()
         else:
-            where = and_(my_db.product.productcode == productcode,
-                         my_db.product.subproductcode == subproductcode,
-                         my_db.product.version == version)
-            product_out_info = my_db.product.filter(where).all()
+            where = and_(db.product.productcode == productcode,
+                         db.product.subproductcode == subproductcode,
+                         db.product.version == version)
+            product_out_info = db.product.filter(where).all()
 
         return product_out_info
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
-        logger.error("get_product_out_info: Database query error!\n -> {}".format(exceptionvalue))
-        # raise Exception("get_product_out_info: Database query error!\n ->%s" % exceptionvalue)
+        logger.error("get_product_out_info_connect: Database query error!\n -> {}".format(exceptionvalue))
+        # raise Exception("get_product_out_info_connect: Database query error!\n ->%s" % exceptionvalue)
         return False
     finally:
-        if my_db.session:
-            my_db.session.close()
-        my_db = None
+        if db.session:
+            db.session.close()
 
 
 ######################################################################################

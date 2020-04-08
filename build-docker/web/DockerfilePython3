@@ -66,6 +66,12 @@ RUN /tmp/esa-snap_all_unix_7_0.sh -q -dir "/usr/local"
 
 # Configuring web folder tree
 RUN mkdir -p /var/www/estation2 && mkdir -p /var/log/apache2/
+# Make tmp dir
+#RUN mkdir -p /tmp/estation2
+#RUN chmod 777 -R /tmp/estation2
+# Processing
+#RUN mkdir -p /data/processing
+#RUN chmod 777 -R /data/processing
 #ENV APACHE_RUN_USER www-data
 #ENV APACHE_RUN_GROUP www-data
 

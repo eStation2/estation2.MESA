@@ -3,10 +3,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from future import standard_library
-standard_library.install_aliases()
 from builtins import str
 from builtins import object
-__author__ = "Jurriaan van 't Klooster"
 
 import sys
 
@@ -18,6 +16,7 @@ from database import connectdb
 import sqlalchemy
 from sqlalchemy.orm import *
 
+standard_library.install_aliases()
 logger = log.my_logger(__name__)
 
 
@@ -34,13 +33,13 @@ class CrudDB(object):
         self.session = None
 
         # new session
-        #self.Session = Session()
+        # self.Session = Session()
         # set the search path
-        #db.execute("SET search_path TO products")
+        # db.execute("SET search_path TO products")
 
-        #Initialize DB and create a hashmap of table name and associated ORM mapper class
+        # Initialize DB and create a hashmap of table name and associated ORM mapper class
         # TODO:The mapper.extension parameter will be removed in a future release.
-        # <string>:2: SADeprecationWarning: MapperExtension is deprecated in favor of the MapperEvents listener interface.
+        # <string>:2: SADeprecationWarning: standard_library.install_aliases() is deprecated in favor of the MapperEvents listener interface.
         # The mapper.extension parameter will be removed in a future release.
         # /usr/local/lib/python3.6/dist-packages/sqlalchemy/orm/deprecated_interfaces.py:62: SADeprecationWarning: MapperExtension.instrument_class is deprecated.
         # The MapperExtension class will be removed in a future release.
@@ -48,32 +47,32 @@ class CrudDB(object):
         #   cls._adapt_listener_methods(self, listener, ("instrument_class",))
 
         metadata = sqlalchemy.MetaData(db, schema=self.schema)
-        #retrieve database table information dynamically
+        # retrieve database table information dynamically
         metadata.reflect()
         metadata.schema = None
-        #metadata.schema = self.schema
+        # metadata.schema = self.schema
         for table_name in metadata.tables:
-            #create a class that inherits basetable class and maps the class to table
+            # create a class that inherits basetable class and maps the class to table
             table_class = type(str(table_name), (BaseTable,), {})
             try:
                 mapper(table_class, sqlalchemy.Table(table_name, metadata, autoload=True))
                 self.table_map[table_name] = table_class
             except:
-                #exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-                #print "could not map table ", table_name
+                # exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+                # print "could not map table ", table_name
                 # Exit the script and print an error telling what happened.
                 logger.error("CrudDB: could not map table %s!" % table_name)
 
-        #create a Session template that requires commit to be called explicit
-        #self.session = sessionmaker(bind=db, autoflush=True)
+        # create a Session template that requires commit to be called explicit
+        # self.session = sessionmaker(bind=db, autoflush=True)
         metadata.schema = self.schema
 
-    #create a record
+    # create a record
     def create(self, table_name, record):
         session = None
         status = False
         try:
-            #lookup the corresponding table class and create an instance
+            # lookup the corresponding table class and create an instance
             table_name = self.schema + "." + table_name
             table_instance = self.table_map[table_name]()
             table_instance.pack(record)
@@ -91,7 +90,7 @@ class CrudDB(object):
                 session.close()
             return status
 
-    #fetch all the records from table that have conditions specified
+    # fetch all the records from table that have conditions specified
     def read(self, table_name, **keywords):
         session = None
         records = []
@@ -99,7 +98,7 @@ class CrudDB(object):
             table_name = self.schema + "." + table_name
             table_class = self.table_map[table_name]
             session = self.connect_db.session
-            #session.schema=self.schema
+            # session.schema=self.schema
             query = session.query(table_class)
             resultset = query.filter_by(**keywords).all()
             for record in resultset:
@@ -115,12 +114,12 @@ class CrudDB(object):
                 session.close()
             return records
 
-    #update a record
+    # update a record
     def update(self, table_name, record):
         session = None
         status = False
         try:
-            #lookup the corresponding table class and create an instance
+            # lookup the corresponding table class and create an instance
             table_name = self.schema + "." + table_name
             table_instance = self.table_map[table_name]()
             table_instance.pack(record)
@@ -131,7 +130,7 @@ class CrudDB(object):
             return status
         except:
             exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-            #print traceback.format_exc()
+            # print traceback.format_exc()
             # Exit the script and print an error telling what happened.
             logger.error("CrudDB: update record error in table {}!\n {}".format(table_name, exceptionvalue))
         finally:
@@ -139,12 +138,12 @@ class CrudDB(object):
                 session.close()
             return status
 
-    #delete a record
+    # delete a record
     def delete(self, table_name, **keywords):
         session = None
         status = False
         try:
-            #lookup the corresponding table class and create an instance
+            # lookup the corresponding table class and create an instance
             table_name = self.schema + "." + table_name
             table_class = self.table_map[table_name]
             session = self.connect_db.session
@@ -155,7 +154,7 @@ class CrudDB(object):
             return status
         except:
             exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-            #print traceback.format_exc()
+            # print traceback.format_exc()
             # Exit the script and print an error telling what happened.
             logger.error("CrudDB: delete record error in table {}!\n {}".format(table_name, exceptionvalue))
         finally:
@@ -165,25 +164,25 @@ class CrudDB(object):
 
 
 class BaseTable(object):
-    #map the record dictionary to table instance variables
+    # map the record dictionary to table instance variables
     def pack(self, record):
         for column in record:
             self.__dict__[column] = record[column]
 
-    #return the dictionary representation of the table instance
+    # return the dictionary representation of the table instance
     def unpack(self):
         record = {}
         for name in self.__dict__:
             if name[0] == "_":
                 continue  # exclude non column keys
             value = self.__dict__[name]
-            #if value is None: continue #exclude null values
+            # if value is None: continue #exclude null values
             try:
                 record[name] = str(value)
             except:
                 record[name] = repr(value)
         return record
 
-    #string representation of the record
+    # string representation of the record
     def __str__(self):
         return self.unpack()
