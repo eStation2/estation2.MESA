@@ -740,41 +740,42 @@ def pre_process_merge_tile(subproducts, tmpdir, input_files, my_logger):
         # -------------------------------------------------------------------------
         # STEP 1: Merge all input products into a 'tmp' file
         # -------------------------------------------------------------------------
-        try:
-            input_files_str = ''
-            for file_add in input_files:
-                input_files_str += ' '
-                input_files_str += file_add
-            # command = 'gdalwarp -srcnodata "{}" -dstnodata "{}" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(scaled_no_data, int(no_data),
-            #      input_files_str, out_tmp_file_gtiff)
-            command = 'gdalwarp '
-            command += ' -co \"COMPRESS=LZW\"'
-            command += ' -srcnodata '+str(nodata)
-            command += ' -dstnodata '+str(nodata)+' '
-            command += input_files_str+' ' + output_file
-            # command += ' -ot BYTE '
-            # for file in input_files:
-            #     command += ' '+file
-            my_logger.debug('Command for merging is: ' + command)
-            os.system(command)
-            # inter_processed_list.append(clipped_file)
-        except:
-            pass
-
         # try:
-        #     command = es_constants.gdal_merge
-        #     # command += ' -co \"compress=lzw\"'
-        #     # command += ' -co \"BIGTIFF=Yes\"'
-        #     command += ' -init '+str(nodata)
-        #     command += ' -o ' + output_file
-        #     command += ' -ot BYTE '
-        #     for file in input_files:
-        #         command += ' '+file
-        #
+        #     input_files_str = ''
+        #     for file_add in input_files:
+        #         input_files_str += ' '
+        #         input_files_str += file_add
+        #     # command = 'gdalwarp -srcnodata "{}" -dstnodata "{}" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(scaled_no_data, int(no_data),
+        #     #      input_files_str, out_tmp_file_gtiff)
+        #     command = 'gdalwarp '
+        #     command += ' -co \"COMPRESS=LZW\"'
+        #     command += ' -srcnodata '+str(nodata)
+        #     command += ' -dstnodata '+str(nodata)+' '
+        #     command += input_files_str+' ' + output_file
+        #     # command += ' -ot BYTE '
+        #     # for file in input_files:
+        #     #     command += ' '+file
         #     my_logger.debug('Command for merging is: ' + command)
         #     os.system(command)
+        #     # inter_processed_list.append(clipped_file)
         # except:
         #     pass
+
+        try:
+            command = es_constants.gdal_merge
+            # command += ' -co \"compress=lzw\"'
+            # command += ' -co \"BIGTIFF=Yes\"'
+            command += ' -init '+str(nodata)
+            command += ' -o ' + output_file
+            command += ' -ot BYTE '
+            command += ' -of GTiff '
+            for file in input_files:
+                command += ' '+file
+
+            my_logger.debug('Command for merging is: ' + command)
+            os.system(command)
+        except:
+            pass
 
         # # Rescale the data using gdal_calc( In this case of 300m and 100m rescale is possible with gdal_calc but due the storage problem we are storing it in BYTE
         # mask_layer='/data/processing/vgt-ndvi/proba300-v1.0/rasterize_full_afr_300m.tif'
@@ -1096,7 +1097,7 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files, my_logger):
             out_tmp_file_gtiff = tmpdir + os.path.sep + id_subproduct + '_' + id_mapset + '.tif.merged'
 
             # Take gdal_merge.py from es2globals
-            command = es_constants.gdal_merge + ' -init '+ str(nodata_value)+' -co \"compress=lzw\" -ot Float32 -o '
+            command = es_constants.gdal_merge + ' -init '+ str(nodata_value)+' -co \"compress=lzw\" -of GTiff -ot Float32 -o '
             command += out_tmp_file_gtiff
             for file_add in geotiff_files:
                 command += ' '
