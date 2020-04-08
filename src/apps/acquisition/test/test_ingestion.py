@@ -201,14 +201,15 @@ class TestIngestion(unittest.TestCase):
         # Test Copernicus Products version 2.0.1 (for FAPAR)
         # Products released from VITO in March 2017
 
-        date_fileslist = glob.glob('/data/ingest/c_gls_FAPAR-RT0_202003100000_GLOBE_PROBAV_V2.0.1.zip*')
+        date_fileslist = glob.glob('/data/ingest/c_gls_FAPAR-RT0_202003100000_GLOBE_PROBAV_V2.0.1.nc*')
         in_date = '202003100000'
         productcode = 'vgt-fapar'
         productversion = 'V2.0'
         subproductcode = 'fapar'
         mapsetcode = 'SPOTV-Africa-1km'
-        # datasource_descrID='PDF:GLS:PROBA-V2.0:FAPAR'   #
-        datasource_descrID = 'EO:EUM:DAT:PROBA-V2.0:FAPAR'
+        # datasource_descrID = 'EO:EUM:DAT:PROBA-V2.0:FAPAR'
+        datasource_descrID='PDF:GLS:PROBA-V2.0:FAPAR'   #
+
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -229,10 +230,10 @@ class TestIngestion(unittest.TestCase):
 
         subproducts = [sprod]
 
-        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                         source_id=datasource_descrID)
-        # datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+        # datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
         #                                                  source_id=datasource_descrID)
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                         source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         self.assertEqual(1, 1)
@@ -569,7 +570,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(1, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - NDVI V2.2.1
+    #   Vegetation - NDVI V2.2.1  //not tested//
     #   ---------------------------------------------------------------------------
     def test_ingest_g_cls_ndvi_2_2_global(self):
 
@@ -1463,10 +1464,10 @@ class TestIngestion(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def test_ingest_cpc_soilmoisture(self):
 
-        filename='w.201609.mon'
-        shutil.copy('/data/processing/exchange/'+filename,'/data/ingest/'+filename)
-        date_fileslist = glob.glob('/data/ingest/w.201609.mon')
-        in_date = '201201'
+        filename='w30.202002.mon'
+        # shutil.copy('/data/processing/exchange/'+filename,'/data/ingest/'+filename)
+        date_fileslist = glob.glob('/data/ingest/w30.202002.mon')
+        in_date = '202002'
         productcode = 'cpc-sm'
         productversion = '1.0'
         subproductcode = 'sm'
