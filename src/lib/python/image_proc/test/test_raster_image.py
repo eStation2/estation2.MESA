@@ -151,7 +151,7 @@ class TestRasterImage(unittest.TestCase):
 
         # Create baresoil mask for 2016/12/21 (w/o using delta_ndvi_max .. only ndvi_max)
 
-        input_file='/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20161221_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif'
+        input_file='/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20161221_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
         min_file  = '/data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/10dmin-linearx2/1221_vgt-ndvi_10dmin-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif'
         max_file  = '/data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/10dmax-linearx2/1221_vgt-ndvi_10dmax-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif'
         min_file  = ''
@@ -162,6 +162,7 @@ class TestRasterImage(unittest.TestCase):
         args = {"input_file": input_file, "min_file": min_file, "max_file": max_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
         raster_image_math.do_make_baresoil(**args)
         self.assertEqual(1, 1)
+
     def test_ratio(self):
 
         # Create ratio_linearx2 for 2016/12/21
@@ -223,8 +224,8 @@ class TestRasterImage(unittest.TestCase):
         args = {"input_file": input_files, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw",'output_type':'Float32', 'input_nodata':-32767}
         raster_image_math.do_cumulate(**args)
         self.assertEqual(1, 1)
-    def test_rain_onset(self):
 
+    def test_rain_onset(self):
         input_file = [
             '/data/processing/fewsnet-rfe/2.0/FEWSNET-Africa-8km/tif/10d/20160911_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif', \
             '/data/processing/fewsnet-rfe/2.0/FEWSNET-Africa-8km/tif/10d/20160901_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif']
@@ -247,6 +248,7 @@ class TestRasterImage(unittest.TestCase):
                 'output_type': 'Int16', 'input_nodata': -32767, 'current_dekad':3}
         raster_image_math.do_rain_onset(**args)
         self.assertEqual(1, 1)
+
     def test_reprojection(self):
 
         # Define the Native mapset
