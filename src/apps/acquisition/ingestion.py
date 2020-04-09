@@ -426,6 +426,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
 #       1 -> ingestion wrong; files to be copied to /data/ingest.wrong
 #       None -> some mandatory files are missing: wait and do not touch files
 #
+    data_dir_out = es_constants.processing_dir
     my_logger.info("Entering routine %s for prod: %s and date: %s" % ('ingestion', product['productcode'], in_date))
 
     preproc_type = datasource_descr.preproc_type
@@ -3485,6 +3486,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 #                          MUST be specified.
 
     version_undef = 'undefined'
+    data_dir_out = es_constants.processing_dir
     my_logger.info("Entering routine %s for product %s - date %s" % ('ingest_file', product['productcode'], in_date))
 
     # Test the file/files exists  (if the file doesn't exists but if the file list is more than 1 then it proceed to next step
