@@ -7,15 +7,18 @@ from __future__ import division
 from builtins import super
 from builtins import int
 from future import standard_library
+
 standard_library.install_aliases()
 from builtins import str
 from builtins import object
 
 import sys, os, time, atexit, io
 import psutil
+
 if sys.platform != 'win32':
     from signal import SIGKILL, SIGTERM
 from lib.python import es_logging as log
+
 logger = log.my_logger("lib.python.daemon")
 from config import es_constants
 
@@ -35,6 +38,7 @@ class Daemon(object):
 
     Usage: subclass the Daemon class and override the run() method
     """
+
     def __init__(self, pidfile, stdin='/dev/null', stdout='/dev/null', stderr='/dev/null'):
         self.stdin = stdin
         self.stdout = stdout
@@ -162,7 +166,7 @@ class Daemon(object):
                 if os.path.exists(self.pidfile):
                     os.remove(self.pidfile)
             else:
-                print (str(err))
+                print(str(err))
                 sys.exit(1)
 
     def restart(self):
@@ -185,7 +189,7 @@ class Daemon(object):
         """
         # Get the pid from the pidfile
         try:
-            pf = open(self.pidfile,'r')
+            pf = open(self.pidfile, 'r')
             # pf = file(self.pidfile, 'r')
             pid = int(pf.read().strip())
             pf.close()

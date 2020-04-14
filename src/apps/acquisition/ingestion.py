@@ -3801,7 +3801,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         sds_meta.assign_from_product(product['productcode'], subproducts[ii]['subproduct'], product['version'])
         sds_meta.assign_date(out_date_str_final)
         sds_meta.assign_subdir_from_fullpath(output_directory)
-        sds_meta.assign_comput_time_now()
+        sds_meta.assign_compute_time_now()
 
         # Check not WD-GEE
         if not trg_mapset.is_wbd():
@@ -4027,7 +4027,7 @@ def ingest_file_vers_1_0(input_file, in_date, product_def, target_mapset, my_log
     sds_meta.assign_from_product(product_def['productcode'], product_def['subproductcode'], product_def['version'])
     sds_meta.assign_date(out_date_str_final)
     sds_meta.assign_subdir_from_fullpath(output_directory)
-    sds_meta.assign_comput_time_now()
+    sds_meta.assign_compute_time_now()
     sds_meta.assign_input_files(input_file)
 
     sds_meta.write_to_ds(trg_ds)
@@ -4192,7 +4192,7 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
     sds_meta_out.assign_from_product(product_code, sub_product_code, version)
     sds_meta_out.assign_date(str_date)
     sds_meta_out.assign_subdir_from_fullpath(output_dir)
-    sds_meta_out.assign_comput_time_now()
+    sds_meta_out.assign_compute_time_now()
     sds_meta_out.assign_input_files(my_input_file)
 
     # Write metadata to file

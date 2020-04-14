@@ -661,7 +661,7 @@ def reproject_output(input_file, native_mapset_id, target_mapset_id, output_dir=
     sds_meta_out.assign_from_product(product_code, sub_product_code, version)
     sds_meta_out.assign_date(str_date)
     sds_meta_out.assign_subdir_from_fullpath(output_dir)
-    sds_meta_out.assign_comput_time_now()
+    sds_meta_out.assign_compute_time_now()
     # Copy the same input files as in the non-reprojected input
     file_list = sds_meta_in.get_item('eStation2_input_files')
     sds_meta_out.assign_input_files(file_list)

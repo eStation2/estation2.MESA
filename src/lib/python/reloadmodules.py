@@ -14,22 +14,24 @@ def reloadallmodules():
     from apps.productmanagement import datasets
     from apps.productmanagement import products
     from lib.python import functions
-
     import webpy_esapp
-    # import webpy_esapp_helpers
-    # import reloader
+    import webpy_esapp_helpers
+
     from importlib import reload
 
-    reload(es_constants)
-    reload(connectdb)
-    reload(functions)
-    reload(querydb)
-    reload(datasets)
-    reload(products)
-    # imp.reload(webpy_esapp_helpers)
-    reload(webpy_esapp)
+    es_constants = reload(es_constants)
+    connectdb = reload(connectdb)
+    functions = reload(functions)
+    querydb = reload(querydb)
+    datasets = reload(datasets)
+    products = reload(products)
+    webpy_esapp = reload(webpy_esapp)
+    webpy_esapp_helpers = reload(webpy_esapp_helpers)
 
-
+    # import reloader
+    # import imp
+    # imp.reload(module)
+    #
     # reloader.enable()
     # # print reloader.get_dependencies(es_constants)
     # reloader.reload(es_constants)
