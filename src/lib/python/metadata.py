@@ -391,8 +391,6 @@ class SdsMetadata(object):
         for key, value in list(sds_metadata.items()):
             print((key, value))
 
-# gdal_info =
-
 class GdalInfo(object):
 
     ######################################################################################
@@ -401,12 +399,19 @@ class GdalInfo(object):
     #   Date: 2020/04/14
     #   Inputs: file -> the file to parse
     #   Output: structure with gdalinfo output
-    #
+
     def __init__(self):
         DriverShort = ''
         DriverLong = ''
-        # To Be Completed !!!????
+        RasterXSize = 0
+        RasterYSize = 0
+        RasterCount = 0
+        Projection = ''
+        GeoTransform = [0,0,0,0,0,0]
         BandMax = 0.0
+        BandMin = 0.0
+        BandMean = 0.0
+        BandStd = 0.0
 
     def get_gdalinfo(self, filename, stats=True, print_out=False):
 
@@ -448,88 +453,22 @@ class GdalInfo(object):
 
             print("Band Type={}".format(gdal.GetDataTypeName(band.DataType)))
 
-
             print("Min={:.3f}, Max={:.3f}".format(self.BandMin,self.BandMax))
             print("Mean={:.3f}, Std={:.3f}".format(self.BandMean,self.BandStd))
 
-        if band.GetOverviewCount() > 0:
-            print("Band has {} overviews".format(band.GetOverviewCount()))
-
-        if band.GetRasterColorTable():
-            print("Band has a color table with {} entries".format(band.GetRasterColorTable().GetCount()))
-
-        # gdal_info = {'DriverShort':DriverShort,
-        #              'DriverLong':DriverLong,
-        #              'RasterXSize':RasterXSize,
-        #              'RasterYSize':RasterYSize,
-        #              'RasterCount':RasterCount,
-        #              'Projection':Projection,
-        #              'GeoTransform':GeoTransform,
-        #              'BandMin': BandMin,
-        #              'BandMax': BandMax,
-        #              'BandMean': BandMean,
-        #              'BandStd': BandStd}
-
         return 0
 
-    def compare_gdalinfo(self, gdal_info, stats=True):
-
+    def compare_gdalinfo(self, gdal_info):
         equal = True
-
-        # Open the file by using gdal
-        if self.BandMax != gdal_info.BandMax:
+        # Get  all members
+        try:
+            my_dict = vars(self)
+            other_dict = vars(gdal_info)
+            for attr in my_dict:
+                if my_dict[attr] != other_dict[attr]:
+                    equal = False
+        except:
+            logger.error("Error in comparing gdal_info")
             equal = False
 
         return equal
-        #
-        # # Read number of properties
-        # DriverShort = dataset.GetDriver().ShortName
-        # DriverLong = dataset.GetDriver().LongName
-        # RasterXSize = dataset.RasterXSize
-        # RasterYSize = dataset.RasterYSize
-        # RasterCount = dataset.RasterCount
-        # Projection = dataset.GetProjection()
-        # GeoTransform = dataset.GetGeoTransform()
-        # band = dataset.GetRasterBand(1)
-        # BandMin = band.GetMinimum()
-        # BandMax = band.GetMaximum()
-        # BandMean, BandStd = band.ComputeBandStats()
-        #
-        # if not BandMin or not BandMax:
-        #     (BandMin,BandMax) = band.ComputeRasterMinMax(True)
-        #
-        # if print_out:
-        #     print("Driver: {}/{}".format(dataset.GetDriver().ShortName,
-        #                                 dataset.GetDriver().LongName))
-        #     print("Size is {} x {} x {}".format(dataset.RasterXSize,
-        #                                         dataset.RasterYSize,
-        #                                         dataset.RasterCount))
-        #     print("Projection is {}".format(dataset.GetProjection()))
-        #     print("Origin = ({}, {})".format(GeoTransform[0], GeoTransform[3]))
-        #     print("Pixel Size = ({}, {})".format(GeoTransform[1], GeoTransform[5]))
-        #
-        #     print("Band Type={}".format(gdal.GetDataTypeName(band.DataType)))
-        #
-        #
-        #     print("Min={:.3f}, Max={:.3f}".format(BandMin,BandMax))
-        #     print("Mean={:.3f}, Std={:.3f}".format(BandMean,BandStd))
-        #
-        # if band.GetOverviewCount() > 0:
-        #     print("Band has {} overviews".format(band.GetOverviewCount()))
-        #
-        # if band.GetRasterColorTable():
-        #     print("Band has a color table with {} entries".format(band.GetRasterColorTable().GetCount()))
-        #
-        # gdal_info = {'DriverShort':DriverShort,
-        #              'DriverLong':DriverLong,
-        #              'RasterXSize':RasterXSize,
-        #              'RasterYSize':RasterYSize,
-        #              'RasterCount':RasterCount,
-        #              'Projection':Projection,
-        #              'GeoTransform':GeoTransform,
-        #              'BandMin': BandMin,
-        #              'BandMax': BandMax,
-        #              'BandMean': BandMean,
-        #              'BandStd': BandStd}
-        #
-        # return gdal_info

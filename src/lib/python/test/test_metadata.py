@@ -209,9 +209,6 @@ class TestMetaData(unittest.TestCase):
         str_date, productcode, subproductcode, mapset, version = functions.get_all_from_filename(
             os.path.basename(output_file))
 
-        # productcode='vgt-ndvi'
-        # subproductcode='ndvi_linearx1'
-        # version='sv2-pv2.1'
         sds_meta.assign_from_product(productcode, subproductcode, version)
         sds_meta.print_out()
 
@@ -219,7 +216,7 @@ class TestMetaData(unittest.TestCase):
         my_file = '/data/test_data/refs_output/wsi-hp/pasture/20200221_wsi-hp_pasture_SPOTV-Africa-1km_V1.0.tif'
         gdal_info = GdalInfo()
         status = gdal_info.get_gdalinfo(my_file,print_out=True)
-        self.assertEqual(1,1)
+        self.assertEqual(status,1)
 
     def test_compare_gdalinfo(self):
         my_file1 = '/data/test_data/refs_output/wsi-hp/pasture/20200221_wsi-hp_pasture_SPOTV-Africa-1km_V1.0.tif'
