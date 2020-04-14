@@ -364,3 +364,85 @@ class SdsMetadata(object):
         # Go through the metadata list and write to std output
         for key, value in list(self.sds_metadata.items()):
             print((key, value))
+
+class GdalInfo(object):
+
+    ######################################################################################
+    #   Purpose: returns into a structure the gdalinfo output over the indicated file
+    #   Author: Marco Clerici, JRC, European Commission
+    #   Date: 2020/04/14
+    #   Inputs: file -> the file to parse
+    #   Output: structure with gdalinfo output
+
+    def __init__(self):
+        DriverShort = ''
+        DriverLong = ''
+        RasterXSize = 0
+        RasterYSize = 0
+        RasterCount = 0
+        Projection = ''
+        GeoTransform = [0,0,0,0,0,0]
+        BandMax = 0.0
+        BandMin = 0.0
+        BandMean = 0.0
+        BandStd = 0.0
+
+    def get_gdalinfo(self, filename, stats=True, print_out=False):
+
+        if not os.path.isfile(filename):
+            logger.error("File does not exists {}:".format(filename))
+            return -1
+
+        # Open the file by using gdal
+        dataset = gdal.Open(filename,gdal.GA_ReadOnly)
+        if not dataset:
+            logger.error("Cannot open dataset in file {}:".format(filename))
+            return -1
+
+        # Read number of properties
+        self.DriverShort = dataset.GetDriver().ShortName
+        self.DriverLong = dataset.GetDriver().LongName
+        self.RasterXSize = dataset.RasterXSize
+        self.RasterYSize = dataset.RasterYSize
+        self.RasterCount = dataset.RasterCount
+        self.Projection = dataset.GetProjection()
+        self.GeoTransform = dataset.GetGeoTransform()
+        band = dataset.GetRasterBand(1)
+        self.BandMin = band.GetMinimum()
+        self.BandMax = band.GetMaximum()
+        self.BandMean, self.BandStd = band.ComputeBandStats()
+
+        if not self.BandMin or not self.BandMax:
+            (self.BandMin,self.BandMax) = band.ComputeRasterMinMax(True)
+
+        if print_out:
+            print("Driver: {}/{}".format(dataset.GetDriver().ShortName,
+                                        dataset.GetDriver().LongName))
+            print("Size is {} x {} x {}".format(dataset.RasterXSize,
+                                                dataset.RasterYSize,
+                                                dataset.RasterCount))
+            print("Projection is {}".format(dataset.GetProjection()))
+            print("Origin = ({}, {})".format(self.GeoTransform[0],self. GeoTransform[3]))
+            print("Pixel Size = ({}, {})".format(self.GeoTransform[1], self.GeoTransform[5]))
+
+            print("Band Type={}".format(gdal.GetDataTypeName(band.DataType)))
+
+            print("Min={:.3f}, Max={:.3f}".format(self.BandMin,self.BandMax))
+            print("Mean={:.3f}, Std={:.3f}".format(self.BandMean,self.BandStd))
+
+        return 0
+
+    def compare_gdalinfo(self, gdal_info):
+        equal = True
+        # Get  all members
+        try:
+            my_dict = vars(self)
+            other_dict = vars(gdal_info)
+            for attr in my_dict:
+                if my_dict[attr] != other_dict[attr]:
+                    equal = False
+        except:
+            logger.error("Error in comparing gdal_info")
+            equal = False
+
+        return equal

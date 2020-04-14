@@ -384,6 +384,14 @@ class TestRasterImage(unittest.TestCase):
         raster_image_math.compute_opFish_indicator(**args)
         self.assertEqual(1, 1)
 
+    def test_compare_two_raster_array(self):
+        input_file_1 = '/tmp/eStation2/wsi-hp/V1.0/SPOTV-Africa-1km/tif/pasture/20200221_wsi-hp_pasture_SPOTV-Africa-1km_V1.0.tif'
+        input_file_2 = '/data/test_data/refs_output/wsi-hp/pasture/20200221_wsi-hp_pasture_SPOTV-Africa-1km_V1.0.tif'
+
+        args = {"input_file_1": input_file_1, "input_file_2": input_file_2}
+        status = raster_image_math.compare_two_raster_array(**args)
+        self.assertEqual(status, 1)
+
 suite_raster_image = unittest.TestLoader().loadTestsFromTestCase(TestRasterImage)
 if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=2).run(suite_raster_image)

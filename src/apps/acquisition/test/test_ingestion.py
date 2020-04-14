@@ -21,6 +21,7 @@ import csv
 import numpy as np
 # import h5py
 from lib.python import functions
+from lib.python import metadata as md
 
 from osgeo import gdal
 
@@ -30,6 +31,40 @@ logger = log.my_logger(__name__)
 
 
 class TestIngestion(unittest.TestCase):
+
+    def setUp(self):
+        root_test_dir=es_constants.es2globals['test_data_dir']
+        self.test_ingest_dir=os.path.join(root_test_dir,'native')
+        self.proc_dir_bck = es_constants.processing_dir
+        es_constants.processing_dir = es_constants.es2globals['base_tmp_dir']+os.path.sep
+        self.ingest_out_dir = es_constants.processing_dir
+        self.ref_out_dir = os.path.join(root_test_dir,'refs_output')
+
+    def tearDown(self):
+        es_constants.processing_dir = self.proc_dir_bck
+
+    def checkIngestedFile(self, productcode='', subproductcode='', version='', mapsetcode='', date=''):
+        # Given the all files keys (date, prod, sprod, ...) finds out:
+        # -> the product just ingested in the tmp_dir (see setUp)
+        # -> the product in refs_output
+        # Assess if the products are equal/equivalent
+
+        result = 0
+        filename = functions.set_path_filename(date,productcode, subproductcode, mapsetcode, version, '.tif')
+        sub_directory= functions.set_path_sub_directory(productcode,subproductcode,'Ingest',version,mapsetcode)
+
+        ref_file = glob.glob(self.ref_out_dir+'**/*/*/'+filename, recursive=True)
+        newly_computed_file = glob.glob(self.ingest_out_dir+sub_directory+filename,recursive=True)
+
+        # Compare the files by using gdal_info objects
+        if os.path.exists(ref_file[0]) and os.path.exists(newly_computed_file[0]):
+            gdal_info_ref = md.GdalInfo()
+            gdal_info_ref.get_gdalinfo(ref_file[0])
+            gdal_info_new = md.GdalInfo()
+            gdal_info_new.get_gdalinfo(newly_computed_file[0])
+            equal = gdal_info_new.compare_gdalinfo(gdal_info_ref)
+
+        return equal
 
     def TestDriveAll(self):
         dry_run = True
@@ -41,7 +76,9 @@ class TestIngestion(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def test_ingest_mars_wsi(self):
 
-        date_fileslist = ['/data/ingest/wsi_hp_pasture_20200221.img','/data/ingest/wsi_hp_pasture_20200221.hdr']
+        date_fileslist = [os.path.join(self.test_ingest_dir,'wsi_hp_pasture_20200221.img'),
+                          os.path.join(self.test_ingest_dir,'wsi_hp_pasture_20200221.hdr')]
+
         in_date = '20200221'
         productcode = 'wsi-hp'
         productversion = 'V1.0'
@@ -70,9 +107,12 @@ class TestIngestion(unittest.TestCase):
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
+
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-        self.assertEqual(1, 1)
+        status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
+                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+        self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
     #   Vegetation - DMP V1.0 \\Not used anymore\\
