@@ -3798,6 +3798,28 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
         shutil.rmtree(tmpdir)
 
 
+# ##########################
+# Compare Two Raster Array
+############################
+def compare_two_raster_array(input_file_1='', input_file_2=''):
+    try:
+        no_difference = False
+        # open first input file
+        dataset1 = gdal.Open(input_file_1, GA_ReadOnly)
+
+        # open second input file
+        dataset2 = gdal.Open(input_file_2, GA_ReadOnly)
+
+        r1 = N.array(dataset1.ReadAsArray())
+        r2 = N.array(dataset2.ReadAsArray())
+
+        no_difference = N.array_equal(r1, r2)
+
+        return no_difference
+    except:
+        logger.warning('Error in Compare Two Raster Array.')
+
+
 def clip_landmask_inputdimension(input_file_gdalobj):
     landmask_file = es_constants.es2globals['estation2_layers_dir'] + os.path.sep + 'landmask_Earth_byte.tif'
     created_file_masked = None
