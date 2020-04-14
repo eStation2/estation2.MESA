@@ -21,6 +21,7 @@ import csv
 import numpy as np
 # import h5py
 from lib.python import functions
+from lib.python import metadata as md
 
 from osgeo import gdal
 
@@ -55,9 +56,15 @@ class TestIngestion(unittest.TestCase):
         ref_file = glob.glob(self.ref_out_dir+'**/*/*/'+filename, recursive=True)
         newly_computed_file = glob.glob(self.ingest_out_dir+sub_directory+filename,recursive=True)
 
+        # Compare the files by using gdal_info objects
         if os.path.exists(ref_file[0]) and os.path.exists(newly_computed_file[0]):
-                result=1
-        return result
+            gdal_info_ref = md.GdalInfo()
+            gdal_info_ref.get_gdalinfo(ref_file[0])
+            gdal_info_new = md.GdalInfo()
+            gdal_info_new.get_gdalinfo(newly_computed_file[0])
+            equal = gdal_info_new.compare_gdalinfo(gdal_info_ref)
+
+        return equal
 
     def TestDriveAll(self):
         dry_run = True
