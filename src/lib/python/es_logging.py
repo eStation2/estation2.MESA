@@ -1,36 +1,39 @@
-from __future__ import print_function
-from __future__ import unicode_literals
+#
+# purpose: Define a class for logging error file to console and file
+# author:  M.Clerici
+# date:	 17.02.2014
+# descr:	 It is a wrapper around standard logging module, and defines two handler (to console a file).
+#            File is named after the name of calling routine
+#            Maximum length of the file/backup files are also managed.
+# history: 1.0
+#
 from __future__ import absolute_import
 from __future__ import division
-#
-#	purpose: Define a class for logging error file to console and file
-#	author:  M.Clerici
-#	date:	 17.02.2014	
-#   descr:	 It is a wrapper around standard logging module, and defines two handler (to console a file).
-#			 File is named after the name of calling routine
-#			 Maximum length of the file/backup files are also managed. 
-#	history: 1.0 
-#
-from future import standard_library
-standard_library.install_aliases()
-from config import es_constants
+from __future__ import print_function
+from __future__ import unicode_literals
+
 from sys import platform
+
+from future import standard_library
+
+from config import es_constants
 
 try:
     import os, stat, glob, logging, logging.handlers
-except ImportError: 
-    print ('Error in importing module ! Exit')
+except ImportError:
+    print('Error in importing module ! Exit')
     exit(1)
 
 # Get log_dir
 try:
     log_dir = es_constants.log_dir
 except EnvironmentError:
-    print ('Error - log_dir not defined in es_constants.  Exit')
+    print('Error - log_dir not defined in es_constants.  Exit')
     exit(1)
 
+standard_library.install_aliases()
 
-#class GroupWriteRotatingFileHandler(logging.handlers.RotatingFileHandler):
+# class GroupWriteRotatingFileHandler(logging.handlers.RotatingFileHandler):
 #    def _open(self):
 #        prevumask=os.umask(0o002)
 #        #os.fdopen(os.open('/path/to/file', os.O_WRONLY, 0600))
@@ -40,28 +43,28 @@ except EnvironmentError:
 
 
 def parse_user_setting(user_def):
-
+    log_level = logging.INFO
     if user_def == "info" or user_def == "INFO":
-        log_level=logging.INFO
+        log_level = logging.INFO
     if user_def == "debug" or user_def == "DEBUG":
-        log_level=logging.DEBUG
+        log_level = logging.DEBUG
     if user_def == "warning" or user_def == "WARNING":
-        log_level=logging.WARNING
+        log_level = logging.WARNING
     if user_def == "error" or user_def == "ERROR":
-        log_level=logging.ERROR
+        log_level = logging.ERROR
     if user_def == "fatal" or user_def == "FATAL":
-        log_level=logging.FATAL
+        log_level = logging.FATAL
 
     return log_level
 
-def my_logger(name):
 
+def my_logger(name):
     # Convert user_settings to logging variable
-    user_logging_level=parse_user_setting(es_constants.log_general_level)
+    user_logging_level = parse_user_setting(es_constants.log_general_level)
 
     # logging.getLogger('sqlalchemy.engine').setLevel(logging.WARN)
 
-    logger = logging.getLogger('eStation2.'+name)
+    logger = logging.getLogger('eStation2.' + name)
     # Try setting from user config .. in case of error set a default level
     try:
         logger.setLevel(user_logging_level)
@@ -80,9 +83,9 @@ def my_logger(name):
 
     if platform == 'win32':
         # TODO: Pierluigi select the correct replacment
-        name=name.replace(':','_')
+        name = name.replace(':', '_')
 
-    file_handler = logging.handlers.RotatingFileHandler(log_dir+name+'.log', maxBytes=50000, backupCount=3)
+    file_handler = logging.handlers.RotatingFileHandler(log_dir + name + '.log', maxBytes=50000, backupCount=3)
 
     # Create formatter
     plain_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%d %H:%M:%S")
@@ -104,4 +107,3 @@ def my_logger(name):
         file_handler.setLevel(logging.INFO)
 
     return logger
-
