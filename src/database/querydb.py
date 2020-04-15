@@ -3633,7 +3633,7 @@ def get_product_in_info(allrecs=False, productcode='', subproductcode='', versio
         query += " ORDER BY productcode"
 
         product_in_info = db.execute(query)
-        product_in_info = product_in_info.fetchall()
+        product_in_info = product_in_info.fetchone()
 
         # if allrecs:
         #     product_in_info = db.sub_datasource_description.order_by(
@@ -3645,8 +3645,12 @@ def get_product_in_info(allrecs=False, productcode='', subproductcode='', versio
         #                  db.sub_datasource_description.datasource_descr_id == datasource_descr_id)
         #     product_in_info = db.sub_datasource_description.filter(where).first()
 
+        # for row in product_in_info:
+        #     product_in_info = functions.row2dict(row)
+
         if product_in_info is None:
             product_in_info = []
+
         return product_in_info
     except exc.NoResultFound:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
