@@ -9,134 +9,111 @@ import unittest
 __author__ = "Jurriaan van 't Klooster"
 
 import lib.python.functions as functions
+from lib.python import metadata as md
 from lib.python.image_proc import raster_image_math
 import json
 import os, shutil, tempfile
+import glob
 
 class TestRasterImage(unittest.TestCase):
 
+    def setUp(self):
+        self.input_files = ['/data/test_data/tif/fewsnet-rfe/10d/20011221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
+                            '/data/test_data/tif/fewsnet-rfe/10d/20021221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
+                            '/data/test_data/tif/fewsnet-rfe/10d/20031221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
+                            '/data/test_data/tif/fewsnet-rfe/10d/20041221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
+                            '/data/test_data/tif/fewsnet-rfe/10d/20051221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
+                            '/data/test_data/tif/fewsnet-rfe/10d/20061221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
+                            '/data/test_data/tif/fewsnet-rfe/10d/20071221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
+                            '/data/test_data/tif/fewsnet-rfe/10d/20081221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
+                            '/data/test_data/tif/fewsnet-rfe/10d/20091221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
+                            '/data/test_data/tif/fewsnet-rfe/10d/20101221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
+                            '/data/test_data/tif/fewsnet-rfe/10d/20111221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
+                            '/data/test_data/tif/fewsnet-rfe/10d/20121221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
+                            '/data/test_data/tif/fewsnet-rfe/10d/20131221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
+                            '/data/test_data/tif/fewsnet-rfe/10d/20141221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
+                            '/data/test_data/tif/fewsnet-rfe/10d/20151221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif']
+        self.ref_dir = '/data/test_data/refs_output/'
+        self.input_dir = '/data/test_data/tif/'
+        self.root_out_dir = '/data/tmp/'
+        self.ref_avg_file = os.path.join(self.ref_dir,'fewsnet-rfe/10davg/1221_fewsnet-rfe_10davg_FEWSNET-Africa-8km_2.0.tif')
+
+    def checkFile(self, ref_file, new_file):
+
+        result = 0
+
+        # Compare the files by using gdal_info objects
+        if os.path.exists(ref_file[0]) and os.path.exists(new_file[0]):
+            gdal_info_ref = md.GdalInfo()
+            gdal_info_ref.get_gdalinfo(ref_file)
+            gdal_info_new = md.GdalInfo()
+            gdal_info_new.get_gdalinfo(new_file)
+            equal = gdal_info_new.compare_gdalinfo(gdal_info_ref)
+
+        return equal
+
     def test_avg(self):
-        # input_file=['/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/19990811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20000811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20010811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20020811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20030811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20040811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20050811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20060811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20070811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20080811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20090811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20100811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20110811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20120811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20130811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20140811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif']
-        input_file=['/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180801_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181011_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181021_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180821_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181101_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180901_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181111_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180911_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181121_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180921_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181201_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181001_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif']
-        output_file='/data/tmp/0811_vgt-ndvi_10davg-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif'
-        #args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw", "input_nodata":-32768}
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+
+        output_filename = 'fewsnet-rfe/10davg/1221_fewsnet-rfe_10davg_FEWSNET-Africa-8km_2.0.tif'
+        output_file=os.path.join(self.root_out_dir, output_filename)
+        ref_file   =os.path.join(self.ref_dir,      output_filename)
+        functions.check_output_dir(os.path.dirname(output_file))
+
+        args = {"input_file": self.input_files, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
         raster_image_math.do_avg_image(**args)
 
+        equal = self.checkFile(ref_file, output_file)
+        self.assertEqual(equal,1)
+
     def test_min(self):
-        # input_file=['/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/19990811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20000811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20010811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20020811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20030811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20040811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20050811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20060811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20070811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20080811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20090811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20100811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20110811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20120811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20130811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/ndvi-linearx2/20140811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif']
-        input_file=['/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180801_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181011_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181021_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180821_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181101_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180901_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181111_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180911_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181121_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180921_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181201_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181001_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif']
-        output_file='/data/tmp/0811_vgt-ndvi_10dmin-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
-        #args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw", "input_nodata":-32768}
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw", "input_nodata":-32768}
+        output_filename = 'fewsnet-rfe/10dmin/1221_fewsnet-rfe_10dmin_FEWSNET-Africa-8km_2.0.tif'
+        output_file=os.path.join(self.root_out_dir, output_filename)
+        ref_file   =os.path.join(self.ref_dir,      output_filename)
+        functions.check_output_dir(os.path.dirname(output_file))
+
+        args = {"input_file": self.input_files, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
         raster_image_math.do_min_image(**args)
 
-    def test_perc_diff(self):
-        input_file=['/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/linearx2diff-linearx2/20181201_vgt-ndvi_linearx2diff-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10dstd-linearx2/1201_vgt-ndvi_10dstd-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif']
-        output_file='/data/tmp/20181201_vgt-ndvi_10dsndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
-        #args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw", "input_nodata":-32768}
-        args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
-        raster_image_math.do_oper_division_perc(**args)
+        equal = self.checkFile(ref_file, output_file)
+        self.assertEqual(equal,1)
+
+    def test_max(self):
+        output_filename = 'fewsnet-rfe/10dmax/1221_fewsnet-rfe_10dmax_FEWSNET-Africa-8km_2.0.tif'
+        output_file=os.path.join(self.root_out_dir, output_filename)
+        ref_file   =os.path.join(self.ref_dir,      output_filename)
+        functions.check_output_dir(os.path.dirname(output_file))
+
+        args = {"input_file": self.input_files, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+        raster_image_math.do_max_image(**args)
+
+        equal = self.checkFile(ref_file, output_file)
+        self.assertEqual(equal,1)
 
     def test_std(self):
-        # input_file=['/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/19990511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20000511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20010511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20020511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20030511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20040511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20050511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20060511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20070511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20080511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20090511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20100511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20110511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20120511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20130511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20140511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20150511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20160511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',\
-        #             '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20170511_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif']
-        #
-        #
-        # output_file='/data/temp/test/0511_vgt-ndvi_10dstd-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
-        # avg_file='/data/temp/test/0511_vgt-ndvi_10davg-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
 
-        input_file=['/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180801_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181011_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180811_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181021_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180821_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181101_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180901_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181111_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180911_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181121_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20180921_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181201_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif',
-                    '/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181001_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif']
-        output_file='/data/tmp/0811_vgt-ndvi_10dstd-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
-        avg_file='/data/tmp/0811_vgt-ndvi_10davg-linearx2_SPOTV-Africa-1km_sv2-pv2.1.tif'
-        # args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw", "input_nodata":-32768}
-        args = {"input_file": input_file, "avg_file": avg_file, "output_format": 'GTIFF', "options": "compress=lzw", "output_stddev": output_file}
+        output_filename = 'fewsnet-rfe/10dstd/1221_fewsnet-rfe_10dstd_FEWSNET-Africa-8km_2.0.tif'
+        output_file=os.path.join(self.root_out_dir, output_filename)
+        ref_file   =os.path.join(self.ref_dir,      output_filename)
+        functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": self.input_files, "avg_file": self.ref_avg_file, "output_format": 'GTIFF', "options": "compress=lzw", "output_stddev": output_file}
         raster_image_math.do_stddev_image(**args)
-        self.assertEqual(1, 1)
+
+        equal = self.checkFile(ref_file, output_file)
+        self.assertEqual(equal,1)
+
+    def test_perc_diff(self):
+
+        output_filename = 'fewsnet-rfe/10dperc/20151221_fewsnet-rfe_10dperc_FEWSNET-Africa-8km_2.0.tif'
+        output_file=os.path.join(self.root_out_dir, output_filename)
+        ref_file   =os.path.join(self.ref_dir,      output_filename)
+        functions.check_output_dir(os.path.dirname(output_file))
+        input_file = os.path.join(self.input_dir,'fewsnet-rfe/10d/20151221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif')
+
+        args = {"input_file": input_file, "avg_file": self.ref_avg_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+        raster_image_math.do_compute_perc_diff_vs_avg(**args)
+
+        equal = self.checkFile(ref_file, output_file)
+        self.assertEqual(equal,1)
 
 
     def test_DIFF(self):
