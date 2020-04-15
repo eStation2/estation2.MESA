@@ -365,6 +365,7 @@ class SdsMetadata(object):
         for key, value in list(self.sds_metadata.items()):
             print((key, value))
 
+
 class GdalInfo(object):
 
     ######################################################################################

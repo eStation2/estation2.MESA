@@ -63,7 +63,7 @@ RUN pip install --upgrade pip
 # the order of install so install setuptools before the requirements.txt
 RUN pip install setuptools
 RUN pip install -r /etc/apache2/sites-available/requirements.txt
-#RUN pip install --upgrade numpy
+RUN pip install --upgrade numpy
 
 # Install and hook mod_wsgi to apache2
 #RUN pip install mod_wsgi
