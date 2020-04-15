@@ -925,6 +925,10 @@ class TestWebpy(unittest.TestCase):
         print(products)
         self.assertEqual(1, 1)
 
+    def test_getProcessing(self):
+        processing = webpy_esapp_helpers.getProcessing(True)
+        self.assertEqual(1, 1)
+
     def test_getDataSets(self):
         datasets = webpy_esapp_helpers.getDataSets(True)
         self.assertEqual(1, 1)

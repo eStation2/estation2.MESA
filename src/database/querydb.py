@@ -3486,7 +3486,7 @@ def get_frequency(frequency_id=''):
     try:
         query = "SELECT * FROM products.frequency WHERE frequency_id = '" + frequency_id + "'"
         frequency = db.execute(query)
-        frequency = frequency.fetchall()
+        frequency = frequency.fetchone()
 
         # # where = and_(db.frequency.frequency_id == frequency_id)
         # # frequency = db.frequency.filter(where).one()
@@ -3738,7 +3738,7 @@ def get_subproduct(productcode='', version='undefined', subproductcode='', maske
         query += where
 
         subproduct = db.execute(query)
-        subproduct = subproduct.fetchall()
+        subproduct = subproduct.fetchone()
 
         # if masked:
         #     where = and_(db.product.productcode == productcode,
@@ -3750,7 +3750,7 @@ def get_subproduct(productcode='', version='undefined', subproductcode='', maske
         #                  db.product.subproductcode == subproductcode,
         #                  db.product.version == version)
         # subproduct = db.product.filter(where).first()
-        if subproduct.__len__() == 0:
+        if not subproduct:
             subproduct = None
         return subproduct
     except exc.NoResultFound:
@@ -4251,7 +4251,7 @@ def __get_processing_chains():
 def get_processingchains_input_products(process_id=None):
     global db
     try:
-        query = " SELECT proc.*, pin.* " \
+        query = " SELECT prod.*, pin.* " \
                 " FROM products.processing proc " \
                 "   LEFT OUTER JOIN (SELECT * FROM products.process_product WHERE type = 'INPUT') pin " \
                 "   ON proc.process_id = pin.process_id " \

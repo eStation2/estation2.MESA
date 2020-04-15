@@ -256,7 +256,7 @@ class TestQuerydb(TestCase):
         result1 = querydb.get_eumetcast(source_id=source_id, allrecs=allrecs)
         if result1:
             print_rows(result1)
-            self.assertEqual(result1[0].eumetcast_id, source_id)
+            self.assertEqual(result1.eumetcast_id, source_id)
         else:
             self.assertFalse(True)  # Test fails: result1 = False because of an exception error!
 
@@ -692,7 +692,7 @@ class TestQuerydb(TestCase):
             'datasource_descr_id': 'USGS:EARLWRN:FEWSNET'
         }
         result = querydb.get_product_in_info(**params)
-        if result[0].datasource_descr_id == 'USGS:EARLWRN:FEWSNET':
+        if result.datasource_descr_id == 'USGS:EARLWRN:FEWSNET':
             if PRINT_RESULTS:
                 print(result)
             self.assertTrue(True)   # Test OK
@@ -966,7 +966,7 @@ class TestQuerydb(TestCase):
             'version': 'spot-v1'
         }
         result1 = querydb.get_subproduct(**params)
-        if result1[0].subproductcode == 'ndv':
+        if result1.subproductcode == 'ndv':
             if PRINT_RESULTS:
                 print(result1)
             self.assertTrue(True)   # Test OK
