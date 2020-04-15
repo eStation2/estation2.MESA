@@ -79,6 +79,16 @@ class TestFunctions(unittest.TestCase):
                                'time_latest_exec': datetime.datetime.now(),
                                'time_latest_copy': datetime.datetime.now()}
 
+        self.testdatadir = es_constants.es2globals['test_data_dir']
+        self.testresultdir = es_constants.es2globals['base_tmp_dir'] + os.path.sep + 'testresults'
+        if not os.path.isdir(self.testresultdir):
+            os.mkdir(self.testresultdir)
+            os.chmod(self.testresultdir, 0o755)
+        else:
+            shutil.rmtree(self.testresultdir)
+            os.mkdir(self.testresultdir)
+            os.chmod(self.testresultdir, 0o755)
+
     def test_check_output_dir(self):
         output_dir = '/tmp/eStation2'
         self.assertTrue(functions.check_output_dir(output_dir))
@@ -127,15 +137,9 @@ class TestFunctions(unittest.TestCase):
                                                              new_mapset=target_mapsetid), result)
 
     def test_create_sym_link(self):
-        self.testdir = '/data/test/'
-        if os.path.isdir(self.testdir):
-            shutil.rmtree(self.testdir)
-            os.mkdir(self.testdir)
-            os.chmod(self.testdir, 0o755)
-
-        src_file = '/data/processing/vgt-dmp/V2.0/SPOTV-Africa-1km/tif/dmp/20181201_vgt-dmp_dmp_SPOTV-Africa-1km_V2.0.tif'
-        fake_file = '/data/processing/vgt-dmp/V2.0/SPOTV-Africa-1km/tif/dmp/fakefile.tif'
-        trg_file = self.testdir + '20181201_vgt-dmp_dmp_SPOTV-Africa-1km_V2.0.tif'
+        src_file = self.testdatadir + '/tif/20181201_vgt-dmp_dmp_SPOTV-Africa-1km_V2.0.tif'
+        fake_file = self.testdatadir + '/tif/fakefile.tif'
+        trg_file = self.testresultdir + '/link_to_20181201_vgt-dmp_dmp_SPOTV-Africa-1km_V2.0.tif'
 
         self.assertEqual(functions.create_sym_link(src_file, trg_file, force=False), 0)  # SYM LINK CREATED
         self.assertEqual(functions.create_sym_link(src_file, trg_file, force=False), 1)  # SYM LINK ALREADY CREATED
@@ -188,8 +192,8 @@ class TestFunctions(unittest.TestCase):
                            current_year + '0111_chirps-dekad_10d_CHIRP-Africa-5km_2.0.tif',
                            current_year + '0121_chirps-dekad_10d_CHIRP-Africa-5km_2.0.tif'
                            ]
-        self.assertEqual(len(functions.exclude_current_year(input_file_list)), 3)
         myvar = functions.exclude_current_year(input_file_list)
+        self.assertEqual(len(myvar), 3)
 
     def test_extract_from_date(self):
         str_date = '202001200924'

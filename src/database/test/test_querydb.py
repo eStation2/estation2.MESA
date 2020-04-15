@@ -80,7 +80,8 @@ class TestQuerydb(TestCase):
 
         result = querydb.copylegend(legendid=legendid, legend_descriptive_name=legend_descriptive_name)
         if result:
-            print_rows(result)
+            if PRINT_RESULTS:
+                print(result)
             self.assertNotEqual(result, legendid)
         else:
             self.assertFalse(True)  # Test fails: result = False because of an exception error!
@@ -101,7 +102,8 @@ class TestQuerydb(TestCase):
 
         result = querydb.createlegend(params)
         if result != -1:
-            print_rows(result)
+            if PRINT_RESULTS:
+                print(result)
             self.assertIsInstance(result, int)
         else:
             self.assertFalse(True)  # Test fails: result = -1 because of an exception error!
@@ -254,7 +256,7 @@ class TestQuerydb(TestCase):
         result1 = querydb.get_eumetcast(source_id=source_id, allrecs=allrecs)
         if result1:
             print_rows(result1)
-            self.assertEqual(result1.eumetcast_id, source_id)
+            self.assertEqual(result1[0].eumetcast_id, source_id)
         else:
             self.assertFalse(True)  # Test fails: result1 = False because of an exception error!
 
@@ -295,7 +297,7 @@ class TestQuerydb(TestCase):
         result = querydb.get_frequency(frequency_id=frequency_id)
         if result:
             print_rows(result)
-            self.assertEqual(result.frequency_id, frequency_id)
+            self.assertEqual(result[0].frequency_id, frequency_id)
         else:
             self.assertFalse(True)  # Test fails: result = False because of an exception error!
 
@@ -420,7 +422,7 @@ class TestQuerydb(TestCase):
         result = querydb.get_internet(internet_id=internet_id)  # This query is not used anywhere in the code!
         if result:
             print_rows(result)
-            self.assertEqual(result.internet_id, internet_id)
+            self.assertEqual(result[0].internet_id, internet_id)
         else:
             self.assertFalse(True)  # Test fails: result = [] because of an exception error!
 
@@ -609,10 +611,18 @@ class TestQuerydb(TestCase):
 
     def test_get_processingchains_input_products(self):
         process_id = 1
-        result = querydb.get_processingchains_input_products(process_id)
-        if result:
-            print_rows(result)
-            self.assertGreater(result.__len__(), 0)
+        result1 = querydb.get_processingchains_input_products(process_id)
+        if result1:
+            print_rows(result1)
+            self.assertGreater(result1.__len__(), 0)
+        else:
+            self.assertFalse(True)  # Test fails: result = False because of an exception error!
+
+        process_id = None
+        result2 = querydb.get_processingchains_input_products(process_id)
+        if result2:
+            print_rows(result2)
+            self.assertGreater(result2.__len__(), 1)
         else:
             self.assertFalse(True)  # Test fails: result = False because of an exception error!
 
@@ -682,7 +692,7 @@ class TestQuerydb(TestCase):
             'datasource_descr_id': 'USGS:EARLWRN:FEWSNET'
         }
         result = querydb.get_product_in_info(**params)
-        if result.datasource_descr_id == 'USGS:EARLWRN:FEWSNET':
+        if result[0].datasource_descr_id == 'USGS:EARLWRN:FEWSNET':
             if PRINT_RESULTS:
                 print(result)
             self.assertTrue(True)   # Test OK
@@ -956,7 +966,7 @@ class TestQuerydb(TestCase):
             'version': 'spot-v1'
         }
         result1 = querydb.get_subproduct(**params)
-        if result1.subproductcode == 'ndv':
+        if result1[0].subproductcode == 'ndv':
             if PRINT_RESULTS:
                 print(result1)
             self.assertTrue(True)   # Test OK
@@ -991,7 +1001,8 @@ class TestQuerydb(TestCase):
             'userid': 'jrc_ref',
             'istemplate': 'false',
             'graph_tpl_id': '-1',
-            'graph_tpl_name': 'default'
+            'graph_tpl_name': 'default',
+            'graph_type': 'xy'
         }
         p = functions.dotdict(params)
         result1 = querydb.get_timeseries_drawproperties(p)
@@ -1165,7 +1176,8 @@ class TestQuerydb(TestCase):
 
         result = querydb.getCreatedUserWorkspace(userid, workspacename)
         if result:
-            print_rows(result)
+            if PRINT_RESULTS:
+                print(result)
             self.assertIsNot(result, -1)
         else:
             self.assertFalse(True)  # Test fails: result = False because of an exception error!
@@ -1182,7 +1194,8 @@ class TestQuerydb(TestCase):
                                                        graph_tpl_name=graph_tpl_name
                                                        )
         if result:
-            print_rows(result)
+            if PRINT_RESULTS:
+                print(result)
             self.assertIsInstance(result, int)
         else:
             self.assertFalse(True)  # Test fails: result = False because of an exception error!

@@ -17,8 +17,6 @@ from builtins import str
 
 import sys
 import traceback
-# import sqlsoup
-# import datetime
 
 from sqlalchemy.sql import func, select, or_, and_, desc, asc, expression
 from sqlalchemy.orm import aliased
@@ -34,7 +32,10 @@ standard_library.install_aliases()
 logger = log.my_logger(__name__)
 
 db = connectdb.ConnectDB(schema='products').db
-dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
+db_analysis = connectdb.ConnectDB(schema='analysis').db
+
+crud_db_analysis = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+crud_db_products = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
 
 
 def get_logos():
@@ -58,12 +59,12 @@ def get_logos():
 
 
 def get_last_map_tpl_id(userid, workspaceid):
-    global dbschema_analysis
+    global db_analysis
     try:
         query = "SELECT max(map_tpl_id) as map_tpl_id FROM analysis.user_map_templates WHERE workspaceid = " + \
                 str(workspaceid) + " AND userid = '" + userid + "'"
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
         return result
     except:
@@ -71,17 +72,17 @@ def get_last_map_tpl_id(userid, workspaceid):
         logger.error("get_last_map_tpl_id: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def get_last_graph_tpl_id(userid, workspaceid):
-    global dbschema_analysis
+    global db_analysis
     try:
         query = "SELECT max(graph_tpl_id) as graph_tpl_id FROM analysis.user_graph_templates WHERE workspaceid = " + \
                 str(workspaceid) + " AND userid = '" + userid + "'"
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
         return result
     except:
@@ -89,17 +90,17 @@ def get_last_graph_tpl_id(userid, workspaceid):
         logger.error("get_last_graph_tpl_id: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def get_workspace_maps(workspaceid, userid):
-    global dbschema_analysis
+    global db_analysis
     try:
         query = "SELECT * FROM analysis.user_map_templates WHERE workspaceid = " + str(workspaceid) + \
                 " AND userid = '" + userid + "'"
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
         return result
     except:
@@ -107,17 +108,17 @@ def get_workspace_maps(workspaceid, userid):
         logger.error("get_workspace_maps: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def get_workspace_graphs(workspaceid, userid):
-    global dbschema_analysis
+    global db_analysis
     try:
         query = "SELECT * FROM analysis.user_graph_templates WHERE workspaceid = " + str(workspaceid) + \
                 " AND userid = '" + userid + "'"
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
         return result
     except:
@@ -125,16 +126,16 @@ def get_workspace_graphs(workspaceid, userid):
         logger.error("get_workspace_graphs: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def get_user_workspaces(userid):
-    global dbschema_analysis
+    global db_analysis
     try:
         query = " SELECT * FROM analysis.user_workspaces WHERE isdefault = FALSE AND userid = '" + userid + "'"
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
         return result
     except:
@@ -142,12 +143,12 @@ def get_user_workspaces(userid):
         logger.error("get_user_workspaces: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def getCreatedUserWorkspace(userid, workspacename):
-    global dbschema_analysis
+    global db_analysis
     try:
         # query = "SELECT max(workspaceid) as lastworkspaceid
         # FROM analysis.user_workspaces
@@ -156,11 +157,11 @@ def getCreatedUserWorkspace(userid, workspacename):
         query = "SELECT workspaceid as lastworkspaceid FROM analysis.user_workspaces " \
                 " WHERE userid = '" + userid + "'" \
                 "  AND workspacename = '" + workspacename + "';"
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
 
         # query2 = "SELECT currval(pg_get_serial_sequence('analysis.user_workspaces','workspaceid')) as lastworkspaceid;"
-        result2 = dbschema_analysis.execute(query)
+        result2 = db_analysis.execute(query)
         result2 = result2.fetchall()
         lastworkspaceid = -1
         for row in result2:
@@ -178,23 +179,33 @@ def getCreatedUserWorkspace(userid, workspacename):
         logger.error("getCreatedUserWorkspace: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def getDefaultUserGraphTemplateID(userid, graph_type, istemplate=False, graph_tpl_name='default'):
-    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+    global db_analysis
+
     defaultworkspaceid = getDefaultUserWorkspaceID(userid)
     if not defaultworkspaceid:
         return False
 
-    where = and_(dbschema_analysis.user_graph_templates.userid == userid,
-                 dbschema_analysis.user_graph_templates.workspaceid == defaultworkspaceid,
-                 dbschema_analysis.user_graph_templates.graph_type == graph_type,
-                 dbschema_analysis.user_graph_templates.istemplate == istemplate,
-                 dbschema_analysis.user_graph_templates.graph_tpl_name == graph_tpl_name)
+    query = " SELECT workspaceid as lastworkspaceid FROM analysis.user_graph_templates " + \
+            " WHERE userid = '" + userid + "'" + \
+            "  AND workspaceid = '" + defaultworkspaceid + "'" + \
+            "  AND graph_type = '" + graph_type + "'" + \
+            "  AND istemplate = " + str(istemplate) + \
+            "  AND graph_tpl_name = '" + graph_tpl_name + "';"
+    result = db_analysis.execute(query)
+    defaultgraphtpl = result.fetchall()
 
-    defaultgraphtpl = dbschema_analysis.user_graph_templates.filter(where).all()
+    # where = and_(db_analysis.user_graph_templates.userid == userid,
+    #              db_analysis.user_graph_templates.workspaceid == defaultworkspaceid,
+    #              db_analysis.user_graph_templates.graph_type == graph_type,
+    #              db_analysis.user_graph_templates.istemplate == istemplate,
+    #              db_analysis.user_graph_templates.graph_tpl_name == graph_tpl_name)
+    #
+    # defaultgraphtpl = db_analysis.user_graph_templates.filter(where).all()
 
     if defaultgraphtpl.__len__() == 0:
         default_user_graph_template = {
@@ -204,25 +215,30 @@ def getDefaultUserGraphTemplateID(userid, graph_type, istemplate=False, graph_tp
             "istemplate": istemplate,
             "graph_type": graph_type
         }
-        if crud_db.create('user_graph_templates', default_user_graph_template):
-            defaultgraphtpl = dbschema_analysis.user_graph_templates.filter(where).all()
+        if crud_db_analysis.create('user_graph_templates', default_user_graph_template):
+            # defaultgraphtpl = db_analysis.user_graph_templates.filter(where).all()
+            defaultgraphtpl = db_analysis.execute(query).fetchall()
             if defaultgraphtpl.__len__() > 0:
-                graph_tpl_id = defaultgraphtpl[0].graph_tpl_id
+                for row in defaultgraphtpl:
+                    graph_tpl_id = row['lastworkspaceid']
+                # graph_tpl_id = defaultgraphtpl[0].graph_tpl_id
             else:
                 return False
         else:
             return False
     else:
-        graph_tpl_id = defaultgraphtpl[0].graph_tpl_id
+        for row in defaultgraphtpl:
+            graph_tpl_id = row['lastworkspaceid']
+        # graph_tpl_id = defaultgraphtpl[0].graph_tpl_id
 
     return graph_tpl_id
 
 
 def getDefaultUserWorkspaceID(userid):
-    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+    global db_analysis
 
     userinfo = {'userid': userid, 'isdefault': True}
-    defaultworkspace = crud_db.read('user_workspaces', **userinfo)
+    defaultworkspace = crud_db_analysis.read('user_workspaces', **userinfo)
     if hasattr(defaultworkspace, "__len__") and defaultworkspace.__len__() > 0:
         defaultworkspaceid = defaultworkspace[0]['workspaceid']
     else:
@@ -231,8 +247,8 @@ def getDefaultUserWorkspaceID(userid):
             'workspacename': 'default',
             'isdefault': True
         }
-        if crud_db.create('user_workspaces', userdefaultworkspace):
-            defaultworkspace = crud_db.read('user_workspaces', **userinfo)
+        if crud_db_analysis.create('user_workspaces', userdefaultworkspace):
+            defaultworkspace = crud_db_analysis.read('user_workspaces', **userinfo)
             defaultworkspaceid = defaultworkspace[0]['workspaceid']
         else:
             return False
@@ -241,12 +257,12 @@ def getDefaultUserWorkspaceID(userid):
 
 
 def copylegend(legendid=-1, legend_descriptive_name=''):
-    global dbschema_analysis
+    global db_analysis
     try:
         if legendid != -1:
             query = "SELECT * FROM analysis.copylegend(" + str(
                 legendid) + ", '" + legend_descriptive_name + "'" + "); "  # COMMIT;
-            result = dbschema_analysis.execute(query)
+            result = db_analysis.execute(query)
             newlegendid = result.fetchall()
             newlegendid = newlegendid[0]._row[0]
             # if hasattr(newlegendid, "__len__") and newlegendid.__len__() > 0:
@@ -255,7 +271,7 @@ def copylegend(legendid=-1, legend_descriptive_name=''):
             # else:
             #     newlegendid = newlegendid[0]._row[0]
 
-            dbschema_analysis.commit()
+            db_analysis.commit()
         else:
             newlegendid = legendid
 
@@ -266,8 +282,8 @@ def copylegend(legendid=-1, legend_descriptive_name=''):
         logger.error("copylegend: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def activate_deactivate_product(productcode='', version='', activate=False):
@@ -295,7 +311,7 @@ def activate_deactivate_product(productcode='', version='', activate=False):
 
 
 def get_product_default_legend_steps(productcode, version, subproductcode):
-    global dbschema_analysis
+    global db_analysis
     try:
         query = " SELECT ls.from_step, ls.to_step, ls.color_rgb, ls.color_label, p.scale_factor, p.scale_offset " + \
                 " FROM analysis.product_legend pl " + \
@@ -309,7 +325,7 @@ def get_product_default_legend_steps(productcode, version, subproductcode):
                 "   AND pl.default_legend = TRUE " + \
                 " ORDER BY  ls.from_step "
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
         return result
     except:
@@ -318,12 +334,12 @@ def get_product_default_legend_steps(productcode, version, subproductcode):
         logger.error("get_product_default_legend_steps: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def get_user_map_templates(userid):
-    global dbschema_analysis
+    global db_analysis
     try:
         query = " SELECT * FROM analysis.user_map_templates umt " + \
                 " JOIN (SELECT workspaceid " + \
@@ -332,7 +348,7 @@ def get_user_map_templates(userid):
                 " ON umt.workspaceid = uw.workspaceid " + \
                 " WHERE umt.userid = '" + userid + "'"
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
         return result
     except:
@@ -340,15 +356,15 @@ def get_user_map_templates(userid):
         logger.error("get_user_map_templates: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def getusers():
-    global dbschema_analysis
+    global db_analysis
     try:
         query = "SELECT * FROM analysis.users"
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
         return result
     except:
@@ -357,17 +373,17 @@ def getusers():
         logger.error("getusers: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def checklogin(login=None):
-    global dbschema_analysis
+    global db_analysis
     try:
         query = "SELECT * FROM analysis.users " + \
                 "WHERE userid = '" + login.username + "'" + \
                 "  AND password = '" + login.password + "'"
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
         return result
     except:
@@ -375,18 +391,18 @@ def checklogin(login=None):
         logger.error("checklogin: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def checkUser(userinfo=None):
-    global dbschema_analysis
+    global db_analysis
     try:
         if userinfo is None:
             return None
 
         query = "SELECT * FROM analysis.users WHERE userid = '" + userinfo.get('userid') + "'"
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
         if hasattr(result, "__len__") and result.__len__() > 0:
             return result
@@ -397,12 +413,12 @@ def checkUser(userinfo=None):
         logger.error("checkUser: Database query error!\n -> {}".format(exceptionvalue))
         return None
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def get_user_graph_templates(userid):
-    global dbschema_analysis
+    global db_analysis
     try:
         query = " SELECT * FROM analysis.user_graph_templates ugt " + \
                 " JOIN analysis.user_workspaces uw ON ugt.workspaceid = uw.workspaceid AND uw.isdefault = TRUE " + \
@@ -411,7 +427,7 @@ def get_user_graph_templates(userid):
                 "  AND ugt.graph_tpl_name != 'default'"
 
         # print query
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
         return result
     except:
@@ -420,30 +436,28 @@ def get_user_graph_templates(userid):
         logger.error("get_user_graph_templates: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def get_product_timeseries_drawproperties(product, userid='', istemplate='false', graph_type='', graph_tpl_id='-1',
                                           graph_tpl_name='default'):
-    global dbschema_analysis
-    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
-
+    global db_analysis
     try:
         product_ts_properties = []
 
-        # where = and_(dbschema_analysis.timeseries_drawproperties_new.productcode == product['productcode'],
-        #              dbschema_analysis.timeseries_drawproperties_new.subproductcode == product['subproductcode'],
-        #              dbschema_analysis.timeseries_drawproperties_new.version == product['version'])
+        # where = and_(db_analysis.timeseries_drawproperties_new.productcode == product['productcode'],
+        #              db_analysis.timeseries_drawproperties_new.subproductcode == product['subproductcode'],
+        #              db_analysis.timeseries_drawproperties_new.version == product['version'])
 
-        # if dbschema_analysis.timeseries_drawproperties_new.filter(where).count() >= 1:
+        # if db_analysis.timeseries_drawproperties_new.filter(where).count() >= 1:
         product_key = {
             "productcode": product['productcode'],
             "subproductcode": product['subproductcode'],
             "version": product['version']
         }
-        if crud_db.read('timeseries_drawproperties_new', **product_key).__len__ == 0:
-            # timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties_new.filter(where).all()
+        if crud_db_analysis.read('timeseries_drawproperties_new', **product_key).__len__ == 0:
+            # timeseries_drawproperties = db_analysis.timeseries_drawproperties_new.filter(where).all()
             # Insert a new record in the table timeseries_drawproperties for the product with default values
             default_ts_drawproperties = {
                 "productcode": product['productcode'],
@@ -457,9 +471,9 @@ def get_product_timeseries_drawproperties(product, userid='', istemplate='false'
                 "yaxes_id": 'default'  # product['productcode'] + '-' + product['version']
             }
 
-            if not crud_db.create('timeseries_drawproperties_new', default_ts_drawproperties):
+            if not crud_db_analysis.create('timeseries_drawproperties_new', default_ts_drawproperties):
                 return product_ts_properties
-                # product_ts_properties = dbschema_analysis.execute(query).fetchall()
+                # product_ts_properties = db_analysis.execute(query).fetchall()
 
         if userid != '':
             if graph_tpl_name == 'default' and graph_tpl_id == '-1' and istemplate == 'false':
@@ -540,7 +554,7 @@ def get_product_timeseries_drawproperties(product, userid='', istemplate='false'
         #             "  and tdp.version ='" + product['version'] + "'"
 
         # print query
-        product_ts_properties = dbschema_analysis.execute(query).fetchall()
+        product_ts_properties = db_analysis.execute(query).fetchall()
 
         return product_ts_properties
     except:
@@ -549,13 +563,12 @@ def get_product_timeseries_drawproperties(product, userid='', istemplate='false'
         logger.error("get_product_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def __get_product_timeseries_drawproperties(product, user='', graph_tpl_name=''):
-    global dbschema_analysis
-    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+    global db_analysis
 
     try:
         product_ts_properties = []
@@ -618,13 +631,13 @@ def __get_product_timeseries_drawproperties(product, user='', graph_tpl_name='')
                     "  and tdp.subproductcode = '" + product['subproductcode'] + "'" + \
                     "  and tdp.version ='" + product['version'] + "'"
 
-        where = and_(dbschema_analysis.timeseries_drawproperties_new.productcode == product['productcode'],
-                     dbschema_analysis.timeseries_drawproperties_new.subproductcode == product['subproductcode'],
-                     dbschema_analysis.timeseries_drawproperties_new.version == product['version'])
+        where = and_(db_analysis.timeseries_drawproperties_new.productcode == product['productcode'],
+                     db_analysis.timeseries_drawproperties_new.subproductcode == product['subproductcode'],
+                     db_analysis.timeseries_drawproperties_new.version == product['version'])
 
-        if dbschema_analysis.timeseries_drawproperties_new.filter(where).count() >= 1:
-            product_ts_properties = dbschema_analysis.execute(query).fetchall()
-            # timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties_new.filter(where).all()
+        if db_analysis.timeseries_drawproperties_new.filter(where).count() >= 1:
+            product_ts_properties = db_analysis.execute(query).fetchall()
+            # timeseries_drawproperties = db_analysis.timeseries_drawproperties_new.filter(where).all()
         else:
             # Insert a new record in the table timeseries_drawproperties for the product with default values
             default_ts_drawproperties = {
@@ -639,10 +652,10 @@ def __get_product_timeseries_drawproperties(product, user='', graph_tpl_name='')
                 "yaxes_id": 'default'  # product['productcode'] + '-' + product['version']
             }
 
-            if crud_db.create('timeseries_drawproperties_new', default_ts_drawproperties):
-                product_ts_properties = dbschema_analysis.execute(query).fetchall()
+            if crud_db_analysis.create('timeseries_drawproperties_new', default_ts_drawproperties):
+                product_ts_properties = db_analysis.execute(query).fetchall()
                 # product_ts_properties = product_ts_properties.fetchall()
-                # timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties_new.filter(where).all()
+                # timeseries_drawproperties = db_analysis.timeseries_drawproperties_new.filter(where).all()
 
         return product_ts_properties
     except:
@@ -650,24 +663,23 @@ def __get_product_timeseries_drawproperties(product, user='', graph_tpl_name='')
         # Exit the script and print an error telling what happened.
         logger.error("get_product_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-        # dbschema_analysis = None
+        if db_analysis.session:
+            db_analysis.session.close()
+        # db_analysis = None
 
 
 def __get_product_timeseries_drawproperties_orig(product):
-    global dbschema_analysis
-    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+    global db_analysis
 
     try:
         timeseries_drawproperties = []
 
-        where = and_(dbschema_analysis.timeseries_drawproperties.productcode == product['productcode'],
-                     dbschema_analysis.timeseries_drawproperties.subproductcode == product['subproductcode'],
-                     dbschema_analysis.timeseries_drawproperties.version == product['version'])
+        where = and_(db_analysis.timeseries_drawproperties.productcode == product['productcode'],
+                     db_analysis.timeseries_drawproperties.subproductcode == product['subproductcode'],
+                     db_analysis.timeseries_drawproperties.version == product['version'])
 
-        if dbschema_analysis.timeseries_drawproperties.filter(where).count() >= 1:
-            timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties.filter(where).all()
+        if db_analysis.timeseries_drawproperties.filter(where).count() >= 1:
+            timeseries_drawproperties = db_analysis.timeseries_drawproperties.filter(where).all()
         else:
             # Insert a new record in the table timeseries_drawproperties for the product with default values
             default_ts_drawproperties = {
@@ -691,8 +703,8 @@ def __get_product_timeseries_drawproperties_orig(product):
                 "aggregation_max": None
             }
 
-            if crud_db.create('timeseries_drawproperties', default_ts_drawproperties):
-                timeseries_drawproperties = dbschema_analysis.timeseries_drawproperties.filter(where).all()
+            if crud_db_analysis.create('timeseries_drawproperties', default_ts_drawproperties):
+                timeseries_drawproperties = db_analysis.timeseries_drawproperties.filter(where).all()
 
         return timeseries_drawproperties
     except:
@@ -700,13 +712,13 @@ def __get_product_timeseries_drawproperties_orig(product):
         # Exit the script and print an error telling what happened.
         logger.error("get_product_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-        # dbschema_analysis = None
+        if db_analysis.session:
+            db_analysis.session.close()
+        # db_analysis = None
 
 
 def get_graph_yaxes(graph_tpl_id='-1'):
-    global dbschema_analysis
+    global db_analysis
 
     try:
         query = " SELECT * FROM analysis.user_graph_tpl_yaxes " + \
@@ -722,13 +734,13 @@ def get_graph_yaxes(graph_tpl_id='-1'):
         logger.error("get_graph_yaxes: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-        # dbschema_analysis = None
+        if db_analysis.session:
+            db_analysis.session.close()
+        # db_analysis = None
 
 
 def get_graph_tsdrawprops(graph_tpl_id):
-    global dbschema_analysis
+    global db_analysis
     try:
         query = " SELECT productcode, subproductcode, version, tsname_in_legend, " \
                 "        charttype, linestyle, linewidth, color, yaxe_id " + \
@@ -736,7 +748,7 @@ def get_graph_tsdrawprops(graph_tpl_id):
                 " WHERE uts.graph_tpl_id = " + str(graph_tpl_id) + \
                 " ORDER BY productcode ASC, subproductcode ASC, version ASC"
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
         # print result
         return result
@@ -747,13 +759,13 @@ def get_graph_tsdrawprops(graph_tpl_id):
         logger.error("get_graph_tsdrawprops: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def get_product_yaxe(product, userid='', istemplate='false', graph_type='', graph_tpl_id='-1',
                      graph_tpl_name='default'):
-    global dbschema_analysis
+    global db_analysis
 
     try:
         product_yaxe = []
@@ -794,14 +806,14 @@ def get_product_yaxe(product, userid='', istemplate='false', graph_type='', grap
         logger.error("get_product_yaxe: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-        # dbschema_analysis = None
+        if db_analysis.session:
+            db_analysis.session.close()
+        # db_analysis = None
 
 
 def get_timeseries_yaxes(products, userid='', istemplate='false', graph_type='', graph_tpl_id='-1',
                          graph_tpl_name='default'):
-    global dbschema_analysis
+    global db_analysis
 
     try:
         if userid != '':
@@ -848,19 +860,19 @@ def get_timeseries_yaxes(products, userid='', istemplate='false', graph_type='',
         logger.error("get_timeseries_yaxes: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-        # dbschema_analysis = None
+        if db_analysis.session:
+            db_analysis.session.close()
+        # db_analysis = None
 
 
 def __get_timeseries_yaxes(products):
-    global dbschema_analysis
+    global db_analysis
 
     try:
         timeseries_yaxes = []
 
-        session = dbschema_analysis.session
-        ts_drawprobs = aliased(dbschema_analysis.timeseries_drawproperties)
+        session = db_analysis.session
+        ts_drawprobs = aliased(db_analysis.timeseries_drawproperties)
 
         timeseries_drawproperties = session.query(
             ts_drawprobs.yaxes_id,
@@ -895,15 +907,14 @@ def __get_timeseries_yaxes(products):
         # Exit the script and print an error telling what happened.
         logger.error("get_timeseries_yaxes: Database query error!\n -> {}".format(exceptionvalue))
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-        # dbschema_analysis = None
+        if db_analysis.session:
+            db_analysis.session.close()
+        # db_analysis = None
 
 
 def update_yaxe(yaxe_info):
-    global dbschema_analysis
+    global db_analysis
     status = False
-    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
 
     try:
         yaxe = {'yaxe_id': yaxe_info['id'], 'title': yaxe_info['title'], 'title_color': yaxe_info['title_color'],
@@ -948,17 +959,25 @@ def update_yaxe(yaxe_info):
             if not graph_tpl_id:
                 return status
 
-        where = and_(dbschema_analysis.user_graph_tpl_yaxes.graph_tpl_id == graph_tpl_id,
-                     dbschema_analysis.user_graph_tpl_yaxes.yaxe_id == yaxe_info['id'])
+        query = " SELECT * FROM analysis.user_graph_tpl_yaxes " + \
+                " WHERE graph_tpl_id = " + str(graph_tpl_id) + \
+                "   AND yaxe_id = '" + str(yaxe_info['id']) + "'"
+
+        result = db_analysis.execute(query)
+        result = result.fetchall()
+
+        # where = and_(db_analysis.user_graph_tpl_yaxes.graph_tpl_id == graph_tpl_id,
+        #              db_analysis.user_graph_tpl_yaxes.yaxe_id == yaxe_info['id'])
 
         yaxe['graph_tpl_id'] = graph_tpl_id
-        if dbschema_analysis.user_graph_tpl_yaxes.filter(where).count() > 0:
-            if crud_db.update('user_graph_tpl_yaxes', yaxe):
+        # if db_analysis.user_graph_tpl_yaxes.filter(where).count() > 0:
+        if result.__len__() > 0:
+            if crud_db_analysis.update('user_graph_tpl_yaxes', yaxe):
                 status = True
             else:
                 status = False
         else:
-            if crud_db.create('user_graph_tpl_yaxes', yaxe):
+            if crud_db_analysis.create('user_graph_tpl_yaxes', yaxe):
                 status = True
             else:
                 status = False
@@ -970,14 +989,13 @@ def update_yaxe(yaxe_info):
         logger.error("update_yaxe: Database query error!\n -> {}".format(exceptionvalue))
         return status
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def __update_yaxe(yaxe):
-    global dbschema_analysis
+    global db_analysis
     status = False
-    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
 
     try:
         yaxe['yaxe_id'] = yaxe['id']  # the key id is passed but in the table the key name is yaxe_id
@@ -1020,29 +1038,29 @@ def __update_yaxe(yaxe):
         #         "   ,aggregation_max = " + str(aggregation_max) + \
         #         " WHERE yaxe_id = '" + yaxe['id'] + "'"
         # # print query
-        # result = dbschema_analysis.execute(query)
-        # dbschema_analysis.commit()
+        # result = db_analysis.execute(query)
+        # db_analysis.commit()
 
         if yaxe['graph_tpl_name'] == 'default':
-            where = and_(dbschema_analysis.user_graph_templates.userid == yaxe['userid'],
-                         dbschema_analysis.user_graph_templates.graph_tpl_name == yaxe['graph_tpl_name'])
-            if dbschema_analysis.user_graph_templates.filter(where).count() == 0:
+            where = and_(db_analysis.user_graph_templates.userid == yaxe['userid'],
+                         db_analysis.user_graph_templates.graph_tpl_name == yaxe['graph_tpl_name'])
+            if db_analysis.user_graph_templates.filter(where).count() == 0:
                 default_user_graph_template = {
                     "userid": yaxe['userid'],
                     "graph_tpl_name": yaxe['graph_tpl_name']
                 }
-                crud_db.create('user_graph_templates', default_user_graph_template)
+                crud_db_analysis.create('user_graph_templates', default_user_graph_template)
 
-        where = and_(dbschema_analysis.user_tpl_graph_yaxes.userid == yaxe['userid'],
-                     dbschema_analysis.user_tpl_graph_yaxes.graph_tpl_name == yaxe['graph_tpl_name'])
+        where = and_(db_analysis.user_tpl_graph_yaxes.userid == yaxe['userid'],
+                     db_analysis.user_tpl_graph_yaxes.graph_tpl_name == yaxe['graph_tpl_name'])
 
-        if dbschema_analysis.user_tpl_graph_yaxes.filter(where).count() >= 1:
-            if crud_db.update('user_tpl_graph_yaxes', yaxe):
+        if db_analysis.user_tpl_graph_yaxes.filter(where).count() >= 1:
+            if crud_db_analysis.update('user_tpl_graph_yaxes', yaxe):
                 status = True
             else:
                 status = False
         else:
-            if crud_db.create('user_tpl_graph_yaxes', yaxe):
+            if crud_db_analysis.create('user_tpl_graph_yaxes', yaxe):
                 status = True
             else:
                 status = False
@@ -1054,12 +1072,12 @@ def __update_yaxe(yaxe):
         logger.error("update_yaxe: Database query error!\n -> {}".format(exceptionvalue))
         return status
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def __update_yaxe_timeseries_drawproperties(yaxe):
-    global dbschema_analysis
+    global db_analysis
     status = False
     try:
         if yaxe['opposite'] == "false":
@@ -1099,8 +1117,8 @@ def __update_yaxe_timeseries_drawproperties(yaxe):
                 "   ,aggregation_max = " + str(aggregation_max) + \
                 " WHERE yaxes_id = '" + yaxe['id'] + "'"
         # print query
-        result = dbschema_analysis.execute(query)
-        dbschema_analysis.commit()
+        result = db_analysis.execute(query)
+        db_analysis.commit()
 
         status = True
         return status
@@ -1110,12 +1128,12 @@ def __update_yaxe_timeseries_drawproperties(yaxe):
         logger.error("update_yaxe_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
         return status
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def get_timeseries_drawproperties(params):
-    global dbschema_analysis
+    global db_analysis
     try:
         if hasattr(params, "userid") and params.userid != '':
             graph_tpl_id = params.graph_tpl_id
@@ -1141,7 +1159,7 @@ def get_timeseries_drawproperties(params):
             query = "SELECT * FROM analysis.timeseries_drawproperties_new " \
                     "ORDER BY productcode ASC, subproductcode ASC, version ASC"
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
         # print result
         return result
@@ -1152,12 +1170,12 @@ def get_timeseries_drawproperties(params):
         logger.error("get_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def __get_timeseries_drawproperties(params):
-    global dbschema_analysis
+    global db_analysis
     try:
         if hasattr(params, "userid") and params.userid != '':
             query = " SELECT productcode, subproductcode, version, tsname_in_legend, " + \
@@ -1179,7 +1197,7 @@ def __get_timeseries_drawproperties(params):
             query = "SELECT * FROM analysis.timeseries_drawproperties_new " \
                     "ORDER BY productcode ASC, subproductcode ASC, version ASC"
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
         # print result
         return result
@@ -1189,14 +1207,13 @@ def __get_timeseries_drawproperties(params):
         # Exit the script and print an error telling what happened.
         logger.error("get_timeseries_drawproperties_new: Database query error!\n -> {}".format(exceptionvalue))
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def update_user_tpl_timeseries_drawproperties(tsdrawproperties):
-    global dbschema_analysis
+    global db_analysis
     status = False
-    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
 
     try:
         if tsdrawproperties['linewidth'] == '':
@@ -1207,14 +1224,24 @@ def update_user_tpl_timeseries_drawproperties(tsdrawproperties):
                 tsdrawproperties['istemplate'] == 'false':
             graph_tpl_id = getDefaultUserGraphTemplateID(tsdrawproperties['userid'], tsdrawproperties['graph_type'])
 
-        where = and_(dbschema_analysis.user_graph_tpl_timeseries_drawproperties.graph_tpl_id == graph_tpl_id,
-                     dbschema_analysis.user_graph_tpl_timeseries_drawproperties.productcode == tsdrawproperties[
-                         'productcode'],
-                     dbschema_analysis.user_graph_tpl_timeseries_drawproperties.subproductcode == tsdrawproperties[
-                         'subproductcode'],
-                     dbschema_analysis.user_graph_tpl_timeseries_drawproperties.version == tsdrawproperties['version'])
+        query = " SELECT * FROM analysis.user_graph_tpl_timeseries_drawproperties " + \
+                " WHERE graph_tpl_id = " + str(graph_tpl_id) + \
+                "   AND productcode = '" + str(tsdrawproperties['productcode']) + "'" \
+                "   AND subproductcode = '" + str(tsdrawproperties['subproductcode']) + "'" \
+                "   AND version = '" + str(tsdrawproperties['version']) + "'"
 
-        if dbschema_analysis.user_graph_tpl_timeseries_drawproperties.filter(where).count() >= 1:
+        result = db_analysis.execute(query)
+        result = result.fetchall()
+
+        # where = and_(db_analysis.user_graph_tpl_timeseries_drawproperties.graph_tpl_id == graph_tpl_id,
+        #              db_analysis.user_graph_tpl_timeseries_drawproperties.productcode == tsdrawproperties[
+        #                  'productcode'],
+        #              db_analysis.user_graph_tpl_timeseries_drawproperties.subproductcode == tsdrawproperties[
+        #                  'subproductcode'],
+        #              db_analysis.user_graph_tpl_timeseries_drawproperties.version == tsdrawproperties['version'])
+
+        # if db_analysis.user_graph_tpl_timeseries_drawproperties.filter(where).count() >= 1:
+        if result.__len__() >= 1:
             query = " UPDATE analysis.user_graph_tpl_timeseries_drawproperties " + \
                     " SET tsname_in_legend = '" + tsdrawproperties['tsname_in_legend'] + "'" + \
                     "   ,color = '" + tsdrawproperties['color'] + "'" + \
@@ -1228,8 +1255,8 @@ def update_user_tpl_timeseries_drawproperties(tsdrawproperties):
                     "   AND version = '" + tsdrawproperties['version'] + "'"
 
             # print query
-            result = dbschema_analysis.execute(query)
-            dbschema_analysis.commit()
+            db_analysis.execute(query)
+            db_analysis.commit()
         else:
             tsdrawprops = {
                 'graph_tpl_id': graph_tpl_id,
@@ -1243,7 +1270,7 @@ def update_user_tpl_timeseries_drawproperties(tsdrawproperties):
                 'color': tsdrawproperties['color'],
                 'yaxe_id': tsdrawproperties['yaxe_id']
             }
-            crud_db.create('user_graph_tpl_timeseries_drawproperties', tsdrawprops)
+            crud_db_analysis.create('user_graph_tpl_timeseries_drawproperties', tsdrawprops)
 
         status = True
         return status
@@ -1253,40 +1280,39 @@ def update_user_tpl_timeseries_drawproperties(tsdrawproperties):
         logger.error("update_user_tpl_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
         return status
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def __update_user_tpl_timeseries_drawproperties(tsdrawproperties):
-    global dbschema_analysis
+    global db_analysis
     status = False
-    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
 
     try:
         if tsdrawproperties['linewidth'] == '':
             tsdrawproperties['linewidth'] = '0'
 
         if tsdrawproperties['graph_tpl_name'] == 'default':
-            where = and_(dbschema_analysis.user_tpl_timeseries_drawproperties.userid == tsdrawproperties['userid'],
-                         dbschema_analysis.user_tpl_timeseries_drawproperties.graph_tpl_name == tsdrawproperties[
+            where = and_(db_analysis.user_tpl_timeseries_drawproperties.userid == tsdrawproperties['userid'],
+                         db_analysis.user_tpl_timeseries_drawproperties.graph_tpl_name == tsdrawproperties[
                              'graph_tpl_name'])
-            if dbschema_analysis.user_graph_templates.filter(where).count() == 0:
+            if db_analysis.user_graph_templates.filter(where).count() == 0:
                 default_user_graph_template = {
                     "userid": tsdrawproperties['userid'],
                     "graph_tpl_name": tsdrawproperties['graph_tpl_name']
                 }
-                crud_db.create('user_graph_templates', default_user_graph_template)
+                crud_db_analysis.create('user_graph_templates', default_user_graph_template)
 
-        where = and_(dbschema_analysis.user_tpl_timeseries_drawproperties.userid == tsdrawproperties['userid'],
-                     dbschema_analysis.user_tpl_timeseries_drawproperties.graph_tpl_name == tsdrawproperties[
+        where = and_(db_analysis.user_tpl_timeseries_drawproperties.userid == tsdrawproperties['userid'],
+                     db_analysis.user_tpl_timeseries_drawproperties.graph_tpl_name == tsdrawproperties[
                          'graph_tpl_name'],
-                     dbschema_analysis.user_tpl_timeseries_drawproperties.productcode == tsdrawproperties[
+                     db_analysis.user_tpl_timeseries_drawproperties.productcode == tsdrawproperties[
                          'productcode'],
-                     dbschema_analysis.user_tpl_timeseries_drawproperties.subproductcode == tsdrawproperties[
+                     db_analysis.user_tpl_timeseries_drawproperties.subproductcode == tsdrawproperties[
                          'subproductcode'],
-                     dbschema_analysis.user_tpl_timeseries_drawproperties.version == tsdrawproperties['version'])
+                     db_analysis.user_tpl_timeseries_drawproperties.version == tsdrawproperties['version'])
 
-        if dbschema_analysis.user_tpl_timeseries_drawproperties.filter(where).count() >= 1:
+        if db_analysis.user_tpl_timeseries_drawproperties.filter(where).count() >= 1:
             query = " UPDATE analysis.user_tpl_timeseries_drawproperties " + \
                     " SET tsname_in_legend = '" + tsdrawproperties['tsname_in_legend'] + "'" + \
                     "   ,color = '" + tsdrawproperties['color'] + "'" + \
@@ -1301,10 +1327,10 @@ def __update_user_tpl_timeseries_drawproperties(tsdrawproperties):
                     "   AND version = '" + tsdrawproperties['version'] + "'"
 
             # print query
-            result = dbschema_analysis.execute(query)
-            dbschema_analysis.commit()
+            result = db_analysis.execute(query)
+            db_analysis.commit()
         else:
-            crud_db.create('user_tpl_timeseries_drawproperties', tsdrawproperties)
+            crud_db_analysis.create('user_tpl_timeseries_drawproperties', tsdrawproperties)
 
         status = True
         return status
@@ -1314,12 +1340,12 @@ def __update_user_tpl_timeseries_drawproperties(tsdrawproperties):
         logger.error("user_tpl_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
         return status
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def __update_timeseries_drawproperties(tsdrawproperties):
-    global dbschema_analysis
+    global db_analysis
     status = False
     try:
         if tsdrawproperties['linewidth'] == '':
@@ -1336,8 +1362,8 @@ def __update_timeseries_drawproperties(tsdrawproperties):
                 "   AND version = '" + tsdrawproperties['version'] + "'"
 
         # print query
-        result = dbschema_analysis.execute(query)
-        dbschema_analysis.commit()
+        result = db_analysis.execute(query)
+        db_analysis.commit()
 
         status = True
         return status
@@ -1347,12 +1373,12 @@ def __update_timeseries_drawproperties(tsdrawproperties):
         logger.error("update_timeseries_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
         return status
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def get_graph_drawproperties(params):
-    global dbschema_analysis
+    global db_analysis
     try:
         if hasattr(params, "userid") and params['userid'] != '':
             if hasattr(params, "graph_tpl_id"):
@@ -1418,7 +1444,7 @@ def get_graph_drawproperties(params):
                     " WHERE graph_type = '" + params['graphtype'] + "'"
 
         # print query
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
 
         return result
@@ -1428,12 +1454,12 @@ def get_graph_drawproperties(params):
         logger.error("get_graph_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def __get_graph_drawproperties(params):
-    global dbschema_analysis
+    global db_analysis
     try:
 
         if hasattr(params, "userid") and params.userid != '':
@@ -1461,7 +1487,7 @@ def __get_graph_drawproperties(params):
         else:
             query = "SELECT * FROM analysis.graph_drawproperties WHERE graph_type = '" + params.graphtype + "'"
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
 
         return result
@@ -1470,15 +1496,15 @@ def __get_graph_drawproperties(params):
         # Exit the script and print an error telling what happened.
         logger.error("get_graph_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def __get_chart_drawproperties(charttype='default'):
-    global dbschema_analysis
+    global db_analysis
     try:
         query = "SELECT * FROM analysis.chart_drawproperties WHERE chart_type = '" + charttype + "'"
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
 
         return result
@@ -1487,13 +1513,12 @@ def __get_chart_drawproperties(charttype='default'):
         # Exit the script and print an error telling what happened.
         logger.error("get_chart_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def update_user_graph_tpl_drawproperties(graphdrawprobs, graphtpl_info):
-    global dbschema_analysis
-    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
+    global db_analysis
 
     try:
         graph_tpl_id = graphtpl_info['graph_tpl_id']
@@ -1502,17 +1527,25 @@ def update_user_graph_tpl_drawproperties(graphdrawprobs, graphtpl_info):
                 and graphtpl_info['istemplate'] == 'false':
             graph_tpl_id = getDefaultUserGraphTemplateID(graphtpl_info['userid'], graphdrawprobs['graph_type'])
 
-        where = and_(dbschema_analysis.user_graph_tpl_drawproperties.graph_tpl_id == graph_tpl_id,
-                     dbschema_analysis.user_graph_tpl_drawproperties.graph_type == graphdrawprobs['graph_type'])
+        query = " SELECT * FROM analysis.user_graph_tpl_drawproperties " + \
+                " WHERE graph_tpl_id = " + str(graph_tpl_id) + \
+                "   AND graph_type = '" + graphdrawprobs['graph_type'] + "'"
+
+        result = db_analysis.execute(query)
+        result = result.fetchall()
+
+        # where = and_(db_analysis.user_graph_tpl_drawproperties.graph_tpl_id == graph_tpl_id,
+        #              db_analysis.user_graph_tpl_drawproperties.graph_type == graphdrawprobs['graph_type'])
 
         graphdrawprobs['graph_tpl_id'] = graph_tpl_id
-        if dbschema_analysis.user_graph_tpl_drawproperties.filter(where).count() >= 1:
-            if crud_db.update('user_graph_tpl_drawproperties', graphdrawprobs):
+        # if db_analysis.user_graph_tpl_drawproperties.filter(where).count() >= 1:
+        if result.__len__() >= 1:
+            if crud_db_analysis.update('user_graph_tpl_drawproperties', graphdrawprobs):
                 status = True
             else:
                 status = False
         else:
-            if crud_db.create('user_graph_tpl_drawproperties', graphdrawprobs):
+            if crud_db_analysis.create('user_graph_tpl_drawproperties', graphdrawprobs):
                 status = True
             else:
                 status = False
@@ -1524,14 +1557,13 @@ def update_user_graph_tpl_drawproperties(graphdrawprobs, graphtpl_info):
         logger.error("update_user_graph_tpl_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def __update_user_tpl_graph_drawproperties(graphdrawprobs):
-    global dbschema_analysis
+    global db_analysis
     status = False
-    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_analysis'])
 
     try:
 
@@ -1554,25 +1586,25 @@ def __update_user_tpl_graph_drawproperties(graphdrawprobs):
         #                   }
 
         if graphdrawprobs['graph_tpl_name'] == 'default':
-            where = and_(dbschema_analysis.user_graph_templates.userid == graphdrawprobs['userid'],
-                         dbschema_analysis.user_graph_templates.graph_tpl_name == graphdrawprobs['graph_tpl_name'])
-            if dbschema_analysis.user_graph_templates.filter(where).count() == 0:
+            where = and_(db_analysis.user_graph_templates.userid == graphdrawprobs['userid'],
+                         db_analysis.user_graph_templates.graph_tpl_name == graphdrawprobs['graph_tpl_name'])
+            if db_analysis.user_graph_templates.filter(where).count() == 0:
                 default_user_graph_template = {
                     "userid": graphdrawprobs['userid'],
                     "graph_tpl_name": graphdrawprobs['graph_tpl_name']
                 }
-                crud_db.create('user_graph_templates', default_user_graph_template)
+                crud_db_analysis.create('user_graph_templates', default_user_graph_template)
 
-        where = and_(dbschema_analysis.user_tpl_graph_drawproperties.userid == graphdrawprobs['userid'],
-                     dbschema_analysis.user_tpl_graph_drawproperties.graph_tpl_name == graphdrawprobs['graph_tpl_name'])
+        where = and_(db_analysis.user_tpl_graph_drawproperties.userid == graphdrawprobs['userid'],
+                     db_analysis.user_tpl_graph_drawproperties.graph_tpl_name == graphdrawprobs['graph_tpl_name'])
 
-        if dbschema_analysis.user_tpl_graph_drawproperties.filter(where).count() >= 1:
-            if crud_db.update('user_tpl_graph_drawproperties', graphdrawprobs):
+        if db_analysis.user_tpl_graph_drawproperties.filter(where).count() >= 1:
+            if crud_db_analysis.update('user_tpl_graph_drawproperties', graphdrawprobs):
                 status = True
             else:
                 status = False
         else:
-            if crud_db.create('user_tpl_graph_drawproperties', graphdrawprobs):
+            if crud_db_analysis.create('user_tpl_graph_drawproperties', graphdrawprobs):
                 status = True
             else:
                 status = False
@@ -1584,15 +1616,15 @@ def __update_user_tpl_graph_drawproperties(graphdrawprobs):
         logger.error("update_user_tpl_graph_drawproperties: Database query error!\n -> {}".format(exceptionvalue))
         return status
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def get_layers():
-    global dbschema_analysis
+    global db_analysis
     try:
         query = "SELECT * FROM analysis.layers order by menu asc, submenu asc, layerlevel asc"
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         result = result.fetchall()
 
         return result
@@ -1602,12 +1634,12 @@ def get_layers():
         logger.error("get_layers: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def get_legend_totals(legendid):
-    global dbschema_analysis
+    global db_analysis
     try:
 
         query = " SELECT ts.TotSteps, tsl.TotColorLabels, tgl.TotGroupLabels " + \
@@ -1620,7 +1652,7 @@ def get_legend_totals(legendid):
                 "      ( SELECT count(group_label) as TotGroupLabels " + \
                 "        FROM analysis.legend_step ls3 " + \
                 "        WHERE ls3.legend_id = " + str(legendid) + " AND trim(group_label) != '') tgl "
-        legendtotals = dbschema_analysis.execute(query)
+        legendtotals = db_analysis.execute(query)
         legendtotals = legendtotals.fetchall()
 
         return legendtotals
@@ -1630,8 +1662,8 @@ def get_legend_totals(legendid):
         logger.error("get_legend_totals: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def get_spirits():
@@ -2334,11 +2366,11 @@ def set_thema(themaid=''):
 
 
 def get_i18n(lang='eng'):
-    global dbschema_analysis
+    global db_analysis
     try:
         query = "SELECT DISTINCT label, CASE WHEN " + lang + " is null or trim(" + lang + ")='' THEN " + 'eng' + \
                 " ELSE " + lang + " END as langtranslation " + "FROM analysis.i18n ORDER BY label ASC"
-        i18n = dbschema_analysis.execute(query)
+        i18n = db_analysis.execute(query)
         i18n = i18n.fetchall()
 
         return i18n
@@ -2348,29 +2380,29 @@ def get_i18n(lang='eng'):
         logger.error("get_i18n: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-        # dbschema_analysis = None
+        if db_analysis.session:
+            db_analysis.session.close()
+        # db_analysis = None
 
 
 def get_languages():
-    global dbschema_analysis
+    global db_analysis
 
     try:
         query = "SELECT langcode, langdescription, active FROM analysis.languages WHERE active = TRUE"
-        languages = dbschema_analysis.execute(query)
+        languages = db_analysis.execute(query)
         languages = languages.fetchall()
 
         return languages
 
-        # l = dbschema_analysis.languages._table
+        # l = db_analysis.languages._table
         #
         # s = select([l.c.langcode,
         #             l.c.langdescription,
         #             l.c.active])
         #
         # s = s.alias('lang')
-        # lang = dbschema_analysis.map(s, primary_key=[s.c.langcode])
+        # lang = db_analysis.map(s, primary_key=[s.c.langcode])
         #
         # where = and_(lang.active == 't')
         #
@@ -2385,9 +2417,9 @@ def get_languages():
         logger.error("get_languages: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-        # dbschema_analysis = None
+        if db_analysis.session:
+            db_analysis.session.close()
+        # db_analysis = None
 
 
 ######################################################################################
@@ -2419,48 +2451,79 @@ def get_timeseries_subproducts(productcode=None, version='undefined', subproduct
     global db
 
     try:
-        p = db.product._table
 
-        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productid'),
-                    p.c.productcode,
-                    p.c.subproductcode,
-                    p.c.version,
-                    p.c.display_index,
-                    # p.c.defined_by,
-                    # p.c.activated,
-                    p.c.date_format,
-                    p.c.frequency_id,
-                    p.c.descriptive_name.label('descriptive_name'),  # prod_descriptive_name
-                    p.c.description,
-                    p.c.masked,
-                    p.c.timeseries_role
-                    ])
-
-        s = s.alias('pl')
-        pl = db.map(s, primary_key=[s.c.productcode, s.c.subproductcode, s.c.version])
+        query = "select p.productcode || '_' || p.version as productid, " + \
+                "       p.productcode, " + \
+                "       p.subproductcode, " + \
+                "       p.version, " + \
+                "       p.display_index, " + \
+                "       p.date_format, " + \
+                "       p.frequency_id, " + \
+                "       p.descriptive_name, " + \
+                "       p.description, " + \
+                "       p.masked, " + \
+                "       p.timeseries_role " + \
+                "from products.product p " + \
+                "where p.timeseries_role = '" + subproductcode + "'" + \
+                "  and p.productcode = '" + productcode + "'" + \
+                "  and p.version = '" + version + "'"
 
         if masked is None:
-            where = and_(pl.c.productcode == productcode,
-                         pl.c.version == version,
-                         pl.c.timeseries_role == subproductcode)
-            # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+            where = ""
         else:
             if not masked:
-                where = and_(pl.c.masked == 'f',
-                             pl.c.productcode == productcode,
-                             pl.c.version == version,
-                             pl.c.timeseries_role == subproductcode)
-                # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+                where = " and p.masked = 'f' "
             else:
-                where = and_(pl.c.masked == 't',
-                             pl.c.productcode == productcode,
-                             pl.c.version == version,
-                             pl.c.timeseries_role == subproductcode)
-                # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+                where = " and p.masked = 't' "
 
-        productslist = pl.filter(where).order_by(asc(pl.c.productcode), asc(pl.c.subproductcode)).all()
-
+        query += where + " ORDER BY productcode, subproductcode"
+        productslist = db.execute(query)
+        productslist = productslist.fetchall()
+        # print result
         return productslist
+
+        # p = db.product._table
+        #
+        # s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productid'),
+        #             p.c.productcode,
+        #             p.c.subproductcode,
+        #             p.c.version,
+        #             p.c.display_index,
+        #             # p.c.defined_by,
+        #             # p.c.activated,
+        #             p.c.date_format,
+        #             p.c.frequency_id,
+        #             p.c.descriptive_name.label('descriptive_name'),  # prod_descriptive_name
+        #             p.c.description,
+        #             p.c.masked,
+        #             p.c.timeseries_role
+        #             ])
+        #
+        # s = s.alias('pl')
+        # pl = db.map(s, primary_key=[s.c.productcode, s.c.subproductcode, s.c.version])
+        #
+        # if masked is None:
+        #     where = and_(pl.c.productcode == productcode,
+        #                  pl.c.version == version,
+        #                  pl.c.timeseries_role == subproductcode)
+        #     # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+        # else:
+        #     if not masked:
+        #         where = and_(pl.c.masked == 'f',
+        #                      pl.c.productcode == productcode,
+        #                      pl.c.version == version,
+        #                      pl.c.timeseries_role == subproductcode)
+        #         # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+        #     else:
+        #         where = and_(pl.c.masked == 't',
+        #                      pl.c.productcode == productcode,
+        #                      pl.c.version == version,
+        #                      pl.c.timeseries_role == subproductcode)
+        #         # or_(pl.c.timeseries_role == subproductcode, pl.c.subproductcode == subproductcode))
+        #
+        # productslist = pl.filter(where).order_by(asc(pl.c.productcode), asc(pl.c.subproductcode)).all()
+        #
+        # return productslist
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
@@ -2590,7 +2653,7 @@ def get_timeseries_products(masked=None):
 #   SELECT * FROM analysis.product_legend
 #
 def get_all_legends():
-    global dbschema_analysis
+    global db_analysis
     try:
 
         query = " SELECT legend.legend_id,  " + \
@@ -2602,7 +2665,7 @@ def get_all_legends():
                 "       legend.step_type " + \
                 " FROM analysis.legend "
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         legends = result.fetchall()
 
         return legends
@@ -2613,20 +2676,20 @@ def get_all_legends():
         logger.error("get_all_legends: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-        # dbschema_analysis = None
+        if db_analysis.session:
+            db_analysis.session.close()
+        # db_analysis = None
 
 
 def deletelegendsteps(legendid):
-    global dbschema_analysis
+    global db_analysis
     try:
 
         query = "DELETE FROM analysis.legend_step WHERE legend_id = " + legendid
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         # legend = result.fetchall()
-        dbschema_analysis.commit()
+        db_analysis.commit()
 
         return True
 
@@ -2638,12 +2701,12 @@ def deletelegendsteps(legendid):
         logger.error("deletelegendsteps: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
+        if db_analysis.session:
+            db_analysis.session.close()
 
 
 def createlegend(params):
-    global dbschema_analysis
+    global db_analysis
     try:
 
         query = "INSERT INTO analysis.legend (legend_name, min_value, max_value, colorbar) VALUES ( " + \
@@ -2653,9 +2716,9 @@ def createlegend(params):
                 ", " + "'" + params['colorbar'] + \
                 "') RETURNING legend_id"
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         legend = result.fetchall()
-        dbschema_analysis.commit()
+        db_analysis.commit()
 
         return legend[0]._row[0]
 
@@ -2667,9 +2730,9 @@ def createlegend(params):
         logger.error("createlegend: Database query error!\n -> {}".format(exceptionvalue))
         return -1
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-            # dbschema_analysis = None
+        if db_analysis.session:
+            db_analysis.session.close()
+            # db_analysis = None
 
 
 ######################################################################################
@@ -2690,7 +2753,7 @@ def createlegend(params):
 #     AND subproductcode = param_subproductcode
 #
 def get_product_legends(productcode=None, subproductcode=None, version=None):
-    global dbschema_analysis
+    global db_analysis
     try:
 
         query = "SELECT legend.legend_id,  " + \
@@ -2705,11 +2768,11 @@ def get_product_legends(productcode=None, subproductcode=None, version=None):
                 "  AND product_legend.subproductcode = '" + subproductcode + "' " + \
                 "  AND product_legend.version = '" + version + "' "
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         productlegends = result.fetchall()
 
-        # legend = dbschema_analysis.legend._table
-        # product_legend = dbschema_analysis.product_legend._table
+        # legend = db_analysis.legend._table
+        # product_legend = db_analysis.product_legend._table
         #
         # productlegends = select([legend.c.legend_id,
         #                          legend.c.legend_name,
@@ -2722,17 +2785,17 @@ def get_product_legends(productcode=None, subproductcode=None, version=None):
         #     select_from(legend.outerjoin(product_legend, legend.c.legend_id == product_legend.c.legend_id))
         #
         # s = productlegends.alias('pl')
-        # pl = dbschema_analysis.map(s, primary_key=[s.c.legend_id])
+        # pl = db_analysis.map(s, primary_key=[s.c.legend_id])
         #
         # where = and_(pl.c.productcode == productcode,
         #              pl.c.subproductcode == subproductcode,
         #              pl.c.version == version)
         # productlegends = pl.filter(where).all()
 
-        # session = dbschema_analysis.session
-        # legend = aliased(dbschema_analysis.legend)
+        # session = db_analysis.session
+        # legend = aliased(db_analysis.legend)
         #
-        # product_legend = session.query(dbschema_analysis.product_legend).subquery()
+        # product_legend = session.query(db_analysis.product_legend).subquery()
         #
         # productlegends = session.query(legend.legend_id,
         #                                legend.legend_name,
@@ -2752,13 +2815,13 @@ def get_product_legends(productcode=None, subproductcode=None, version=None):
         logger.error("get_product_legends: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-        # dbschema_analysis = None
+        if db_analysis.session:
+            db_analysis.session.close()
+        # db_analysis = None
 
 
 def get_legend_assigned_datasets(legendid):
-    global dbschema_analysis
+    global db_analysis
     try:
 
         query = "SELECT product_legend.legend_id,  " + \
@@ -2774,7 +2837,7 @@ def get_legend_assigned_datasets(legendid):
                 "  AND product.version = product_legend.version )" + \
                 "WHERE product_legend.legend_id = " + str(legendid)
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         legend_datasets = result.fetchall()
 
         return legend_datasets
@@ -2785,13 +2848,13 @@ def get_legend_assigned_datasets(legendid):
         logger.error("get_legend_assigned_datasets: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-            # dbschema_analysis = None
+        if db_analysis.session:
+            db_analysis.session.close()
+            # db_analysis = None
 
 
 def export_legend_steps(legendid=None):
-    global dbschema_analysis
+    global db_analysis
     try:
         # query = " SELECT to_step || ', ' || replace(color_rgb, ' ', ', ') || " + \
         #         " ', 255, ' || COALESCE('''' || color_label || '''', '') as legendstep " + \
@@ -2812,7 +2875,7 @@ def export_legend_steps(legendid=None):
                 " AND ls.legend_id = pinfo.legend_id " + \
                 " ORDER BY ls.from_step ASC "
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         legend_steps = result.fetchall()
 
         return legend_steps
@@ -2823,9 +2886,9 @@ def export_legend_steps(legendid=None):
         logger.error("get_legend_steps: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-        # dbschema_analysis = None
+        if db_analysis.session:
+            db_analysis.session.close()
+        # db_analysis = None
 
 
 ######################################################################################
@@ -2842,19 +2905,19 @@ def export_legend_steps(legendid=None):
 #    ORDER BY from_step
 #
 def get_legend_steps(legendid=None):
-    global dbschema_analysis
+    global db_analysis
     try:
         query = " SELECT legend_id,  from_step,  to_step, color_rgb, color_label, group_label " + \
                 " FROM analysis.legend_step " + \
                 " WHERE legend_id = " + str(legendid) + \
                 " ORDER BY from_step ASC "
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         legend_steps = result.fetchall()
 
         return legend_steps
 
-        # ls = dbschema_analysis.legend_step._table
+        # ls = db_analysis.legend_step._table
         #
         # s = select([ls.c.legend_id,
         #             ls.c.from_step,
@@ -2866,7 +2929,7 @@ def get_legend_steps(legendid=None):
         #            )
         #
         # s = s.alias('legend_steps')
-        # ls = dbschema_analysis.map(s, primary_key=[s.c.legend_id, s.c.from_step, s.c.to_step])
+        # ls = db_analysis.map(s, primary_key=[s.c.legend_id, s.c.from_step, s.c.to_step])
         #
         # where = and_(ls.c.legend_id == legendid)
         # legend_steps = ls.filter(where).order_by(asc(ls.c.from_step)).all()
@@ -2879,9 +2942,9 @@ def get_legend_steps(legendid=None):
         logger.error("get_legend_steps: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-        # dbschema_analysis = None
+        if db_analysis.session:
+            db_analysis.session.close()
+        # db_analysis = None
 
 
 ######################################################################################
@@ -2904,7 +2967,7 @@ def get_legend_steps(legendid=None):
 #    GROUP BY analysis.legend_step.legend_id
 #
 def get_legend_info(legendid=None):
-    global dbschema_analysis
+    global db_analysis
     try:
 
         query = " SELECT MIN(analysis.legend_step.from_step) AS realminstep, " + \
@@ -2938,11 +3001,11 @@ def get_legend_info(legendid=None):
                 "       analysis.legend.unit, " + \
                 "       analysis.legend.step_type "
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         legend_info = result.fetchall()
 
-        # ls = dbschema_analysis.legend_step._table
-        # l = dbschema_analysis.legend._table
+        # ls = db_analysis.legend_step._table
+        # l = db_analysis.legend._table
         #
         # s = select([func.MIN(ls.c.from_step).label('realminstep'),
         #             func.MAX(ls.c.to_step).label('realmaxstep'),
@@ -2972,10 +3035,10 @@ def get_legend_info(legendid=None):
         #            ).select_from(l.outerjoin(ls, l.c.legend_id == ls.c.legend_id))
         #
         # s = s.alias('legend_info')
-        # dbschema_analysis.legend_info = dbschema_analysis.map(s, primary_key=[s.c.legend_id])
+        # db_analysis.legend_info = db_analysis.map(s, primary_key=[s.c.legend_id])
         #
-        # where = and_(dbschema_analysis.legend_info.legend_id == legendid)
-        # legend_info = dbschema_analysis.legend_info.filter(where).all()
+        # where = and_(db_analysis.legend_info.legend_id == legendid)
+        # legend_info = db_analysis.legend_info.filter(where).all()
 
         return legend_info
 
@@ -2985,9 +3048,9 @@ def get_legend_info(legendid=None):
         logger.error("get_legend_info: Database query error!\n -> {}".format(exceptionvalue))
         return False
     finally:
-        if dbschema_analysis.session:
-            dbschema_analysis.session.close()
-        # dbschema_analysis = None
+        if db_analysis.session:
+            db_analysis.session.close()
+        # db_analysis = None
 
 
 ######################################################################################
@@ -3152,13 +3215,13 @@ def get_products_acquisition(activated=None):
                 "        p.activated, " + \
                 "        p.product_type, " + \
                 "        COALESCE(p.descriptive_name, '') as prod_descriptive_name, " + \
-                " COALESCE(p.description, '') as description, " + \
-                " COALESCE(p.provider, '') as provider, " + \
-                " p.masked, " + \
-                " pc.category_id, " + \
-                " pc.descriptive_name as cat_descr_name, " + \
-                " pc.order_index, " + \
-                " subprods.totsubprods " + \
+                "        COALESCE(p.description, '') as description, " + \
+                "        COALESCE(p.provider, '') as provider, " + \
+                "        p.masked, " + \
+                "        pc.category_id, " + \
+                "        pc.descriptive_name as cat_descr_name, " + \
+                "        pc.order_index, " + \
+                "        subprods.totsubprods " + \
                 " FROM products.product as p INNER JOIN products.product_category as pc " + \
                 "   ON p.category_id = pc.category_id " + \
                 " INNER JOIN (SELECT COUNT(pads.data_source_id) as totgets, " + \
@@ -3309,53 +3372,95 @@ def __get_products_acquisition(activated=None):
 def get_products(activated=None, masked=None):
     global db
     try:
-        pc = db.product_category._table
-        p = db.product._table
 
-        s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productid'),
-                    p.c.productcode,
-                    p.c.subproductcode,
-                    p.c.version,
-                    p.c.defined_by,
-                    p.c.activated,
-                    p.c.product_type,
-                    # p.c.descriptive_name.label('prod_descriptive_name'),
-                    # p.c.description,
-                    func.coalesce(p.c.descriptive_name, '').label('prod_descriptive_name'),
-                    func.coalesce(p.c.description, '').label('description'),
-                    func.coalesce(p.c.provider, '').label('provider'),
-                    p.c.masked,
-                    pc.c.category_id,
-                    pc.c.descriptive_name.label('cat_descr_name'),
-                    pc.c.order_index]).select_from(p.outerjoin(pc, p.c.category_id == pc.c.category_id))
-
-        s = s.alias('pl')
-        pl = db.map(s, primary_key=[s.c.productid])
+        query = "select p.productcode || '_' || p.version as productid, " + \
+                "       p.productcode, " + \
+                "       p.subproductcode, " + \
+                "       p.version, " + \
+                "       p.defined_by, " + \
+                "       p.activated, " + \
+                "       p.product_type, " + \
+                "       COALESCE(p.descriptive_name, '') as prod_descriptive_name, " + \
+                "       COALESCE(p.description, '') as description, " + \
+                "       COALESCE(p.provider, '') as provider, " + \
+                "       p.masked, " + \
+                "       pc.category_id, " + \
+                "       pc.descriptive_name as cat_descr_name, " + \
+                "       pc.order_index " + \
+                "from products.product p " + \
+                "     left outer join products.product_category pc on p.category_id = pc.category_id " + \
+                "where p.product_type = 'Native' "
 
         if masked is None:
-            if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
-                where = and_(pl.c.product_type == 'Native',
-                             pl.c.activated == 't')  # , pl.c.defined_by != ''     'JRC-Test'
-            elif activated is False or activated in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
-                where = and_(pl.c.product_type == 'Native',
-                             pl.c.activated == 'f')  # , pl.c.defined_by != ''   'JRC-Test'
-            else:
-                where = and_(pl.c.product_type == 'Native')  # , pl.c.defined_by != ''    'JRC-Test'
+            and_masked = ""
         else:
             if not masked:
-                if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
-                    where = and_(pl.c.product_type == 'Native', pl.c.activated == 't', pl.c.masked == 'f')
-                else:
-                    where = and_(pl.c.product_type == 'Native', pl.c.activated == 'f', pl.c.masked == 'f')
+                and_masked = " and p.masked = 'f' "
             else:
-                if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
-                    where = and_(pl.c.product_type == 'Native', pl.c.activated == 't', pl.c.masked == 't')
-                else:
-                    where = and_(pl.c.product_type == 'Native', pl.c.activated == 'f', pl.c.masked == 't')
+                and_masked = " and p.masked = 't' "
+        query += and_masked
 
-        productslist = pl.filter(where).order_by(asc(pl.c.order_index), asc(pl.c.productcode)).all()
+        if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            and_activated = " and p.activated = 't' "
+        elif activated is False or activated in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
+            and_activated = " and p.activated = 'f' "
+        else:
+            and_activated = ""
+        query += and_activated
+        query += " ORDER BY order_index, productcode"
 
+        productslist = db.execute(query)
+        productslist = productslist.fetchall()
+        # print result
         return productslist
+
+        # pc = db.product_category._table
+        # p = db.product._table
+        #
+        # s = select([func.CONCAT(p.c.productcode, '_', p.c.version).label('productid'),
+        #             p.c.productcode,
+        #             p.c.subproductcode,
+        #             p.c.version,
+        #             p.c.defined_by,
+        #             p.c.activated,
+        #             p.c.product_type,
+        #             # p.c.descriptive_name.label('prod_descriptive_name'),
+        #             # p.c.description,
+        #             func.coalesce(p.c.descriptive_name, '').label('prod_descriptive_name'),
+        #             func.coalesce(p.c.description, '').label('description'),
+        #             func.coalesce(p.c.provider, '').label('provider'),
+        #             p.c.masked,
+        #             pc.c.category_id,
+        #             pc.c.descriptive_name.label('cat_descr_name'),
+        #             pc.c.order_index]).select_from(p.outerjoin(pc, p.c.category_id == pc.c.category_id))
+        #
+        # s = s.alias('pl')
+        # pl = db.map(s, primary_key=[s.c.productid])
+        #
+        # if masked is None:
+        #     if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+        #         where = and_(pl.c.product_type == 'Native',
+        #                      pl.c.activated == 't')  # , pl.c.defined_by != ''     'JRC-Test'
+        #     elif activated is False or activated in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
+        #         where = and_(pl.c.product_type == 'Native',
+        #                      pl.c.activated == 'f')  # , pl.c.defined_by != ''   'JRC-Test'
+        #     else:
+        #         where = and_(pl.c.product_type == 'Native')  # , pl.c.defined_by != ''    'JRC-Test'
+        # else:
+        #     if not masked:
+        #         if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+        #             where = and_(pl.c.product_type == 'Native', pl.c.activated == 't', pl.c.masked == 'f')
+        #         else:
+        #             where = and_(pl.c.product_type == 'Native', pl.c.activated == 'f', pl.c.masked == 'f')
+        #     else:
+        #         if activated is True or activated in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+        #             where = and_(pl.c.product_type == 'Native', pl.c.activated == 't', pl.c.masked == 't')
+        #         else:
+        #             where = and_(pl.c.product_type == 'Native', pl.c.activated == 'f', pl.c.masked == 't')
+        #
+        # productslist = pl.filter(where).order_by(asc(pl.c.order_index), asc(pl.c.productcode)).all()
+        #
+        # return productslist
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
@@ -3379,9 +3484,13 @@ def get_products(activated=None, masked=None):
 def get_frequency(frequency_id=''):
     global db
     try:
-        # where = and_(db.frequency.frequency_id == frequency_id)
-        # frequency = db.frequency.filter(where).one()
-        frequency = db.frequency.get(frequency_id)
+        query = "SELECT * FROM products.frequency WHERE frequency_id = '" + frequency_id + "'"
+        frequency = db.execute(query)
+        frequency = frequency.fetchall()
+
+        # # where = and_(db.frequency.frequency_id == frequency_id)
+        # # frequency = db.frequency.filter(where).one()
+        # frequency = db.frequency.get(frequency_id)
 
         return frequency
     except:
@@ -3410,13 +3519,26 @@ def get_product_out_info(allrecs=False, productcode='', subproductcode='', versi
     global db
 
     try:
-        if allrecs:
-            product_out_info = db.product.order_by(asc(db.product.productcode)).all()
-        else:
-            where = and_(db.product.productcode == productcode,
-                         db.product.subproductcode == subproductcode,
-                         db.product.version == version)
-            product_out_info = db.product.filter(where).all()
+        query = " SELECT * FROM products.product "
+
+        where = ""
+        if not allrecs:
+            where = " WHERE productcode = '" + productcode + "'" + \
+                    "   AND subproductcode = '" + subproductcode + "'" + \
+                    "   AND version = '" + version + "'"
+        query += where
+        query += " ORDER BY productcode"
+
+        product_out_info = db.execute(query)
+        product_out_info = product_out_info.fetchall()
+
+        # if allrecs:
+        #     product_out_info = db.product.order_by(asc(db.product.productcode)).all()
+        # else:
+        #     where = and_(db.product.productcode == productcode,
+        #                  db.product.subproductcode == subproductcode,
+        #                  db.product.version == version)
+        #     product_out_info = db.product.filter(where).all()
 
         return product_out_info
     except:
@@ -3446,13 +3568,26 @@ def get_product_out_info(allrecs=False, productcode='', subproductcode='', versi
 def get_product_out_info_connect(allrecs=False, productcode='', subproductcode='', version='undefined'):
     global db
     try:
-        if allrecs:
-            product_out_info = db.product.order_by(asc(db.product.productcode)).all()
-        else:
-            where = and_(db.product.productcode == productcode,
-                         db.product.subproductcode == subproductcode,
-                         db.product.version == version)
-            product_out_info = db.product.filter(where).all()
+        query = " SELECT * FROM products.product "
+
+        where = ""
+        if not allrecs:
+            where = " WHERE productcode = '" + productcode + "'" + \
+                    "   AND subproductcode = '" + subproductcode + "'" + \
+                    "   AND version = '" + version + "'"
+        query += where
+        query += " ORDER BY productcode"
+
+        product_out_info = db.execute(query)
+        product_out_info = product_out_info.fetchall()
+
+        # if allrecs:
+        #     product_out_info = db.product.order_by(asc(db.product.productcode)).all()
+        # else:
+        #     where = and_(db.product.productcode == productcode,
+        #                  db.product.subproductcode == subproductcode,
+        #                  db.product.version == version)
+        #     product_out_info = db.product.filter(where).all()
 
         return product_out_info
     except:
@@ -3484,17 +3619,38 @@ def get_product_out_info_connect(allrecs=False, productcode='', subproductcode='
 def get_product_in_info(allrecs=False, productcode='', subproductcode='', version='undefined', datasource_descr_id=''):
     global db
     try:
-        if allrecs:
-            product_in_info = db.sub_datasource_description.order_by(
-                asc(db.sub_datasource_description.productcode)).all()
-        else:
-            where = and_(db.sub_datasource_description.productcode == productcode,
-                         db.sub_datasource_description.subproductcode == subproductcode,
-                         db.sub_datasource_description.version == version,
-                         db.sub_datasource_description.datasource_descr_id == datasource_descr_id)
-            product_in_info = db.sub_datasource_description.filter(where).first()
+
+        query = " SELECT * FROM products.sub_datasource_description "
+
+        where = ""
+        if not allrecs:
+            where = " WHERE productcode = '" + productcode + "'" + \
+                    "   AND subproductcode = '" + subproductcode + "'" + \
+                    "   AND version = '" + version + "'" + \
+                    "   AND datasource_descr_id = '" + datasource_descr_id + "'"
+
+        query += where
+        query += " ORDER BY productcode"
+
+        product_in_info = db.execute(query)
+        product_in_info = product_in_info.fetchone()
+
+        # if allrecs:
+        #     product_in_info = db.sub_datasource_description.order_by(
+        #         asc(db.sub_datasource_description.productcode)).all()
+        # else:
+        #     where = and_(db.sub_datasource_description.productcode == productcode,
+        #                  db.sub_datasource_description.subproductcode == subproductcode,
+        #                  db.sub_datasource_description.version == version,
+        #                  db.sub_datasource_description.datasource_descr_id == datasource_descr_id)
+        #     product_in_info = db.sub_datasource_description.filter(where).first()
+
+        # for row in product_in_info:
+        #     product_in_info = functions.row2dict(row)
+
         if product_in_info is None:
             product_in_info = []
+
         return product_in_info
     except exc.NoResultFound:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
@@ -3505,7 +3661,6 @@ def get_product_in_info(allrecs=False, productcode='', subproductcode='', versio
     finally:
         if db.session:
             db.session.close()
-        # db = None
 
 
 ######################################################################################
@@ -3572,18 +3727,31 @@ def get_product_native(productcode='', version='undefined', allrecs=False):
 def get_subproduct(productcode='', version='undefined', subproductcode='', masked=False):
     global db
     try:
+        query = " SELECT * FROM products.product " \
+                " WHERE productcode = '" + productcode + "'"\
+                "   AND subproductcode = '" + subproductcode + "'" \
+                "   AND version = '" + version + "'"
+
+        where = ""
         if masked:
-            where = and_(db.product.productcode == productcode,
-                         db.product.subproductcode == subproductcode,
-                         db.product.version == version,
-                         db.product.masked == 'f')
-        else:
-            where = and_(db.product.productcode == productcode,
-                         db.product.subproductcode == subproductcode,
-                         db.product.version == version)
-        subproduct = db.product.filter(where).first()
-        # if subproduct is None:
-        #    subproduct = []
+            where = " AND masked = 'f' "
+        query += where
+
+        subproduct = db.execute(query)
+        subproduct = subproduct.fetchall()
+
+        # if masked:
+        #     where = and_(db.product.productcode == productcode,
+        #                  db.product.subproductcode == subproductcode,
+        #                  db.product.version == version,
+        #                  db.product.masked == 'f')
+        # else:
+        #     where = and_(db.product.productcode == productcode,
+        #                  db.product.subproductcode == subproductcode,
+        #                  db.product.version == version)
+        # subproduct = db.product.filter(where).first()
+        if subproduct.__len__() == 0:
+            subproduct = None
         return subproduct
     except exc.NoResultFound:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
@@ -3610,12 +3778,21 @@ def get_eumetcast(source_id='', allrecs=False):
     global db
     try:
         if allrecs:
-            eumetcasts = db.eumetcast_source.order_by(asc(db.eumetcast_source.eumetcast_id)).all()
+            query = " SELECT * FROM products.eumetcast_source ORDER BY eumetcast_id ASC"
         else:
-            where = db.eumetcast_source.eumetcast_id == source_id
-            eumetcasts = db.eumetcast_source.filter(where).first()
-        if eumetcasts is None:
-            eumetcasts = []
+            query = " SELECT * FROM products.eumetcast_source WHERE eumetcast_id = '" + source_id + "'"
+
+        eumetcasts = db.execute(query)
+        eumetcasts = eumetcasts.fetchall()
+
+        # if allrecs:
+        #     eumetcasts = db.eumetcast_source.order_by(asc(db.eumetcast_source.eumetcast_id)).all()
+        # else:
+        #     where = db.eumetcast_source.eumetcast_id == source_id
+        #     eumetcasts = db.eumetcast_source.filter(where).first()
+
+        # if eumetcasts is None:
+        #     eumetcasts = []
         return eumetcasts
     except exc.NoResultFound:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
@@ -3625,7 +3802,6 @@ def get_eumetcast(source_id='', allrecs=False):
     finally:
         if db.session:
             db.session.close()
-        # db = None
 
 
 ######################################################################################
@@ -3640,10 +3816,16 @@ def get_eumetcast(source_id='', allrecs=False):
 def get_internet(internet_id=''):
     global db
     try:
-        where = db.internet_source.internet_id == internet_id
-        internet = db.internet_source.filter(where).first()
-        if internet is None:
-            internet = []
+        query = " SELECT * FROM products.internet_source WHERE internet_id = '" + internet_id + "'"
+
+        internet = db.execute(query)
+        internet = internet.fetchall()
+
+        # where = db.internet_source.internet_id == internet_id
+        # internet = db.internet_source.filter(where).first()
+
+        # if internet is None:
+        #     internet = []
         return internet
     except exc.NoResultFound:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
@@ -3671,27 +3853,44 @@ def get_internet(internet_id=''):
 def get_ingestion_product(allrecs=False, productcode='', version='undefined'):
     global db
     try:
-        session = db.session
-        ingest = aliased(db.ingestion)
+        query = " SELECT productcode, version, count(subproductcode) " + \
+                " FROM products.ingestion " + \
+                " WHERE activated "
+        groupby = " GROUP BY productcode, version"
+        andwhere = ""
+        if not allrecs:
+            andwhere = " AND productcode = '" + productcode + "'" + \
+                       " AND version = '" + version + "'"
+        query += andwhere
+        query += groupby
 
-        # Get all defined ingestion definitions with the amount of subproducts per product/version (count).
-        ingestion_product = session.query(ingest.productcode,
-                                          ingest.version,
-                                          func.count(ingest.subproductcode), ). \
-            group_by(ingest.productcode, ingest.version)
+        active_ingestions = db.execute(query)
+        active_ingestions = active_ingestions.fetchall()
 
-        active_ingestions = []
-        if allrecs:
-            ingestion_product = ingestion_product.filter(ingest.activated == True)
+        if not active_ingestions.__len__() >= 1:
+            active_ingestions = []
 
-            if ingestion_product.count() >= 1:  # At least 1 product ingestion definition has to exist.
-                active_ingestions = ingestion_product.all()
-        else:
-            where = and_(ingest.productcode == productcode,
-                         ingest.activated == True,
-                         ingest.version == version)
-            if ingestion_product.filter(where).count() == 1:  # Exactly 1 product ingestion definition has to exist.
-                active_ingestions = ingestion_product.filter(where).one()
+        # session = db.session
+        # ingest = aliased(db.ingestion)
+        #
+        # # Get all defined ingestion definitions with the amount of subproducts per product/version (count).
+        # ingestion_product = session.query(ingest.productcode,
+        #                                   ingest.version,
+        #                                   func.count(ingest.subproductcode), ). \
+        #     group_by(ingest.productcode, ingest.version)
+        #
+        # active_ingestions = []
+        # if allrecs:
+        #     ingestion_product = ingestion_product.filter(ingest.activated == True)
+        #
+        #     if ingestion_product.count() >= 1:  # At least 1 product ingestion definition has to exist.
+        #         active_ingestions = ingestion_product.all()
+        # else:
+        #     where = and_(ingest.productcode == productcode,
+        #                  ingest.activated == True,
+        #                  ingest.version == version)
+        #     if ingestion_product.filter(where).count() == 1:  # Exactly 1 product ingestion definition has to exist.
+        #         active_ingestions = ingestion_product.filter(where).one()
         return active_ingestions
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
@@ -3702,7 +3901,6 @@ def get_ingestion_product(allrecs=False, productcode='', version='undefined'):
     finally:
         if db.session:
             db.session.close()
-        # db = None
 
 
 ######################################################################################
@@ -3718,18 +3916,33 @@ def get_ingestion_product(allrecs=False, productcode='', version='undefined'):
 def get_ingestion_subproduct(allrecs=False, productcode='', version=''):
     global db
     try:
-        ingestion = []
-        if allrecs:
-            if db.ingestion.filter(db.ingestion.activated).count() >= 1:
-                ingestion = db.ingestion.filter(db.ingestion.activated). \
-                    order_by(asc(db.ingestion.productcode)).all()
-        else:
-            where = and_(db.ingestion.productcode == productcode,
-                         db.ingestion.activated,
-                         # db.ingestion.subproductcode == subproductcode,
-                         db.ingestion.version == version)
-            if db.ingestion.filter(where).count() >= 1:
-                ingestion = db.ingestion.filter(where).all()
+        query = " SELECT * FROM products.ingestion WHERE activated "
+
+        andwhere = ""
+        if not allrecs:
+            andwhere = " AND productcode = '" + productcode + "'" + \
+                       " AND version = '" + version + "'"
+        query += andwhere
+        query += " ORDER BY productcode"
+
+        ingestion = db.execute(query)
+        ingestion = ingestion.fetchall()
+
+        if not ingestion.__len__() >= 1:
+            ingestion = []
+
+        # ingestion = []
+        # if allrecs:
+        #     if db.ingestion.filter(db.ingestion.activated).count() >= 1:
+        #         ingestion = db.ingestion.filter(db.ingestion.activated). \
+        #             order_by(asc(db.ingestion.productcode)).all()
+        # else:
+        #     where = and_(db.ingestion.productcode == productcode,
+        #                  db.ingestion.activated,
+        #                  # db.ingestion.subproductcode == subproductcode,
+        #                  db.ingestion.version == version)
+        #     if db.ingestion.filter(where).count() >= 1:
+        #         ingestion = db.ingestion.filter(where).all()
 
         return ingestion
     except:
@@ -3760,15 +3973,26 @@ def get_ingestion_subproduct(allrecs=False, productcode='', version=''):
 def get_product_sources(productcode='', subproductcode='', version=''):
     global db
     try:
-        sources = []
-        where = and_(db.product_acquisition_data_source.productcode == productcode,
-                     db.product_acquisition_data_source.subproductcode == subproductcode,
-                     db.product_acquisition_data_source.version == version,
-                     db.product_acquisition_data_source.activated)
+        query = " SELECT * FROM products.product_acquisition_data_source " \
+                " WHERE productcode = '" + productcode + "'" \
+                "   AND subproductcode = '" + subproductcode + "'" \
+                "   AND version = '" + version + "'" \
+                "   AND activated " \
+                " ORDER BY type"
 
-        if db.product_acquisition_data_source.filter(where).count() >= 1:
-            sources = db.product_acquisition_data_source.filter(where). \
-                order_by(asc(db.product_acquisition_data_source.type)).all()
+        sources = db.execute(query)
+        sources = sources.fetchall()
+
+        if sources.__len__() == 0:
+            sources = []
+        # where = and_(db.product_acquisition_data_source.productcode == productcode,
+        #              db.product_acquisition_data_source.subproductcode == subproductcode,
+        #              db.product_acquisition_data_source.version == version,
+        #              db.product_acquisition_data_source.activated)
+        #
+        # if db.product_acquisition_data_source.filter(where).count() >= 1:
+        #     sources = db.product_acquisition_data_source.filter(where). \
+        #         order_by(asc(db.product_acquisition_data_source.type)).all()
 
         return sources
     except:
@@ -3780,7 +4004,6 @@ def get_product_sources(productcode='', subproductcode='', version=''):
     finally:
         if db.session:
             db.session.close()
-        # db = None
 
 
 ######################################################################################
@@ -3809,7 +4032,7 @@ def get_datasource_descr(source_type='', source_id=''):
                     "  ON ints.datasource_descr_id = dsd.datasource_descr_id " + \
                     "WHERE ints.datasource_descr_id = '" + source_id + "'"
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         datasource_descr = result.fetchall()
 
         return datasource_descr
@@ -3857,7 +4080,7 @@ def get_eumetcast_sources():
                 "WHERE pads.type = 'EUMETCAST' " + \
                 "  AND pads.activated"
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         eumetcast_sources = result.fetchall()
 
         return eumetcast_sources
@@ -3909,7 +4132,7 @@ def get_active_internet_sources():
                 "       AND p.activated = TRUE " + \
                 "    WHERE pads.type = 'INTERNET' AND pads.activated = TRUE)"
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         internet_sources = result.fetchall()
 
         # session = db.session
@@ -4028,65 +4251,99 @@ def __get_processing_chains():
 def get_processingchains_input_products(process_id=None):
     global db
     try:
-        in_process_id = process_id
+        query = " SELECT proc.*, pin.* " \
+                " FROM products.processing proc " \
+                "   LEFT OUTER JOIN (SELECT * FROM products.process_product WHERE type = 'INPUT') pin " \
+                "   ON proc.process_id = pin.process_id " \
+                "   LEFT OUTER JOIN ( " \
+                "   SELECT productcode || '_' || version as productid, " \
+                "     p.productcode as prod_productcode, " \
+                "     p.subproductcode as prod_subproductcode, " \
+                "     p.version as prod_version, " \
+                "     p.defined_by, " \
+                "     p.product_type, " \
+                "     p.descriptive_name as prod_descriptive_name, " \
+                "     p.description, " \
+                "     pc.category_id, " \
+                "     pc.descriptive_name as cat_descr_name, " \
+                "     pc.order_index " \
+                "   FROM products.product p INNER JOIN products.product_category pc " \
+                "     ON p.category_id = pc.category_id ) prod " \
+                "   ON pin.productcode = prod.prod_productcode  " \
+                "   AND pin.subproductcode = prod.prod_subproductcode  " \
+                "   AND pin.version = prod.prod_version "
 
-        process = db.processing._table
-        processinput = db.process_product._table  # session.query(db.process_product).subquery()
-        product = db.product._table  # session.query(db.product).subquery()
-        pc = db.product_category._table  # session.query(db.product_category).subquery()
+        orderby = " ORDER BY proc.process_id"
+        if process_id is not None:
+            where = " WHERE proc.process_id = " + str(process_id)
+            query += where
+        query += orderby
 
-        s = select([process.c.process_id,
-                    process.c.defined_by.label('process_defined_by'),
-                    process.c.activated,
-                    process.c.output_mapsetcode,
-                    process.c.derivation_method,
-                    process.c.algorithm,
-                    process.c.priority,
+        result = db.execute(query)
+        processing_chains = result.fetchall()
 
-                    processinput.c.productcode,
-                    processinput.c.subproductcode,
-                    processinput.c.version,
-                    processinput.c.mapsetcode,
-                    processinput.c.date_format,
-                    processinput.c.start_date,
-                    processinput.c.end_date,
-                    processinput.c.type]). \
-            select_from(process.outerjoin(processinput, process.c.process_id == processinput.c.process_id))
-
-        s = s.alias('pi')
-        pi = db.map(s, primary_key=[s.c.process_id])
-        db.pi = pi
-
-        s = select([func.CONCAT(product.c.productcode, '_', product.c.version).label('productid'),
-                    product.c.productcode.label('prod_productcode'),
-                    product.c.subproductcode.label('prod_subproductcode'),
-                    product.c.version.label('prod_version'),
-                    product.c.defined_by,
-                    product.c.product_type,
-                    product.c.descriptive_name.label('prod_descriptive_name'),
-                    product.c.description,
-
-                    pc.c.category_id,
-                    pc.c.descriptive_name.label('cat_descr_name'),
-                    pc.c.order_index]). \
-            select_from(product.outerjoin(pc, product.c.category_id == pc.c.category_id))
-
-        s = s.alias('p')
-        p = db.map(s, primary_key=[s.c.productid])
-        db.p = p
-
-        processing_chains = db.join(db.pi, db.p, and_(db.pi.productcode == db.p.prod_productcode,
-                                                      db.pi.subproductcode == db.p.prod_subproductcode,
-                                                      db.pi.version == db.p.prod_version), isouter=True)
-
-        if in_process_id is not None:
-            where = and_(db.pi.c.process_id == in_process_id,
-                         db.pi.c.type == 'INPUT')
-        else:
-            where = and_(db.pi.c.type == 'INPUT')
-
-        processing_chains = processing_chains.filter(where).all()
         return processing_chains
+
+        # in_process_id = process_id
+        #
+        # process = db.processing._table
+        # processinput = db.process_product._table  # session.query(db.process_product).subquery()
+        # product = db.product._table  # session.query(db.product).subquery()
+        # pc = db.product_category._table  # session.query(db.product_category).subquery()
+        #
+        # s = select([process.c.process_id,
+        #             process.c.defined_by.label('process_defined_by'),
+        #             process.c.activated,
+        #             process.c.output_mapsetcode,
+        #             process.c.derivation_method,
+        #             process.c.algorithm,
+        #             process.c.priority,
+        #
+        #             processinput.c.productcode,
+        #             processinput.c.subproductcode,
+        #             processinput.c.version,
+        #             processinput.c.mapsetcode,
+        #             processinput.c.date_format,
+        #             processinput.c.start_date,
+        #             processinput.c.end_date,
+        #             processinput.c.type]). \
+        #     select_from(process.outerjoin(processinput, process.c.process_id == processinput.c.process_id))
+        #
+        # s = s.alias('pi')
+        # pi = db.map(s, primary_key=[s.c.process_id])
+        # db.pi = pi
+        #
+        # s = select([func.CONCAT(product.c.productcode, '_', product.c.version).label('productid'),
+        #             product.c.productcode.label('prod_productcode'),
+        #             product.c.subproductcode.label('prod_subproductcode'),
+        #             product.c.version.label('prod_version'),
+        #             product.c.defined_by,
+        #             product.c.product_type,
+        #             product.c.descriptive_name.label('prod_descriptive_name'),
+        #             product.c.description,
+        #
+        #             pc.c.category_id,
+        #             pc.c.descriptive_name.label('cat_descr_name'),
+        #             pc.c.order_index]). \
+        #     select_from(product.outerjoin(pc, product.c.category_id == pc.c.category_id))
+        #
+        # s = s.alias('p')
+        # p = db.map(s, primary_key=[s.c.productid])
+        # db.p = p
+        #
+        # processing_chains = db.join(db.pi, db.p, and_(db.pi.productcode == db.p.prod_productcode,
+        #                                               db.pi.subproductcode == db.p.prod_subproductcode,
+        #                                               db.pi.version == db.p.prod_version), isouter=True)
+        #
+        # if in_process_id is not None:
+        #     where = and_(db.pi.c.process_id == in_process_id,
+        #                  db.pi.c.type == 'INPUT')
+        # else:
+        #     where = and_(db.pi.c.type == 'INPUT')
+        #
+        # processing_chains = processing_chains.filter(where).all()
+        #
+        # return processing_chains
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
@@ -4098,7 +4355,6 @@ def get_processingchains_input_products(process_id=None):
     finally:
         if db.session:
             db.session.close()
-        # db = None
 
 
 ######################################################################################
@@ -4116,57 +4372,95 @@ def get_processingchain_output_products(process_id=None):
         processing_chain_output_products = []
 
         if process_id is not None:
-            myprocess_id = process_id
-            processfinaloutput = db.process_product._table
-            product = db.product._table
-            pc = db.product_category._table
+            query = " SELECT  pout.process_id,  " \
+                    "         pout.productcode,  " \
+                    "         pout.subproductcode,  " \
+                    "         pout.version,  " \
+                    "         pout.mapsetcode,  " \
+                    "         pout.type,  " \
+                    "         pout.activated as subactivated,  " \
+                    "         pout.final,  " \
+                    "         pout.date_format,  " \
+                    "         pout.start_date,  " \
+                    "         pout.end_date,  " \
+                    "         prod.*  " \
+                    " FROM products.process_product pout   " \
+                    " LEFT OUTER JOIN (  " \
+                    "   SELECT productcode || '_' || version as productid,  " \
+                    "       p.productcode as prod_productcode,  " \
+                    "       p.subproductcode as prod_subproductcode,  " \
+                    "       p.version as prod_version,  " \
+                    "       p.defined_by,  " \
+                    "       p.product_type,  " \
+                    "       p.descriptive_name as prod_descriptive_name,  " \
+                    "       p.description,  " \
+                    "       pc.category_id,  " \
+                    "       pc.descriptive_name as cat_descr_name,  " \
+                    "       pc.order_index  " \
+                    "   FROM products.product p INNER JOIN products.product_category pc  " \
+                    "                              ON p.category_id = pc.category_id ) prod  " \
+                    " ON pout.productcode = prod.prod_productcode   " \
+                    "  AND pout.subproductcode = prod.prod_subproductcode   " \
+                    "  AND pout.version = prod.prod_version  " \
+                    " WHERE pout.type = 'OUTPUT'   " \
+                    " AND pout.final " \
+                    " AND pout.process_id = " + str(process_id)
 
-            s = select([processfinaloutput.c.process_id,
-                        processfinaloutput.c.productcode,
-                        processfinaloutput.c.subproductcode,
-                        processfinaloutput.c.version,
-                        processfinaloutput.c.mapsetcode,
-                        processfinaloutput.c.type,
-                        processfinaloutput.c.activated.label('subactivated'),
-                        processfinaloutput.c.final,
-                        processfinaloutput.c.date_format,
-                        processfinaloutput.c.start_date,
-                        processfinaloutput.c.end_date])
+            result = db.execute(query)
+            processing_chain_output_products = result.fetchall()
 
-            s = s.alias('pfo')
-            pfo = db.map(s, primary_key=[s.c.process_id])
-            db.pfo = pfo
 
-            s = select([func.CONCAT(product.c.productcode, '_',
-                                    product.c.subproductcode, '_',
-                                    product.c.version).label('productid'),
-                        product.c.productcode.label('prod_productcode'),
-                        product.c.subproductcode.label('prod_subproductcode'),
-                        product.c.version.label('prod_version'),
-                        product.c.defined_by,
-                        product.c.product_type,
-                        product.c.descriptive_name.label('prod_descriptive_name'),
-                        product.c.description,
-                        pc.c.category_id,
-                        pc.c.descriptive_name.label('cat_descr_name'),
-                        pc.c.order_index]). \
-                select_from(product.outerjoin(pc, product.c.category_id == pc.c.category_id))
-
-            s = s.alias('p')
-            p = db.map(s, primary_key=[s.c.productid])
-            db.p = p
-
-            where = and_(db.pfo.c.process_id == myprocess_id,
-                         db.pfo.c.type == 'OUTPUT',
-                         db.pfo.c.final == True)
-
-            processing_chain_output_products = db.join(db.pfo,
-                                                       db.p,
-                                                       and_(db.pfo.productcode == db.p.prod_productcode,
-                                                            db.pfo.subproductcode == db.p.prod_subproductcode,
-                                                            db.pfo.version == db.p.prod_version),
-                                                       isouter=True)
-            processing_chain_output_products = processing_chain_output_products.filter(where).all()
+            # myprocess_id = process_id
+            # processfinaloutput = db.process_product._table
+            # product = db.product._table
+            # pc = db.product_category._table
+            #
+            # s = select([processfinaloutput.c.process_id,
+            #             processfinaloutput.c.productcode,
+            #             processfinaloutput.c.subproductcode,
+            #             processfinaloutput.c.version,
+            #             processfinaloutput.c.mapsetcode,
+            #             processfinaloutput.c.type,
+            #             processfinaloutput.c.activated.label('subactivated'),
+            #             processfinaloutput.c.final,
+            #             processfinaloutput.c.date_format,
+            #             processfinaloutput.c.start_date,
+            #             processfinaloutput.c.end_date])
+            #
+            # s = s.alias('pfo')
+            # pfo = db.map(s, primary_key=[s.c.process_id])
+            # db.pfo = pfo
+            #
+            # s = select([func.CONCAT(product.c.productcode, '_',
+            #                         product.c.subproductcode, '_',
+            #                         product.c.version).label('productid'),
+            #             product.c.productcode.label('prod_productcode'),
+            #             product.c.subproductcode.label('prod_subproductcode'),
+            #             product.c.version.label('prod_version'),
+            #             product.c.defined_by,
+            #             product.c.product_type,
+            #             product.c.descriptive_name.label('prod_descriptive_name'),
+            #             product.c.description,
+            #             pc.c.category_id,
+            #             pc.c.descriptive_name.label('cat_descr_name'),
+            #             pc.c.order_index]). \
+            #     select_from(product.outerjoin(pc, product.c.category_id == pc.c.category_id))
+            #
+            # s = s.alias('p')
+            # p = db.map(s, primary_key=[s.c.productid])
+            # db.p = p
+            #
+            # where = and_(db.pfo.c.process_id == myprocess_id,
+            #              db.pfo.c.type == 'OUTPUT',
+            #              db.pfo.c.final == True)
+            #
+            # processing_chain_output_products = db.join(db.pfo,
+            #                                            db.p,
+            #                                            and_(db.pfo.productcode == db.p.prod_productcode,
+            #                                                 db.pfo.subproductcode == db.p.prod_subproductcode,
+            #                                                 db.pfo.version == db.p.prod_version),
+            #                                            isouter=True)
+            # processing_chain_output_products = processing_chain_output_products.filter(where).all()
 
         return processing_chain_output_products
 
@@ -4193,21 +4487,35 @@ def get_processingchain_output_products(process_id=None):
 def get_processing_chains():
     global db
     try:
-        p = db.processing._table
+        query = " SELECT p.process_id, " \
+                "        p.defined_by as process_defined_by, " \
+                "        p.activated as process_activated, " \
+                "        p.output_mapsetcode, " \
+                "        p.derivation_method, " \
+                "        p.algorithm, " \
+                "        p.priority, " \
+                "        p.enabled " \
+                " FROM products.processing p" \
+                " WHERE enabled "
 
-        s = select([p.c.process_id,
-                    p.c.defined_by.label('process_defined_by'),
-                    p.c.activated.label('process_activated'),
-                    p.c.output_mapsetcode,
-                    p.c.derivation_method,
-                    p.c.algorithm,
-                    p.c.priority,
-                    p.c.enabled])
+        result = db.execute(query)
+        processing_chains = result.fetchall()
 
-        s = s.alias('pc')
-        pc = db.map(s, primary_key=[s.c.process_id])
-        where = and_(pc.enabled == 't')
-        processing_chains = pc.filter(where).all()
+        # p = db.processing._table
+        #
+        # s = select([p.c.process_id,
+        #             p.c.defined_by.label('process_defined_by'),
+        #             p.c.activated.label('process_activated'),
+        #             p.c.output_mapsetcode,
+        #             p.c.derivation_method,
+        #             p.c.algorithm,
+        #             p.c.priority,
+        #             p.c.enabled])
+        #
+        # s = s.alias('pc')
+        # pc = db.map(s, primary_key=[s.c.process_id])
+        # where = and_(pc.enabled == 't')
+        # processing_chains = pc.filter(where).all()
 
         # session = db.session
         # process = aliased(db.processing)
@@ -4229,7 +4537,6 @@ def get_processing_chains():
     finally:
         if db.session:
             db.session.close()
-        # db = None
 
 
 ######################################################################################
@@ -4250,7 +4557,7 @@ def get_active_processing_chains():
 
         query = "SELECT * FROM products.processing WHERE activated=TRUE"
 
-        result = dbschema_analysis.execute(query)
+        result = db_analysis.execute(query)
         active_processing_chains = result.fetchall()
 
         # session = db.session
@@ -4298,53 +4605,86 @@ def get_active_processing_chains():
 def get_processing_chain_products(process_id, type='All'):
     global db
     products = []
+    wrong_param_value = False
+    where = ""
+
     try:
-        session = db.session
-        process = aliased(db.processing)
+        query = " SELECT  pp.process_id,  " \
+                "         pp.productcode,  " \
+                "         pp.subproductcode,  " \
+                "         pp.version,  " \
+                "         pp.mapsetcode,  " \
+                "         pp.type,  " \
+                "         pp.activated,  " \
+                "         pp.final,  " \
+                "         pp.date_format,  " \
+                "         pp.start_date,  " \
+                "         pp.end_date  " \
+                " FROM products.process_product pp "
 
-        processinput = session.query(db.process_product).subquery()
-
-        # The columns on the subquery "processinput" are accessible through an attribute called "c"
-        # e.g. es.c.productcode
         if type == 'All':
-            products = session.query(process.process_id,
-                                     processinput.c.productcode,
-                                     processinput.c.subproductcode,
-                                     processinput.c.version,
-                                     processinput.c.mapsetcode,
-                                     processinput.c.date_format,
-                                     processinput.c.start_date,
-                                     processinput.c.end_date). \
-                outerjoin(processinput, process.process_id == processinput.c.process_id).all()
-
+            where = " WHERE pp.process_id = " + str(process_id)
         elif type == 'input':
-            products = session.query(process.process_id,
-                                     processinput.c.productcode,
-                                     processinput.c.subproductcode,
-                                     processinput.c.version,
-                                     processinput.c.mapsetcode,
-                                     processinput.c.date_format,
-                                     processinput.c.start_date,
-                                     processinput.c.end_date). \
-                outerjoin(processinput, process.process_id == processinput.c.process_id). \
-                filter(and_(processinput.c.type == 'INPUT', processinput.c.process_id == process_id)).all()
-
+            where = " WHERE pp.process_id = " + str(process_id) + " AND pp.type = 'INPUT'"
         elif type == 'output':
-            products = session.query(process.process_id,
-                                     processinput.c.productcode,
-                                     processinput.c.subproductcode,
-                                     processinput.c.version,
-                                     processinput.c.mapsetcode,
-                                     processinput.c.date_format,
-                                     processinput.c.start_date,
-                                     processinput.c.end_date). \
-                outerjoin(processinput, process.process_id == processinput.c.process_id). \
-                filter(and_(processinput.c.type == 'OUTPUT', processinput.c.process_id == process_id)).all()
-
+            where = " WHERE pp.process_id = " + str(process_id) + " AND pp.type = 'OUTPUT'"
         else:
+            wrong_param_value = True
             logger.error("get_processing_chain_products: type must be all/input/output")
 
+        if not wrong_param_value:
+            query += where
+            result = db_analysis.execute(query)
+            products = result.fetchall()
+
         return products
+
+        # session = db.session
+        # process = aliased(db.processing)
+        #
+        # processinput = session.query(db.process_product).subquery()
+        #
+        # # The columns on the subquery "processinput" are accessible through an attribute called "c"
+        # # e.g. es.c.productcode
+        # if type == 'All':
+        #     products = session.query(process.process_id,
+        #                              processinput.c.productcode,
+        #                              processinput.c.subproductcode,
+        #                              processinput.c.version,
+        #                              processinput.c.mapsetcode,
+        #                              processinput.c.date_format,
+        #                              processinput.c.start_date,
+        #                              processinput.c.end_date). \
+        #         outerjoin(processinput, process.process_id == processinput.c.process_id).all()
+        #
+        # elif type == 'input':
+        #     products = session.query(process.process_id,
+        #                              processinput.c.productcode,
+        #                              processinput.c.subproductcode,
+        #                              processinput.c.version,
+        #                              processinput.c.mapsetcode,
+        #                              processinput.c.date_format,
+        #                              processinput.c.start_date,
+        #                              processinput.c.end_date). \
+        #         outerjoin(processinput, process.process_id == processinput.c.process_id). \
+        #         filter(and_(processinput.c.type == 'INPUT', processinput.c.process_id == process_id)).all()
+        #
+        # elif type == 'output':
+        #     products = session.query(process.process_id,
+        #                              processinput.c.productcode,
+        #                              processinput.c.subproductcode,
+        #                              processinput.c.version,
+        #                              processinput.c.mapsetcode,
+        #                              processinput.c.date_format,
+        #                              processinput.c.start_date,
+        #                              processinput.c.end_date). \
+        #         outerjoin(processinput, process.process_id == processinput.c.process_id). \
+        #         filter(and_(processinput.c.type == 'OUTPUT', processinput.c.process_id == process_id)).all()
+        #
+        # else:
+        #     logger.error("get_processing_chain_products: type must be all/input/output")
+        #
+        # return products
 
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
@@ -4369,7 +4709,6 @@ def get_processing_chain_products(process_id, type='All'):
 #   Output: OK / error
 #
 def update_processing_chain_products(productcode, version, proc_sub_product, input_product_info):
-    crud_db = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
 
     updatestatus = {'success': False, 'message': ''}
     # 'Hard-coded' definitions
@@ -4413,7 +4752,7 @@ def update_processing_chain_products(productcode, version, proc_sub_product, inp
                        'subproductcode': subproductcode,
                        'version': version}
 
-        if crud_db.read('product', **productinfo):
+        if crud_db_products.read('product', **productinfo):
             updatestatus['success'] = True
             updatestatus['message'] = 'Product already exist in products table!'
         else:
@@ -4438,7 +4777,7 @@ def update_processing_chain_products(productcode, version, proc_sub_product, inp
                                'data_type_id': data_type_id,
                                'masked': masked,
                                'timeseries_role': timeseries_role}
-                crud_db.create('product', productinfo)
+                crud_db_products.create('product', productinfo)
                 updatestatus['success'] = True
                 updatestatus['message'] = 'Product created in products table!'
             except:
@@ -4480,9 +4819,9 @@ def update_processing_chain_products(productcode, version, proc_sub_product, inp
         updatestatus['success'] = False
         updatestatus['message'] = 'Database exception error!'
         return updatestatus
-    finally:
-        if crud_db:
-            crud_db = None
+    # finally:
+    #     if crud_db_products:
+    #         crud_db = None
 
 
 ######################################################################################

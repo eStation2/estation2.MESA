@@ -22,6 +22,7 @@ import numpy as np
 # import h5py
 from lib.python import functions
 from lib.python import metadata as md
+from lib.python.image_proc import raster_image_math
 
 from osgeo import gdal
 
@@ -64,7 +65,13 @@ class TestIngestion(unittest.TestCase):
             gdal_info_new.get_gdalinfo(newly_computed_file[0])
             equal = gdal_info_new.compare_gdalinfo(gdal_info_ref)
 
-        return equal
+            # Check the raster array compare
+            array_equal = raster_image_math.compare_two_raster_array(ref_file[0], newly_computed_file[0])
+
+        if array_equal is True and equal is True:
+            result = 1
+
+        return result
 
     def TestDriveAll(self):
         dry_run = True

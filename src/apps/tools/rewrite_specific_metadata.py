@@ -68,7 +68,7 @@ def rewrite_metadata(input_file, productcode, subproductcode, version, mapsetcod
 
     if output_directory is not None:
         sds_meta.assign_subdir_from_fullpath(output_directory)
-    sds_meta.assign_comput_time_now()
+    sds_meta.assign_compute_time_now()
 
     sds_meta.assign_input_files(input_file)
     sds_meta.assign_date(sds_meta.get_item('eStation2_input_files')[0:8])
