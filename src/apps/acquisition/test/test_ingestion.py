@@ -166,8 +166,8 @@ class TestIngestion(unittest.TestCase):
 
         # Test Copernicus Products version 2.0.1 (for DMP)
         # Products released from VITO in March 2017
+        date_fileslist = [os.path.join(self.test_ingest_dir,'c_gls_DMP-RT0_202003200000_GLOBE_PROBAV_V2.0.1.nc')]
 
-        date_fileslist = glob.glob('/data/ingest/c_gls_DMP-RT0_202003200000_GLOBE_PROBAV_V2.0.1.nc')
         in_date = '20200320'
         productcode = 'vgt-dmp'
         productversion = 'V2.0'
@@ -199,8 +199,9 @@ class TestIngestion(unittest.TestCase):
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-
-        self.assertEqual(1, 1)
+        status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
+                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+        self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
     #   Vegetation - FAPAR V1.4 \\Not used anymore\\
