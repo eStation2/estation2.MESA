@@ -25,6 +25,13 @@ class TestDaemon(unittest.TestCase):
     #       2. If OFF   -> Start in dry_run mode, check status and stop
     #
     #   TODO-M.C.: does the exit(0) in daemon code make the test fail ?
+    #   TODO-JUR: Unittesting does not work for methods that are in a continues loop and do not return a value!
+    #             Static state methods naturally make themselves fairly untestable.
+    #             We have to be pragmatic about our work and don't write tests in the mere effort to
+    #             get 100% code coverage...that 100% will come with a price...
+    #             See books:
+    #               - http://accorsi.net/docs/TheArtofUnitTesting.pdf
+    #               - Python Unit Test Automation - Practical Techniques for Python Developers and Testers 2017.pdf
     #   ---------------------------------------------------------------------------
     def test_IngestionDaemon(self):
 
