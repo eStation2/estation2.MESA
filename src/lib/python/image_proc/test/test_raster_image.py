@@ -115,7 +115,6 @@ class TestRasterImage(unittest.TestCase):
         equal = self.checkFile(ref_file, output_file)
         self.assertEqual(equal,1)
 
-
     def test_DIFF(self):
         input_file=['/data/processing/modis-firms/v6.0/SPOTV-Africa-1km/derived/10dcount/20160101_modis-firms_10dcount_SPOTV-Africa-1km_v6.0.tif',\
                     '/data/processing/modis-firms/v6.0/SPOTV-Africa-1km/derived/10dcountavg/0101_modis-firms_10dcountavg_SPOTV-Africa-1km_v6.0.tif']
@@ -295,13 +294,14 @@ class TestRasterImage(unittest.TestCase):
         raster_image_math.do_reproject(**args)
         self.assertEqual(1, 1)
 
-    #Didnt work
     def test_sst_fronts(self):
-        input_file = '/data/processing/modis-sst/v2013.1/MODIS-Africa-4km/tif/sst-day/20181007_modis-sst_sst-day_MODIS-Africa-4km_v2013.1.tif'
 
-        output_file = '/data/tmp/20160921_modis-sst_sst-fronts_MODIS-Africa-4km_v2013.1.tif'
+        input_file = self.input_dir+'pml-modis-sst/sst-3day/20200318_pml-modis-sst_sst-3day_SPOTV-IOC-1km_3.0.tif'
+        output_filename = 'pml-modis-sst/sst-fronts/20200318_pml-modis-sst_sst-fronts_SPOTV-IOC-1km_3.0.tif'
+        output_file=os.path.join(self.root_out_dir, output_filename)
+        ref_file   =os.path.join(self.ref_dir,      output_filename)
+        functions.check_output_dir(os.path.dirname(output_file))
 
-        # prod == 'modis-sst'
         parameters = {'histogramWindowStride': 8,  # smaller window detects more fronts
                       'histogramWindowSize': 32,
                       'minTheta': 0.76,
@@ -315,7 +315,9 @@ class TestRasterImage(unittest.TestCase):
         args = {"input_file": input_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw",
                 "parameters": parameters}
         raster_image_math.do_detect_sst_fronts(**args)
-        self.assertEqual(1, 1)
+
+        equal = self.checkFile(ref_file, output_file)
+        self.assertEqual(equal,1)
 
     def test_compute_primary_production(self):
         input_file = [
@@ -368,6 +370,7 @@ class TestRasterImage(unittest.TestCase):
         args = {"input_file_1": input_file_1, "input_file_2": input_file_2}
         status = raster_image_math.compare_two_raster_array(**args)
         self.assertEqual(status, 1)
+
 
 suite_raster_image = unittest.TestLoader().loadTestsFromTestCase(TestRasterImage)
 if __name__ == '__main__':

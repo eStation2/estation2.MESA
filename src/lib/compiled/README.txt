@@ -18,11 +18,20 @@ Header files for Python 3.6 (in ubuntu 18.04):
     #include "/usr/include/python3.6/pyconfig.h"
     #include "/usr/local/lib/python3.6/dist-packages/numpy/core/include/numpy/arrayobject.h"
 
-2. Complile for Python 2.7 with:
+Header files for Python 3.7:
+
+    #include "/opt/conda/include/python3.7m/Python.h"
+    #include "/opt/conda/include/python3.7m/pyconfig.h"
+    #include "/opt/conda/lib/python3.7/site-packages/numpy/core/include/numpy/arrayobject.h"
+
+2. Compile for Python 2.7 with:
         gcc -c -fPIC -I /usr/include/python2.7 FrontsUtils.cpp -o FrontsUtils.o
 
-   Complile for Python 3.6 with:
+   Compile for Python 3.6 with:
         gcc -c -fPIC -I /usr/include/python3.6 FrontsUtils.cpp -o FrontsUtils.o
+
+   Compile for Python 3.7 with:
+        gcc -c -fPIC -I /opt/conda/include/python3.7m FrontsUtils.cpp -o FrontsUtils.o
 
 3. Create shared library with
         gcc FrontsUtils.o -shared -o FrontsUtils.so
