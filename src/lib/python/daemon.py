@@ -12,7 +12,12 @@ standard_library.install_aliases()
 from builtins import str
 from builtins import object
 
-import sys, os, time, atexit, io
+import sys
+import os
+import time
+import atexit
+import io
+# import signal
 import psutil
 
 if sys.platform != 'win32':
@@ -100,7 +105,9 @@ class Daemon(object):
         atexit.register(self.delpid)
         pid = str(os.getpid())
         # file(self.pidfile, 'w+').write("%s\n" % pid)
-        open(self.pidfile, 'w+').write("%s\n" % pid)
+        with open(self.pidfile, 'w+') as f:
+            f.write("%s\n" % pid)
+        # open(self.pidfile, 'w+').write("%s\n" % pid)
         logger.debug("Pid %s written into file %s" % (pid, self.pidfile))
 
     def delpid(self):
@@ -160,6 +167,34 @@ class Daemon(object):
                 if sys.platform != 'win32':
                     os.kill(pid, SIGKILL)
                 time.sleep(0.1)
+
+            # if sys.platform != 'win32':
+            #     os.kill(pid, SIGKILL)
+            #
+            # trystop = True
+            # while trystop:
+            #     # os.kill(pid, SIGTERM)
+            #     if sys.platform != 'win32':
+            #         # os.kill(pid, SIGKILL)
+            #         os.kill(pid, signal.SIGSTOP)
+            #
+            #         info = os.waitpid(pid, os.WSTOPPED)
+            #         # waitpid() method returns a
+            #         # tuple whose first attribute
+            #         # represents child's pid
+            #         # and second attribute
+            #         # represnting child's status indication
+            #
+            #         # os.WSTOPSIG() returns the signal number
+            #         # which caused the process to stop
+            #         stopSignal = os.WSTOPSIG(info[1])
+            #         print("Child stopped due to signal no:", stopSignal)
+            #         print("Signal name:", signal.Signals(stopSignal).name)
+            #         if stopSignal:
+            #             trystop = False
+            #         else:
+            #             time.sleep(0.1)
+            # return True
         except OSError as err:
             err = str(err)
             if err.find("No such process") > 0:

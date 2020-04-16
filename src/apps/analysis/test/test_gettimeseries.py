@@ -115,7 +115,7 @@ class TestGetTimeseries(unittest.TestCase):
 
         [list_files, dates_list] = getFilesList(productcode, subproductcode, version, mapsetcode, date_format,
                                                 from_date, to_date)
-        self.assertEquals(len(list_files), 75)
+        self.assertEquals(len(list_files), 108)
 
     def test_files_rfe_10davg_case1(self):
         productcode = "fewsnet-rfe"
@@ -167,7 +167,7 @@ class TestGetTimeseries(unittest.TestCase):
 
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_simple, from_date,
                                     to_date, self.aggregate)
-        self.assertEquals(len(list_values), 75)
+        self.assertEquals(len(list_values), 108)
 
     def test_values_rfe_10davg(self):
 
@@ -184,7 +184,7 @@ class TestGetTimeseries(unittest.TestCase):
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_simple, from_date,
                                     to_date, aggregate)
         print(list_values)
-        self.assertEquals(len(list_values), 108)
+        self.assertEquals(len(list_values), 2)
 
     def test_values_sst(self):
         productcode = "modis-sst"
@@ -200,7 +200,7 @@ class TestGetTimeseries(unittest.TestCase):
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_simple, from_date, to_date,
                                     aggregate)
         print(list_values)
-        self.assertEquals(len(list_values), 108)
+        self.assertEquals(len(list_values), 2)
 
     def test_values_chirps_10d(self):
 
@@ -221,7 +221,7 @@ class TestGetTimeseries(unittest.TestCase):
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_simple,
                                     from_date, to_date, aggregate)
         print(list_values)
-        self.assertEquals(len(list_values), 36)
+        self.assertEquals(len(list_values), 6)
 
     def test_chla_values_ES2_105(self):
 
@@ -244,7 +244,7 @@ class TestGetTimeseries(unittest.TestCase):
         list_values = getTimeseries(productcode, subproductcode, version, mapsetcode, self.wkt_test_ES2_271, from_date,
                                     to_date, aggregate)
         print(list_values)
-        self.assertEquals(len(list_values), 36)
+        self.assertEquals(len(list_values), 11)
 
     def test_values_wd_gee(self):
 

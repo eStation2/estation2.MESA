@@ -14,7 +14,9 @@ standard_library.install_aliases()
 class TestGenerateLegendHTML(unittest.TestCase):
 
     def test_generatelegendhtml(self):
-        productcode = "vgt-ndvi"
+        legend_id = 1
+        result = generateLegendHTML(legend_id)
+        self.assertEqual(result.__len__(), 2)
 
 
 suite_generatelegendhtml = unittest.TestLoader().loadTestsFromTestCase(TestGenerateLegendHTML)

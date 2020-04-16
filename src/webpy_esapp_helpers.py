@@ -5698,7 +5698,8 @@ def DataSets():
 def getDatasetCompleteness(dataset, fordatamanagement):
     completeness_dict = {}
     output_dir = es_constants.base_local_dir + os.path.sep + 'completeness_bars/'
-    functions.check_output_dir(output_dir)  # if not exists output_dir -> create output_dir
+    if not os.path.isdir(output_dir):
+        functions.check_output_dir(output_dir)  # if not exists output_dir -> create output_dir
 
     prod_ident = functions.set_path_filename_no_date(dataset._db_product.productcode,
                                                      dataset._db_product.subproductcode,
