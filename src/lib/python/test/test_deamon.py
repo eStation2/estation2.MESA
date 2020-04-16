@@ -5,6 +5,7 @@ from __future__ import print_function
 from future import standard_library
 
 import unittest
+import time
 
 from lib.python.daemon import DaemonDryRunnable
 from apps.acquisition import get_internet
@@ -24,43 +25,57 @@ class TestDeamon(unittest.TestCase):
         self.daemon = TestGetInternetDaemon(self.pid_file, dry_run=True)
 
     def test_getpid_from_file(self):
-        self.daemon.start()
+        with self.assertRaises(SystemExit) as cm:
+            self.daemon.start()
+
+        time.sleep(1)
         status = self.daemon.status()
         self.assertTrue(status)
         pid = self.daemon.getpid_from_file()
         self.assertIsInstance(pid, int)
+
         self.daemon.stop()
+        time.sleep(1)
         status = self.daemon.status()
         self.assertFalse(status)
 
     def test_restart(self):
-        self.daemon.start()
-        status = self.daemon.status()
-        self.assertTrue(status)
-        self.daemon.restart()
-        status = self.daemon.status()
-        self.assertTrue(status)
-        self.daemon.stop()
-        status = self.daemon.status()
-        self.assertFalse(status)
+        with self.assertRaises(SystemExit) as cm:
+            self.daemon.start()
 
-    def test_start(self):
-        self.daemon.start()
+        time.sleep(1)
         status = self.daemon.status()
         self.assertTrue(status)
 
-    def test_status(self):
-        self.daemon.start()
+        with self.assertRaises(SystemExit) as cm:
+            self.daemon.restart()
+
+        time.sleep(1)
         status = self.daemon.status()
         self.assertTrue(status)
+
+        time.sleep(1)
         self.daemon.stop()
+
+        time.sleep(1)
         status = self.daemon.status()
         self.assertFalse(status)
 
-    def test_stop(self):
-        self.daemon.stop()
+    def test_start_status_stop(self):
+        # here we should catch the 'sys.exit(0)', which otherwise causes nosetest to fail
+        # see http://stackoverflow.com/questions/15672151/is-it-possible-for-a-unit-test-to-assert-that-a-method-calls-sys-exit
+
+        with self.assertRaises(SystemExit) as cm:
+            self.daemon.start()
+        # self.assertEqual(cm.exception.code, 0)
+
+        time.sleep(1)
         status = self.daemon.status()
-        self.assertFalse(status)
+        self.assertTrue(status)
+
+        time.sleep(1)
+        self.daemon.stop()
+        self.assertEqual(self.daemon.status(), False)
 
 
 suite_deamon = unittest.TestLoader().loadTestsFromTestCase(TestDeamon)

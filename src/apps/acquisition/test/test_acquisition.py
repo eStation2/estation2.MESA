@@ -18,19 +18,18 @@ logger = log.my_logger(__name__)
 
 
 class TestDaemon(unittest.TestCase):
-
     #   ---------------------------------------------------------------------------
-    #   Test IngestDaemon():
+    #   test_IngestionDaemon():
     #   Check the status of the Ingest process:
     #       1. If ON    -> exit with warning
     #       2. If OFF   -> Start in dry_run mode, check status and stop
     #
     #   TODO-M.C.: does the exit(0) in daemon code make the test fail ?
     #   ---------------------------------------------------------------------------
-    def TestIngestDaemon(self):
+    def test_IngestionDaemon(self):
 
-        pid_file = es_constants.ingest_pid_filename
-        daemon = acquisition.IngestDaemon(pid_file, dry_run=True)
+        pid_file = es_constants.ingestion_pid_filename
+        daemon = acquisition.IngestionDaemon(pid_file, dry_run=True)
 
         # If the daemon is running, do not perform test
         if daemon.status():
@@ -53,7 +52,7 @@ class TestDaemon(unittest.TestCase):
             # Check the process was stopped
             self.assertEqual(daemon.status(), False)
 
-    def TestGetInternetDaemon(self):
+    def test_GetInternetDaemon(self):
 
         logger.info('Test GetInternet daemon')
 
@@ -69,15 +68,16 @@ class TestDaemon(unittest.TestCase):
                 pass
             self.assertEqual(os.path.isfile(pid_file), 0)
         else:
-            logger.info('GetInternet pid file des NOT exist: start daemon')
+            logger.info('GetInternet pid file does NOT exist: start daemon')
             try:
                 daemon.start()
             except:
                 pass
             time.sleep(1)
+            status = daemon.status()
             self.assertEqual(os.path.isfile(pid_file), 1)
-    #
-    def TestGetEumetcastDaemon(self):
+
+    def test_GetEumetcastDaemon(self):
 
         logger.info('Test GetEumetcast daemon')
 
