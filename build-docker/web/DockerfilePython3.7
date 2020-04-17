@@ -83,6 +83,28 @@ ADD esa-snap_all_unix_7_0.sh /tmp
 RUN chmod 755 -R /tmp
 RUN /tmp/esa-snap_all_unix_7_0.sh -q -dir "/usr/local"
 
+RUN mkdir -p /usr/java && chmod 755 -R /usr/java
+ADD jre-8u251-linux-x64.tar.gz /usr/java
+#RUN tar zxvf /usr/java/jre-8u73-linux-x64.tar.gz
+ENV PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
+ARG PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
+
+## Install OpenJDK-11
+#RUN apt-get update && \
+#    apt-get install -y openjdk-11-jdk && \
+#    apt-get install -y ant && \
+#    apt-get clean;
+#
+## Fix certificate issues
+#RUN apt-get update && \
+#    apt-get install ca-certificates-java && \
+#    apt-get clean && \
+#    update-ca-certificates -f;
+#
+## Setup JAVA_HOME -- useful for docker commandline
+#ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
+#RUN export JAVA_HOME
+
 # Configuring web folder tree
 RUN mkdir -p /var/www/estation2 && mkdir -p /var/log/apache2/
 #ENV APACHE_RUN_USER www-data

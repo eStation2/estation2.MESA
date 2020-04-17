@@ -498,6 +498,7 @@ def statusRequestJob(requestid):
     totko = 0
     mapsetcode = ''
     subproductcode = ''
+    descriptive_name = ''
 
     requestinfo = requestid.split('_')
     level = requestinfo[len(requestinfo) - 1]
@@ -517,7 +518,6 @@ def statusRequestJob(requestid):
         p5_requestfile = ''  # mandatory but empty for status action
 
         db_product_info = querydb.get_product_native(productcode=productcode, version=version)
-        descriptive_name = ''
         if hasattr(db_product_info, "__len__") and db_product_info.__len__() > 0:
             for row in db_product_info:
                 prod_dict = functions.row2dict(row)
@@ -550,7 +550,7 @@ def statusRequestJob(requestid):
 
             statusresult = job.communicate()
 
-            status = statusresult[0].split(';')
+            status = statusresult[0].split(b';')
             if status[0] == 'Error':
                 jobstatus = 'error'  # status[2]
                 datestatus = status[1]
@@ -558,20 +558,20 @@ def statusRequestJob(requestid):
                 totok = None
                 totko = None
             elif len(status) >= 3:
-                jobstatus = status[0].split(':')[0]
+                jobstatus = status[0].split(b':')[0].decode()
                 datestatus = status[1]
-                totfiles = status[2].split(':')[1]
-                totok = status[3].split(':')[1]
-                totko = status[4].split(':')[1]
+                totfiles = status[2].split(b':')[1].decode()
+                totok = status[3].split(b':')[1].decode()
+                totko = status[4].split(b':')[1].decode()
             else:
-                jobstatus = status[0].split(':')[0]
+                jobstatus = status[0].split(b':')[0].decode()
                 datestatus = status[1]
                 totfiles = None
                 totok = None
                 totko = None
 
             message = 'Status info request: ' + requestid
-
+            # jobstatus = str(jobstatus)
             # statusresult = job.stdout.readline().rstrip("\n\r")   # Not good, creates defunct process with no kill
             # job.poll()
             # job.terminate()
