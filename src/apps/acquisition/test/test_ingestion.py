@@ -115,7 +115,7 @@ class TestIngestion(unittest.TestCase):
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
 
-        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+        # ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
                                version=productversion, mapsetcode=mapsetcode,date=in_date)

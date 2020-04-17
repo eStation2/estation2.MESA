@@ -1929,7 +1929,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
 
     import numpy
     from lib.compiled import FrontsUtils
-    from scipy import ndimage
+    # from scipy import ndimage             # Commented -> causes the error in numpy.ufunc size
 
     # The edge detection algorithm uses moving windows. To
     # simplify implementation of that code, create a copy of the
@@ -1955,33 +1955,33 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
     # Apply the caller's masks.
 
     if minImageValue is not None:
-        print(' Debug: minImageValue is defined.')
+        print('Debug: minImageValue is defined.')
         unbufferedMask[:] = numpy.logical_or(unbufferedMask, image < minImageValue)
 
     if maxImageValue is not None:
-        print(' Debug: maxImageValue is defined.')
+        print('Debug: maxImageValue is defined.')
         unbufferedMask[:] = numpy.logical_or(unbufferedMask, image > maxImageValue)
 
     if masks is not None:
         for i in range(len(masks)):
             if maskTests[i] == u'equal':
-                print((' Debug: Masking cells where mask %(mask)i is equal to ', i, '.'))
+                print(('Debug: Masking cells where mask %(mask)i is equal to ', i, '.'))
                 unbufferedMask[:] = numpy.logical_or(unbufferedMask, masks[i] == maskValues[i])
 
             elif maskTests[i] == u'notequal':
-                print((' Debug: Masking cells where mask %(mask)i is not equal to ', i, '.'))
+                print(('Debug: Masking cells where mask %(mask)i is not equal to ', i, '.'))
                 unbufferedMask[:] = numpy.logical_or(unbufferedMask, masks[i] != maskValues[i])
 
             elif maskTests[i] == u'greaterthan':
-                print((' Debug: Masking cells where mask %(mask)i is greater than ', i, '.'))
+                print(('Debug: Masking cells where mask %(mask)i is greater than ', i, '.'))
                 unbufferedMask[:] = numpy.logical_or(unbufferedMask, masks[i] > maskValues[i])
 
             elif maskTests[i] == u'lessthan':
-                print((' Debug: Masking cells where mask %(mask)i is less than ', i, '.'))
+                print(('Debug: Masking cells where mask %(mask)i is less than ', i, '.'))
                 unbufferedMask[:] = numpy.logical_or(unbufferedMask, masks[i] < maskValues[i])
 
             elif maskTests[i] == u'anybitstrue':
-                print((' Debug: Masking cells where mask ', i, '(mask) bitwise-ANDed with ', X, ' is not zero.'))
+                print(('Debug: Masking cells where mask ', i, '(mask) bitwise-ANDed with ', X, ' is not zero.'))
                 unbufferedMask[:] = numpy.logical_or(unbufferedMask, numpy.bitwise_and(masks[i], maskValues[i]) != 0)
 
             else:
@@ -2037,7 +2037,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
         # print ' Debug: Applying ',ix,i,' median filter.'
         bufferedImage = FrontsUtils.MedianFilter(bufferedImage, bufferedMask, bufferSize, medianFilterWindowSize)
         # bufferedImage = ndimage.median_filter(bufferedImage, footprint=N.ones((medianFilterWindowSize, medianFilterWindowSize)))
-
+        print('Debug: MedianFilter done.')
         # If the caller specified that the edges should wrap, copy
         # image values to the buffer strips again, because the image
         # values probably changed as a result of running the median
@@ -2082,7 +2082,7 @@ def DetectEdgesInSingleImage(image, histogramWindowStride, \
     bufferedWindowStatusCodes = numpy.zeros((rows, cols), dtype='int8')
     bufferedWindowStatusValues = numpy.zeros((rows, cols), dtype='float32')
 
-    print(' Debug: Running histogramming and cohesion algorithm.')
+    print('Debug: Running histogramming and cohesion algorithm.')
     timeStarted = time.time()
 
     # If we're only using one thread, invoke the C code directly.
@@ -2385,7 +2385,7 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
 
         # Apply thinning
         print("Debug: Applying now thinning")
-        from skimage.morophology import thin
+        from skimage.morphology import thin
         thin_output = thin(dataOut)
         # thin_output = pymorph.thin(dataOut)
         # thin_output = dataOut                              # For TEST only ... make it faster

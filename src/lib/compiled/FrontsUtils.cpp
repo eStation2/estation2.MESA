@@ -23,9 +23,12 @@
 //#include "/usr/include/python2.7/pyconfig.h"
 //#include "/usr/share/pyshared/numpy/core/include/numpy/arrayobject.h"
 #define PY_SSIZE_T_CLEAN
-#include "/usr/include/python3.6/Python.h"
-#include "/usr/include/python3.6/pyconfig.h"
-#include "/usr/local/lib/python3.6/dist-packages/numpy/core/include/numpy/arrayobject.h"
+//#include "/usr/include/python3.6/Python.h"
+//#include "/usr/include/python3.6/pyconfig.h"
+//#include "/usr/local/lib/python3.6/dist-packages/numpy/core/include/numpy/arrayobject.h"
+#include "/opt/conda/include/python3.7m/Python.h"
+#include "/opt/conda/include/python3.7m/pyconfig.h"
+#include "/opt/conda/lib/python3.7/site-packages/numpy/core/include/numpy/arrayobject.h"
 
 #pragma warning(disable: 4244)		// warning C4244: '=' : conversion from 'double' to 'npy_float32', possible loss of data
 
@@ -639,6 +642,7 @@ static struct PyModuleDef FrontsUtilsmodule = {
 PyMODINIT_FUNC
 PyInit_FrontsUtils(void)
 {
+    import_array();
     return PyModule_Create(&FrontsUtilsmodule);
 }
 // Python2 implementation (obsolete)
