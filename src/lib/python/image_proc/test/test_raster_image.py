@@ -43,14 +43,21 @@ class TestRasterImage(unittest.TestCase):
         result = 0
 
         # Compare the files by using gdal_info objects
-        if os.path.exists(ref_file[0]) and os.path.exists(new_file[0]):
+        if len(ref_file)>0 and len(new_file)>0 and os.path.exists(ref_file[0]) and os.path.exists(ref_file[0]):
+            # Metadata compare
             gdal_info_ref = md.GdalInfo()
             gdal_info_ref.get_gdalinfo(ref_file)
             gdal_info_new = md.GdalInfo()
             gdal_info_new.get_gdalinfo(new_file)
             equal = gdal_info_new.compare_gdalinfo(gdal_info_ref)
 
-        return equal
+            # Raster image compare
+            array_compare = raster_image_math.compare_two_raster_array(ref_file[0], ref_file[0])
+
+        if equal and array_compare:
+            result = 1
+
+        return result
 
     def test_avg(self):
 
