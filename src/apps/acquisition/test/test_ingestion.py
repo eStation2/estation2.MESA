@@ -68,7 +68,7 @@ class TestIngestion(unittest.TestCase):
             # Check the raster array compare
             array_equal = raster_image_math.compare_two_raster_array(ref_file[0], newly_computed_file[0])
 
-        if array_equal is True and equal is True:
+        if array_equal and equal:
             result = 1
 
         return result
@@ -503,9 +503,9 @@ class TestIngestion(unittest.TestCase):
 
         # Test Copernicus Products version 2.2 (starting with NDVI 2.2.1)
         # Products released from VITO in March 2017
-        date_fileslist = [os.path.join(self.test_ingest_dir,'c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.zip')]
+        date_fileslist = [os.path.join(self.test_ingest_dir,'c_gls_NDVI_201905010000_AFRI_PROBAV_V2.2.1.zip')]
         # date_fileslist = glob.glob('/data/TestIngestion/c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.zip*')
-        in_date = '201401010000'
+        in_date = '201905010000'
         productcode = 'vgt-ndvi'
         productversion = 'proba-v2.2'
         subproductcode = 'ndv'
