@@ -409,12 +409,13 @@ class GdalInfo(object):
         self.Projection = dataset.GetProjection()
         self.GeoTransform = dataset.GetGeoTransform()
         band = dataset.GetRasterBand(1)
-        self.BandMin = band.GetMinimum()
-        self.BandMax = band.GetMaximum()
-        self.BandMean, self.BandStd = band.ComputeBandStats()
+        # Do not assign stats ... seems they are not realiable computed
+        # self.BandMin = band.GetMinimum()
+        # self.BandMax = band.GetMaximum()
+        # self.BandMean, self.BandStd = band.ComputeBandStats()
 
-        if not self.BandMin or not self.BandMax:
-            (self.BandMin,self.BandMax) = band.ComputeRasterMinMax(True)
+        # if not self.BandMin or not self.BandMax:
+        #     (self.BandMin,self.BandMax) = band.ComputeRasterMinMax(True)
 
         if print_out:
             print("Driver: {}/{}".format(dataset.GetDriver().ShortName,

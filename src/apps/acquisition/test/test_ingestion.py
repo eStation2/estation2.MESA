@@ -30,7 +30,6 @@ from osgeo import gdal
 from lib.python import es_logging as log
 logger = log.my_logger(__name__)
 
-
 class TestIngestion(unittest.TestCase):
 
     def setUp(self):
@@ -55,7 +54,13 @@ class TestIngestion(unittest.TestCase):
         sub_directory= functions.set_path_sub_directory(productcode,subproductcode,'Ingest',version,mapsetcode)
 
         ref_file = glob.glob(self.ref_out_dir+'**/*/*/'+filename, recursive=True)
+        if not os.path.isfile(ref_file[0]):
+            print("Error reference file does not exist: "+filename)
+            return result
         newly_computed_file = glob.glob(self.ingest_out_dir+sub_directory+filename,recursive=True)
+        if not os.path.isfile(newly_computed_file[0]):
+            print("Error reference file does not exist: "+filename)
+            return result
 
         # Compare the files by using gdal_info objects
         if len(ref_file)>0 and len(newly_computed_file)>0 and os.path.exists(ref_file[0]) and os.path.exists(newly_computed_file[0]):
@@ -65,11 +70,15 @@ class TestIngestion(unittest.TestCase):
             gdal_info_new.get_gdalinfo(newly_computed_file[0])
             equal = gdal_info_new.compare_gdalinfo(gdal_info_ref)
 
+            if not equal:
+                print("Warning: the files metadata are different")
             # Check the raster array compare
             array_equal = raster_image_math.compare_two_raster_array(ref_file[0], newly_computed_file[0])
+            if not array_equal:
+                print("Warning: the files contents are different")
 
-        if array_equal and equal:
-            result = 1
+            if array_equal is True:
+                result = 1
 
         return result
 
@@ -79,7 +88,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(1, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - WSI CROP/PASTURE  \\tested\\
+    #   Vegetation - WSI CROP/PASTURE           //Tested 20.04.202//
     #   ---------------------------------------------------------------------------
     def test_ingest_mars_wsi(self):
 
@@ -121,46 +130,8 @@ class TestIngestion(unittest.TestCase):
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
 
-    # #   ---------------------------------------------------------------------------
-    # #   Vegetation - DMP V1.0 \\Not used anymore\\
-    # #   ---------------------------------------------------------------------------
-    # def test_ingest_vgt_dmp(self):
-    #
-    #     date_fileslist = ['/data/ingest/test/g2_BIOPAR_DMP_201406010000_AFRI_PROBAV_V1_0.ZIP']
-    #     in_date = '201406010000'
-    #     productcode = 'vgt-dmp'
-    #     productversion = 'V1.0'
-    #     subproductcode = 'dmp'
-    #     mapsetcode = 'SPOTV-Africa-1km'
-    #     datasource_descrID='EO:EUM:DAT:PROBA-V:DMP'
-    #
-    #     product = {"productcode": productcode,
-    #                "version": productversion}
-    #     args = {"productcode": productcode,
-    #             "subproductcode": subproductcode,
-    #             "datasource_descr_id": datasource_descrID,
-    #             "version": productversion}
-    #
-    #     product_in_info = querydb.get_product_in_info(**args)
-    #
-    #     re_process = product_in_info.re_process
-    #     re_extract = product_in_info.re_extract
-    #
-    #     sprod = {'subproduct': subproductcode,
-    #                          'mapsetcode': mapsetcode,
-    #                          're_extract': re_extract,
-    #                          're_process': re_process}
-    #
-    #     subproducts = [sprod]
-    #
-    #     datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-    #                                                      source_id=datasource_descrID)
-    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-    #
-    #     self.assertEqual(1, 1)
-
     #   ---------------------------------------------------------------------------
-    #   Vegetation - DMP V2.0.1 //Tested//
+    #   Vegetation - DMP V2.0.1                 //Tested  20.04.2020//
     #   ---------------------------------------------------------------------------
     def test_ingest_g_cls_dmp_2_0_1(self):
 
@@ -174,7 +145,6 @@ class TestIngestion(unittest.TestCase):
         subproductcode = 'dmp'
         mapsetcode = 'SPOTV-Africa-1km'
         datasource_descrID='PDF:GLS:PROBA-V2.0:DMP_RT0'
-
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -199,147 +169,71 @@ class TestIngestion(unittest.TestCase):
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
         in_date = '20200311'
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
 
-    # #   ---------------------------------------------------------------------------
-    # #   Vegetation - FAPAR V1.4 \\Not used anymore\\
-    # #   ---------------------------------------------------------------------------
-    # def test_ingest_vgt_fapar(self):
-    #
-    #     date_fileslist = ['/data/ingest.wrong/g2_BIOPAR_FAPAR_201510240000_AFRI_PROBAV_V1.4.zip']
-    #     in_date = '201510240000'
-    #     productcode = 'vgt-fapar'
-    #     productversion = 'V1.4'
-    #     subproductcode = 'fapar'
-    #     mapsetcode = 'SPOTV-Africa-1km'
-    #     datasource_descrID='EO:EUM:DAT:PROBA-V:FAPAR'
-    #
-    #     product = {"productcode": productcode,
-    #                "version": productversion}
-    #     args = {"productcode": productcode,
-    #             "subproductcode": subproductcode,
-    #             "datasource_descr_id": datasource_descrID,
-    #             "version": productversion}
-    #
-    #     product_in_info = querydb.get_product_in_info(**args)
-    #
-    #     re_process = product_in_info.re_process
-    #     re_extract = product_in_info.re_extract
-    #
-    #     sprod = {'subproduct': subproductcode,
-    #                          'mapsetcode': mapsetcode,
-    #                          're_extract': re_extract,
-    #                          're_process': re_process}
-    #
-    #     subproducts = [sprod]
-    #
-    #     datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-    #                                                      source_id=datasource_descrID)
-    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-    #
-    #     self.assertEqual(1, 1)
+    #   ---------------------------------------------------------------------------
+    #   Vegetation - FAPAR V2.0.1 AFRI (EumetCast source)//Tested 21.04.01//
+    #   ---------------------------------------------------------------------------
+    def test_ingest_g_cls_fapar_afri_2_0_1(self):
+
+        # Test Copernicus Products version 2.0.1 (for FAPAR)
+        # Products released from VITO in March 2017
+        date_fileslist = [os.path.join(self.test_ingest_dir,'c_gls_FAPAR-RT0_202004100000_AFRI_PROBAV_V2.0.1.zip')]
+
+        in_date = '202004010000'
+        productcode = 'vgt-fapar'
+        productversion = 'V2.0'
+        subproductcode = 'fapar'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID='EO:EUM:DAT:PROBA-V2.0:FAPAR'   #
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts = [sprod]
+
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                         source_id=datasource_descrID)
+
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+        in_date = '20200401'
+        status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
+                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+        self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - FAPAR V2.0.1 \\Tested\\
+    #   Vegetation - FAPAR V2.0.1 Global (Internet source) //Tested 20.04.2020 //
     #   ---------------------------------------------------------------------------
-    def test_ingest_g_cls_fapar_2_0_1(self):
+    def test_ingest_g_cls_fapar_global_2_0_1(self):
 
         # Test Copernicus Products version 2.0.1 (for FAPAR)
         # Products released from VITO in March 2017
         date_fileslist = [os.path.join(self.test_ingest_dir,'c_gls_FAPAR-RT0_202003310000_GLOBE_PROBAV_V2.0.1.nc')]
-        # date_fileslist = glob.glob('/data/ingest/c_gls_FAPAR-RT0_202003100000_GLOBE_PROBAV_V2.0.1.nc*')
+
         in_date = '202003310000'
         productcode = 'vgt-fapar'
         productversion = 'V2.0'
         subproductcode = 'fapar'
         mapsetcode = 'SPOTV-Africa-1km'
-        # datasource_descrID = 'EO:EUM:DAT:PROBA-V2.0:FAPAR'
-        datasource_descrID='PDF:GLS:PROBA-V2.0:FAPAR'   #
-
-
-        product = {"productcode": productcode,
-                   "version": productversion}
-        args = {"productcode": productcode,
-                "subproductcode": subproductcode,
-                "datasource_descr_id": datasource_descrID,
-                "version": productversion}
-
-        product_in_info = querydb.get_product_in_info(**args)
-
-        re_process = product_in_info.re_process
-        re_extract = product_in_info.re_extract
-
-        sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
-
-        subproducts = [sprod]
-
-        # datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-        #                                                  source_id=datasource_descrID)
-        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
-
-        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        in_date = '20200321'
-        status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
-        self.assertEqual(status, 1)
-
-    #   ---------------------------------------------------------------------------
-    #   Vegetation - FCOVER V1.4  \\Not used anymore\\
-    #   ---------------------------------------------------------------------------
-    # def test_ingest_vgt_fcover(self):
-    #
-    #     date_fileslist = ['/data/ingest/g2_BIOPAR_FCOVER_201601130000_AFRI_PROBAV_V1.4.zip']
-    #     in_date = '201601130000'
-    #     productcode = 'vgt-fcover'
-    #     productversion = 'V1.4'
-    #     subproductcode = 'fcover'
-    #     mapsetcode = 'SPOTV-Africa-1km'
-    #     datasource_descrID='EO:EUM:DAT:PROBA-V:FCOVER'
-    #
-    #     product = {"productcode": productcode,
-    #                "version": productversion}
-    #     args = {"productcode": productcode,
-    #             "subproductcode": subproductcode,
-    #             "datasource_descr_id": datasource_descrID,
-    #             "version": productversion}
-    #
-    #     product_in_info = querydb.get_product_in_info(**args)
-    #
-    #     re_process = product_in_info.re_process
-    #     re_extract = product_in_info.re_extract
-    #
-    #     sprod = {'subproduct': subproductcode,
-    #                          'mapsetcode': mapsetcode,
-    #                          're_extract': re_extract,
-    #                          're_process': re_process}
-    #
-    #     subproducts = [sprod]
-    #
-    #     datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-    #                                                      source_id=datasource_descrID)
-    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-    #
-    #     self.assertEqual(1, 1)
-
-    #   ---------------------------------------------------------------------------
-    #   Vegetation - FCOVER V2.0.2 \\Made similar process test\\
-    #   ---------------------------------------------------------------------------
-    def test_ingest_vgt_fcover(self):
-        date_fileslist = [os.path.join(self.test_ingest_dir,'c_gls_FCOVER_199901200000_GLOBE_VGT_V2.0.2.nc')]
-        # date_fileslist = ['/data/ingest/c_gls_FCOVER_199901200000_GLOBE_VGT_V2.0.2.nc']
-        in_date = '199901200000'
-        productcode = 'vgt-fcover'
-        productversion = 'V2.0'
-        subproductcode = 'fcover'
-        mapsetcode = 'SPOTV-Africa-1km'
-        datasource_descrID='PDF:GLS:VGT-V2.0:FCOVER'
+        datasource_descrID='PDF:GLS:PROBA-V2.0:FAPAR'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -362,6 +256,7 @@ class TestIngestion(unittest.TestCase):
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
+
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
         in_date = '20200321'
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
@@ -369,143 +264,15 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - LAI V1.4 \\Not used anymore\\
-    #   ---------------------------------------------------------------------------
-    # def test_ingest_vgt_lai(self):
-    #
-    #     date_fileslist = ['/data/ingest/test/g2_BIOPAR_LAI_201510240000_AFRI_PROBAV_V1.4.zip']
-    #     in_date = '201510240000'
-    #     productcode = 'vgt-lai'
-    #     productversion = 'V1.4'
-    #     subproductcode = 'lai'
-    #     mapsetcode = 'SPOTV-Africa-1km'
-    #     datasource_descrID='EO:EUM:DAT:PROBA-V:LAI'
-    #
-    #     product = {"productcode": productcode,
-    #                "version": productversion}
-    #     args = {"productcode": productcode,
-    #             "subproductcode": subproductcode,
-    #             "datasource_descr_id": datasource_descrID,
-    #             "version": productversion}
-    #
-    #     product_in_info = querydb.get_product_in_info(**args)
-    #
-    #     re_process = product_in_info.re_process
-    #     re_extract = product_in_info.re_extract
-    #
-    #     sprod = {'subproduct': subproductcode,
-    #                          'mapsetcode': mapsetcode,
-    #                          're_extract': re_extract,
-    #                          're_process': re_process}
-    #
-    #     subproducts = [sprod]
-    #
-    #     datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-    #                                                      source_id=datasource_descrID)
-    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-    #
-    #     self.assertEqual(1, 1)
-
-    # #   ---------------------------------------------------------------------------
-    # #   Vegetation - NDVI V2.1  \\Not used anymore\\
-    # #   ---------------------------------------------------------------------------
-    # def test_ingest_vgt_ndvi(self):
-    #
-    #     date_fileslist = ['/data/temp/proba-v/g2_BIOPAR_NDVI_201601110000_AFRI_PROBAV_V2.1.zip']
-    #     in_date = '201601110000'
-    #     productcode = 'vgt-ndvi'
-    #     productversion = 'proba-v2.1'
-    #     subproductcode = 'ndv'
-    #     mapsetcode = 'SPOTV-Africa-1km'
-    #     datasource_descrID='EO:EUM:DAT:PROBA-V2.1:NDVI'
-    #
-    #     product = {"productcode": productcode,
-    #                "version": productversion}
-    #     args = {"productcode": productcode,
-    #             "subproductcode": subproductcode,
-    #             "datasource_descr_id": datasource_descrID,
-    #             "version": productversion}
-    #
-    #     product_in_info = querydb.get_product_in_info(**args)
-    #
-    #     re_process = product_in_info.re_process
-    #     re_extract = product_in_info.re_extract
-    #
-    #     sprod = {'subproduct': subproductcode,
-    #                          'mapsetcode': mapsetcode,
-    #                          're_extract': re_extract,
-    #                          're_process': re_process}
-    #
-    #     subproducts = [sprod]
-    #
-    #     datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-    #                                                      source_id=datasource_descrID)
-    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-    #
-    #     self.assertEqual(1, 1)
-    #
-    # #   ---------------------------------------------------------------------------
-    # #   Vegetation - NDVI V2.2.1 \\Not used anymore\\
-    # #   ---------------------------------------------------------------------------
-    # def test_ingest_g_cls_ndvi_2_2_netcdf(self):
-    #
-    #
-    #     file = '/data/TestIngestion/c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.nc'
-    #     outputfile= '/data/TestIngestion/c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.tif'
-    #
-    #     # hdf = gdal.Open('HDF5:'+file+'://NDVI')
-    #     hdf = gdal.Open(file)
-    #     sdsdict = hdf.GetMetadata('SUBDATASETS')
-    #
-    #     # sdslist = in_ds.GetSubDatasets()
-    #     # in_ds = gdal.Open('HDF5:'+file+'://NDVI')
-    #     ingestion.write_ds_to_geotiff(hdf, outputfile)
-    #     print (sdsdict)
-    #     #
-    #     #
-    #     # date_fileslist = glob.glob('/data/native/DISK_MSG_MPE/MSG3*201609301200*gz')
-    #     # in_date = '201609301200'
-    #     # productcode = 'msg-mpe'
-    #     # productversion = 'undefined'
-    #     # subproductcode = 'mpe'
-    #     # mapsetcode = 'MSG-satellite-3km'
-    #     # datasource_descrID='EO:EUM:DAT:MSG:MPE-UMARF'
-    #     #
-    #     # product = {"productcode": productcode,
-    #     #            "version": productversion}
-    #     # args = {"productcode": productcode,
-    #     #         "subproductcode": subproductcode,
-    #     #         "datasource_descr_id": datasource_descrID,
-    #     #         "version": productversion}
-    #     #
-    #     # product_in_info = querydb.get_product_in_info(**args)
-    #     #
-    #     # re_process = product_in_info.re_process
-    #     # re_extract = product_in_info.re_extract
-    #     #
-    #     # sprod = {'subproduct': subproductcode,
-    #     #                      'mapsetcode': mapsetcode,
-    #     #                      're_extract': re_extract,
-    #     #                      're_process': re_process}
-    #     #
-    #     # subproducts=[]
-    #     # subproducts.append(sprod)
-    #     #
-    #     # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
-    #     #                                                                       source_id=datasource_descrID):
-    #     #
-    #     #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
-
-    #   ---------------------------------------------------------------------------
-    #   Vegetation - NDVI V2.2.1 \\Not tested\\
+    #   Vegetation - NDVI V2.2.1                            //Should be ok -> Marco//
     #   ---------------------------------------------------------------------------
     def test_ingest_g_cls_ndvi_2_2(self):
 
         # Test Copernicus Products version 2.2 (starting with NDVI 2.2.1)
         # Products released from VITO in March 2017
-        date_fileslist = [os.path.join(self.test_ingest_dir,'c_gls_NDVI_201905010000_AFRI_PROBAV_V2.2.1.zip')]
+        date_fileslist = [os.path.join(self.test_ingest_dir,'c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.zip')]
         # date_fileslist = glob.glob('/data/TestIngestion/c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.zip*')
-        in_date = '201905010000'
+        in_date = '201401010000'
         productcode = 'vgt-ndvi'
         productversion = 'proba-v2.2'
         subproductcode = 'ndv'
@@ -540,52 +307,8 @@ class TestIngestion(unittest.TestCase):
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
 
-    # #   ---------------------------------------------------------------------------
-    # #   Vegetation - NDVI 100m \\Not used \\
-    # #   ---------------------------------------------------------------------------
-    # def test_ingest_probav_ndvi_100(self):
-    #
-    #     # Test Copernicus Products version 2.2 (starting with NDVI 2.2.1)
-    #     # Products released from VITO in March 2017
-    #     date_fileslist = [os.path.join(self.test_ingest_dir,'c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.zip')]
-    #     # date_fileslist = glob.glob('/data/ingest/PROBAV_S1_TOC_*20190611*')
-    #     in_date = '20190611'
-    #     productcode = 'vgt-ndvi'
-    #     productversion = 'proba100-v1.0'
-    #     subproductcode = 'ndv'
-    #     mapsetcode = 'PROBAV-Africa-100m'
-    #     datasource_descrID='PDF:VITO:PROBA-V1:NDVI100'
-    #
-    #
-    #     product = {"productcode": productcode,
-    #                "version": productversion}
-    #     args = {"productcode": productcode,
-    #             "subproductcode": subproductcode,
-    #             "datasource_descr_id": datasource_descrID,
-    #             "version": productversion}
-    #
-    #     product_in_info = querydb.get_product_in_info(**args)
-    #
-    #     re_process = product_in_info.re_process
-    #     re_extract = product_in_info.re_extract
-    #
-    #     sprod = {'subproduct': subproductcode,
-    #                          'mapsetcode': mapsetcode,
-    #                          're_extract': re_extract,
-    #                          're_process': re_process}
-    #
-    #     subproducts = [sprod]
-    #
-    #     datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-    #                                                      source_id=datasource_descrID)
-    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-    #     # in_date = '20200321'
-    #     status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-    #                            version=productversion, mapsetcode=mapsetcode,date=in_date)
-    #     self.assertEqual(status, 1)
-
     #   ---------------------------------------------------------------------------
-    #   Vegetation - NDVI 300m \\working\\
+    #   Vegetation - NDVI 300m                              //Should be ok -> Marco//
     #   ---------------------------------------------------------------------------
     def test_ingest_probav_ndvi_300(self):
         # Test Copernicus Products version 2.2 (starting with NDVI 2.2.1)
@@ -629,99 +352,8 @@ class TestIngestion(unittest.TestCase):
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
 
-    # #   ---------------------------------------------------------------------------
-    # #   Vegetation - NDVI V2.2.1  //not tested//
-    # #   ---------------------------------------------------------------------------
-    # def test_ingest_g_cls_ndvi_2_2_global(self):
-    #
-    #     # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
-    #     # Products released from VITO in March 2017
-    #
-    #     #date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_201706*_GLOBE_PROBAV_V2.2.1.nc')
-    #     # date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_19*_GLOBE_VGT_V2.2.1.nc')
-    #     date_fileslist = glob.glob('/data/processing/exchange/c_gls_NDVI_201811010000_GLOBE_PROBAV_V2.2.1.nc')
-    #
-    #     for one_file in date_fileslist:
-    #
-    #         one_filename = os.path.basename(one_file)
-    #         in_date = one_filename.split('_')[3]
-    #         productcode = 'vgt-ndvi'
-    #         productversion = 'proba-v2.2'
-    #         subproductcode = 'ndv'
-    #         mapsetcode = 'SPOTV-Africa-1km'
-    #         datasource_descrID='PDF:GLS:PROBA-V2.2:NDVI'
-    #
-    #
-    #         product = {"productcode": productcode,
-    #                    "version": productversion}
-    #         args = {"productcode": productcode,
-    #                 "subproductcode": subproductcode,
-    #                 "datasource_descr_id": datasource_descrID,
-    #                 "version": productversion}
-    #
-    #         product_in_info = querydb.get_product_in_info(**args)
-    #
-    #         re_process = product_in_info.re_process
-    #         re_extract = product_in_info.re_extract
-    #
-    #         sprod = {'subproduct': subproductcode,
-    #                              'mapsetcode': mapsetcode,
-    #                              're_extract': re_extract,
-    #                              're_process': re_process}
-    #
-    #         subproducts=[]
-    #         subproducts.append(sprod)
-    #         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-    #                                                         source_id=datasource_descrID)
-    #         ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-    #
-    #     self.assertEqual(1, 1)
-    #
-    # #   ---------------------------------------------------------------------------
-    # #   Vegetation - NDVI GLOBAL 300m \\Not used anymore\\
-    # #   ---------------------------------------------------------------------------
-    # def test_ingest_g_cls_ndvi_300m_global(self):
-    #
-    #     # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
-    #     # Products released from VITO in March 2017
-    #     date_fileslist = glob.glob('/data/ingest/c_gls_NDVI300_201901010000_GLOBE_PROBAV_V1.0.1.nc')
-    #
-    #     for one_file in date_fileslist:
-    #
-    #         one_filename = os.path.basename(one_file)
-    #         in_date = '20190101'
-    #         productcode = 'vgt-ndvi'
-    #         productversion = 'proba300-v1.0'
-    #         subproductcode = 'ndv'
-    #         mapsetcode = 'SPOTV-Africa-300m'
-    #         datasource_descrID='PDF:GLS:PROBA-V1.0:NDVI300'
-    #
-    #
-    #         product = {"productcode": productcode,
-    #                    "version": productversion}
-    #         args = {"productcode": productcode,
-    #                 "subproductcode": subproductcode,
-    #                 "datasource_descr_id": datasource_descrID,
-    #                 "version": productversion}
-    #
-    #         product_in_info = querydb.get_product_in_info(**args)
-    #
-    #         re_process = product_in_info.re_process
-    #         re_extract = product_in_info.re_extract
-    #         sprod = {'subproduct': subproductcode,
-    #                              'mapsetcode': mapsetcode,
-    #                              're_extract': re_extract,
-    #                              're_process': re_process }
-    #
-    #         subproducts=[]
-    #         subproducts.append(sprod)
-    #         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-    #                                                         source_id=datasource_descrID)
-    #         ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-    #
-    #     self.assertEqual(1, 1)
     #   ---------------------------------------------------------------------------
-    #   Rainfall - ARC2  \\Tested\\
+    #   Rainfall - ARC2                                     //Tested\\
     #   ---------------------------------------------------------------------------
     def test_ingest_arc2_rain(self):
         date_fileslist = [os.path.join(self.test_ingest_dir,'africa_arc.20200318.tif.zip')]
@@ -839,7 +471,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    Rainfall - Fewsnet 2  \\working\\
+    #    Rainfall - Fewsnet 2  \\Tested\\
     #   ---------------------------------------------------------------------------
     def test_ingest_fewsnet_rfe(self):
 
@@ -926,112 +558,6 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    FIRE - MODIS FIRMS
-    #   ---------------------------------------------------------------------------
-    # def test_ingest_modis_firms_nasa(self):
-    #
-    #     # This is for MCD14DL format from ftp://nrt1.modaps.eosdis.nasa.gov/FIRMS/Global
-    #     # having columns as: latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp
-    #
-    #     # Definitions
-    #     myfile='Global_MCD14DL_2015042.txt'
-    #     file_mcd14dl = es_constants.es2globals['ingest_dir'] + myfile
-    #     shutil.copy('/data/processing/modis-firms/v5.0/archive/'+myfile, file_mcd14dl)
-    #     pix_size = '0.008928571428571'
-    #     # Create a temporary working dir
-    #     tmpdir='/tmp/eStation2/test_ingest_firms_nasa/'
-    #     file_vrt=tmpdir+"firms_file.vrt"
-    #     file_csv=tmpdir+"firms_file.csv"
-    #     file_tif=tmpdir+"firms_file.tif"
-    #     out_layer="firms_file"
-    #     file_shp=tmpdir+out_layer+".shp"
-    #
-    #     # Write the 'vrt' file
-    #     with open(file_vrt,'w') as outFile:
-    #         outFile.write('<OGRVRTDataSource>\n')
-    #         outFile.write('    <OGRVRTLayer name="firms_file">\n')
-    #         outFile.write('        <SrcDataSource>'+file_csv+'</SrcDataSource>\n')
-    #         outFile.write('        <OGRVRTLayer name="firms_file" />\n')
-    #         outFile.write('        <GeometryType>wkbPoint</GeometryType>\n')
-    #         outFile.write('        <LayerSRS>WGS84</LayerSRS>\n')
-    #         outFile.write('        <GeometryField encoding="PointFromColumns" x="longitude" y="latitude" />\n')
-    #         outFile.write('    </OGRVRTLayer>\n')
-    #         outFile.write('</OGRVRTDataSource>\n')
-    #
-    #     # Generate the csv file with header
-    #     with open(file_csv,'w') as outFile:
-    #         #outFile.write('latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp')
-    #         with open(file_mcd14dl, 'r') as input_file:
-    #             outFile.write(input_file.read())
-    #
-    #     # Execute the ogr2ogr command
-    #     command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
-    #     #print ('['+command+']')
-    #     os.system(command)
-    #
-    #     # Convert from shapefile to rasterfile
-    #     command = 'gdal_rasterize  -l ' + out_layer + ' -burn 1 '\
-    #               + ' -tr ' + str(pix_size) + ' ' + str(pix_size) \
-    #               + ' -co "compress=LZW" -of GTiff -ot Byte '     \
-    #               +file_shp+' '+file_tif
-    #
-    #     #print ('['+command+']')
-    #     os.system(command)
-    #     self.assertEqual(1, 1)
-    # #   ---------------------------------------------------------------------------
-    # #    FIRE - MODIS FIRMS 6
-    # #   ---------------------------------------------------------------------------
-    # def test_ingest_modis_firms_nasa_6(self):
-    #
-    #     # This is for MCD14DL format from ftp://nrt3.modaps.eosdis.nasa.gov/FIRMS/c6/Global
-    #     # having columns as: latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp
-    #
-    #     # Definitions
-    #     myfile='MODIS_C6_Global_MCD14DL_NRT_2020020.txt'
-    #     file_mcd14dl = es_constants.es2globals['ingest_dir'] + myfile
-    #     # shutil.copy('/data/processing/modis-firms/v5.0/archive/'+myfile, file_mcd14dl)
-    #     pix_size = '0.008928571428571'
-    #     # Create a temporary working dir
-    #     tmpdir='/data/tmp/'
-    #     file_vrt=tmpdir+"firms_file.vrt"
-    #     file_csv=tmpdir+"firms_file.csv"
-    #     file_tif=tmpdir+"firms_file.tif"
-    #     out_layer="firms_file"
-    #     file_shp=tmpdir+out_layer+".shp"
-    #
-    #     # Write the 'vrt' file
-    #     with open(file_vrt,'w') as outFile:
-    #         outFile.write('<OGRVRTDataSource>\n')
-    #         outFile.write('    <OGRVRTLayer name="firms_file">\n')
-    #         outFile.write('        <SrcDataSource>'+file_csv+'</SrcDataSource>\n')
-    #         outFile.write('        <OGRVRTLayer name="firms_file" />\n')
-    #         outFile.write('        <GeometryType>wkbPoint</GeometryType>\n')
-    #         outFile.write('        <LayerSRS>WGS84</LayerSRS>\n')
-    #         outFile.write('        <GeometryField encoding="PointFromColumns" x="longitude" y="latitude" />\n')
-    #         outFile.write('    </OGRVRTLayer>\n')
-    #         outFile.write('</OGRVRTDataSource>\n')
-    #
-    #     # Generate the csv file with header
-    #     with open(file_csv,'w') as outFile:
-    #         #outFile.write('latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp')
-    #         with open(file_mcd14dl, 'r') as input_file:
-    #             outFile.write(input_file.read())
-    #
-    #     # Execute the ogr2ogr command
-    #     command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
-    #     #print ('['+command+']')
-    #     os.system(command)
-    #
-    #     # Convert from shapefile to rasterfile
-    #     command = 'gdal_rasterize  -l ' + out_layer + ' -burn 1 '\
-    #               + ' -tr ' + str(pix_size) + ' ' + str(pix_size) \
-    #               + ' -co "compress=LZW" -of GTiff -ot Byte '     \
-    #               +file_shp+' '+file_tif
-    #
-    #     #print ('['+command+']')
-    #     os.system(command)
-    #     self.assertEqual(1, 1)
-    #   ---------------------------------------------------------------------------
     #    FIRE - MODIS FIRMS 6  \\Tested\\
     #   ---------------------------------------------------------------------------
     def test_ingest_modis_firms(self):
@@ -1073,7 +599,7 @@ class TestIngestion(unittest.TestCase):
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
-    #    FIRE - PROBA BA 300 NOT WORKING
+    #    FIRE - PROBA BA 300 NOT WORKING    -> Marco (memory problem?)
     #   ---------------------------------------------------------------------------
     def test_ingest_g_cls_ba_300m_global(self):
         # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
@@ -1159,85 +685,85 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    OCEANOGRAPHY - MODIS KD490 \\Made similar process test\\
+    #    OCEANOGRAPHY - MODIS KD490 //Redundant w.r.t modis-chla//
     #   ---------------------------------------------------------------------------
-    def test_ingest_modis_kd490_netcdf(self):
-        date_fileslist = [os.path.join(self.test_ingest_dir, 'A2018121.L3m_DAY_KD490_Kd_490_4km.nc')]
-        # date_fileslist = ['/data/ingest/A2018121.L3m_DAY_KD490_Kd_490_4km.nc']
-        in_date = '2018121'
-        productcode = 'modis-kd490'
-        productversion = 'v2012.0'
-        subproductcode = 'kd490-day'
-        mapsetcode = 'MODIS-Africa-4km'
-        datasource_descrID='GSFC:CGI:MODIS:KD490:1D'
-
-        product = {"productcode": productcode,
-                   "version": productversion}
-        args = {"productcode": productcode,
-                "subproductcode": subproductcode,
-                "datasource_descr_id": datasource_descrID,
-                "version": productversion}
-
-        product_in_info = querydb.get_product_in_info(**args)
-
-        re_process = product_in_info.re_process
-        re_extract = product_in_info.re_extract
-
-        sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
-
-        subproducts = [sprod]
-        datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
-                                                      source_id=datasource_descrID)
-        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        in_date = functions.conv_date_yyyydoy_2_yyyymmdd(in_date)#'20200318'
-        status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
-        self.assertEqual(status, 1)
-
-    #   ---------------------------------------------------------------------------
-    #    OCEANOGRAPHY - MODIS PAR \\Made similar process test\\
-    #   ---------------------------------------------------------------------------
-    def test_ingest_modis_par_netcdf(self):
-        date_fileslist = [os.path.join(self.test_ingest_dir, 'A2015189.L3m_DAY_PAR_par_4km.nc')]
-        # date_fileslist = ['/data/ingest/A2015189.L3m_DAY_PAR_par_4km.nc']
-        in_date = '2015189'
-        productcode = 'modis-par'
-        productversion = 'v2012.0'
-        subproductcode = 'par-day'
-        mapsetcode = 'MODIS-Africa-4km'
-        datasource_descrID='GSFC:CGI:MODIS:PAR:1D'
-
-        product = {"productcode": productcode,
-                   "version": productversion}
-        args = {"productcode": productcode,
-                "subproductcode": subproductcode,
-                "datasource_descr_id": datasource_descrID,
-                "version": productversion}
-
-        product_in_info = querydb.get_product_in_info(**args)
-
-        re_process = product_in_info.re_process
-        re_extract = product_in_info.re_extract
-
-        sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
-
-        subproducts = [sprod]
-        datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
-                                                      source_id=datasource_descrID)
-        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        in_date = functions.conv_date_yyyydoy_2_yyyymmdd(in_date)#'20200318'
-        status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
-        self.assertEqual(status, 1)
+    # def test_ingest_modis_kd490_netcdf(self):
+    #     date_fileslist = [os.path.join(self.test_ingest_dir, 'A2018121.L3m_DAY_KD490_Kd_490_4km.nc')]
+    #     # date_fileslist = ['/data/ingest/A2018121.L3m_DAY_KD490_Kd_490_4km.nc']
+    #     in_date = '2018121'
+    #     productcode = 'modis-kd490'
+    #     productversion = 'v2012.0'
+    #     subproductcode = 'kd490-day'
+    #     mapsetcode = 'MODIS-Africa-4km'
+    #     datasource_descrID='GSFC:CGI:MODIS:KD490:1D'
+    #
+    #     product = {"productcode": productcode,
+    #                "version": productversion}
+    #     args = {"productcode": productcode,
+    #             "subproductcode": subproductcode,
+    #             "datasource_descr_id": datasource_descrID,
+    #             "version": productversion}
+    #
+    #     product_in_info = querydb.get_product_in_info(**args)
+    #
+    #     re_process = product_in_info.re_process
+    #     re_extract = product_in_info.re_extract
+    #
+    #     sprod = {'subproduct': subproductcode,
+    #                          'mapsetcode': mapsetcode,
+    #                          're_extract': re_extract,
+    #                          're_process': re_process}
+    #
+    #     subproducts = [sprod]
+    #     datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
+    #                                                   source_id=datasource_descrID)
+    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+    #     in_date = functions.conv_date_yyyydoy_2_yyyymmdd(in_date)#'20200318'
+    #     status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
+    #                            version=productversion, mapsetcode=mapsetcode,date=in_date)
+    #     self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    OCEANOGRAPHY - MODIS SST  \\Tested\\
+    #    OCEANOGRAPHY - MODIS PAR //Redundant w.r.t modis-chla//
+    #   ---------------------------------------------------------------------------
+    # def test_ingest_modis_par_netcdf(self):
+    #     date_fileslist = [os.path.join(self.test_ingest_dir, 'A2015189.L3m_DAY_PAR_par_4km.nc')]
+    #     # date_fileslist = ['/data/ingest/A2015189.L3m_DAY_PAR_par_4km.nc']
+    #     in_date = '2015189'
+    #     productcode = 'modis-par'
+    #     productversion = 'v2012.0'
+    #     subproductcode = 'par-day'
+    #     mapsetcode = 'MODIS-Africa-4km'
+    #     datasource_descrID='GSFC:CGI:MODIS:PAR:1D'
+    #
+    #     product = {"productcode": productcode,
+    #                "version": productversion}
+    #     args = {"productcode": productcode,
+    #             "subproductcode": subproductcode,
+    #             "datasource_descr_id": datasource_descrID,
+    #             "version": productversion}
+    #
+    #     product_in_info = querydb.get_product_in_info(**args)
+    #
+    #     re_process = product_in_info.re_process
+    #     re_extract = product_in_info.re_extract
+    #
+    #     sprod = {'subproduct': subproductcode,
+    #                          'mapsetcode': mapsetcode,
+    #                          're_extract': re_extract,
+    #                          're_process': re_process}
+    #
+    #     subproducts = [sprod]
+    #     datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
+    #                                                   source_id=datasource_descrID)
+    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+    #     in_date = functions.conv_date_yyyydoy_2_yyyymmdd(in_date)#'20200318'
+    #     status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
+    #                            version=productversion, mapsetcode=mapsetcode,date=in_date)
+    #     self.assertEqual(status, 1)
+
+    #   ---------------------------------------------------------------------------
+    #    OCEANOGRAPHY - MODIS SST  //Tested//
     #   ---------------------------------------------------------------------------
     def test_ingest_modis_sst_netcdf(self):
         date_fileslist = [os.path.join(self.test_ingest_dir, 'AQUA_MODIS.20200320.L3m.DAY.SST.sst.4km.NRT.nc')]
@@ -1359,9 +885,8 @@ class TestIngestion(unittest.TestCase):
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
 
-
     #   ---------------------------------------------------------------------------
-    #    OCEANOGRAPHY - Sentinel 3 OLCI WRR OC4ME \\Not working\\
+    #    OCEANOGRAPHY - Sentinel 3 OLCI WRR OC4ME \\Not working\\ -> Marco
     #   ---------------------------------------------------------------------------
     def test_ingest_s3_olci_wrr_chl_oc4me(self):
         # Test the ingestion of the Sentinel-3/OLCI Level-2 WRR product (on d6-dev-vm19 !!!!!)
@@ -1406,8 +931,9 @@ class TestIngestion(unittest.TestCase):
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
+
     #   ---------------------------------------------------------------------------
-    #    OCEANOGRAPHY - Sentinel 3 SLSTR WST \\Not working\\
+    #    OCEANOGRAPHY - Sentinel 3 SLSTR WST \\Not working// -> Marco
     #   ---------------------------------------------------------------------------
     def test_ingest_s3_slstr_sst(self):
 
@@ -1461,7 +987,7 @@ class TestIngestion(unittest.TestCase):
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
-    #    OCEANOGRAPHY - Sentinel 3 SLSTR WST \\Not working\\
+    #    OCEANOGRAPHY - Sentinel 3 SLSTR WST \\Not working\\ -> Marco
     #   ---------------------------------------------------------------------------
     def test_ingest_s3_slstr_sst_zipped(self):
 
@@ -1516,7 +1042,7 @@ class TestIngestion(unittest.TestCase):
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
-    #    Miscellaneous - CPC SM \\Tested\\
+    #    Miscellaneous - CPC SM               \\Not working\\ -> Marco
     #   ---------------------------------------------------------------------------
     def test_ingest_cpc_soilmoisture(self):
 
@@ -1558,7 +1084,7 @@ class TestIngestion(unittest.TestCase):
                                         version=productversion, mapsetcode=mapsetcode, date=in_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
-    #    Miscellaneous - LSASAF ET \\Not yet tested\\
+    #    Miscellaneous - LSASAF ET            \\Not yet tested\\ -> To be done ??
     #   ---------------------------------------------------------------------------
     def test_ingest_lsasaf_et_disk(self):
 
@@ -1599,7 +1125,7 @@ class TestIngestion(unittest.TestCase):
                                         version=productversion, mapsetcode=mapsetcode, date=in_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
-    #    Miscellaneous - LSASAF ET \\Not yet tested\\
+    #    Miscellaneous - LSASAF ET \\Not yet tested\\ -> Vijay
     #   ---------------------------------------------------------------------------
     def test_ingest_lsasaf_et(self):
         date_fileslist = [os.path.join(self.test_ingest_dir, 'S-LSA_-HDF5_LSASAF_MSG_ET_SAfr_201511301000.bz2')]
@@ -1638,44 +1164,9 @@ class TestIngestion(unittest.TestCase):
                                         version=productversion, mapsetcode=mapsetcode, date=in_date)
         self.assertEqual(status, 1)
 
-    # def test_ingest_spi(self):
-    #
-    #     date_fileslist = ['/data/ingest//chirps-v2.0.2018.06.2.tif.gz']
-    #     in_date = '2018.06.2'
-    #     productcode = 'chirps-dekad'
-    #     productversion = '2.0'
-    #     subproductcode = '10d'
-    #     mapsetcode = 'CHIRP-Africa-5km'
-    #     datasource_descrID='UCSB:CHIRPS:DEKAD:2.0'
-    #
-    #     product = {"productcode": productcode,
-    #                "version": productversion}
-    #     args = {"productcode": productcode,
-    #             "subproductcode": subproductcode,
-    #             "datasource_descr_id": datasource_descrID,
-    #             "version": productversion}
-    #
-    #     product_in_info = querydb.get_product_in_info(**args)
-    #
-    #     re_process = product_in_info.re_process
-    #     re_extract = product_in_info.re_extract
-    #
-    #     sprod = {'subproduct': subproductcode,
-    #                          'mapsetcode': mapsetcode,
-    #                          're_extract': re_extract,
-    #                          're_process': re_process}
-    #
-    #     subproducts = [sprod]
-    #     datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-    #                                                      source_id=datasource_descrID)
-    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-    #
-    #     self.assertEqual(1, 1)
-
     #   ---------------------------------------------------------------------------
-    #   INLAND WATER - WBD AVG \\Not yet tested\\
+    #   INLAND WATER - WBD AVG                      \\Not yet tested\\ -> Vijay
     #   ---------------------------------------------------------------------------
-
     def test_ingest_jrc_wbd_avg(self):
 
         date_fileslist = glob.glob('/data/ingest/JRC-WBD-AVG-ICPAC_1985-2015_1201*')
@@ -2211,7 +1702,524 @@ class TestIngestion(unittest.TestCase):
     #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
     #     self.assertEqual(1, 1)
 
-
 suite_ingestion = unittest.TestLoader().loadTestsFromTestCase(TestIngestion)
 if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=2).run(suite_ingestion)
+
+
+    # #   ---------------------------------------------------------------------------
+    # #   Vegetation - DMP V1.0 \\Not used anymore\\
+    # #   ---------------------------------------------------------------------------
+    # def test_ingest_vgt_dmp(self):
+    #
+    #     date_fileslist = ['/data/ingest/test/g2_BIOPAR_DMP_201406010000_AFRI_PROBAV_V1_0.ZIP']
+    #     in_date = '201406010000'
+    #     productcode = 'vgt-dmp'
+    #     productversion = 'V1.0'
+    #     subproductcode = 'dmp'
+    #     mapsetcode = 'SPOTV-Africa-1km'
+    #     datasource_descrID='EO:EUM:DAT:PROBA-V:DMP'
+    #
+    #     product = {"productcode": productcode,
+    #                "version": productversion}
+    #     args = {"productcode": productcode,
+    #             "subproductcode": subproductcode,
+    #             "datasource_descr_id": datasource_descrID,
+    #             "version": productversion}
+    #
+    #     product_in_info = querydb.get_product_in_info(**args)
+    #
+    #     re_process = product_in_info.re_process
+    #     re_extract = product_in_info.re_extract
+    #
+    #     sprod = {'subproduct': subproductcode,
+    #                          'mapsetcode': mapsetcode,
+    #                          're_extract': re_extract,
+    #                          're_process': re_process}
+    #
+    #     subproducts = [sprod]
+    #
+    #     datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+    #                                                      source_id=datasource_descrID)
+    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+    #
+    #     self.assertEqual(1, 1)
+
+    # #   ---------------------------------------------------------------------------
+    # #   Vegetation - FAPAR V1.4 \\Not used anymore\\
+    # #   ---------------------------------------------------------------------------
+    # def test_ingest_vgt_fapar(self):
+    #
+    #     date_fileslist = ['/data/ingest.wrong/g2_BIOPAR_FAPAR_201510240000_AFRI_PROBAV_V1.4.zip']
+    #     in_date = '201510240000'
+    #     productcode = 'vgt-fapar'
+    #     productversion = 'V1.4'
+    #     subproductcode = 'fapar'
+    #     mapsetcode = 'SPOTV-Africa-1km'
+    #     datasource_descrID='EO:EUM:DAT:PROBA-V:FAPAR'
+    #
+    #     product = {"productcode": productcode,
+    #                "version": productversion}
+    #     args = {"productcode": productcode,
+    #             "subproductcode": subproductcode,
+    #             "datasource_descr_id": datasource_descrID,
+    #             "version": productversion}
+    #
+    #     product_in_info = querydb.get_product_in_info(**args)
+    #
+    #     re_process = product_in_info.re_process
+    #     re_extract = product_in_info.re_extract
+    #
+    #     sprod = {'subproduct': subproductcode,
+    #                          'mapsetcode': mapsetcode,
+    #                          're_extract': re_extract,
+    #                          're_process': re_process}
+    #
+    #     subproducts = [sprod]
+    #
+    #     datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+    #                                                      source_id=datasource_descrID)
+    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+    #
+    #     self.assertEqual(1, 1)
+    #   ---------------------------------------------------------------------------
+    #   Vegetation - FCOVER V1.4  \\Not used anymore\\
+    #   ---------------------------------------------------------------------------
+    # def test_ingest_vgt_fcover(self):
+    #
+    #     date_fileslist = ['/data/ingest/g2_BIOPAR_FCOVER_201601130000_AFRI_PROBAV_V1.4.zip']
+    #     in_date = '201601130000'
+    #     productcode = 'vgt-fcover'
+    #     productversion = 'V1.4'
+    #     subproductcode = 'fcover'
+    #     mapsetcode = 'SPOTV-Africa-1km'
+    #     datasource_descrID='EO:EUM:DAT:PROBA-V:FCOVER'
+    #
+    #     product = {"productcode": productcode,
+    #                "version": productversion}
+    #     args = {"productcode": productcode,
+    #             "subproductcode": subproductcode,
+    #             "datasource_descr_id": datasource_descrID,
+    #             "version": productversion}
+    #
+    #     product_in_info = querydb.get_product_in_info(**args)
+    #
+    #     re_process = product_in_info.re_process
+    #     re_extract = product_in_info.re_extract
+    #
+    #     sprod = {'subproduct': subproductcode,
+    #                          'mapsetcode': mapsetcode,
+    #                          're_extract': re_extract,
+    #                          're_process': re_process}
+    #
+    #     subproducts = [sprod]
+    #
+    #     datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+    #                                                      source_id=datasource_descrID)
+    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+    #
+    #     self.assertEqual(1, 1)
+    #   ---------------------------------------------------------------------------
+    #   Vegetation - LAI V1.4 \\Not used anymore\\
+    #   ---------------------------------------------------------------------------
+    # def test_ingest_vgt_lai(self):
+    #
+    #     date_fileslist = ['/data/ingest/test/g2_BIOPAR_LAI_201510240000_AFRI_PROBAV_V1.4.zip']
+    #     in_date = '201510240000'
+    #     productcode = 'vgt-lai'
+    #     productversion = 'V1.4'
+    #     subproductcode = 'lai'
+    #     mapsetcode = 'SPOTV-Africa-1km'
+    #     datasource_descrID='EO:EUM:DAT:PROBA-V:LAI'
+    #
+    #     product = {"productcode": productcode,
+    #                "version": productversion}
+    #     args = {"productcode": productcode,
+    #             "subproductcode": subproductcode,
+    #             "datasource_descr_id": datasource_descrID,
+    #             "version": productversion}
+    #
+    #     product_in_info = querydb.get_product_in_info(**args)
+    #
+    #     re_process = product_in_info.re_process
+    #     re_extract = product_in_info.re_extract
+    #
+    #     sprod = {'subproduct': subproductcode,
+    #                          'mapsetcode': mapsetcode,
+    #                          're_extract': re_extract,
+    #                          're_process': re_process}
+    #
+    #     subproducts = [sprod]
+    #
+    #     datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+    #                                                      source_id=datasource_descrID)
+    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+    #
+    #     self.assertEqual(1, 1)
+
+    # #   ---------------------------------------------------------------------------
+    # #   Vegetation - NDVI V2.1  \\Not used anymore\\
+    # #   ---------------------------------------------------------------------------
+    # def test_ingest_vgt_ndvi(self):
+    #
+    #     date_fileslist = ['/data/temp/proba-v/g2_BIOPAR_NDVI_201601110000_AFRI_PROBAV_V2.1.zip']
+    #     in_date = '201601110000'
+    #     productcode = 'vgt-ndvi'
+    #     productversion = 'proba-v2.1'
+    #     subproductcode = 'ndv'
+    #     mapsetcode = 'SPOTV-Africa-1km'
+    #     datasource_descrID='EO:EUM:DAT:PROBA-V2.1:NDVI'
+    #
+    #     product = {"productcode": productcode,
+    #                "version": productversion}
+    #     args = {"productcode": productcode,
+    #             "subproductcode": subproductcode,
+    #             "datasource_descr_id": datasource_descrID,
+    #             "version": productversion}
+    #
+    #     product_in_info = querydb.get_product_in_info(**args)
+    #
+    #     re_process = product_in_info.re_process
+    #     re_extract = product_in_info.re_extract
+    #
+    #     sprod = {'subproduct': subproductcode,
+    #                          'mapsetcode': mapsetcode,
+    #                          're_extract': re_extract,
+    #                          're_process': re_process}
+    #
+    #     subproducts = [sprod]
+    #
+    #     datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+    #                                                      source_id=datasource_descrID)
+    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+    #
+    #     self.assertEqual(1, 1)
+    #
+    # #   ---------------------------------------------------------------------------
+    # #   Vegetation - NDVI V2.2.1 \\Not used anymore\\
+    # #   ---------------------------------------------------------------------------
+    # def test_ingest_g_cls_ndvi_2_2_netcdf(self):
+    #
+    #
+    #     file = '/data/TestIngestion/c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.nc'
+    #     outputfile= '/data/TestIngestion/c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.tif'
+    #
+    #     # hdf = gdal.Open('HDF5:'+file+'://NDVI')
+    #     hdf = gdal.Open(file)
+    #     sdsdict = hdf.GetMetadata('SUBDATASETS')
+    #
+    #     # sdslist = in_ds.GetSubDatasets()
+    #     # in_ds = gdal.Open('HDF5:'+file+'://NDVI')
+    #     ingestion.write_ds_to_geotiff(hdf, outputfile)
+    #     print (sdsdict)
+    #     #
+    #     #
+    #     # date_fileslist = glob.glob('/data/native/DISK_MSG_MPE/MSG3*201609301200*gz')
+    #     # in_date = '201609301200'
+    #     # productcode = 'msg-mpe'
+    #     # productversion = 'undefined'
+    #     # subproductcode = 'mpe'
+    #     # mapsetcode = 'MSG-satellite-3km'
+    #     # datasource_descrID='EO:EUM:DAT:MSG:MPE-UMARF'
+    #     #
+    #     # product = {"productcode": productcode,
+    #     #            "version": productversion}
+    #     # args = {"productcode": productcode,
+    #     #         "subproductcode": subproductcode,
+    #     #         "datasource_descr_id": datasource_descrID,
+    #     #         "version": productversion}
+    #     #
+    #     # product_in_info = querydb.get_product_in_info(**args)
+    #     #
+    #     # re_process = product_in_info.re_process
+    #     # re_extract = product_in_info.re_extract
+    #     #
+    #     # sprod = {'subproduct': subproductcode,
+    #     #                      'mapsetcode': mapsetcode,
+    #     #                      're_extract': re_extract,
+    #     #                      're_process': re_process}
+    #     #
+    #     # subproducts=[]
+    #     # subproducts.append(sprod)
+    #     #
+    #     # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='INTERNET',
+    #     #                                                                       source_id=datasource_descrID):
+    #     #
+    #     #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr, logger, echo_query=1)
+   # #   ---------------------------------------------------------------------------
+    # #   Vegetation - NDVI 100m \\Not used \\
+    # #   ---------------------------------------------------------------------------
+    # def test_ingest_probav_ndvi_100(self):
+    #
+    #     # Test Copernicus Products version 2.2 (starting with NDVI 2.2.1)
+    #     # Products released from VITO in March 2017
+    #     date_fileslist = [os.path.join(self.test_ingest_dir,'c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.zip')]
+    #     # date_fileslist = glob.glob('/data/ingest/PROBAV_S1_TOC_*20190611*')
+    #     in_date = '20190611'
+    #     productcode = 'vgt-ndvi'
+    #     productversion = 'proba100-v1.0'
+    #     subproductcode = 'ndv'
+    #     mapsetcode = 'PROBAV-Africa-100m'
+    #     datasource_descrID='PDF:VITO:PROBA-V1:NDVI100'
+    #
+    #
+    #     product = {"productcode": productcode,
+    #                "version": productversion}
+    #     args = {"productcode": productcode,
+    #             "subproductcode": subproductcode,
+    #             "datasource_descr_id": datasource_descrID,
+    #             "version": productversion}
+    #
+    #     product_in_info = querydb.get_product_in_info(**args)
+    #
+    #     re_process = product_in_info.re_process
+    #     re_extract = product_in_info.re_extract
+    #
+    #     sprod = {'subproduct': subproductcode,
+    #                          'mapsetcode': mapsetcode,
+    #                          're_extract': re_extract,
+    #                          're_process': re_process}
+    #
+    #     subproducts = [sprod]
+    #
+    #     datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+    #                                                      source_id=datasource_descrID)
+    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+    #     # in_date = '20200321'
+    #     status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
+    #                            version=productversion, mapsetcode=mapsetcode,date=in_date)
+    #     self.assertEqual(status, 1)
+    # #   ---------------------------------------------------------------------------
+    # #   Vegetation - NDVI V2.2.1  //not tested//
+    # #   ---------------------------------------------------------------------------
+    # def test_ingest_g_cls_ndvi_2_2_global(self):
+    #
+    #     # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
+    #     # Products released from VITO in March 2017
+    #
+    #     #date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_201706*_GLOBE_PROBAV_V2.2.1.nc')
+    #     # date_fileslist = glob.glob('/spatial_data/data/native/GLOBAL_NDVI_2.2/c_gls_NDVI_19*_GLOBE_VGT_V2.2.1.nc')
+    #     date_fileslist = glob.glob('/data/processing/exchange/c_gls_NDVI_201811010000_GLOBE_PROBAV_V2.2.1.nc')
+    #
+    #     for one_file in date_fileslist:
+    #
+    #         one_filename = os.path.basename(one_file)
+    #         in_date = one_filename.split('_')[3]
+    #         productcode = 'vgt-ndvi'
+    #         productversion = 'proba-v2.2'
+    #         subproductcode = 'ndv'
+    #         mapsetcode = 'SPOTV-Africa-1km'
+    #         datasource_descrID='PDF:GLS:PROBA-V2.2:NDVI'
+    #
+    #
+    #         product = {"productcode": productcode,
+    #                    "version": productversion}
+    #         args = {"productcode": productcode,
+    #                 "subproductcode": subproductcode,
+    #                 "datasource_descr_id": datasource_descrID,
+    #                 "version": productversion}
+    #
+    #         product_in_info = querydb.get_product_in_info(**args)
+    #
+    #         re_process = product_in_info.re_process
+    #         re_extract = product_in_info.re_extract
+    #
+    #         sprod = {'subproduct': subproductcode,
+    #                              'mapsetcode': mapsetcode,
+    #                              're_extract': re_extract,
+    #                              're_process': re_process}
+    #
+    #         subproducts=[]
+    #         subproducts.append(sprod)
+    #         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+    #                                                         source_id=datasource_descrID)
+    #         ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+    #
+    #     self.assertEqual(1, 1)
+    #
+
+
+    # #   ---------------------------------------------------------------------------
+    # #   Vegetation - NDVI GLOBAL 300m \\Not used anymore\\
+    # #   ---------------------------------------------------------------------------
+    # def test_ingest_g_cls_ndvi_300m_global(self):
+    #
+    #     # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
+    #     # Products released from VITO in March 2017
+    #     date_fileslist = glob.glob('/data/ingest/c_gls_NDVI300_201901010000_GLOBE_PROBAV_V1.0.1.nc')
+    #
+    #     for one_file in date_fileslist:
+    #
+    #         one_filename = os.path.basename(one_file)
+    #         in_date = '20190101'
+    #         productcode = 'vgt-ndvi'
+    #         productversion = 'proba300-v1.0'
+    #         subproductcode = 'ndv'
+    #         mapsetcode = 'SPOTV-Africa-300m'
+    #         datasource_descrID='PDF:GLS:PROBA-V1.0:NDVI300'
+    #
+    #
+    #         product = {"productcode": productcode,
+    #                    "version": productversion}
+    #         args = {"productcode": productcode,
+    #                 "subproductcode": subproductcode,
+    #                 "datasource_descr_id": datasource_descrID,
+    #                 "version": productversion}
+    #
+    #         product_in_info = querydb.get_product_in_info(**args)
+    #
+    #         re_process = product_in_info.re_process
+    #         re_extract = product_in_info.re_extract
+    #         sprod = {'subproduct': subproductcode,
+    #                              'mapsetcode': mapsetcode,
+    #                              're_extract': re_extract,
+    #                              're_process': re_process }
+    #
+    #         subproducts=[]
+    #         subproducts.append(sprod)
+    #         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+    #                                                         source_id=datasource_descrID)
+    #         ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+    #
+    #     self.assertEqual(1, 1)
+    #   ---------------------------------------------------------------------------
+    #    FIRE - MODIS FIRMS
+    #   ---------------------------------------------------------------------------
+    # def test_ingest_modis_firms_nasa(self):
+    #
+    #     # This is for MCD14DL format from ftp://nrt1.modaps.eosdis.nasa.gov/FIRMS/Global
+    #     # having columns as: latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp
+    #
+    #     # Definitions
+    #     myfile='Global_MCD14DL_2015042.txt'
+    #     file_mcd14dl = es_constants.es2globals['ingest_dir'] + myfile
+    #     shutil.copy('/data/processing/modis-firms/v5.0/archive/'+myfile, file_mcd14dl)
+    #     pix_size = '0.008928571428571'
+    #     # Create a temporary working dir
+    #     tmpdir='/tmp/eStation2/test_ingest_firms_nasa/'
+    #     file_vrt=tmpdir+"firms_file.vrt"
+    #     file_csv=tmpdir+"firms_file.csv"
+    #     file_tif=tmpdir+"firms_file.tif"
+    #     out_layer="firms_file"
+    #     file_shp=tmpdir+out_layer+".shp"
+    #
+    #     # Write the 'vrt' file
+    #     with open(file_vrt,'w') as outFile:
+    #         outFile.write('<OGRVRTDataSource>\n')
+    #         outFile.write('    <OGRVRTLayer name="firms_file">\n')
+    #         outFile.write('        <SrcDataSource>'+file_csv+'</SrcDataSource>\n')
+    #         outFile.write('        <OGRVRTLayer name="firms_file" />\n')
+    #         outFile.write('        <GeometryType>wkbPoint</GeometryType>\n')
+    #         outFile.write('        <LayerSRS>WGS84</LayerSRS>\n')
+    #         outFile.write('        <GeometryField encoding="PointFromColumns" x="longitude" y="latitude" />\n')
+    #         outFile.write('    </OGRVRTLayer>\n')
+    #         outFile.write('</OGRVRTDataSource>\n')
+    #
+    #     # Generate the csv file with header
+    #     with open(file_csv,'w') as outFile:
+    #         #outFile.write('latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp')
+    #         with open(file_mcd14dl, 'r') as input_file:
+    #             outFile.write(input_file.read())
+    #
+    #     # Execute the ogr2ogr command
+    #     command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
+    #     #print ('['+command+']')
+    #     os.system(command)
+    #
+    #     # Convert from shapefile to rasterfile
+    #     command = 'gdal_rasterize  -l ' + out_layer + ' -burn 1 '\
+    #               + ' -tr ' + str(pix_size) + ' ' + str(pix_size) \
+    #               + ' -co "compress=LZW" -of GTiff -ot Byte '     \
+    #               +file_shp+' '+file_tif
+    #
+    #     #print ('['+command+']')
+    #     os.system(command)
+    #     self.assertEqual(1, 1)
+    # #   ---------------------------------------------------------------------------
+    # #    FIRE - MODIS FIRMS 6
+    # #   ---------------------------------------------------------------------------
+    # def test_ingest_modis_firms_nasa_6(self):
+    #
+    #     # This is for MCD14DL format from ftp://nrt3.modaps.eosdis.nasa.gov/FIRMS/c6/Global
+    #     # having columns as: latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp
+    #
+    #     # Definitions
+    #     myfile='MODIS_C6_Global_MCD14DL_NRT_2020020.txt'
+    #     file_mcd14dl = es_constants.es2globals['ingest_dir'] + myfile
+    #     # shutil.copy('/data/processing/modis-firms/v5.0/archive/'+myfile, file_mcd14dl)
+    #     pix_size = '0.008928571428571'
+    #     # Create a temporary working dir
+    #     tmpdir='/data/tmp/'
+    #     file_vrt=tmpdir+"firms_file.vrt"
+    #     file_csv=tmpdir+"firms_file.csv"
+    #     file_tif=tmpdir+"firms_file.tif"
+    #     out_layer="firms_file"
+    #     file_shp=tmpdir+out_layer+".shp"
+    #
+    #     # Write the 'vrt' file
+    #     with open(file_vrt,'w') as outFile:
+    #         outFile.write('<OGRVRTDataSource>\n')
+    #         outFile.write('    <OGRVRTLayer name="firms_file">\n')
+    #         outFile.write('        <SrcDataSource>'+file_csv+'</SrcDataSource>\n')
+    #         outFile.write('        <OGRVRTLayer name="firms_file" />\n')
+    #         outFile.write('        <GeometryType>wkbPoint</GeometryType>\n')
+    #         outFile.write('        <LayerSRS>WGS84</LayerSRS>\n')
+    #         outFile.write('        <GeometryField encoding="PointFromColumns" x="longitude" y="latitude" />\n')
+    #         outFile.write('    </OGRVRTLayer>\n')
+    #         outFile.write('</OGRVRTDataSource>\n')
+    #
+    #     # Generate the csv file with header
+    #     with open(file_csv,'w') as outFile:
+    #         #outFile.write('latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,confidence,version,bright_t31,frp')
+    #         with open(file_mcd14dl, 'r') as input_file:
+    #             outFile.write(input_file.read())
+    #
+    #     # Execute the ogr2ogr command
+    #     command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
+    #     #print ('['+command+']')
+    #     os.system(command)
+    #
+    #     # Convert from shapefile to rasterfile
+    #     command = 'gdal_rasterize  -l ' + out_layer + ' -burn 1 '\
+    #               + ' -tr ' + str(pix_size) + ' ' + str(pix_size) \
+    #               + ' -co "compress=LZW" -of GTiff -ot Byte '     \
+    #               +file_shp+' '+file_tif
+    #
+    #     #print ('['+command+']')
+    #     os.system(command)
+    #     self.assertEqual(1, 1)
+
+    # def test_ingest_spi(self):
+    #
+    #     date_fileslist = ['/data/ingest//chirps-v2.0.2018.06.2.tif.gz']
+    #     in_date = '2018.06.2'
+    #     productcode = 'chirps-dekad'
+    #     productversion = '2.0'
+    #     subproductcode = '10d'
+    #     mapsetcode = 'CHIRP-Africa-5km'
+    #     datasource_descrID='UCSB:CHIRPS:DEKAD:2.0'
+    #
+    #     product = {"productcode": productcode,
+    #                "version": productversion}
+    #     args = {"productcode": productcode,
+    #             "subproductcode": subproductcode,
+    #             "datasource_descr_id": datasource_descrID,
+    #             "version": productversion}
+    #
+    #     product_in_info = querydb.get_product_in_info(**args)
+    #
+    #     re_process = product_in_info.re_process
+    #     re_extract = product_in_info.re_extract
+    #
+    #     sprod = {'subproduct': subproductcode,
+    #                          'mapsetcode': mapsetcode,
+    #                          're_extract': re_extract,
+    #                          're_process': re_process}
+    #
+    #     subproducts = [sprod]
+    #     datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+    #                                                      source_id=datasource_descrID)
+    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+    #
+    #     self.assertEqual(1, 1)
+
