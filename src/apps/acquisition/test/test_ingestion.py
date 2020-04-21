@@ -34,11 +34,11 @@ class TestIngestion(unittest.TestCase):
 
     def setUp(self):
         root_test_dir=es_constants.es2globals['test_data_dir']
-        self.test_ingest_dir=os.path.join(root_test_dir,'native')
+        self.test_ingest_dir=root_test_dir #os.path.join(root_test_dir,'native')
         self.proc_dir_bck = es_constants.processing_dir
         es_constants.processing_dir = es_constants.es2globals['base_tmp_dir']+os.path.sep
         self.ingest_out_dir = es_constants.processing_dir
-        self.ref_out_dir = os.path.join(root_test_dir,'refs_output')
+        self.ref_out_dir = root_test_dir #os.path.join(root_test_dir,'refs_output')
 
     def tearDown(self):
         es_constants.processing_dir = self.proc_dir_bck
@@ -54,11 +54,11 @@ class TestIngestion(unittest.TestCase):
         sub_directory= functions.set_path_sub_directory(productcode,subproductcode,'Ingest',version,mapsetcode)
 
         ref_file = glob.glob(self.ref_out_dir+'**/*/*/'+filename, recursive=True)
-        if not os.path.isfile(ref_file[0]):
+        if not len(ref_file)>0: #os.path.isfile(ref_file[0]):
             print("Error reference file does not exist: "+filename)
             return result
         newly_computed_file = glob.glob(self.ingest_out_dir+sub_directory+filename,recursive=True)
-        if not os.path.isfile(newly_computed_file[0]):
+        if not len(newly_computed_file)>0: #os.path.isfile(newly_computed_file[0]):
             print("Error reference file does not exist: "+filename)
             return result
 
@@ -1088,16 +1088,14 @@ class TestIngestion(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def test_ingest_lsasaf_et_disk(self):
 
-        # date_fileslist = ['/data/ingest/test/S-LSA_-HDF5_LSASAF_MSG_ET_MSG-Disk_201905290900.bz2']
-        # os.system('cp /data/ingest/S-LSA_-HDF5_LSASAF_MSG_ET_MSG-Disk_201905290900.bz2 /data/ingest/test/')
-        date_fileslist = [os.path.join(self.test_ingest_dir, 'S-LSA_-HDF5_LSASAF_MSG_ET_MSG-Disk_201905290900.bz2')]
-        in_date = '201905290900'
-
         productcode = 'lsasaf-et'
         productversion = 'undefined'
         subproductcode = 'et'
         mapsetcode = 'MSG-satellite-3km'
         datasource_descrID='EO:EUM:DAT:MSG:ET-SEVIRI'
+        input_dir= self.test_ingest_dir+os.path.sep+productcode+os.path.sep+'native'
+        date_fileslist = [os.path.join(input_dir, 'S-LSA_-HDF5_LSASAF_MSG_ET_MSG-Disk_202004201200.bz2')]
+        in_date = '202004201200'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1119,8 +1117,8 @@ class TestIngestion(unittest.TestCase):
         subproducts = [sprod]
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
-        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        in_date = '201905290900'
+        # ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+        in_date = '202004201200'
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
                                         version=productversion, mapsetcode=mapsetcode, date=in_date)
         self.assertEqual(status, 1)
