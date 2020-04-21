@@ -11,6 +11,7 @@ __author__ = "Jurriaan van 't Klooster"
 import lib.python.functions as functions
 from lib.python import metadata as md
 from lib.python.image_proc import raster_image_math
+from config import es_constants
 import json
 import os, shutil, tempfile
 import glob
@@ -18,6 +19,8 @@ import glob
 class TestRasterImage(unittest.TestCase):
 
     def setUp(self):
+        root_test_dir = es_constants.es2globals['test_data_dir']
+
         self.input_files = ['/data/test_data/tif/fewsnet-rfe/10d/20011221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
                             '/data/test_data/tif/fewsnet-rfe/10d/20021221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
                             '/data/test_data/tif/fewsnet-rfe/10d/20031221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
@@ -33,7 +36,7 @@ class TestRasterImage(unittest.TestCase):
                             '/data/test_data/tif/fewsnet-rfe/10d/20131221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
                             '/data/test_data/tif/fewsnet-rfe/10d/20141221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
                             '/data/test_data/tif/fewsnet-rfe/10d/20151221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif']
-        self.ref_dir = '/data/test_data/refs_output/'
+        self.ref_dir = root_test_dir
         self.input_dir = '/data/test_data/tif/'
         self.root_out_dir = '/data/tmp/'
         self.ref_avg_file = os.path.join(self.ref_dir,'fewsnet-rfe/10davg/1221_fewsnet-rfe_10davg_FEWSNET-Africa-8km_2.0.tif')
@@ -125,22 +128,52 @@ class TestRasterImage(unittest.TestCase):
 
     # Continue from HERE !!!!
     def test_oper_division_perc(self):
-
         # 10dratio
+        output_filename = 'fewsnet-rfe/10dratio/20151221_fewsnet-rfe_10dratio_FEWSNET-Africa-8km_2.0.tif'
+        output_file=os.path.join(self.root_out_dir, output_filename)
+        ref_file   =os.path.join(self.ref_dir, output_filename)
+        functions.check_output_dir(os.path.dirname(output_file))
+        input_files = [os.path.join(self.input_dir,'fewsnet-rfe/10d/20151221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif'),
+                       self.ref_avg_file]
+        args = {"input_file": input_files, "output_file": output_file, "output_format": 'GTIFF',
+                "options": "compress=lzw", 'output_type': 'Float32', 'input_nodata': -32767}
 
-        input_file='/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20161221_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
-        avg_file  = '/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10davg-linearx2/1221_vgt-ndvi_10davg-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
-        output_file='/data/tmp/20161221_vgt-ndvi_ratio-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
-
-        args = {"input_file": [input_file,avg_file], "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
         raster_image_math.do_oper_division_perc(**args)
 
-    def test_make_vci(self):
+        equal = self.checkFile(ref_file, output_file)
+        self.assertEqual(equal,1)
+        #
+        #
+        # input_file='/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20161221_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
+        # avg_file  = '/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10davg-linearx2/1221_vgt-ndvi_10davg-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
+        # output_file='/data/tmp/20161221_vgt-ndvi_ratio-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
+        #
+        # args = {"input_file": [input_file,avg_file], "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+        # raster_image_math.do_oper_division_perc(**args)
 
+    def test_make_vci(self):
         # 10dnp
-        input_file='/data/processing//vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/tif/ndv/20170301_vgt-ndvi_ndv_SPOTV-Africa-1km_sv2-pv2.2.tif'
-        min_file  = '/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10dmin-linearx2/0301_vgt-ndvi_10dmin-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
-        max_file  = '/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10dmax-linearx2/0301_vgt-ndvi_10dmax-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
+        # output_filename = 'fewsnet-rfe/10dratio/20151221_fewsnet-rfe_10dratio_FEWSNET-Africa-8km_2.0.tif'
+        output_filename = 'vgt-ndvi/baresoil-linearx2/20170301_vgt-ndvi_baresoil-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
+        # output_file=os.path.join(self.root_out_dir, output_filename)
+        ref_file   =os.path.join(self.ref_dir, output_filename)
+        # functions.check_output_dir(os.path.dirname(output_file))
+        # input_files = [os.path.join(self.input_dir,'fewsnet-rfe/10d/20151221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif'),
+        #                self.ref_avg_file]
+
+        input_file= self.input_dir+'/vgt-ndvi/ndv/20170301_vgt-ndvi_ndv_SPOTV-Africa-1km_sv2-pv2.2.tif'
+        min_file  = self.input_dir+'/vgt-ndvi/10dmin-linearx2/0301_vgt-ndvi_10dmin-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
+        max_file  = self.input_dir+'/vgt-ndvi/10dmax-linearx2/0301_vgt-ndvi_10dmax-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
+        output_file = self.root_out_dir+'/vgt-ndvi/baresoil-linearx2/20170301_vgt-ndvi_baresoil-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
+
+        args = {"input_file": input_file, "min_file": min_file, "max_file": max_file, "output_file": output_file, "output_format": 'GTIFF', "options": "compress = lzw"}
+
+        raster_image_math.do_oper_division_perc(**args)
+
+        equal = self.checkFile(ref_file, output_file)
+        self.assertEqual(equal,1)
+
+
 
         output_file='/data/tmp/20170301_vgt-ndvi_baresoil-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
 
