@@ -1401,7 +1401,7 @@ def do_make_baresoil(input_file='', avg_file='', min_file='', max_file='', outpu
         shutil.rmtree(tmpdir)
 
 
-# _____________________________ Not tested in test_raster_image
+# _____________________________
 def do_mask_image(input_file='', mask_file='', output_file='', output_format=None,
                   output_type=None, options='', mask_value=1, out_value=0):
     # _____________________________
@@ -2425,7 +2425,7 @@ def do_detect_sst_fronts(input_file='', output_file='', input_nodata=None, param
         shutil.rmtree(tmpdir)
 
 
-# _____________________________ Not tested in test_raster_image
+# _____________________________
 def do_ts_linear_filter(input_file='', before_file='', after_file='', output_file='', input_nodata=None,
                         output_format=None,
                         output_type=None, options='', threshold=None):
@@ -2533,7 +2533,7 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
     finally:
         shutil.rmtree(tmpdir)
 
-
+# _____________________________ No usage
 def do_rain_onset(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
                   output_type=None, options='', current_dekad=None):
     try:

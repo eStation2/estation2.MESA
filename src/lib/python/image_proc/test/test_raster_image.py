@@ -73,10 +73,10 @@ class TestRasterImage(unittest.TestCase):
         equal = self.checkFile(ref_file, output_file)
         self.assertEqual(equal,1)
 
-    # Error in assigning metadata - Matching
+    # Tested
     def test_stddev_image(self):
 
-        output_filename = 'vgt-ndvi/10dstd-linearx2/1221_vgt-ndvi_10dstd-linearx2_SPOTV-Africa-1km_sv2-pv2.2'
+        output_filename = 'vgt-ndvi/10dstd-linearx2/1221_vgt-ndvi_10dstd-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
         output_file=os.path.join(self.root_out_dir, output_filename)
         ref_file   =os.path.join(self.ref_dir,      output_filename)
         functions.check_output_dir(os.path.dirname(output_file))
@@ -263,17 +263,55 @@ class TestRasterImage(unittest.TestCase):
         # raster_image_math.do_make_baresoil(**args)
         # self.assertEqual(1, 1)
 
-    # Didnt test
-    def test_cumululate(self):
-        output_filename = 'fewsnet-rfe/10dperc/20151221_fewsnet-rfe_10dperc_FEWSNET-Africa-8km_2.0.tif'
+    # Tested
+    def test_do_mask_image(self):
+        # linearx2diff-linearx2
+        output_filename = 'vgt-ndvi/linearx2diff-linearx2/20200301_vgt-ndvi_linearx2diff-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
         output_file=os.path.join(self.root_out_dir, output_filename)
         ref_file   =os.path.join(self.ref_dir,      output_filename)
         functions.check_output_dir(os.path.dirname(output_file))
+
+        output_file = functions.list_to_element(output_file)
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
+                                  dir=es_constants.base_tmp_dir)
+
+        # Temporary (not masked) file
+        output_file_temp = tmpdir + os.path.sep + os.path.basename(output_file)
+        current_file = self.ref_dir + 'vgt-ndvi/ndvi-linearx2/20200301_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
+        average_file = self.ref_dir + 'vgt-ndvi/10davg-linearx2/0301_vgt-ndvi_10davg-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
+        baresoil_file = self.ref_dir + 'vgt-ndvi/baresoil-linearx2/20200301_vgt-ndvi_baresoil-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
+
+        # Compute temporary file
+        args = {"input_file": [current_file, average_file], "output_file": output_file_temp, "output_format": 'GTIFF',
+                "options": "compress = lzw"}
+        raster_image_math.do_oper_subtraction(**args)
+        sds_meta = md.SdsMetadata()
+
+        # Mask with baresoil file
+        no_data = int(sds_meta.get_nodata_value(current_file))
+        functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": output_file_temp, "mask_file": baresoil_file, "output_file": output_file,
+                "options": "compress = lzw", "mask_value": no_data, "out_value": no_data}
+        raster_image_math.do_mask_image(**args)
+        # args = {"input_file": self.input_files, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw",'output_type':'Float32', 'input_nodata':-32767}
+        # raster_image_math.do_mask_image(**args)
+        equal = self.checkFile(ref_file, output_file)
+        self.assertEqual(equal,1)
+
+    # Tested
+    def test_cumululate(self):
         # 1moncum
-        output_file = self.root_out_dir+'/data/tmp/20180001_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
-        args = {"input_file": self.input_files, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw",'output_type':'Float32', 'input_nodata':-32767}
+        output_filename = 'fewsnet-rfe/1moncum/20200301_fewsnet-rfe_1moncum_FEWSNET-Africa-8km_2.0.tif'
+        output_file=os.path.join(self.root_out_dir, output_filename)
+        ref_file   =os.path.join(self.ref_dir,      output_filename)
+        functions.check_output_dir(os.path.dirname(output_file))
+        input_files = [self.ref_dir+'/fewsnet-rfe/10d/20200321_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
+                            self.ref_dir+'/fewsnet-rfe/10d/20200311_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
+                            self.ref_dir+'/fewsnet-rfe/10d/20200301_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',]
+        args = {"input_file": input_files, "output_file": output_file, "output_format": 'GTIFF', "options": "compress=lzw",'output_type':'Float32', 'input_nodata':-32767}
         raster_image_math.do_cumulate(**args)
-        self.assertEqual(1, 1)
+        equal = self.checkFile(ref_file, output_file)
+        self.assertEqual(equal,1)
 
     # Tested
     def test_compute_perc_diff_vs_avg(self):
@@ -308,6 +346,23 @@ class TestRasterImage(unittest.TestCase):
                 "output_format": 'GTIFF', \
                 "output_type": None, "options": "compress=lzw"}
         raster_image_math.do_compute_primary_production(**args)
+        equal = self.checkFile(ref_file, output_file)
+        self.assertEqual(equal,1)
+    # Tested
+    def test_do_ts_linear_filter(self):
+        input_files = [self.ref_dir+'/vgt-ndvi/ndvi-linearx1/20200221_vgt-ndvi_ndvi-linearx1_SPOTV-Africa-1km_sv2-pv2.2.tif', \
+            self.ref_dir+'/vgt-ndvi/ndvi-linearx1/20200301_vgt-ndvi_ndvi-linearx1_SPOTV-Africa-1km_sv2-pv2.2.tif', \
+            self.ref_dir+'/vgt-ndvi/ndvi-linearx1/20200311_vgt-ndvi_ndvi-linearx1_SPOTV-Africa-1km_sv2-pv2.2.tif']
+        # output_file = '/data/tmp/20181007_modis-pp_monavg_MODIS-Africa-4km_v2013.1.tif'
+        output_filename = 'vgt-ndvi/ndvi-linearx2/20200301_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
+        output_file=os.path.join(self.root_out_dir, output_filename)
+        ref_file   =os.path.join(self.ref_dir,      output_filename)
+        output_file = functions.list_to_element(output_file)
+        functions.check_output_dir(os.path.dirname(output_file))
+        args = {"input_file": input_files[1], "before_file": input_files[0], "after_file": input_files[2],
+                "output_file": output_file,
+                "output_format": 'GTIFF', "options": "compress = lzw", 'threshold': 0.1}
+        raster_image_math.do_ts_linear_filter(**args)
         equal = self.checkFile(ref_file, output_file)
         self.assertEqual(equal,1)
 
@@ -363,25 +418,25 @@ class TestRasterImage(unittest.TestCase):
     #     self.assertEqual(1, 1)
 
     # We dont have result to test it since it is part of a chain.. Could use test_stats_4_raster
-    def test_do_reproject(self):
-        # Define the Native mapset
-        # native_mapset_name ='SPOTV-SADC-1km'
-        # target_mapset_name = 'FEWSNET-Africa-8km'
-        #
-        # inputfile='/data/tmp/20161221_vgt-ndvi_ratio-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
-        # output_file='/data/tmp/AGRIC_MASK-'+target_mapset_name+'.tif'
-
-        inputfile = self.ref_dir+'modis-firms/10dcount/20200301_modis-firms_10dcount_SPOTV-Africa-1km_v6.0.tif'
-        output_filename = 'modis-firms/10dcount10k/20200301_modis-firms_10dcount10k_SPOTV-Africa-10km_v6.0.tif'
-        output_file=os.path.join(self.root_out_dir, output_filename)
-        ref_file   =os.path.join(self.ref_dir,      output_filename)
-        functions.check_output_dir(os.path.dirname(output_file))
-        target_mapset_name = 'SPOTV-Africa-10km'
-        native_mapset_name = 'SPOTV-Africa-1km'
-
-        raster_image_math.do_reproject(inputfile, output_file,native_mapset_name,target_mapset_name)
-        equal = self.checkFile(ref_file, output_file)
-        self.assertEqual(equal,1)
+    # def test_do_reproject(self):
+    #     # Define the Native mapset
+    #     # native_mapset_name ='SPOTV-SADC-1km'
+    #     # target_mapset_name = 'FEWSNET-Africa-8km'
+    #     #
+    #     # inputfile='/data/tmp/20161221_vgt-ndvi_ratio-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
+    #     # output_file='/data/tmp/AGRIC_MASK-'+target_mapset_name+'.tif'
+    #
+    #     inputfile = self.ref_dir+'modis-firms/10dcount/20200301_modis-firms_10dcount_SPOTV-Africa-1km_v6.0.tif'
+    #     output_filename = 'modis-firms/10dcount10k/20200301_modis-firms_10dcount10k_SPOTV-Africa-10km_v6.0.tif'
+    #     output_file=os.path.join(self.root_out_dir, output_filename)
+    #     ref_file   =os.path.join(self.ref_dir,      output_filename)
+    #     functions.check_output_dir(os.path.dirname(output_file))
+    #     target_mapset_name = 'SPOTV-Africa-10km'
+    #     native_mapset_name = 'SPOTV-Africa-1km'
+    #
+    #     raster_image_math.do_reproject(inputfile, output_file,native_mapset_name,target_mapset_name)
+    #     equal = self.checkFile(ref_file, output_file)
+    #     self.assertEqual(equal,1)
 
     #Dint test  No usage
     # def test_create_surface_area_raster(self):
@@ -447,7 +502,7 @@ class TestRasterImage(unittest.TestCase):
         equal = self.checkFile(ref_file, output_file)
         self.assertEqual(equal,1)
 
-    # Not matching - Qgis difference gives Zero
+    # Not matching - But Qgis difference gives Zero
     def test_do_compute_chla_gradient(self):
 
         input_file = self.ref_dir+'modis-chla/chla-day/20200301_modis-chla_chla-day_MODIS-Africa-4km_v2013.1.tif'
