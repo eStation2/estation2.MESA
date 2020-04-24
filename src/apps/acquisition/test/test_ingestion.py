@@ -1117,7 +1117,7 @@ class TestIngestion(unittest.TestCase):
         subproducts = [sprod]
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
-        # ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
         in_date = '202004201200'
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
                                         version=productversion, mapsetcode=mapsetcode, date=in_date)
