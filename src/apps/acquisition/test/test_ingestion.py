@@ -1126,9 +1126,9 @@ class TestIngestion(unittest.TestCase):
     #    Miscellaneous - LSASAF ET \\Not yet tested\\ -> Vijay
     #   ---------------------------------------------------------------------------
     def test_ingest_lsasaf_et(self):
-        date_fileslist = [os.path.join(self.test_ingest_dir, 'S-LSA_-HDF5_LSASAF_MSG_ET_SAfr_201511301000.bz2')]
+        date_fileslist = [os.path.join(self.test_ingest_dir, 'S-LSA_-S-LSA_-HDF5_LSASAF_MSG_ET_MSG-Disk_202004201200.bz2')]
         # date_fileslist = ['/data/TestIngestion/S-LSA_-HDF5_LSASAF_MSG_ET_SAfr_201511301000.bz2']
-        in_date = '201511301000'
+        in_date = '202004201200'
         productcode = 'lsasaf-et'
         productversion = 'undefined'
         subproductcode = 'et'
@@ -1157,7 +1157,7 @@ class TestIngestion(unittest.TestCase):
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        in_date = '201511301000'
+        in_date = '202004201200'
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
                                         version=productversion, mapsetcode=mapsetcode, date=in_date)
         self.assertEqual(status, 1)
