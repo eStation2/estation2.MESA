@@ -39,6 +39,7 @@ class TestIngestion(unittest.TestCase):
         es_constants.processing_dir = es_constants.es2globals['base_tmp_dir']+os.path.sep
         self.ingest_out_dir = es_constants.processing_dir
         self.ref_out_dir = root_test_dir #os.path.join(root_test_dir,'refs_output')
+        self.native_dir = 'native'
 
     def tearDown(self):
         es_constants.processing_dir = self.proc_dir_bck
@@ -88,19 +89,19 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(1, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - WSI CROP/PASTURE           //Tested 20.04.202//
+    #   Vegetation - WSI CROP/PASTURE           //Tested 27.04.2020//
     #   ---------------------------------------------------------------------------
     def test_ingest_mars_wsi(self):
-
-        date_fileslist = [os.path.join(self.test_ingest_dir,'wsi_hp_pasture_20200221.img'),
-                          os.path.join(self.test_ingest_dir,'wsi_hp_pasture_20200221.hdr')]
-
-        in_date = '20200221'
         productcode = 'wsi-hp'
         productversion = 'V1.0'
         subproductcode = 'pasture'
         mapsetcode = 'SPOTV-Africa-1km'
         datasource_descrID='JRC:MARS:WSI:PASTURE'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir,'wsi_hp_pasture_20200221.img'),
+                          os.path.join(input_dir,'wsi_hp_pasture_20200221.hdr')]
+
+        in_date = '20200221'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -131,20 +132,21 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - DMP V2.0.1                 //Tested  20.04.2020//
+    #   Vegetation - DMP V2.0.1                 //Tested 27.04.2020//
     #   ---------------------------------------------------------------------------
     def test_ingest_g_cls_dmp_2_0_1(self):
 
         # Test Copernicus Products version 2.0.1 (for DMP)
         # Products released from VITO in March 2017
-        date_fileslist = [os.path.join(self.test_ingest_dir,'c_gls_DMP-RT0_202003200000_GLOBE_PROBAV_V2.0.1.nc')]
-
-        in_date = '20200320'
         productcode = 'vgt-dmp'
         productversion = 'V2.0'
         subproductcode = 'dmp'
         mapsetcode = 'SPOTV-Africa-1km'
         datasource_descrID='PDF:GLS:PROBA-V2.0:DMP_RT0'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir,'c_gls_DMP-RT0_202003200000_GLOBE_PROBAV_V2.0.1.nc')]
+
+        in_date = '20200320'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -182,15 +184,15 @@ class TestIngestion(unittest.TestCase):
 
         # Test Copernicus Products version 2.0.1 (for FAPAR)
         # Products released from VITO in March 2017
-        date_fileslist = [os.path.join(self.test_ingest_dir,'c_gls_FAPAR-RT0_202004100000_AFRI_PROBAV_V2.0.1.zip')]
-
-        in_date = '202004010000'
         productcode = 'vgt-fapar'
         productversion = 'V2.0'
         subproductcode = 'fapar'
         mapsetcode = 'SPOTV-Africa-1km'
         datasource_descrID='EO:EUM:DAT:PROBA-V2.0:FAPAR'   #
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir,'c_gls_FAPAR-RT0_202004100000_AFRI_PROBAV_V2.0.1.zip')]
 
+        in_date = '202004010000'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -226,14 +228,14 @@ class TestIngestion(unittest.TestCase):
 
         # Test Copernicus Products version 2.0.1 (for FAPAR)
         # Products released from VITO in March 2017
-        date_fileslist = [os.path.join(self.test_ingest_dir,'c_gls_FAPAR-RT0_202003310000_GLOBE_PROBAV_V2.0.1.nc')]
-
-        in_date = '202003310000'
         productcode = 'vgt-fapar'
         productversion = 'V2.0'
         subproductcode = 'fapar'
         mapsetcode = 'SPOTV-Africa-1km'
         datasource_descrID='PDF:GLS:PROBA-V2.0:FAPAR'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir,'c_gls_FAPAR-RT0_202003310000_GLOBE_PROBAV_V2.0.1.nc')]
+        in_date = '202003310000'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -269,16 +271,15 @@ class TestIngestion(unittest.TestCase):
     def test_ingest_g_cls_ndvi_2_2(self):
 
         # Test Copernicus Products version 2.2 (starting with NDVI 2.2.1)
-        # Products released from VITO in March 2017
-        date_fileslist = [os.path.join(self.test_ingest_dir,'c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.zip')]
-        # date_fileslist = glob.glob('/data/TestIngestion/c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.zip*')
-        in_date = '201401010000'
         productcode = 'vgt-ndvi'
         productversion = 'proba-v2.2'
         subproductcode = 'ndv'
         mapsetcode = 'SPOTV-Africa-1km'
         datasource_descrID='EO:EUM:DAT:PROBA-V2.2:NDVI'
-
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir,'c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.zip')]
+        # date_fileslist = glob.glob('/data/TestIngestion/c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.zip*')
+        in_date = '201401010000'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -311,16 +312,15 @@ class TestIngestion(unittest.TestCase):
     #   Vegetation - NDVI 300m                              //Should be ok -> Marco//
     #   ---------------------------------------------------------------------------
     def test_ingest_probav_ndvi_300(self):
-        # Test Copernicus Products version 2.2 (starting with NDVI 2.2.1)
-        # Products released from VITO in March 2017
-        # date_fileslist = [os.path.join(self.test_ingest_dir,'PROBAV_S10_TOC_*20200201**')]
-        date_fileslist = glob.glob(self.test_ingest_dir+'/PROBAV_S10_TOC_*20200201**')
-        in_date = '20200201'
         productcode = 'vgt-ndvi'
         productversion = 'proba300-v1.0'
         subproductcode = 'ndv'
         mapsetcode = 'SENTINEL-Africa-300m'
         datasource_descrID = 'PDF:VITO:PROBA-V1:NDVI300'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        # date_fileslist = [os.path.join(self.test_ingest_dir,'PROBAV_S10_TOC_*20200201**')]
+        date_fileslist = glob.glob(input_dir+'/PROBAV_S10_TOC_*20200201**')
+        in_date = '20200201'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -353,17 +353,18 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Rainfall - ARC2                                     //Tested\\
+    #   Rainfall - ARC2   \\Tested\\
     #   ---------------------------------------------------------------------------
     def test_ingest_arc2_rain(self):
-        date_fileslist = [os.path.join(self.test_ingest_dir,'africa_arc.20200318.tif.zip')]
-        # date_fileslist = glob.glob('/data/ingest/africa_arc.20200318.tif.zip')
-        in_date = '20200318'
         productcode = 'arc2-rain'
         productversion = '2.0'
         subproductcode = '1day'
         mapsetcode = 'ARC2-Africa-11km'
         datasource_descrID='CPC:NOAA:RAIN:ARC2'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir,'africa_arc.20200318.tif.zip')]
+        # date_fileslist = glob.glob('/data/ingest/africa_arc.20200318.tif.zip')
+        in_date = '20200318'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -391,17 +392,18 @@ class TestIngestion(unittest.TestCase):
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
-    #   Rainfall - CHIRPS  \\Tested\\
+    #   Rainfall - CHIRPS  \\Tested 27.\\
     #   ---------------------------------------------------------------------------
     def test_ingest_chirps(self):
-        date_fileslist = [os.path.join(self.test_ingest_dir, 'chirps-v2.0.2020.02.3.tif.gz')]
-        # date_fileslist = ['/data/ingest/chirps-v2.0.2020.02.3.tif.gz']
-        in_date = '2020.02.3'
         productcode = 'chirps-dekad'
         productversion = '2.0'
         subproductcode = '10d'
         mapsetcode = 'CHIRP-Africa-5km'
         datasource_descrID='UCSB:CHIRPS:DEKAD:2.0'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir, 'chirps-v2.0.2020.02.3.tif.gz')]
+        # date_fileslist = ['/data/ingest/chirps-v2.0.2020.02.3.tif.gz']
+        in_date = '2020.02.3'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -433,14 +435,15 @@ class TestIngestion(unittest.TestCase):
     #   Rainfall - CHIRPS TIF  \\Tested\\
     #   ---------------------------------------------------------------------------
     def test_ingest_chirps_tif(self):
-        date_fileslist = [os.path.join(self.test_ingest_dir, 'chirps-v2.0.2020.03.1.tif')]
-        # date_fileslist = ['/data/ingest/chirps-v2.0.2020.03.1.tif']
-        in_date = '2020.03.1'
         productcode = 'chirps-dekad'
         productversion = '2.0'
         subproductcode = '10d'
         mapsetcode = 'CHIRP-Africa-5km'
         datasource_descrID='UCSB:CHIRPS:PREL:DEKAD'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir, 'chirps-v2.0.2020.03.1.tif')]
+        # date_fileslist = ['/data/ingest/chirps-v2.0.2020.03.1.tif']
+        in_date = '2020.03.1'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -474,16 +477,16 @@ class TestIngestion(unittest.TestCase):
     #    Rainfall - Fewsnet 2  \\Tested\\
     #   ---------------------------------------------------------------------------
     def test_ingest_fewsnet_rfe(self):
-
-        # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
-        date_fileslist = [os.path.join(self.test_ingest_dir, 'a20013rb.zip')]
-        # date_fileslist = glob.glob('/data/ingest/a20013rb.zip')
-        in_date = '20013'
         productcode = 'fewsnet-rfe'
         productversion = '2.0'
         subproductcode = '10d'
         mapsetcode = 'FEWSNET-Africa-8km'
         datasource_descrID = 'USGS:EARLWRN:FEWSNET'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
+        date_fileslist = [os.path.join(input_dir, 'a20013rb.zip')]
+        # date_fileslist = glob.glob('/data/ingest/a20013rb.zip')
+        in_date = '20013'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -518,14 +521,15 @@ class TestIngestion(unittest.TestCase):
     #    Rainfall - TAMSAT 3  \\Tested\\
     #   ---------------------------------------------------------------------------
     def test_ingest_tamsat_rfe(self):
-        date_fileslist = [os.path.join(self.test_ingest_dir, 'rfe2020_01-dk3.v3.nc')]
-        # date_fileslist = glob.glob('/data/ingest/rfe2020_01-dk3.v3.nc')
-        in_date = '2020_01-dk3'
         productcode = 'tamsat-rfe'
         productversion = '3.0'
         subproductcode = '10d'
         mapsetcode = 'TAMSAT-Africa-4km'
         datasource_descrID = 'READINGS:TAMSAT:3.0:10D:NC'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir, 'rfe2020_01-dk3.v3.nc')]
+        # date_fileslist = glob.glob('/data/ingest/rfe2020_01-dk3.v3.nc')
+        in_date = '2020_01-dk3'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -558,17 +562,18 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    FIRE - MODIS FIRMS 6  \\Tested\\
+    #    FIRE - MODIS FIRMS 6  \\Tested \\
     #   ---------------------------------------------------------------------------
     def test_ingest_modis_firms(self):
-        date_fileslist = [os.path.join(self.test_ingest_dir, 'MODIS_C6_Global_MCD14DL_NRT_2020020.txt')]
-        # date_fileslist = glob.glob('/data/ingest/MODIS_C6_Global_MCD14DL_NRT_2020020.txt')
-        in_date = '2020020'
         productcode = 'modis-firms'
         productversion = 'v6.0'
         subproductcode = '1day'
         mapsetcode = 'SPOTV-Africa-1km'
         datasource_descrID = 'MODAPS:EOSDIS:FIRMS:NASA:HTTP'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir, 'MODIS_C6_Global_MCD14DL_NRT_2020020.txt')]
+        # date_fileslist = glob.glob('/data/ingest/MODIS_C6_Global_MCD14DL_NRT_2020020.txt')
+        in_date = '2020020'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -605,39 +610,39 @@ class TestIngestion(unittest.TestCase):
         # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
         # Products released from VITO in March 2017
         # date_fileslist = glob.glob('/data/ingest/c_gls_BA300_202003100000_GLOBE_PROBAV_V1.1.1.nc')
-        date_fileslist = [os.path.join(self.test_ingest_dir, 'c_gls_BA300_202003100000_GLOBE_PROBAV_V1.1.1.nc')]
-        for one_file in date_fileslist:
+        productcode = 'vgt-ba'
+        productversion = 'V1.1'
+        subproductcode = 'ba'
+        mapsetcode = 'SENTINEL-Africa-300m'
+        datasource_descrID = 'PDF:GLS:PROBA-V1.1:BA300'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir, 'c_gls_BA300_202003100000_GLOBE_PROBAV_V1.1.1.nc')]
+        # for one_file in date_fileslist:
 
-            one_filename = os.path.basename(one_file)
-            in_date = '20200310'
-            productcode = 'vgt-ba'
-            productversion = 'V1.1'
-            subproductcode = 'ba'
-            mapsetcode = 'SENTINEL-Africa-300m'
-            datasource_descrID='PDF:GLS:PROBA-V1.1:BA300'
+        one_filename = os.path.basename(date_fileslist[0])
+        in_date = '20200310'
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
 
-            product = {"productcode": productcode,
-                       "version": productversion}
-            args = {"productcode": productcode,
-                    "subproductcode": subproductcode,
-                    "datasource_descr_id": datasource_descrID,
-                    "version": productversion}
+        product_in_info = querydb.get_product_in_info(**args)
 
-            product_in_info = querydb.get_product_in_info(**args)
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process,
+                             'nodata': product_in_info.no_data }
 
-            re_process = product_in_info.re_process
-            re_extract = product_in_info.re_extract
-            sprod = {'subproduct': subproductcode,
-                                 'mapsetcode': mapsetcode,
-                                 're_extract': re_extract,
-                                 're_process': re_process,
-                                 'nodata': product_in_info.no_data }
-
-            subproducts=[]
-            subproducts.append(sprod)
-            datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                            source_id=datasource_descrID)
-            ingestion.ingestion(one_file, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+        subproducts=[]
+        subproducts.append(sprod)
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                        source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist[0], in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         in_date = '20200120'
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
@@ -648,14 +653,16 @@ class TestIngestion(unittest.TestCase):
     #    OCEANOGRAPHY - MODIS CHLA  \\Tested\\
     #   ---------------------------------------------------------------------------
     def test_ingest_modis_chlor_netcdf(self):
-        date_fileslist = [os.path.join(self.test_ingest_dir, 'A2020078.L3m_DAY_CHL_chlor_a_4km.nc')]
-        # date_fileslist = ['/data/ingest/A2020078.L3m_DAY_CHL_chlor_a_4km.nc']
-        in_date = '2020078'
         productcode = 'modis-chla'
         productversion = 'v2013.1'
         subproductcode = 'chla-day'
         mapsetcode = 'MODIS-Africa-4km'
         datasource_descrID='GSFC:CGI:MODIS:CHLA:1D'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir, 'A2020078.L3m_DAY_CHL_chlor_a_4km.nc')]
+        # date_fileslist = ['/data/ingest/A2020078.L3m_DAY_CHL_chlor_a_4km.nc']
+        in_date = '2020078'
+
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -766,14 +773,15 @@ class TestIngestion(unittest.TestCase):
     #    OCEANOGRAPHY - MODIS SST  //Tested//
     #   ---------------------------------------------------------------------------
     def test_ingest_modis_sst_netcdf(self):
-        date_fileslist = [os.path.join(self.test_ingest_dir, 'AQUA_MODIS.20200320.L3m.DAY.SST.sst.4km.NRT.nc')]
-        # date_fileslist = ['/data/ingest/AQUA_MODIS.20200320.L3m.DAY.SST.sst.4km.NRT.nc']
-        in_date = '20200320'
         productcode = 'modis-sst'
         productversion = 'v2013.1'
         subproductcode = 'sst-day'
         mapsetcode = 'MODIS-Africa-4km'
         datasource_descrID='GSFC:CGI:MODIS:SST:1D:NEW'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir, 'AQUA_MODIS.20200320.L3m.DAY.SST.sst.4km.NRT.nc')]
+        # date_fileslist = ['/data/ingest/AQUA_MODIS.20200320.L3m.DAY.SST.sst.4km.NRT.nc']
+        in_date = '20200320'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -806,14 +814,15 @@ class TestIngestion(unittest.TestCase):
     #    OCEANOGRAPHY - PML MODIS SST \\Tested\\
     #   ---------------------------------------------------------------------------
     def test_ingest_pml_modis_sst(self):
-        date_fileslist = [os.path.join(self.test_ingest_dir, 'PML_Tanzania_MODIS_sst_3daycomp_20200312_20200314.nc.bz2')]
-        # date_fileslist = ['/data/ingest/PML_Tanzania_MODIS_sst_3daycomp_20200312_20200314.nc.bz2']
-        in_date = '20200314'
         productcode = 'pml-modis-sst'
         productversion = '3.0'
         subproductcode = 'sst-3day'
         mapsetcode = 'SPOTV-IOC-1km'
         datasource_descrID='EO:EUM:DAT:MULT:CPMAD:SST'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir, 'PML_Tanzania_MODIS_sst_3daycomp_20200312_20200314.nc.bz2')]
+        # date_fileslist = ['/data/ingest/PML_Tanzania_MODIS_sst_3daycomp_20200312_20200314.nc.bz2']
+        in_date = '20200314'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -847,14 +856,15 @@ class TestIngestion(unittest.TestCase):
     #    OCEANOGRAPHY - PML MODIS CHL \\Tested\\
     #   ---------------------------------------------------------------------------
     def test_ingest_pml_modis_oc(self):
-        date_fileslist = [os.path.join(self.test_ingest_dir, 'PML_Tanzania_MODIS_oc_3daycomp_20200312_20200314.nc.bz2')]
-        # date_fileslist = ['/data/ingest/PML_Tanzania_MODIS_oc_3daycomp_20200312_20200314.nc.bz2']
-        in_date = '20200314'
         productcode = 'pml-modis-chl'
         productversion = '3.0'
         subproductcode = 'chl-3day'
         mapsetcode = 'SPOTV-IOC-1km'
         datasource_descrID='EO:EUM:DAT:MULT:CPMAD:OC'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir, 'PML_Tanzania_MODIS_oc_3daycomp_20200312_20200314.nc.bz2')]
+        # date_fileslist = ['/data/ingest/PML_Tanzania_MODIS_oc_3daycomp_20200312_20200314.nc.bz2']
+        in_date = '20200314'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -889,8 +899,15 @@ class TestIngestion(unittest.TestCase):
     #    OCEANOGRAPHY - Sentinel 3 OLCI WRR OC4ME \\Not working\\ -> Marco
     #   ---------------------------------------------------------------------------
     def test_ingest_s3_olci_wrr_chl_oc4me(self):
+        productcode = 'olci-wrr'
+        productversion = 'V02.0'
+        subproductcode = 'chl-oc4me'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID='EO:EUM:DAT:SENTINEL-3:OL_2_WRR___NRT'
+        datasource_descrID='CODA:EUM:S3A:OLCI:WRR'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
         # Test the ingestion of the Sentinel-3/OLCI Level-2 WRR product (on d6-dev-vm19 !!!!!)
-        date_fileslist = glob.glob(self.test_ingest_dir+os.path.sep+'S3A_OL_2_WRR____*')
+        date_fileslist = glob.glob(input_dir+os.path.sep+'S3A_OL_2_WRR____*')
         single_date =  os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
         in_date = in_date.split('T')[0] #+ '0000'
@@ -936,9 +953,15 @@ class TestIngestion(unittest.TestCase):
     #    OCEANOGRAPHY - Sentinel 3 SLSTR WST \\Not working// -> Marco
     #   ---------------------------------------------------------------------------
     def test_ingest_s3_slstr_sst(self):
-
+        productcode = 'slstr-sst'
+        productversion = '1.0'
+        subproductcode = 'wst'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID = 'EO:EUM:DAT:SENTINEL-3:SL_2_WST___NRT'
+        # datasource_descrID = 'CODA:EUM:S3A:SLSTR:WST'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
         # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
-        date_fileslist = glob.glob(self.test_ingest_dir+os.path.sep+'S3A_SL_2_WST__*')
+        date_fileslist = glob.glob(input_dir+os.path.sep+'S3A_SL_2_WST__*')
         # date_fileslist = glob.glob('/data/ingest/S3A_SL_2_WST__*.SEN3.tar')
         single_date = os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
@@ -990,9 +1013,14 @@ class TestIngestion(unittest.TestCase):
     #    OCEANOGRAPHY - Sentinel 3 SLSTR WST \\Not working\\ -> Marco
     #   ---------------------------------------------------------------------------
     def test_ingest_s3_slstr_sst_zipped(self):
-
+        productcode = 'slstr-sst'
+        productversion = '1.0'
+        subproductcode = 'wst'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID = 'CODA:EUM:S3A:WST'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
         # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
-        date_fileslist = glob.glob(self.test_ingest_dir+os.path.sep+'SLSTR/S3A_SL_2_WST____20190406T*.zip')
+        date_fileslist = glob.glob(input_dir+os.path.sep+'SLSTR/S3A_SL_2_WST____20190406T*.zip')
         # date_fileslist = glob.glob('/data/processing/exchange/Sentinel-3/SLSTR/S3A_SL_2_WST____20190406T*.zip')
         single_date = os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
@@ -1005,12 +1033,6 @@ class TestIngestion(unittest.TestCase):
         #
         #     if day_data:
         #         date_fileslist_day.append(one_file)
-        productcode = 'slstr-sst'
-        productversion = '1.0'
-        subproductcode = 'wst'
-        mapsetcode = 'SPOTV-Africa-1km'
-        datasource_descrID = 'CODA:EUM:S3A:WST'
-
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -1045,17 +1067,18 @@ class TestIngestion(unittest.TestCase):
     #    Miscellaneous - CPC SM               \\Not working\\ -> Marco
     #   ---------------------------------------------------------------------------
     def test_ingest_cpc_soilmoisture(self):
-
-        filename='w30.202002.mon'
-        date_fileslist = [os.path.join(self.test_ingest_dir, filename)]
-        # date_fileslist = glob.glob('/data/ingest/w30.202002.mon')
-        in_date = '202002'
         productcode = 'cpc-sm'
         productversion = '1.0'
         subproductcode = 'sm'
         mapsetcode = 'CPC-Africa-50km'
         #mapsetcode = 'CPC-Global-50km'
         datasource_descrID='CPC:NCEP:NOAA:SM'
+        filename='w30.202002.mon'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir, filename)]
+        # date_fileslist = glob.glob('/data/ingest/w30.202002.mon')
+        in_date = '202002'
+
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1084,7 +1107,7 @@ class TestIngestion(unittest.TestCase):
                                         version=productversion, mapsetcode=mapsetcode, date=in_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
-    #    Miscellaneous - LSASAF ET            \\Not yet tested\\ -> To be done ??
+    #    Miscellaneous - LSASAF ET DISK   \\Problem with native mapset wkt\\
     #   ---------------------------------------------------------------------------
     def test_ingest_lsasaf_et_disk(self):
 
@@ -1093,7 +1116,7 @@ class TestIngestion(unittest.TestCase):
         subproductcode = 'et'
         mapsetcode = 'MSG-satellite-3km'
         datasource_descrID='EO:EUM:DAT:MSG:ET-SEVIRI'
-        input_dir= self.test_ingest_dir+os.path.sep+productcode+os.path.sep+'native'
+        input_dir= self.test_ingest_dir+os.path.sep+productcode+os.path.sep+self.native_dir
         date_fileslist = [os.path.join(input_dir, 'S-LSA_-HDF5_LSASAF_MSG_ET_MSG-Disk_202004201200.bz2')]
         in_date = '202004201200'
 
@@ -1126,15 +1149,15 @@ class TestIngestion(unittest.TestCase):
     #    Miscellaneous - LSASAF ET \\Not yet tested\\ -> Vijay
     #   ---------------------------------------------------------------------------
     def test_ingest_lsasaf_et(self):
-        date_fileslist = [os.path.join(self.test_ingest_dir, 'S-LSA_-S-LSA_-HDF5_LSASAF_MSG_ET_MSG-Disk_202004201200.bz2')]
-        # date_fileslist = ['/data/TestIngestion/S-LSA_-HDF5_LSASAF_MSG_ET_SAfr_201511301000.bz2']
         in_date = '202004201200'
         productcode = 'lsasaf-et'
         productversion = 'undefined'
         subproductcode = 'et'
         mapsetcode = 'MSG-satellite-3km'
         datasource_descrID='EO:EUM:DAT:MSG:ET-SEVIRI'
-
+        input_dir= self.test_ingest_dir+os.path.sep+productcode+os.path.sep+self.native_dir
+        date_fileslist = [os.path.join(input_dir, 'S-LSA_-S-LSA_-HDF5_LSASAF_MSG_ET_MSG-Disk_202004201200.bz2')]
+        # date_fileslist = ['/data/TestIngestion/S-LSA_-HDF5_LSASAF_MSG_ET_SAfr_201511301000.bz2']
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -1205,15 +1228,16 @@ class TestIngestion(unittest.TestCase):
     #   INLAND WATER - WBD AVG \\Not yet tested\\
     #   ---------------------------------------------------------------------------
     def test_ingest_jrc_wbd_avg_tarzip(self):
-
-        date_fileslist = glob.glob('/data/ingest/MESA_JRC_wd-gee_avg_1201_WD-GEE-IGAD-AVG_1.0.tgz')
-        # date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
-        in_date = '1201'
         productcode = 'wd-gee'
         productversion = '1.0'
-        subproductcode = 'avg'
+        subproductcode = 'occurr'
         mapsetcode = 'WD-GEE-IGAD-AVG'
         datasource_descrID = 'EO:EUM:DAT:LANDSAT:MESA-JRC-WBD-GEE-AVG'
+        input_dir= self.test_ingest_dir+os.path.sep+productcode+os.path.sep+self.native_dir
+        date_fileslist = [os.path.join(input_dir, 'MESA_JRC_wd-gee_occurr_20191201_WD-GEE-ECOWAS-AVG_1.0.tgz')]
+        # date_fileslist = glob.glob('/data/ingest/MESA_JRC_wd-gee_avg_1201_WD-GEE-IGAD-AVG_1.0.tgz')
+        # date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
+        in_date = '20191201'
 
         product = {"productcode": productcode,
                    "version": productversion}
