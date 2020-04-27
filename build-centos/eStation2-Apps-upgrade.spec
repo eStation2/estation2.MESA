@@ -406,7 +406,7 @@ fi
 
 # Import JRC Reference workspaces
 echo "`date +'%Y-%m-%d %H:%M '` Importing JRC Reference workspaces"
-su adminuser -c "/usr/local/src/tas/anaconda/bin/python -c 'import webpy_esapp_helpers; webpy_esapp_helpers.importJRCRefWorkspaces()'"
+su adminuser -c "/usr/local/src/tas/anaconda/bin/python -c 'import webpy_esapp_helpers; webpy_esapp_helpers.importJRCRefWorkspaces(version=1)'"
 
 # Install Anydesk (see ES2-453)
 if [[ ! -f /usr/bin/anydesk ]]; then 

@@ -38,6 +38,23 @@ crud_db_analysis = crud.CrudDB(schema=es_constants.es2globals['schema_analysis']
 crud_db_products = crud.CrudDB(schema=es_constants.es2globals['schema_products'])
 
 
+def delete_jrcref_workspaces():
+    global db_analysis
+    try:
+        query = "DELETE FROM analysis.user_workspaces WHERE userid = 'jrc_ref' "
+        db_analysis.execute(query)
+        db_analysis.commit()
+        return True
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and log the error telling what happened.
+        logger.error("delete_jrcref_workspaces: Database query error!\n -> {}".format(exceptionvalue))
+        return False
+    finally:
+        if db_analysis.session:
+            db_analysis.session.close()
+
+
 def get_logos():
     global db
     try:

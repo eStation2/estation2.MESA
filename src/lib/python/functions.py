@@ -12,7 +12,6 @@
 # history: 1.0
 #
 # TODO-M.C.: replace, where needed/applicable, datetime()
-# TODO-Jurvtk: All functions need error handling!
 #
 
 # Import standard modules
@@ -43,10 +42,11 @@ import ast
 import sys
 import numpy as N
 import urllib
-from osgeo import gdal, osr
+import configparser
 from xml.dom import minidom
 from datetime import date
 from socket import socket
+from osgeo import gdal, osr
 # from urllib import request, parse, error
 # from json import JSONEncoder
 # import resource
@@ -210,20 +210,26 @@ def check_connection(server_info):
 
 def getStatusPostgreSQL():
     try:
-        # TODO: extend functions.getStatusPostgreSQL() to check the status in the postgres container!
-
+        from docker import Client
+        systemsettings = getSystemSettings()
         # Get status of postgresql
         command = [es_constants.es2globals['postgresql_executable'], 'status']  # /etc/init.d/postgresql-9.3  on CentOS
+        command = ["source", "/root/setup_estationdb.sh"]
         # print command
-        if sys.platform.startswith('win'):
+        if systemsettings['docker_install']:
+            c = Client(base_url='unix://var/run/docker.sock')
+            commandid = c.exec_create('postgres', command)
+            status = c.exec_start(commandid)
+        elif sys.platform.startswith('win'):
             args = ["-N", "postgresql-x64-9.3", "-D", "C:/Program Files/PostgreSQL/9.3/data"]
             p = subprocess.Popen(command + args, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            status, err = p.communicate()
         else:
             p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            status, err = p.communicate()
 
-        out, err = p.communicate()
-        # print out
-        if re.search('running', out) or re.search('online', out) or re.search('en cours', out):  # ToDo: Add Portuguese!
+        status = status.decode()
+        if re.search('running', status) or re.search('online', status) or re.search('en cours', status):
             psql_status = True
         else:
             psql_status = False
@@ -353,7 +359,6 @@ def getListVersions():
 
 
 def setSystemSetting(setting=None, value=None):
-    import configparser
     if setting is not None:
         systemsettingsfilepath = es_constants.es2globals['settings_dir'] + '/system_settings.ini'
         config_systemsettings = configparser.ConfigParser()
@@ -372,7 +377,6 @@ def setSystemSetting(setting=None, value=None):
 
 
 def setUserSetting(setting=None, value=None):
-    import configparser
     if setting is not None:
         usersettingsfilepath = es_constants.es2globals['settings_dir'] + '/user_settings.ini'
         config_usersettings = configparser.ConfigParser()
@@ -398,13 +402,11 @@ def setUserSetting(setting=None, value=None):
 
 
 def getSystemSettings():
-    import configparser
-
-    thisfiledir = os.path.dirname(os.path.abspath(__file__))
+    # thisfiledir = os.path.dirname(os.path.abspath(__file__))
 
     systemsettingsfile = es_constants.es2globals['settings_dir'] + '/system_settings.ini'
     if not os.path.isfile(systemsettingsfile):
-        systemsettingsfile = os.path.join(thisfiledir, 'config/install/', 'system_settings.ini')
+        systemsettingsfile = os.path.join(es_constants.es2globals['base_dir'], 'config/install/', 'system_settings.ini')
 
     config_systemsettings = configparser.ConfigParser()
     config_systemsettings.read([systemsettingsfile])
@@ -418,9 +420,7 @@ def getSystemSettings():
 
 
 def getUserSettings():
-    import configparser
-
-    thisfiledir = os.path.dirname(os.path.abspath(__file__))
+    # thisfiledir = os.path.dirname(os.path.abspath(__file__))
 
     if es_constants.es2globals['settings_dir'] != '':
         usersettingsfile = es_constants.es2globals['settings_dir'] + '/user_settings.ini'
@@ -428,7 +428,7 @@ def getUserSettings():
         usersettingsfile = '/eStation2/settings/user_settings.ini'
 
     if not os.path.isfile(usersettingsfile):
-        usersettingsfile = os.path.join(thisfiledir, 'config/install/', 'user_settings.ini')
+        usersettingsfile = os.path.join(es_constants.es2globals['base_dir'], 'config/install/', 'user_settings.ini')
 
     config_usersettings = configparser.ConfigParser()
     config_usersettings.read([usersettingsfile])
@@ -439,6 +439,37 @@ def getUserSettings():
     usersettings = dict(usersettings)  # convert list of tuples to dict
     # print usersettings
     return usersettings
+
+
+def getJRCRefSettings():
+    jrc_ref_settingsfile = os.path.join(es_constants.es2globals['base_dir'],
+                                        'database/referenceWorkspaces/', 'jrc_ref_settings.ini')
+
+    config_jrc_ref_settings = configparser.ConfigParser()
+    config_jrc_ref_settings.read([jrc_ref_settingsfile])
+
+    jrc_ref_settings = config_jrc_ref_settings.items('JRC_REF_SETTINGS')  # returns a list of tuples
+    jrc_ref_settings = dict(jrc_ref_settings)
+    return jrc_ref_settings
+
+
+def setJRCRefSetting(setting=None, value=None):
+    if setting is not None:
+        jrc_ref_settingsfile = os.path.join(es_constants.es2globals['base_dir'],
+                                            'database/referenceWorkspaces/', 'jrc_ref_settings.ini')
+
+        config_jrc_ref_settings = configparser.ConfigParser()
+        config_jrc_ref_settings.read([jrc_ref_settingsfile])
+
+        if config_jrc_ref_settings.has_option('JRC_REF_SETTINGS', setting):
+            config_jrc_ref_settings.set('JRC_REF_SETTINGS', setting, value)
+
+        with open(jrc_ref_settingsfile, 'w') as configfile:
+            config_jrc_ref_settings.write(configfile)
+            configfile.close()
+        return True
+    else:
+        return False
 
 
 def checkIP():

@@ -6,6 +6,7 @@ from future import standard_library
 from builtins import int
 
 import os
+import sys
 import shutil
 import datetime
 import unittest
@@ -18,6 +19,9 @@ from database import querydb
 
 logger = log.my_logger(__name__)
 standard_library.install_aliases()
+
+systemsettings = functions.getSystemSettings()
+install_type = systemsettings['type_installation'].lower()
 
 
 class TestFunctions(unittest.TestCase):
@@ -93,15 +97,17 @@ class TestFunctions(unittest.TestCase):
         output_dir = '/tmp/eStation2'
         self.assertTrue(functions.check_output_dir(output_dir))
 
+    @unittest.skip("Remove function? This function is not used anywhere in the code!")
     def test_check_polygons_intersects(self):
-        # TODO: Remove function? This function is not used anywahere in the code
+        # TODO: Remove function? This function is not used anywhere in the code!
         # poly1 = []
         # poly2 = []
         # self.assertTrue(functions.check_polygons_intersects(poly1, poly2))
         self.assertTrue(True)
 
+    @unittest.skip("Remove function? This function is not used anywhere in the code and is not working!")
     def test_checkDateFormat(self):
-        # TODO: Remove function? This function is not used anywahere in the code and is not working!
+        # TODO: Remove function? This function is not used anywhere in the code and is not working!
         myString = '05061967'
         result = functions.checkDateFormat(myString)
         self.assertEqual(result, None)
@@ -143,7 +149,7 @@ class TestFunctions(unittest.TestCase):
 
         self.assertEqual(functions.create_sym_link(src_file, trg_file, force=False), 0)  # SYM LINK CREATED
         self.assertEqual(functions.create_sym_link(src_file, trg_file, force=False), 1)  # SYM LINK ALREADY CREATED
-        self.assertEqual(functions.create_sym_link(src_file, trg_file, force=True), 0)   # SYM LINK RECREATED
+        self.assertEqual(functions.create_sym_link(src_file, trg_file, force=True), 0)  # SYM LINK RECREATED
         self.assertEqual(functions.create_sym_link(fake_file, trg_file, force=True), 1)  # SOURCE FILE DOES'T EXIST
 
     def test_day_per_dekad(self):
@@ -239,8 +245,9 @@ class TestFunctions(unittest.TestCase):
         modified_time_sec = functions.get_modified_time_from_file(file_path)
         self.assertIsInstance(modified_time_sec, float)
 
+    @unittest.skip("Remove function? NOT used anywhere in the code and function is incomplete!")
     def test_get_modis_tiles_list(self):
-        # TODO: REMOVE function? NOT used anywhere in the code and function is incomplete!
+        # TODO: Remove function? NOT used anywhere in the code and function is incomplete!
         mapset = ''
         tiles_list = functions.get_modis_tiles_list(mapset)
 
@@ -249,18 +256,18 @@ class TestFunctions(unittest.TestCase):
         product_type = functions.get_product_type_from_subdir(subdir)
         self.assertEqual(product_type, 'Ingest')
 
+    @unittest.skipUnless(sys.platform.startswith("win"), "Requires Windows!")
     def test_getStatusAllServicesWin(self):
-        # TODO: move this test to test suite for windows only version!
+        # TODO: Finish test on the windows version!
         services_status = functions.getStatusAllServicesWin()
         # self.assertIsInstance(services_status, list)
 
     def test_getStatusPostgreSQL(self):
-        # TODO: extend functions.getStatusPostgreSQL() to check the status in the postgres container!
         postgres_status = functions.getStatusPostgreSQL()
         self.assertIsInstance(postgres_status, bool)
 
     def test_getSystemSettings(self):
-        systemsettings = functions.getSystemSettings()
+        # systemsettings = functions.getSystemSettings()
         result = False
         if 'type_installation' in systemsettings.keys():
             result = True
@@ -274,6 +281,25 @@ class TestFunctions(unittest.TestCase):
             result = True
         self.assertIsInstance(usersettings, dict)
         self.assertTrue(result)
+
+    def test_getJRCRefSettings(self):
+        jrc_ref_ettings = functions.getJRCRefSettings()
+        result = False
+        if 'version' in jrc_ref_ettings.keys():
+            result = True
+        self.assertIsInstance(jrc_ref_ettings, dict)
+        self.assertTrue(result)
+
+    def test_setJRCRefSetting(self):
+        setting = 'update'
+        value = 'false'
+        result = functions.setJRCRefSetting(setting, value)
+        self.assertTrue(result)
+        jrc_refsettings = functions.getJRCRefSettings()
+        if 'update' in jrc_refsettings.keys():
+            self.assertEqual(jrc_refsettings['version'], 'false')
+        else:
+            self.assertTrue(False)
 
     def test_is_data_captured_during_day(self):
         in_date = '20180428T163216'
@@ -387,6 +413,7 @@ class TestFunctions(unittest.TestCase):
                 categories_dict_all.append(categories_dict)
             self.assertEqual(len(categories_dict_all), 8)
 
+    @unittest.skip("Remove function? NOT used anywhere in the code!")
     def test_sentinel_get_footprint(self):
         # TODO: REMOVE function?  NOT used anywhere in the code!
         # TODO: TEST DATA NEEDED
@@ -418,15 +445,14 @@ class TestFunctions(unittest.TestCase):
         else:
             self.assertTrue(False)
 
+    @unittest.skipIf(install_type != 'full', "Test only on MESA Station - Full install")
     def test_setThemaOtherPC(self):
-        # TODO: This test works only on a full MESA station.
         server_address = 'mesa-pc3'
         thema = 'JRC'
         thema_is_changed = functions.setThemaOtherPC(server_address, thema)
         self.assertTrue(thema_is_changed)  # Test fails on non MESA station!
 
     def test_setUserSetting(self):
-        functions.setUserSetting()
         setting = 'log_general_level'
         value = 'DEBUG'
         result = functions.setUserSetting(setting, value)
@@ -443,6 +469,7 @@ class TestFunctions(unittest.TestCase):
         string_to_convert = 'no'
         self.assertFalse(functions.str_to_bool(string_to_convert))
 
+    @unittest.skip("Remove function? NOT used anywhere in the code and does not make any sense!")
     def test_system_status_filename(self):
         # TODO: REMOVE function?  NOT used anywhere in the code and does not make any sense!
         result = functions.system_status_filename()
@@ -581,25 +608,27 @@ class TestFunctions(unittest.TestCase):
         else:
             self.assertTrue(False)
 
+    @unittest.skipIf(install_type != 'full', "Test only on MESA Station - Full install")
     def test_get_status_PC1(self):
-        # TODO: This test cannot be done in the docker installation because PC1 doesn not exist!
-        # status_PC1 = functions.get_status_PC1()
+        # TODO: Test and finish writing this test on Full station!
+        status_PC1 = functions.get_status_PC1()
         self.assertTrue(True)
 
+    @unittest.skipIf(install_type == 'server', "Test only on MESA Station - Full install")
     def test_internet_on(self):
         # TODO: System setting type_installation must NOT be Server!
         status = functions.internet_on()
         self.assertTrue(status)
 
     def test_save_netcdf_scaling(self):
-        # TODO: Test data needed! To be put in /data/test/
+        # TODO: Test data needed! To be put in es_constants.es2globals['test_data_dir']
         preproc_file = '/tmp/eStation2/apps.acquisition.ingestion4Losxu_A2016201.L3m_DAY_SST_sst_4km.nc/A2016201.L3m_DAY_SST_sst_4km.nc.geotiff'
         sds = 'NETCDF:/data/test/A2016201.L3m_DAY_SST_sst_4km.nc:sst'
         status = functions.save_netcdf_scaling(sds, preproc_file)
         self.assertTrue(False)  # Test fails for now!
 
     def test_read_netcdf_scaling(self):
-        # TODO: Test data needed! To be put in /data/test/
+        # TODO: Test data needed! To be put in es_constants.es2globals['test_data_dir']
         preproc_file = '/tmp/eStation2/apps.acquisition.ingestion4Losxu_A2016201.L3m_DAY_SST_sst_4km.nc/A2016201.L3m_DAY_SST_sst_4km.nc.geotiff'
         [fact, off] = functions.read_netcdf_scaling(preproc_file)
         self.assertTrue(False)  # Test fails for now!
@@ -707,10 +736,6 @@ class TestFunctions(unittest.TestCase):
         latitude = 40.0
         dl = functions.day_length(day, latitude)
         self.assertEqual(dl, 73.63579020749116)
-        # print('Day lenght is: {0}'.format(dl))
-
-    #   -----------------------------------------------------------------------------------
-    #   Extract info from dir/filename/fullpath
 
     def test_get_from_path_dir(self):
         [my_product_code, my_sub_product_code, my_version, my_mapset] = functions.get_from_path_dir(self.dir_name)
@@ -769,9 +794,6 @@ class TestFunctions(unittest.TestCase):
 
         self.assertEqual(my_subdir, self.sub_dir)
 
-    #   -----------------------------------------------------------------------------------
-    #   Compose dir/filename/fullpath from attributes
-
     def test_set_path_filename(self):
         my_filename = functions.set_path_filename(self.str_date, self.str_prod, self.str_sprod,
                                                   self.str_mapset, self.str_version, self.str_extension)
@@ -814,12 +836,10 @@ class TestFunctions(unittest.TestCase):
 
     def test_convert_name_from_eumetcast(self):
         filename = functions.convert_name_from_eumetcast(self.filename_eumetcast, self.product_type)
-
         self.assertEqual(self.filename, filename)
 
         fullpath = functions.convert_name_from_eumetcast(self.filename_eumetcast, self.product_type, with_dir=True)
-
-        self.assertEqual(self.filename, filename)
+        self.assertEqual(self.sub_dir+filename, fullpath)
 
 
 suite_functions = unittest.TestLoader().loadTestsFromTestCase(TestFunctions)

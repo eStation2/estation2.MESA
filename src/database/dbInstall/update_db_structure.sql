@@ -241,7 +241,7 @@ CREATE TABLE IF NOT EXISTS analysis.chart_drawproperties
   CONSTRAINT chart_drawproperties_pk PRIMARY KEY (chart_type)
 )
 WITH (
-  OIDS=TRUE
+  OIDS=FALSE
 );
 ALTER TABLE analysis.chart_drawproperties
   OWNER TO estation;
@@ -408,7 +408,7 @@ CREATE TABLE IF NOT EXISTS analysis.graph_drawproperties
   CONSTRAINT graph_drawproperties_pk PRIMARY KEY (graph_type)
 )
 WITH (
-  OIDS=TRUE
+  OIDS=FALSE
 );
 ALTER TABLE analysis.graph_drawproperties
   OWNER TO estation;
@@ -432,7 +432,7 @@ CREATE TABLE IF NOT EXISTS analysis.graph_yaxes
   CONSTRAINT graph_yaxes_pk PRIMARY KEY (yaxe_id)
 )
 WITH (
-  OIDS=TRUE
+  OIDS=FALSE
 );
 ALTER TABLE analysis.graph_yaxes
   OWNER TO estation;
@@ -458,7 +458,7 @@ CREATE TABLE IF NOT EXISTS analysis.timeseries_drawproperties_new
       ON UPDATE CASCADE ON DELETE RESTRICT
 )
 WITH (
-  OIDS=TRUE
+  OIDS=FALSE
 );
 ALTER TABLE analysis.timeseries_drawproperties_new
   OWNER TO estation;

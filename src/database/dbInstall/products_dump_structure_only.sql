@@ -2967,7 +2967,7 @@ CREATE TABLE product_legend (
 
 ALTER TABLE analysis.product_legend OWNER TO estation;
 
-SET default_with_oids = true;
+SET default_with_oids = false;
 
 --
 -- TOC entry 192 (class 1259 OID 18354)

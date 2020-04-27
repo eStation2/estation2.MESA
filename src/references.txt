@@ -100,3 +100,5 @@ I Libraries for Sentinel data management
 
 https://github.com/sentinelsat/sentinelsat/blob/master/README.rst
 
+I Sync code to home
+rsync -av --delete --exclude=.git/ ./ /home/esuser/eStation2/src/
