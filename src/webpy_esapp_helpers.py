@@ -1929,28 +1929,38 @@ def importWorkspaces(params):
     return status
 
 
-def importJRCRefWorkspaces():
+def importJRCRefWorkspaces(version=0):
+    success = False
     try:
-        filename = 'jrc_ref_workspaces.json'
+        jrc_ref_settings = functions.getJRCRefSettings()
+        if bool(jrc_ref_settings['update']) and int(jrc_ref_settings['version']) < version:
+            # Delete existing workspaces of user jrc_ref
+            deletestatus = querydb.delete_jrcref_workspaces()
+            if deletestatus:
+                filename = 'jrc_ref_workspaces.json'
 
-        with open(es_constants.es2globals['base_dir'] + '/database/referenceWorkspaces/' + filename, 'r') as f:
-            workspaces_dict = json.load(f)
+                with open(es_constants.es2globals['base_dir'] + '/database/referenceWorkspaces/' + filename, 'r') as f:
+                    workspaces_dict = json.load(f)
 
-        for workspace in workspaces_dict['workspaces']:
-            workspace['isNewWorkspace'] = 'true'
-            workspace['isrefworkspace'] = 'true'
-            workspace['pinned'] = 'false'
-            # workspace['showindefault'] = 'false'
-            workspace['userid'] = es_constants.es2globals['jrc_ref_user']
-            workspace['workspaceid'] = None
-            for wsmap in workspace['maps']:
-                wsmap['userid'] = es_constants.es2globals['jrc_ref_user']
-            for wsgraph in workspace['graphs']:
-                wsgraph['userid'] = es_constants.es2globals['jrc_ref_user']
+                for workspace in workspaces_dict['workspaces']:
+                    workspace['isNewWorkspace'] = 'true'
+                    workspace['isrefworkspace'] = 'true'
+                    workspace['pinned'] = 'false'
+                    # workspace['showindefault'] = 'false'
+                    workspace['userid'] = es_constants.es2globals['jrc_ref_user']
+                    workspace['workspaceid'] = None
+                    for wsmap in workspace['maps']:
+                        wsmap['userid'] = es_constants.es2globals['jrc_ref_user']
+                    for wsgraph in workspace['graphs']:
+                        wsgraph['userid'] = es_constants.es2globals['jrc_ref_user']
 
-            saveWorkspace(workspace)
+                    saveWorkspace(workspace)
 
-        success = True
+                functions.setJRCRefSetting('version', str(version))
+                functions.setJRCRefSetting('update', 'false')
+                success = True
+            else:
+                success = False
     except:
         success = False
 

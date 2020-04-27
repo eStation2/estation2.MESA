@@ -2,7 +2,18 @@
 #	Procedure to generate the update_insert_jrc_data.sql file
 #   ==========================================================
 
-Table than MUST NOT be 'full-copied':
+In the products schema there is the function called export_jrc_data(full_copy) that generates the content of
+the update_insert_jrc_data.sql file according to the below rules.
+Run the function as follows:
+    SELECT FROM products.export_jrc_data(TRUE);
+    or
+    SELECT FROM products.export_jrc_data(FALSE);
+
+Copy the result a paste it in a temprary file. Open update_insert_jrc_data.sql and copy paste the sql at its right place.
+
+____________________________________________________________________________________________________________________
+
+Tables that MUST NOT be 'full-copied':
 
 pads, processing, ingestion, process_products 	-> depends on THEMA 
 products					                    -> depends on THEMA
@@ -10,7 +21,7 @@ products					                    -> depends on THEMA
 Specific actions - like removing a processing chain or correcting a record - can be done on single records
 
 
-Table that CAN be 'full-copied':
+Tables that CAN be 'full-copied':
 												NOTE
 datasource_description 		-> in case of correction/patches			can be changed by Users in the interface
 sub_datasource_description 	-> in case of correction/patches			can be changed by Users in the interface
@@ -19,7 +30,7 @@ internet_source			    -> in case of correction/patches			can be changed by Users
 
 mapset				        -> in case of correction/patches			cannot be changed by Users in the interface
 
-Table that ARE always 'full-copied':
+Tables that ARE always 'full-copied':
 												NOTE
 legend,legend_steps 		-> truncated at the beginning of the update .sql
 

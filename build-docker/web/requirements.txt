@@ -33,3 +33,4 @@ psutil
 request
 #pymorph
 scikit-image
+docker-py

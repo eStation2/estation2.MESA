@@ -17,7 +17,7 @@ standard_library.install_aliases()
 logger = log.my_logger(__name__)
 
 
-class TestDaemon(unittest.TestCase):
+class TestAcquisition(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #   test_IngestionDaemon():
     #   Check the status of the Ingest process:
@@ -33,6 +33,8 @@ class TestDaemon(unittest.TestCase):
     #               - http://accorsi.net/docs/TheArtofUnitTesting.pdf
     #               - Python Unit Test Automation - Practical Techniques for Python Developers and Testers 2017.pdf
     #   ---------------------------------------------------------------------------
+
+    @unittest.skip("Unittesting does not work for methods that are in a continues loop and do not return a value!")
     def test_IngestionDaemon(self):
 
         pid_file = es_constants.ingestion_pid_filename
@@ -59,6 +61,7 @@ class TestDaemon(unittest.TestCase):
             # Check the process was stopped
             self.assertEqual(daemon.status(), False)
 
+    @unittest.skip("Unittesting does not work for methods that are in a continues loop and do not return a value!")
     def test_GetInternetDaemon(self):
 
         logger.info('Test GetInternet daemon')
@@ -84,6 +87,7 @@ class TestDaemon(unittest.TestCase):
             status = daemon.status()
             self.assertEqual(os.path.isfile(pid_file), 1)
 
+    @unittest.skip("Unittesting does not work for methods that are in a continues loop and do not return a value!")
     def test_GetEumetcastDaemon(self):
 
         logger.info('Test GetEumetcast daemon')
@@ -107,3 +111,8 @@ class TestDaemon(unittest.TestCase):
                 pass
             time.sleep(1)
             self.assertEqual(os.path.isfile(pid_file), 1)
+
+
+suite_acquisition = unittest.TestLoader().loadTestsFromTestCase(TestAcquisition)
+if __name__ == '__main__':
+    unittest.TextTestRunner(verbosity=2).run(suite_acquisition)

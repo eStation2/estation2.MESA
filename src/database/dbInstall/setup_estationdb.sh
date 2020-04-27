@@ -23,7 +23,7 @@ if [[ `su - postgres -c "psql postgres -d estationdb -c \"select db_version from
     echo "`date +'%Y-%m-%d %H:%M '` Update database structure"
     psql -h postgres -U estation -d estationdb -w -f /var/www/eStation2/database/dbInstall/update_db_structure.sql >/var/log/eStation2/update_db_structure.log 2>/var/log/eStation2/update_db_structure.err
 
-    # psql -h postgres -U estation -d estationdb -w -f /var/tmp/online_old_h05estationdru7_data.sql >/var/log/eStation2/online_old_h05estationdru7_data.log 2>/var/log/eStation2/online_old_h05estationdru7_data.err
+    # psql -h postgres -U estation -d estationdb -w -f /var/www/eStation2/database/dbInstall/online_old_h05estationdru7_data.sql >/var/log/eStation2/online_old_h05estationdru7_data.log 2>/var/log/eStation2/online_old_h05estationdru7_data.err
 
     # Update Tables (both for upgrade and installation from scratch)
     echo "`date +'%Y-%m-%d %H:%M '` Populate/update tables"

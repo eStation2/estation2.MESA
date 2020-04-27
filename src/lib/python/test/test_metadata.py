@@ -6,6 +6,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from future import standard_library
+
 standard_library.install_aliases()
 
 import unittest
@@ -400,19 +401,20 @@ class TestMetaData(unittest.TestCase):
     def test_get_gdalinfo(self):
         my_file = '/data/test_data/refs_output/wsi-hp/pasture/20200221_wsi-hp_pasture_SPOTV-Africa-1km_V1.0.tif'
         gdal_info = GdalInfo()
-        status = gdal_info.get_gdalinfo(my_file,print_out=True)
-        self.assertEqual(status,1)
+        status = gdal_info.get_gdalinfo(my_file, print_out=True)
+        self.assertEqual(status, 1)
 
     def test_compare_gdalinfo(self):
         my_file1 = '/data/test_data/refs_output/wsi-hp/pasture/20200221_wsi-hp_pasture_SPOTV-Africa-1km_V1.0.tif'
         my_file2 = '/data/test_data/refs_output/wsi-hp/pasture/20200221_wsi-hp_pasture_SPOTV-Africa-1km_V1.0.tif'
         gdal_info1 = GdalInfo()
-        gdal_info2  = GdalInfo()
-        status = gdal_info1.get_gdalinfo(my_file1,print_out=True)
-        status = gdal_info2.get_gdalinfo(my_file2,print_out=True)
+        gdal_info2 = GdalInfo()
+        status = gdal_info1.get_gdalinfo(my_file1, print_out=True)
+        status = gdal_info2.get_gdalinfo(my_file2, print_out=True)
         equal = gdal_info1.compare_gdalinfo(gdal_info2)
 
-        self.assertEqual(equal,1)
+        self.assertEqual(equal, 1)
+
 
 suite_metadata = unittest.TestLoader().loadTestsFromTestCase(TestMetaData)
 if __name__ == '__main__':
