@@ -1015,7 +1015,7 @@ def do_oper_division_perc(input_file='', output_file='', input_nodata=None, outp
         shutil.rmtree(tmpdir)
 
 
-# _____________________________
+# _____________________________NO usage -- Not tested in test_raster_image
 def do_oper_scalar_multiplication(input_file='', output_file='', scalar=1, input_nodata=None, output_nodata=None,
                                   output_format=None,
                                   output_type=None, options=''):
@@ -1278,9 +1278,10 @@ def do_make_baresoil(input_file='', avg_file='', min_file='', max_file='', outpu
         projection = fileFID.GetProjection()
         driver_type = fileFID.GetDriver().ShortName
 
+        sds_meta = metadata.SdsMetadata()
         # Try and assign input_nodata if it is UNDEF
         if input_nodata is None:
-            sds_meta = metadata.SdsMetadata()
+
             if os.path.exists(input_file):
                 input_nodata = float(sds_meta.get_nodata_value(input_file))
                 [scaling_factor, scaling_offset] = sds_meta.get_scaling_values(input_file)
@@ -1883,7 +1884,7 @@ def do_compute_primary_production(chla_file='', sst_file='', kd_file='', par_fil
     finally:
         shutil.rmtree(tmpdir)
 
-
+# _____________________________
 def DetectEdgesInSingleImage(image, histogramWindowStride, \
                              minTheta, histogramWindowSize, minPopProp, minPopMeanDifference, minSinglePopCohesion,
                              minImageValue, \
@@ -2532,7 +2533,7 @@ def do_ts_linear_filter(input_file='', before_file='', after_file='', output_fil
     finally:
         shutil.rmtree(tmpdir)
 
-
+# _____________________________ No usage
 def do_rain_onset(input_file='', output_file='', input_nodata=None, output_nodata=None, output_format=None,
                   output_type=None, options='', current_dekad=None):
     try:
@@ -2681,7 +2682,6 @@ def ParseType(type):
         return GDT_CFloat64
     else:
         return GDT_Byte
-
 
 # _____________________________
 #   Merge/move wrt processing.py functions
@@ -2845,7 +2845,7 @@ def getRasterBox(fid, xstart, xend, ystart, yend, band):
     return [minValGrid, maxValGrid]
 
 
-#   -------------------------------------------------------------------------------------------
+#   No usage -------------------------------------------------------------------------------------------
 #   Computes surface area of each pixel for an given mapset or the given image
 
 #   Argument:
@@ -3195,6 +3195,7 @@ def do_stats_4_raster(input_file, grid_file, output_file, operation, input_mapse
 ##  Compute chla gradient   ####
 ## using normal ndimage sobel###
 ################################
+# _____________________________
 
 def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_nodata=None, output_format=None,
                              output_type=None, options=''):
@@ -3202,7 +3203,7 @@ def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_
 
         tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_file),
                                   dir=es_constants.base_tmp_dir)
-
+        from scipy import ndimage
         output_file_final = output_file
         output_file = tmpdir + os.sep + os.path.basename(output_file)
 
@@ -3304,10 +3305,7 @@ def do_compute_chla_gradient(input_file='', nodata=None, output_file='', output_
         shutil.rmtree(tmpdir)
 
 
-# ##########################
-#   Compute chla gradient  #
-#    Jean-Noel Algo        #
-############################
+# _____________________________No usage -  Not tested in test_raster_image
 def compute_extrapolated_chla_gradient(input_file='', nodata=None, output_file='', output_nodata=None,
                                        output_format=None,
                                        output_type=None, options=''):

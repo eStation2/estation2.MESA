@@ -1609,7 +1609,7 @@ def pre_process_hdf5_gls(subproducts, tmpdir, input_files, my_logger):
         # Loop over datasets and extract the one in the list
         for output_sds in sds_to_process:
             # Open directly the SDS with the HDF interface (the NETCDF one goes in segfault)
-            my_sds_hdf='HDF5:'+my_unzip_file+'://'+output_sds
+            my_sds_hdf='NETCDF:'+my_unzip_file+'://'+output_sds
             sds_in = gdal.Open(my_sds_hdf)
 
             outputfile = tmpdir + os.path.sep + filename + '.tif'
@@ -1648,9 +1648,8 @@ def pre_process_hdf5_gls_nc(subproducts, tmpdir, input_files, my_logger):
         # Loop over datasets and extract the one in the list
         for output_sds in sds_to_process:
             # Open directly the SDS with the HDF interface (the NETCDF one goes in segfault)
-            my_sds_hdf='HDF5:'+input_file+'://'+output_sds
+            my_sds_hdf='NETCDF:'+input_file+'://'+output_sds
             sds_in = gdal.Open(my_sds_hdf)
-
             outputfile = tmpdir + os.path.sep + os.path.basename(input_file) + '.tif'
             write_ds_to_geotiff(sds_in, outputfile)
             sds_in = None
