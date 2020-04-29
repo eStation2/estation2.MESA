@@ -14,7 +14,7 @@ from osgeo import gdal
 
 import os
 
-def plot_1o1(data_1, data_2, x_label=None, y_label=None, figure_title=None):
+def plot_1o1(data_1, data_2, x_label=None, y_label=None, figure_title=None, png_name=None):
     """
     :param data_1:              -> np.array dataset 1
     :param data_2:              -> np.array dataset 2
@@ -45,6 +45,9 @@ def plot_1o1(data_1, data_2, x_label=None, y_label=None, figure_title=None):
 
     if figure_title is None:
         figure_title = 'Density Scatter Plot'
+
+    if png_name is None:
+        png_name = '/data/tmp/plot_1o1.png'
 
     '''
     ***************  SPATIAL CONSISTENCY! **********************
@@ -119,43 +122,68 @@ def plot_1o1(data_1, data_2, x_label=None, y_label=None, figure_title=None):
         plt.grid()
         plt.tight_layout()
 
-        plt.savefig("/data/processing/exchange/"+filename+".png")
+        plt.savefig(png_name+".png")
         
         #plt.show()
 
-#ds_1 = gdal.Open("E:\\dev\\Mapplot\\1999-2017\\vgt-ndvi\\10davg-linearx2\\1221_vgt-ndvi_10davg-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif")
-#data_1 = np.array(ds_1.GetRasterBand(1).ReadAsArray())
-#
-#ds_2 = gdal.Open("E:\\dev\\Mapplot\\1999-2014\\vgt-ndvi\\10davg-linearx2\\1221_vgt-ndvi_10davg-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif")
-#data_2 = np.array(ds_2.GetRasterBand(1).ReadAsArray())
-#
-#data_1 = data_1.astype('float')
-#data_2 = data_2.astype('float')
-#data_1[data_1==-32768]=np.nan
-#data_2[data_2==-32768]=np.nan
-#data_1 = np.random.sample((10, 10))
-#data_2 = np.random.sample((10, 10))
-input_directory = os.fsencode("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10davg-linearx2/")
-filename = "test"
-#
-for file in os.listdir(input_directory):
-    filename = os.fsdecode(file)
-    if filename.endswith(".tif") or filename.endswith(".py"): 
-        ds_1 = gdal.Open("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10davg-linearx2/"+filename)
-        data_1 = np.array(ds_1.GetRasterBand(1).ReadAsArray())
+if __name__ == "__main__":
 
-        ds_2 = gdal.Open("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10dmax-linearx2/"+filename)
+    single_file = True
+    directory   = False
+
+    if single_file:
+        #   Work with 2 files
+        file= 'modis-chla/gradient/20200301_modis-chla_gradient_MODIS-Africa-4km_v2013.1.tif'
+        file_1 = "/data/test_data/"+file
+        file_2 = "/data/tmp/"+file
+
+        if not os.path.isfile(file_1):
+            print("Error: file does not exist: "+file_1)
+
+        if not os.path.isfile(file_2):
+            print("Error: file does not exist: "+file_2)
+
+        ds_1 = gdal.Open(file_1)
+        data_1 = np.array(ds_1.GetRasterBand(1).ReadAsArray())
+        #
+        ds_2 = gdal.Open(file_2)
         data_2 = np.array(ds_2.GetRasterBand(1).ReadAsArray())
-        
+        #
         data_1 = data_1.astype('float')
         data_2 = data_2.astype('float')
+        data_1[data_1==-32768]=np.nan
+        data_2[data_2==-32768]=np.nan
+
+        # Trivial test
+        #data_1 = np.random.sample((10, 10))
+        #data_2 = np.random.sample((10, 10))
+
+        plot_1o1(data_1, data_2, x_label="Reference", y_label="Local", figure_title=os.path.basename(file))
+
+    #   Loop over a directory
+    if directory:
+
+        input_directory = os.fsencode("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10davg-linearx2/")
+        filename = "test"
         #
-        data_1[data_1 == -32768] = np.nan
-        data_2[data_2 == -32768] = np.nan
-        
-        plot_1o1(data_1, data_2, "1999-2017", "1999-2014", filename)
-        
-    else:
-        continue
+        for file in os.listdir(input_directory):
+            filename = os.fsdecode(file)
+            if filename.endswith(".tif") or filename.endswith(".py"):
+                ds_1 = gdal.Open("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10davg-linearx2/"+filename)
+                data_1 = np.array(ds_1.GetRasterBand(1).ReadAsArray())
+
+                ds_2 = gdal.Open("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10dmax-linearx2/"+filename)
+                data_2 = np.array(ds_2.GetRasterBand(1).ReadAsArray())
+
+                data_1 = data_1.astype('float')
+                data_2 = data_2.astype('float')
+                #
+                data_1[data_1 == -32768] = np.nan
+                data_2[data_2 == -32768] = np.nan
+
+                plot_1o1(data_1, data_2, "1999-2017", "1999-2014", file)
+
+            else:
+                continue
 
 #plot_1o1(data_1, data_2, "1999-2017", "1999-2014", "Scatterplot - avg")
