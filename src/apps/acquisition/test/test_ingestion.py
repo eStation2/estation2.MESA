@@ -89,7 +89,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(1, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - WSI CROP/PASTURE           //Tested 27.04.2020//
+    #   Vegetation - WSI CROP/PASTURE  \\Tested Matching --> 29-04-2020 (Not matching--> 28-04-2020) --> Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_mars_wsi(self):
         productcode = 'wsi-hp'
@@ -125,14 +125,14 @@ class TestIngestion(unittest.TestCase):
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
 
-        # ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - DMP V2.0.1                 //Tested 27.04.2020//
+    #   Vegetation - DMP V2.0.1   \\Tested --> 28-04-2020 --> Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_g_cls_dmp_2_0_1(self):
 
@@ -222,7 +222,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - FAPAR V2.0.1 Global (Internet source) //Tested 20.04.2020 //
+    #   Vegetation - FAPAR V2.0.1 Global (Internet source)\\Tested --Working 29-04-2020  (Array different --> 28-04-2020) --> Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_g_cls_fapar_global_2_0_1(self):
 
@@ -266,7 +266,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - NDVI V2.2.1                            //Should be ok -> Marco//
+    #   Vegetation - NDVI V2.2.1 \\Tested --Working 29-04-2020 --> Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_g_cls_ndvi_2_2(self):
 
@@ -277,9 +277,9 @@ class TestIngestion(unittest.TestCase):
         mapsetcode = 'SPOTV-Africa-1km'
         datasource_descrID='EO:EUM:DAT:PROBA-V2.2:NDVI'
         input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
-        date_fileslist = [os.path.join(input_dir,'c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.zip')]
+        date_fileslist = [os.path.join(input_dir,'c_gls_NDVI_202003010000_AFRI_PROBAV_V2.2.1.zip')]
         # date_fileslist = glob.glob('/data/TestIngestion/c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.zip*')
-        in_date = '201401010000'
+        in_date = '202003010000'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -303,7 +303,7 @@ class TestIngestion(unittest.TestCase):
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        # in_date = '20200321'
+        in_date = '20200301'
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
@@ -353,7 +353,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Rainfall - ARC2   \\Tested\\
+    #   Rainfall - ARC2   \\Tested --> 29-04-2020 --> Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_arc2_rain(self):
         productcode = 'arc2-rain'
@@ -392,7 +392,7 @@ class TestIngestion(unittest.TestCase):
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
-    #   Rainfall - CHIRPS  \\Tested 27.\\
+    #   Rainfall - CHIRPS  \\Tested -->Not working 29-04-2020 (Working --> 28-04-2020) --> Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_chirps(self):
         productcode = 'chirps-dekad'
@@ -432,7 +432,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Rainfall - CHIRPS TIF  \\Tested\\
+    #   Rainfall - CHIRPS TIF  \\Tested -Matching --> 29-04-2020 (Not matching --> 28-04-2020) --> Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_chirps_tif(self):
         productcode = 'chirps-dekad'
@@ -474,8 +474,10 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    Rainfall - Fewsnet 2  \\Tested\\
+    #    Rainfall - Fewsnet 2  \\Tested Matching --> 29-04-2020 (Not matching with warning below--> 28-04-2020) --> Vijay\\
     #   ---------------------------------------------------------------------------
+    # web          | ERROR 1: PROJ: proj_create_from_database: crs not found
+    # web          | ERROR 1: PROJ: proj_create_from_database: crs not found
     def test_ingest_fewsnet_rfe(self):
         productcode = 'fewsnet-rfe'
         productversion = '2.0'
@@ -518,7 +520,7 @@ class TestIngestion(unittest.TestCase):
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
-    #    Rainfall - TAMSAT 3  \\Tested\\
+    #    Rainfall - TAMSAT 3  \\Tested Matching 29-04-2020 --> 28-04-2020 --> Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_tamsat_rfe(self):
         productcode = 'tamsat-rfe'
@@ -562,7 +564,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    FIRE - MODIS FIRMS 6  \\Tested \\
+    #    FIRE - MODIS FIRMS 6  \\Tested -->29-04-2020 28-04-2020 --> Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_modis_firms(self):
         productcode = 'modis-firms'
@@ -650,7 +652,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    OCEANOGRAPHY - MODIS CHLA  \\Tested\\
+    #    OCEANOGRAPHY - MODIS CHLA  \\Tested -->29-04-2020 28-04-2020 --> Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_modis_chlor_netcdf(self):
         productcode = 'modis-chla'
@@ -662,7 +664,6 @@ class TestIngestion(unittest.TestCase):
         date_fileslist = [os.path.join(input_dir, 'A2020078.L3m_DAY_CHL_chlor_a_4km.nc')]
         # date_fileslist = ['/data/ingest/A2020078.L3m_DAY_CHL_chlor_a_4km.nc']
         in_date = '2020078'
-
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -770,8 +771,11 @@ class TestIngestion(unittest.TestCase):
     #     self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    OCEANOGRAPHY - MODIS SST  //Tested//
+    #    OCEANOGRAPHY - MODIS SST  \\Not matching with below warning -- QGIS same results--> 29-04-2020 --> Vijay\\
     #   ---------------------------------------------------------------------------
+    # web          | /opt/project/src/apps/acquisition/ingestion.py:3535: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/eStation2/apps.acquisition.ingestiond0mdd_10_AQUA_MODIS.20200320.L3m.DAY.SST.sst.4km.NRT.nc/scaling.txt' mode='r' encoding='UTF-8'>
+    #  [in_scale_factor, in_offset] = functions.read_netcdf_scaling(intermFile)
+    # ResourceWarning: Enable tracemalloc to get the object allocation traceback
     def test_ingest_modis_sst_netcdf(self):
         productcode = 'modis-sst'
         productversion = 'v2013.1'
@@ -811,7 +815,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    OCEANOGRAPHY - PML MODIS SST \\Tested\\
+    #    OCEANOGRAPHY - PML MODIS SST \\Similar method tested --> Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_pml_modis_sst(self):
         productcode = 'pml-modis-sst'
@@ -853,7 +857,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    OCEANOGRAPHY - PML MODIS CHL \\Tested\\
+    #    OCEANOGRAPHY - PML MODIS CHL \\Tested --> 28-04-2020 --> Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_pml_modis_oc(self):
         productcode = 'pml-modis-chl'
@@ -1064,7 +1068,7 @@ class TestIngestion(unittest.TestCase):
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
-    #    Miscellaneous - CPC SM               \\Not working\\ -> Marco
+    #    Miscellaneous - CPC SM     \\Tested working -- 29-04-2020 \\ -> Vijay
     #   ---------------------------------------------------------------------------
     def test_ingest_cpc_soilmoisture(self):
         productcode = 'cpc-sm'
@@ -1107,7 +1111,7 @@ class TestIngestion(unittest.TestCase):
                                         version=productversion, mapsetcode=mapsetcode, date=in_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
-    #    Miscellaneous - LSASAF ET DISK   \\Problem with native mapset wkt\\
+    #    Miscellaneous - LSASAF ET DISK   \\Problem with native mapset wkt --> 28-04-2020\\
     #   ---------------------------------------------------------------------------
     def test_ingest_lsasaf_et_disk(self):
 
@@ -1145,94 +1149,94 @@ class TestIngestion(unittest.TestCase):
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
                                         version=productversion, mapsetcode=mapsetcode, date=in_date)
         self.assertEqual(status, 1)
+    # #   ---------------------------------------------------------------------------
+    # #    Miscellaneous - LSASAF ET \\Not used\\
+    # #   ---------------------------------------------------------------------------
+    # def test_ingest_lsasaf_et(self):
+    #     in_date = '202004201200'
+    #     productcode = 'lsasaf-et'
+    #     productversion = 'undefined'
+    #     subproductcode = 'et'
+    #     mapsetcode = 'MSG-satellite-3km'
+    #     datasource_descrID='EO:EUM:DAT:MSG:ET-SEVIRI'
+    #     input_dir= self.test_ingest_dir+os.path.sep+productcode+os.path.sep+self.native_dir
+    #     date_fileslist = [os.path.join(input_dir, 'S-LSA_-HDF5_LSASAF_MSG_ET_SAfr_201903190030.bz2')]
+    #     # date_fileslist = ['/data/TestIngestion/S-LSA_-HDF5_LSASAF_MSG_ET_SAfr_201511301000.bz2']
+    #     product = {"productcode": productcode,
+    #                "version": productversion}
+    #     args = {"productcode": productcode,
+    #             "subproductcode": subproductcode,
+    #             "datasource_descr_id": datasource_descrID,
+    #             "version": productversion}
+    #
+    #     product_in_info = querydb.get_product_in_info(**args)
+    #
+    #     re_process = product_in_info.re_process
+    #     re_extract = product_in_info.re_extract
+    #
+    #     sprod = {'subproduct': subproductcode,
+    #                          'mapsetcode': mapsetcode,
+    #                          're_extract': re_extract,
+    #                          're_process': re_process}
+    #
+    #     subproducts = [sprod]
+    #
+    #     datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+    #                                                      source_id=datasource_descrID)
+    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+    #     in_date = '202004201200'
+    #     status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
+    #                                     version=productversion, mapsetcode=mapsetcode, date=in_date)
+    #     self.assertEqual(status, 1)
+
+    # #   ---------------------------------------------------------------------------
+    # #   INLAND WATER - WBD AVG                      \\Not yet tested\\ -> Vijay
+    # #   ---------------------------------------------------------------------------
+    # def test_ingest_jrc_wbd_avg(self):
+    #
+    #     date_fileslist = glob.glob('/data/ingest/JRC-WBD-AVG-ICPAC_1985-2015_1201*')
+    #     #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
+    #     in_date = '1201'
+    #     productcode = 'wd-gee'
+    #     productversion = '1.0'
+    #     subproductcode = 'avg'
+    #     mapsetcode = 'WD-GEE-ECOWAS-AVG'
+    #     datasource_descrID='JRC:WBD:GEE:AVG'
+    #
+    #     product = {"productcode": productcode,
+    #                "version": productversion}
+    #     args = {"productcode": productcode,
+    #             "subproductcode": subproductcode,
+    #             "datasource_descr_id": datasource_descrID,
+    #             "version": productversion}
+    #
+    #     product_in_info = querydb.get_product_in_info(**args)
+    #
+    #     re_process = product_in_info.re_process
+    #     re_extract = product_in_info.re_extract
+    #
+    #     sprod = {'subproduct': subproductcode,
+    #                          'mapsetcode': mapsetcode,
+    #                          're_extract': re_extract,
+    #                          're_process': re_process}
+    #
+    #     subproducts = [sprod]
+    #
+    #     datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+    #                                                      source_id=datasource_descrID)
+    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+    #
+    #     self.assertEqual(1, 1)
+
     #   ---------------------------------------------------------------------------
-    #    Miscellaneous - LSASAF ET \\Not yet tested\\ -> Vijay
-    #   ---------------------------------------------------------------------------
-    def test_ingest_lsasaf_et(self):
-        in_date = '202004201200'
-        productcode = 'lsasaf-et'
-        productversion = 'undefined'
-        subproductcode = 'et'
-        mapsetcode = 'MSG-satellite-3km'
-        datasource_descrID='EO:EUM:DAT:MSG:ET-SEVIRI'
-        input_dir= self.test_ingest_dir+os.path.sep+productcode+os.path.sep+self.native_dir
-        date_fileslist = [os.path.join(input_dir, 'S-LSA_-S-LSA_-HDF5_LSASAF_MSG_ET_MSG-Disk_202004201200.bz2')]
-        # date_fileslist = ['/data/TestIngestion/S-LSA_-HDF5_LSASAF_MSG_ET_SAfr_201511301000.bz2']
-        product = {"productcode": productcode,
-                   "version": productversion}
-        args = {"productcode": productcode,
-                "subproductcode": subproductcode,
-                "datasource_descr_id": datasource_descrID,
-                "version": productversion}
-
-        product_in_info = querydb.get_product_in_info(**args)
-
-        re_process = product_in_info.re_process
-        re_extract = product_in_info.re_extract
-
-        sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
-
-        subproducts = [sprod]
-
-        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
-                                                         source_id=datasource_descrID)
-        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        in_date = '202004201200'
-        status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                                        version=productversion, mapsetcode=mapsetcode, date=in_date)
-        self.assertEqual(status, 1)
-
-    #   ---------------------------------------------------------------------------
-    #   INLAND WATER - WBD AVG                      \\Not yet tested\\ -> Vijay
-    #   ---------------------------------------------------------------------------
-    def test_ingest_jrc_wbd_avg(self):
-
-        date_fileslist = glob.glob('/data/ingest/JRC-WBD-AVG-ICPAC_1985-2015_1201*')
-        #date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
-        in_date = '1201'
-        productcode = 'wd-gee'
-        productversion = '1.0'
-        subproductcode = 'avg'
-        mapsetcode = 'WD-GEE-ECOWAS-AVG'
-        datasource_descrID='JRC:WBD:GEE:AVG'
-
-        product = {"productcode": productcode,
-                   "version": productversion}
-        args = {"productcode": productcode,
-                "subproductcode": subproductcode,
-                "datasource_descr_id": datasource_descrID,
-                "version": productversion}
-
-        product_in_info = querydb.get_product_in_info(**args)
-
-        re_process = product_in_info.re_process
-        re_extract = product_in_info.re_extract
-
-        sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
-
-        subproducts = [sprod]
-
-        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
-        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-
-        self.assertEqual(1, 1)
-
-    #   ---------------------------------------------------------------------------
-    #   INLAND WATER - WBD AVG \\Not yet tested\\
+    #   INLAND WATER - WBD AVG \\Not working --> memory problem --->28-04-2020\\ @Marco can you please check
     #   ---------------------------------------------------------------------------
     def test_ingest_jrc_wbd_avg_tarzip(self):
         productcode = 'wd-gee'
         productversion = '1.0'
         subproductcode = 'occurr'
-        mapsetcode = 'WD-GEE-IGAD-AVG'
-        datasource_descrID = 'EO:EUM:DAT:LANDSAT:MESA-JRC-WBD-GEE-AVG'
+        mapsetcode = 'WD-GEE-ECOWAS-AVG'
+        datasource_descrID = 'EO:EUM:DAT:LANDSAT:MESA-JRC-WBD-GEE'
         input_dir= self.test_ingest_dir+os.path.sep+productcode+os.path.sep+self.native_dir
         date_fileslist = [os.path.join(input_dir, 'MESA_JRC_wd-gee_occurr_20191201_WD-GEE-ECOWAS-AVG_1.0.tgz')]
         # date_fileslist = glob.glob('/data/ingest/MESA_JRC_wd-gee_avg_1201_WD-GEE-IGAD-AVG_1.0.tgz')
@@ -1261,8 +1265,10 @@ class TestIngestion(unittest.TestCase):
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                         source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-
-        self.assertEqual(1, 1)
+        # in_date = '202004201200'
+        status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
+                                        version=productversion, mapsetcode=mapsetcode, date=in_date)
+        self.assertEqual(status, 1)
 
     # def test_preprocess_ecmwf_mars(self):
     #
