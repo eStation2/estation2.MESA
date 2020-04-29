@@ -178,7 +178,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - FAPAR V2.0.1 AFRI (EumetCast source)//Tested 21.04.01//
+    #   Vegetation - FAPAR V2.0.1 AFRI (EumetCast source)//Tested 21.04.01// --> Marco
     #   ---------------------------------------------------------------------------
     def test_ingest_g_cls_fapar_afri_2_0_1(self):
 
@@ -309,7 +309,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - NDVI 300m                              //Should be ok -> Marco//
+    #   Vegetation - NDVI 300m  //Tested sometime enters method to merge the files and throws error 29-04-2020 -> Vijay Charan//
     #   ---------------------------------------------------------------------------
     def test_ingest_probav_ndvi_300(self):
         productcode = 'vgt-ndvi'
@@ -857,7 +857,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    OCEANOGRAPHY - PML MODIS CHL \\Tested --> 28-04-2020 --> Vijay\\
+    #    OCEANOGRAPHY - PML MODIS CHL \\Tested --> 29-04-2020 , 28-04-2020 --> Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_pml_modis_oc(self):
         productcode = 'pml-modis-chl'
@@ -1328,44 +1328,44 @@ class TestIngestion(unittest.TestCase):
     #
     #     ingestion.ingest_archives_eumetcast()
 
-    #   ---------------------------------------------------------------------------
-    #   INLAND WATER - WBD OCC \\Not yet tested\\
-    #   ---------------------------------------------------------------------------
-    def test_ingest_jrc_wbd_occ(self):
-
-
-        date_fileslist = glob.glob('/data/ingest/JRC-WBD_ICPAC_20181201*.tif')
-        in_date = '20181201'
-        productcode = 'wd-gee'
-        productversion = '1.0'
-        subproductcode = 'occurr'
-        mapsetcode = 'WD-GEE-IGAD-AVG'
-        datasource_descrID='JRC:WBD:GEE'
-
-        product = {"productcode": productcode,
-                   "version": productversion}
-        args = {"productcode": productcode,
-                "subproductcode": subproductcode,
-                "datasource_descr_id": datasource_descrID,
-                "version": productversion}
-
-        product_in_info = querydb.get_product_in_info(**args)
-
-        re_process = product_in_info.re_process
-        re_extract = product_in_info.re_extract
-
-        sprod = {'subproduct': subproductcode,
-                             'mapsetcode': mapsetcode,
-                             're_extract': re_extract,
-                             're_process': re_process}
-
-        subproducts = [sprod]
-
-        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                         source_id=datasource_descrID)
-        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-
-        self.assertEqual(1, 1)
+    # #   ---------------------------------------------------------------------------
+    # #   INLAND WATER - WBD OCC \\Not yet tested\\
+    # #   ---------------------------------------------------------------------------
+    # def test_ingest_jrc_wbd_occ(self):
+    #
+    #
+    #     date_fileslist = glob.glob('/data/ingest/JRC-WBD_ICPAC_20181201*.tif')
+    #     in_date = '20181201'
+    #     productcode = 'wd-gee'
+    #     productversion = '1.0'
+    #     subproductcode = 'occurr'
+    #     mapsetcode = 'WD-GEE-IGAD-AVG'
+    #     datasource_descrID='JRC:WBD:GEE'
+    #
+    #     product = {"productcode": productcode,
+    #                "version": productversion}
+    #     args = {"productcode": productcode,
+    #             "subproductcode": subproductcode,
+    #             "datasource_descr_id": datasource_descrID,
+    #             "version": productversion}
+    #
+    #     product_in_info = querydb.get_product_in_info(**args)
+    #
+    #     re_process = product_in_info.re_process
+    #     re_extract = product_in_info.re_extract
+    #
+    #     sprod = {'subproduct': subproductcode,
+    #                          'mapsetcode': mapsetcode,
+    #                          're_extract': re_extract,
+    #                          're_process': re_process}
+    #
+    #     subproducts = [sprod]
+    #
+    #     datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+    #                                                      source_id=datasource_descrID)
+    #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+    #
+    #     self.assertEqual(1, 1)
 
     # def test_ingest_ecmwf_evtp(self):
     #

@@ -3843,6 +3843,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             try:
                 command = es_constants.gdal_merge + ' -n '+str(out_nodata)
                 command += ' -a_nodata '+str(out_nodata)
+                command += ' -of GTiff '
                 command += ' -co \"compress=lzw\" -o '
                 command += tmp_output_file
                 command += ' '+ my_output_filename+ ' '+output_filename
