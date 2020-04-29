@@ -30,6 +30,11 @@ logger = log.my_logger(__name__)
 
 class TestWebpy(unittest.TestCase):
 
+    def test_importJRCRefWorkspaces(self):
+        version = 1
+        webpy_esapp_helpers.importJRCRefWorkspaces(version)
+        self.assertEqual(1, 1)
+
     def test_ProductAcquisition(self):
         params = {
             'activated': None

@@ -53,6 +53,7 @@ class ConnectDB(object):
             else:
                 self.db = self.get_db_engine()
                 mysession = sessionmaker(bind=self.db, autoflush=False)
+                self.db.session = mysession()
                 self.session = mysession()
 
             self.db.schema = self.schema

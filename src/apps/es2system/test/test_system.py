@@ -13,8 +13,8 @@ from lib.python import functions
 
 standard_library.install_aliases()
 
-class TestSystem(unittest.TestCase):
 
+class TestSystem(unittest.TestCase):
     systemsettings = functions.getSystemSettings()
     install_type = systemsettings['type_installation'].lower()
 
@@ -42,9 +42,9 @@ class TestSystem(unittest.TestCase):
 
         # Save machine status in /eStation/system
         status_system_file = es2system.save_status_local_machine()
-        self.assertEqual(status_system_file,0)
+        self.assertEqual(status_system_file, 0)
 
-    @unittest.skipIf(install_type != 'full',"Test only on MESA Station - Full install")
+    @unittest.skipIf(install_type != 'full', "Test only on MESA Station - Full install")
     def test_change_ip_addresses_default(self):
         ip_pc1 = '192.168.0.11'
         ip_pc2 = '192.168.0.15'
@@ -64,7 +64,7 @@ class TestSystem(unittest.TestCase):
         status = os.system('echo %s | sudo -S %s' % (sudo_psw, command))
         self.assertEqual(status, 0)
 
-    @unittest.skipIf(install_type != 'full',"Test only on MESA Station - Full install")
+    @unittest.skipIf(install_type != 'full', "Test only on MESA Station - Full install")
     def test_change_ip_addresses_Container(self):
 
         ip_pc1 = '10.191.231.11'  # the machine does not actually exist ..
@@ -91,20 +91,26 @@ class TestSystem(unittest.TestCase):
     #     status = es2system.loop_system(dry_run=False)
     #     self.assertEqual(status, 0)
 
-    @unittest.skipIf(install_type != 'full',"Test only on MESA Station - Full install")
+    def test_system_db_dump_docker(self):
+
+        list_dump = ['products', 'analysis']
+        status = es2system.system_db_dump_docker(list_dump)
+        self.assertEqual(status, b'')
+
+    @unittest.skipIf(install_type != 'full', "Test only on MESA Station - Full install")
     def test_system_db_dump(self):
 
         list_dump = ['products', 'analysis']
         status = es2system.system_db_dump(list_dump)
         self.assertEqual(status, 0)
 
-    @unittest.skipIf(install_type != 'full',"Test only on MESA Station - Full install")
+    @unittest.skipIf(install_type != 'full', "Test only on MESA Station - Full install")
     def test_system_manage_dumps(self):
 
         status = es2system.system_manage_dumps()
         self.assertEqual(status, 0)
 
-    @unittest.skipIf(install_type != 'full',"Test only on MESA Station - Full install")
+    @unittest.skipIf(install_type != 'full', "Test only on MESA Station - Full install")
     def test_system_data_sync(self):
 
         source = es_constants.es2globals['processing_dir']
@@ -115,37 +121,38 @@ class TestSystem(unittest.TestCase):
         status = es2system.system_data_sync(source, target)
         self.assertEqual(status, 0)
 
-    @unittest.skipIf(install_type != 'full',"Test only on MESA Station - Full install")
+    @unittest.skipIf(install_type != 'full', "Test only on MESA Station - Full install")
     def test_db_sync_full_from_PC2(self):
 
         list_syncs = ['sync_pc2_products_full', 'sync_pc2_analysis_full']
         status = es2system.system_db_sync(list_syncs)
 
-    @unittest.skipIf(install_type != 'full',"Test only on MESA Station - Full install")
+    @unittest.skipIf(install_type != 'full', "Test only on MESA Station - Full install")
     def test_db_sync_full_from_PC3(self):
 
         list_syncs = ['sync_pc3_analysis_full', 'sync_pc3_products_full']
         status = es2system.system_db_sync(list_syncs)
 
-    @unittest.skipIf(install_type != 'full',"Test only on MESA Station - Full install")
+    @unittest.skipIf(install_type != 'full', "Test only on MESA Station - Full install")
     def test_system_db_sync_full(self):
 
         # Should get here the role of my machine ...
         status = es2system.system_db_sync_full('pc2')
+        self.assertTrue(status)
 
-    @unittest.skipIf(install_type != 'full',"Test only on MESA Station - Full install")
+    @unittest.skipIf(install_type != 'full', "Test only on MESA Station - Full install")
     def test_system_bucardo_config(self):
 
         # Should get here the role of my machine ...
         status = es2system.system_bucardo_config()
 
-    @unittest.skipIf(install_type != 'full',"Test only on MESA Station - Full install")
+    @unittest.skipIf(install_type != 'full', "Test only on MESA Station - Full install")
     def test_system_status_PC1(self):
 
         # Should get here the role of my machine ...
         status = es2system.get_status_PC1()
 
-    @unittest.skipIf(install_type != 'full',"Test only on MESA Station - Full install")
+    # @unittest.skipIf(install_type != 'full',"Test only on MESA Station - Full install")
     def test_system_install_report(self):
 
         # Should get here the role of my machine ...
@@ -162,9 +169,9 @@ class TestSystem(unittest.TestCase):
 
         # Clean the temp dirs and check the status
         status = es2system.clean_temp_dir()
-        self.assertEqual(status,0)
+        self.assertEqual(status, 0)
 
-    @unittest.skipIf(install_type != 'full',"Test only on MESA Station - Full install")
+    @unittest.skipIf(install_type != 'full', "Test only on MESA Station - Full install")
     def test_bucardo_service(self):
 
         # Should get here the role of my machine ...
@@ -174,9 +181,9 @@ class TestSystem(unittest.TestCase):
 
         # Call the system loop in dry mode (exits after first iteration)
         status = es2system.loop_system(dry_run=True)
-        self.assertEqual(status,0)
+        self.assertEqual(status, 0)
 
-    @unittest.skipIf(install_type != 'server',"Test only on JRC Server Installation")
+    @unittest.skipIf(install_type != 'server', "Test only on JRC Server Installation")
     def test_push_ftp_aruba(self):
 
         try:
@@ -186,9 +193,9 @@ class TestSystem(unittest.TestCase):
 
         # Masked=FALSE means the masked products are pushed.
         status = es2system.push_data_ftp(url=ac.url, user=ac.user, psw=ac.psw, trg_dir=ac.trg_dir, masked=False)
-        self.assertEqual(status,0)
+        self.assertEqual(status, 0)
 
-    @unittest.skipIf(install_type != 'server',"Test only on JRC Server Installation")
+    @unittest.skipIf(install_type != 'server', "Test only on JRC Server Installation")
     def test_push_ftp_jrc(self):
 
         # Execute w.o. arguments: they are read from config/server_ftp.py
@@ -196,7 +203,8 @@ class TestSystem(unittest.TestCase):
         # Masked=TRUE means the masked sub-products are not pushed (which is the default)
 
         status = es2system.push_data_ftp(masked=True)
-        self.assertEqual(status,0)
+        self.assertEqual(status, 0)
+
 
 suite_system = unittest.TestLoader().loadTestsFromTestCase(TestSystem)
 if __name__ == "__main__":

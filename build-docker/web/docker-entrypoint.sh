@@ -1,15 +1,10 @@
 #!/bin/bash
-
-export PYTHONPATH=$PYTHONPATH:'var/www/estation2'
-
 #echo "Starting container $(hostname)"
-#sleep 5
+sleep 2
+#export PYTHONPATH=$PYTHONPATH:'var/www/estation2'
+python -c 'import webpy_esapp_helpers; webpy_esapp_helpers.importJRCRefWorkspaces(version=1)'
+sleep 2
+python -c 'from database.dbInstall.install_update_db_in_postgres_container import install_update_db; install_update_db()'
 #/setup_pythonenvironment.sh
-#sleep 5
-#apache2ctl -D FOREGROUND
-
-# set -e
-# internal start of server in order to allow set-up using psql-client
-# does not listen on external TCP/IP and waits until start finishes
-# pg_ctl -D "/var/lib/postgres/data" -o "-c listen_addresses=''" -w start
-# source /setup_estationdb.sh
+sleep 3
+apache2ctl -D FOREGROUND

@@ -3657,9 +3657,22 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # -------------------------------------------------------------------------
 
         native_mapset_code = datasource_descr.native_mapset
-        orig_ds = gdal.Open(intermFile, gdal.GA_ReadOnly)           # Why in ROnly !??? it generates an error below
+
+        init_orig_ds = gdal.Open(intermFile, gdal.GF_Write)  #GA_Update
+        if init_orig_ds is None:
+            init_orig_ds = gdal.Open(intermFile, gdal.GA_ReadOnly)           # Why in ROnly !??? it generates an error below orig_ds = gdal.Open(intermFile, gdal.GA_Update)
         native_mapset = mapset.MapSet()
         native_mapset.assigndb(native_mapset_code)
+
+        # ES-535  Create a copy to assign projection.
+        intermFile_copyname = 'copy_'+os.path.basename(intermFile)
+        intermFile_copy = os.path.join(os.path.dirname(intermFile), intermFile_copyname)
+
+        # Prepare output driver
+        out_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
+
+        # Open destination dataset # ES-535
+        orig_ds = out_driver.CreateCopy(intermFile_copy, init_orig_ds, 0)
 
         if not native_mapset.is_wbd():
           if native_mapset_code != 'default':
@@ -3699,8 +3712,6 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # -------------------------------------------------------------------------
         # Generate the output file
         # -------------------------------------------------------------------------
-        # Prepare output driver
-        out_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
 
         merge_existing_output = False
         # Check if the output file already exists
@@ -3832,6 +3843,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             try:
                 command = es_constants.gdal_merge + ' -n '+str(out_nodata)
                 command += ' -a_nodata '+str(out_nodata)
+                command += ' -of GTiff '
                 command += ' -co \"compress=lzw\" -o '
                 command += tmp_output_file
                 command += ' '+ my_output_filename+ ' '+output_filename

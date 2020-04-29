@@ -89,6 +89,35 @@ ADD jre-8u251-linux-x64.tar.gz /usr/java
 ENV PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
 ARG PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
 
+#RUN mkdir -p /root/senchacmd && chmod 755 -R /root/senchacmd
+#ADD SenchaCmd-5.1.3.61-linux-x64.run /root/senchacmd
+#RUN apt-get update && apt-get install -y ruby2.5
+
+# Configuring web folder tree
+RUN mkdir -p /var/www/estation2 && mkdir -p /var/log/apache2/
+#ENV APACHE_RUN_USER www-data
+#ENV APACHE_RUN_GROUP www-data
+
+# Enable these Apache modules wsgi
+RUN a2enmod headers rewrite proxy wsgi
+RUN service apache2 restart
+WORKDIR /var/www/estation2
+
+# https://docs.docker.com/engine/reference/builder/#understand-how-cmd-and-entrypoint-interact
+#ENTRYPOINT ["apache2ctl", "-D", "FOREGROUND"]
+#CMD ["python", "-c", "import webpy_esapp_helpers; webpy_esapp_helpers.importJRCRefWorkspaces(version=1)"]
+#CMD apache2ctl -D FOREGROUND
+
+ADD docker-entrypoint.sh /root/docker-entrypoint.sh
+RUN chmod 0775 /root/docker-entrypoint.sh
+
+ENTRYPOINT ["/root/docker-entrypoint.sh"]
+
+EXPOSE  80
+
+
+
+
 ## Install OpenJDK-11
 #RUN apt-get update && \
 #    apt-get install -y openjdk-11-jdk && \
@@ -104,19 +133,6 @@ ARG PATH="/usr/java/jre1.8.0_251/bin:${PATH}"
 ## Setup JAVA_HOME -- useful for docker commandline
 #ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 #RUN export JAVA_HOME
-
-# Configuring web folder tree
-RUN mkdir -p /var/www/estation2 && mkdir -p /var/log/apache2/
-#ENV APACHE_RUN_USER www-data
-#ENV APACHE_RUN_GROUP www-data
-
-# Enable these Apache modules wsgi
-RUN a2enmod headers rewrite proxy wsgi
-RUN service apache2 restart
-WORKDIR /var/www
-
-CMD apache2ctl -D FOREGROUND
-EXPOSE  80
 
 
 #ADD pythonpath /pythonpath

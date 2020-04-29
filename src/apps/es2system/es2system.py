@@ -1,16 +1,3 @@
-from __future__ import division
-from __future__ import unicode_literals
-from __future__ import absolute_import
-from __future__ import print_function
-from builtins import open
-from builtins import int
-from future import standard_library
-
-standard_library.install_aliases()
-from builtins import str
-from past.utils import old_div
-
-_author__ = "Marco Clerici"
 #
 #	purpose: Define the system service
 #	author:  M.Clerici & Jurriaan van't Klooster
@@ -18,6 +5,18 @@ _author__ = "Marco Clerici"
 #   descr:	 Manage all background operations (db and data sync, check status, db dump)
 #	history: 1.0
 #
+
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import print_function
+from builtins import open
+from builtins import int
+from future import standard_library
+from shlex import quote as shlex_quote
+standard_library.install_aliases()
+from builtins import str
+from past.utils import old_div
 
 # source eStation2 base definitions
 import os, re, subprocess
@@ -29,6 +28,7 @@ import tempfile
 import glob
 import tarfile
 import shlex
+
 # import eStation2 modules
 from lib.python import functions
 from lib.python import es_logging as log
@@ -39,8 +39,13 @@ from database import querydb
 from apps.productmanagement.products import *
 from lib.python.daemon import DaemonDryRunnable
 
+_author__ = "Marco Clerici"
+
 logger = log.my_logger(__name__)
 data_dir = es_constants.es2globals['processing_dir']
+
+# Get the local systems settings
+systemsettings = functions.getSystemSettings()
 
 
 def get_status_local_machine():
@@ -50,7 +55,7 @@ def get_status_local_machine():
     logger.debug("Entering routine %s" % 'get_status_local_machine')
 
     # Get the local systems settings
-    systemsettings = functions.getSystemSettings()
+    # systemsettings = functions.getSystemSettings()
 
     # Get status of all services
     status_services = functions.getStatusAllServices()
@@ -183,6 +188,7 @@ def system_bucardo_service(action):
 def system_db_sync_full(pc_role):
     #   Manage the transition from Recovery to Nominal, by forcing a full sync of both DB schemas
     #   pc_role:    role of my PC (either PC2 or PC3)
+    from docker import Client
 
     logger.debug("Entering routine %s" % 'system_db_sync_full')
 
@@ -193,8 +199,12 @@ def system_db_sync_full(pc_role):
     # Create a full dump
     dumpcommand = 'psql -h localhost -p 5432 -U estation -d estationdb -t -A -c "SELECT products.export_all_data()" -o ' + \
                   dump_filename
-
-    status = os.system(dumpcommand)
+    if systemsettings['docker_install']:
+        c = Client(base_url='unix://var/run/docker.sock')
+        commandid = c.exec_create('postgres', dumpcommand)
+        status = c.exec_start(commandid)
+    else:
+        status = os.system(dumpcommand)
 
     # Wait a second
     time.sleep(1)
@@ -216,6 +226,43 @@ def system_db_sync_full(pc_role):
 
 def system_db_dump(list_dump):
     #   Dump the database schemas (for backup)
+    logger.debug("Entering routine %s" % 'system_db_dump')
+    now = datetime.datetime.now()
+    # Use db_dump
+    dump_dir = es_constants.es2globals['db_dump_dir']
+    db_dump = es_constants.es2globals['db_dump_exec']
+    status = False
+    if len(list_dump) > 0:
+        for dump_schema in list_dump:
+
+            # Check if there is one dump for the current day
+            # See Tuleap Ticket #10905 (VGF-MOI-wk1)
+            existing_dumps = glob.glob(dump_dir + os.path.sep + 'estationdb_' + dump_schema + '_*')
+            match_name = '.*estationdb_' + dump_schema + '_' + now.strftime("%Y-%m-%d-") + '.*.sql'
+            matches = [s for s in existing_dumps if re.match(match_name, s)]
+            if len(matches) == 0:
+                dump_file = dump_dir + os.path.sep + 'estationdb_' + dump_schema + '_' + now.strftime(
+                    "%Y-%m-%d-%H:%M:%S") + '.sql'
+                # The -i (ignore-version) flag is deprecated and gives error when used in postgresql >9.3
+                command = db_dump + ' -i ' + \
+                                  ' -h localhost ' + \
+                                  ' -U estation ' + \
+                                  ' -F p -a --column-inserts ' + \
+                                  ' -f ' + dump_file + \
+                                  ' -n ' + dump_schema + ' estationdb'
+
+                logger.info('Command is: %s' % command)
+                status = + os.system(command)
+
+        return status
+
+
+def system_db_dump_docker(list_dump):
+    #   Dump the database schemas (for backup)
+    from docker import Client
+    c = Client(base_url='unix://var/run/docker.sock')
+    # commandid = c.exec_create('postgres', '/usr/bin/pg_dump -h localhost -U estation -F p -a --column-inserts -f
+    # /eStation2/db_dump/estationdb_products_2020-04-21-15:21:33.sql -n products estationdb')
 
     logger.debug("Entering routine %s" % 'system_db_dump')
     now = datetime.datetime.now()
@@ -234,16 +281,16 @@ def system_db_dump(list_dump):
             if len(matches) == 0:
                 dump_file = dump_dir + os.path.sep + 'estationdb_' + dump_schema + '_' + now.strftime(
                     "%Y-%m-%d-%H:%M:%S") + '.sql'
-                command = db_dump + ' -i ' + \
-                          ' -h localhost ' + \
-                          ' -U estation ' + \
-                          ' -F p -a --column-inserts ' + \
-                          ' -f ' + dump_file + \
-                          ' -n ' + dump_schema + ' estationdb'
+                command = db_dump + ' -h localhost' + \
+                                    ' -U estation' + \
+                                    ' -F p -a --column-inserts' + \
+                                    ' -f ' + dump_file + \
+                                    ' -n ' + dump_schema + ' estationdb'
 
                 logger.info('Command is: %s' % command)
-                status = + os.system(command)
-
+                commandid = c.exec_create('postgres', command)
+                status = c.exec_start(commandid)
+                # status = + os.system(shlex_quote(command))
         return status
 
 
@@ -462,6 +509,7 @@ def system_install_report(target_file=None):
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
     pipf = open(tmp_dir + os.path.sep + 'List_pip_freeze.txt', 'w')
+    out = out.decode()
     for value in out:
         pipf.write(value)
     pipf.close()
@@ -602,238 +650,6 @@ def clean_temp_dir():
             logger.warning('A directory was deleted by system: %s' % f)
             return 1
     return 0
-
-
-def loop_system(dry_run=False):
-    #    Driver of the system service
-    #    Reads configuration from the system setting file (system_settings.ini)
-    #    Perform the needed operations, according to the machine role/mode
-    #    Arguments: dry_run -> if > 0, only report what has to be done (no actions)
-    #                       -> if = 0, do operations (default)
-
-    logger.info("Entering routine %s" % 'loop_system')
-
-    # Specific settings for the system operations
-    delay_data_sync_minutes = es_constants.es2globals['system_delay_data_sync_min']
-    time_for_db_dump = es_constants.es2globals['system_time_db_dump_hhmm']
-    time_for_spirits_conv = es_constants.es2globals['system_time_spirits_conv']
-
-    try:
-        time_for_push_ftp = es_constants.es2globals['system_time_push_ftp']
-    except:
-        logger.info("Parameter not defined in factory_settings: %s" % 'system_time_push_ftp')
-        time_for_push_ftp = '24:01'
-
-    do_bucardo_config = False
-
-    # Restart bucardo
-    if do_bucardo_config:
-        command = 'bucardo restart'
-        res_bucardo_restart = os.system(command)
-        if res_bucardo_restart:
-            logger.warning("Error in restarting bucardo")
-        else:
-            logger.info("Bucardo restarted correctly")
-
-    # Loop to manage the 'cron-like' operations, i.e.:
-
-    #   0. Check bucardo config	
-    #   a. Data sync (not anymore, done by TPZF)
-    #   b. DB sync: bucardo
-    #   c. DB dump (create/manage)
-    #   d. Spirits conversion
-    #   e. Clean Temporary directory
-
-    execute_loop = True
-    while execute_loop:
-
-        logger.info("")
-        logger.info("Entering the System Service loop")
-
-        # Read the relevant info from system settings
-        system_settings = functions.getSystemSettings()
-        logger.debug('System Settings Mode: %s ' % system_settings['mode'])
-
-        # Initialize To Do flags
-        do_data_sync = False
-        schemas_db_sync = []
-        schemas_db_dump = []
-        do_convert_spirits = False
-        do_clean_tmp = True
-        do_push_ftp = False
-
-        if system_settings['data_sync'] in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
-            do_data_sync = True
-        else:
-            do_data_sync = False
-
-        if system_settings['db_sync'] in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
-            do_db_sync = True
-        else:
-            do_db_sync = False
-
-        # Implement the logic of operations based on type/role/mode
-        if system_settings['type_installation'] == 'Full':
-
-            do_bucardo_config = True
-            if system_settings['role'] == 'PC2':
-                status_otherPC = functions.get_remote_system_status('mesa-pc3')
-                if len(status_otherPC) != 0:
-                    mode_otherPC = status_otherPC['mode']
-                else:
-                    mode_otherPC = 'unreachable'
-
-                # ip_target = system_settings['ip_pc3']
-                if system_settings['mode'] == 'nominal':
-                    if mode_otherPC == 'recovery':
-                        do_data_sync = False
-                        logger.info("Do not do data_sync because other PC is in Recovery Mode")
-                    elif mode_otherPC == 'unreachable':
-                        do_data_sync = False
-                        logger.info("Do not do data_sync because other PC is not reachable")
-
-                    schemas_db_sync = ['products']
-                    schemas_db_dump = ['products', 'analysis']
-                    do_convert_spirits = True
-                    bucardo_action = 'start'
-
-                if system_settings['mode'] == 'recovery':
-                    schemas_db_sync = []
-                    schemas_db_dump = ['products', 'analysis']
-                    do_convert_spirits = True
-                    bucardo_action = 'stop'
-
-                if system_settings['mode'] == 'maintenance':
-                    schemas_db_sync = []
-                    schemas_db_dump = []
-                    bucardo_action = 'stop'
-
-            if system_settings['role'] == 'PC3':
-                status_otherPC = functions.get_remote_system_status('mesa-pc2')
-
-                if len(status_otherPC) != 0:
-                    mode_otherPC = status_otherPC['mode']
-                else:
-                    mode_otherPC = 'unreachable'
-
-                # ip_target = system_settings['ip_pc2']
-                if system_settings['mode'] == 'nominal':
-                    if mode_otherPC == 'recovery':
-                        do_data_sync = False
-                        logger.info("Do not do data_sync because other PC is in Recovery Mode")
-                    elif mode_otherPC == 'unreachable':
-                        do_data_sync = False
-                        logger.info("Do not do data_sync because other PC is not reachable")
-
-                    schemas_db_sync = ['analysis']
-                    schemas_db_dump = ['products', 'analysis']
-                    bucardo_action = 'start'
-
-                if system_settings['mode'] == 'recovery':
-                    schemas_db_sync = []
-                    schemas_db_dump = ['products', 'analysis']
-                    bucardo_action = 'stop'
-
-                if system_settings['mode'] == 'maintenance':
-                    schemas_db_sync = []
-                    schemas_db_dump = []
-                    bucardo_action = 'stop'
-
-        if system_settings['type_installation'] == 'SinglePC':
-            do_data_sync = False
-            schemas_db_sync = []
-            schemas_db_dump = ['products', 'analysis']
-
-        if system_settings['type_installation'] == 'Server':
-            do_data_sync = False
-            do_db_sync = False
-            schemas_db_sync = []
-            schemas_db_dump = ['products', 'analysis']
-            do_convert_spirits = False
-            do_push_ftp = True
-
-        if es_constants.es2globals['do_spirits_conversion'] in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
-            do_convert_spirits = True
-
-        # Report on the actions to be done
-        logger.info("")
-        logger.info("*   Schedule follows ")
-        logger.info("*   Do bucardo config:  " + str(do_bucardo_config))
-        logger.info("*   Do data-sync:       " + str(do_data_sync))
-        logger.info("*   Do db-sync:         " + str(do_db_sync))
-        # logger.info("*   Nr schema to dump:  " + str(len(schemas_db_dump)))
-        logger.info("*   Do spirits convers: " + str(do_convert_spirits))
-        logger.info("*   Do push to ftp:     " + str(do_push_ftp))
-        logger.info("")
-
-        # do_bucardo_config
-        if do_bucardo_config:
-            system_bucardo_config()
-
-        # do_data_sync
-        operation = 'data_sync'
-        if do_data_sync:
-            check_time = check_delay_time(operation, delay_minutes=delay_data_sync_minutes)
-            logger.info("check_time: " + str(check_time))
-            if check_time:
-                logger.info("Executing data synchronization")
-                data_source = es_constants.es2globals['processing_dir']
-                # data_target = ip_target+'::products'+es_constants.es2globals['processing_dir']
-                data_target = 'PC3::products'
-                system_data_sync(data_source, data_target)
-                check_delay_time(operation, delay_minutes=delay_data_sync_minutes, write=True)
-
-        # DB sync: execute every cycle if in system_setting (no delay)
-        operation = 'db_sync'
-        if len(schemas_db_sync) > 0:
-            if do_db_sync:
-                logger.info("Executing db synchronization")
-                # Call the function
-                system_bucardo_service(bucardo_action)
-
-        # DB dump
-        operation = 'db_dump'
-        if len(schemas_db_dump) > 0:
-            check_time = check_delay_time(operation, time=time_for_db_dump)
-            if check_time:
-                # Execute the dump of the schemas active on the machine - Correct Tuleap #10905
-                logger.info("Executing db dump")
-                system_db_dump(schemas_db_dump)
-
-                # Manage the file dumps (rotation)
-                logger.info("Executing manage dumps")
-                system_manage_dumps()
-
-        # Convert to spirits format
-        operation = 'convert_spirits'
-        if do_convert_spirits:
-            check_time = check_delay_time(operation, time=time_for_spirits_conv)
-            if check_time:
-                logger.info("Convert to SPIRITS format")
-                output_dir = es_constants.es2globals['spirits_output_dir']
-                conv.convert_driver(output_dir)
-
-        # Push data to ftp server
-        operation = 'push_to_ftp'
-        if do_push_ftp:
-            check_time = check_delay_time(operation, time=time_for_push_ftp)
-            if check_time:
-                logger.info("Push data to remote ftp server")
-                status = push_data_ftp()
-
-        # Clean temporary directory
-        operation = 'clean_temp'
-        if do_clean_tmp:
-            logger.info("Cleaning Temporary dirs")
-            clean_temp_dir()
-
-        # Exit in case of dry_run
-        if dry_run:
-            execute_loop = False
-            return 0
-
-        # Sleep some time
-        time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))
 
 
 def cmd(acmd):
@@ -1011,6 +827,241 @@ def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None, ma
                         except:
                             logger.error('Error in executing command: {}'.format(command))
                             spec_logger.error('Error in executing command: {}'.format(command))
+
+
+def loop_system(dry_run=False):
+    #    Driver of the system service
+    #    Reads configuration from the system setting file (system_settings.ini)
+    #    Perform the needed operations, according to the machine role/mode
+    #    Arguments: dry_run -> if > 0, only report what has to be done (no actions)
+    #                       -> if = 0, do operations (default)
+
+    logger.info("Entering routine %s" % 'loop_system')
+
+    # Specific settings for the system operations
+    delay_data_sync_minutes = es_constants.es2globals['system_delay_data_sync_min']
+    time_for_db_dump = es_constants.es2globals['system_time_db_dump_hhmm']
+    time_for_spirits_conv = es_constants.es2globals['system_time_spirits_conv']
+
+    try:
+        time_for_push_ftp = es_constants.es2globals['system_time_push_ftp']
+    except:
+        logger.info("Parameter not defined in factory_settings: %s" % 'system_time_push_ftp')
+        time_for_push_ftp = '24:01'
+
+    do_bucardo_config = False
+
+    # Restart bucardo
+    if do_bucardo_config:
+        command = 'bucardo restart'
+        res_bucardo_restart = os.system(command)
+        if res_bucardo_restart:
+            logger.warning("Error in restarting bucardo")
+        else:
+            logger.info("Bucardo restarted correctly")
+
+    # Loop to manage the 'cron-like' operations, i.e.:
+
+    #   0. Check bucardo config
+    #   a. Data sync (not anymore, done by TPZF)
+    #   b. DB sync: bucardo
+    #   c. DB dump (create/manage)
+    #   d. Spirits conversion
+    #   e. Clean Temporary directory
+
+    execute_loop = True
+    while execute_loop:
+
+        logger.info("")
+        logger.info("Entering the System Service loop")
+
+        # Read the relevant info from system settings
+        system_settings = functions.getSystemSettings()
+        logger.debug('System Settings Mode: %s ' % system_settings['mode'])
+
+        # Initialize To Do flags
+        do_data_sync = False
+        schemas_db_sync = []
+        schemas_db_dump = []
+        do_convert_spirits = False
+        do_clean_tmp = True
+        do_push_ftp = False
+
+        if system_settings['data_sync'] in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            do_data_sync = True
+        else:
+            do_data_sync = False
+
+        if system_settings['db_sync'] in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            do_db_sync = True
+        else:
+            do_db_sync = False
+
+        # Implement the logic of operations based on type/role/mode
+        if system_settings['type_installation'] == 'Full':
+
+            do_bucardo_config = True
+            if system_settings['role'] == 'PC2':
+                status_otherPC = functions.get_remote_system_status('mesa-pc3')
+                if len(status_otherPC) != 0:
+                    mode_otherPC = status_otherPC['mode']
+                else:
+                    mode_otherPC = 'unreachable'
+
+                # ip_target = system_settings['ip_pc3']
+                if system_settings['mode'] == 'nominal':
+                    if mode_otherPC == 'recovery':
+                        do_data_sync = False
+                        logger.info("Do not do data_sync because other PC is in Recovery Mode")
+                    elif mode_otherPC == 'unreachable':
+                        do_data_sync = False
+                        logger.info("Do not do data_sync because other PC is not reachable")
+
+                    schemas_db_sync = ['products']
+                    schemas_db_dump = ['products', 'analysis']
+                    do_convert_spirits = True
+                    bucardo_action = 'start'
+
+                if system_settings['mode'] == 'recovery':
+                    schemas_db_sync = []
+                    schemas_db_dump = ['products', 'analysis']
+                    do_convert_spirits = True
+                    bucardo_action = 'stop'
+
+                if system_settings['mode'] == 'maintenance':
+                    schemas_db_sync = []
+                    schemas_db_dump = []
+                    bucardo_action = 'stop'
+
+            if system_settings['role'] == 'PC3':
+                status_otherPC = functions.get_remote_system_status('mesa-pc2')
+
+                if len(status_otherPC) != 0:
+                    mode_otherPC = status_otherPC['mode']
+                else:
+                    mode_otherPC = 'unreachable'
+
+                # ip_target = system_settings['ip_pc2']
+                if system_settings['mode'] == 'nominal':
+                    if mode_otherPC == 'recovery':
+                        do_data_sync = False
+                        logger.info("Do not do data_sync because other PC is in Recovery Mode")
+                    elif mode_otherPC == 'unreachable':
+                        do_data_sync = False
+                        logger.info("Do not do data_sync because other PC is not reachable")
+
+                    schemas_db_sync = ['analysis']
+                    schemas_db_dump = ['products', 'analysis']
+                    bucardo_action = 'start'
+
+                if system_settings['mode'] == 'recovery':
+                    schemas_db_sync = []
+                    schemas_db_dump = ['products', 'analysis']
+                    bucardo_action = 'stop'
+
+                if system_settings['mode'] == 'maintenance':
+                    schemas_db_sync = []
+                    schemas_db_dump = []
+                    bucardo_action = 'stop'
+
+        if system_settings['type_installation'] == 'SinglePC':
+            do_data_sync = False
+            schemas_db_sync = []
+            schemas_db_dump = ['products', 'analysis']
+
+        if system_settings['type_installation'] == 'Server':
+            do_data_sync = False
+            do_db_sync = False
+            schemas_db_sync = []
+            schemas_db_dump = ['products', 'analysis']
+            do_convert_spirits = False
+            do_push_ftp = True
+
+        if es_constants.es2globals['do_spirits_conversion'] in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+            do_convert_spirits = True
+
+        # Report on the actions to be done
+        logger.info("")
+        logger.info("*   Schedule follows ")
+        logger.info("*   Do bucardo config:  " + str(do_bucardo_config))
+        logger.info("*   Do data-sync:       " + str(do_data_sync))
+        logger.info("*   Do db-sync:         " + str(do_db_sync))
+        # logger.info("*   Nr schema to dump:  " + str(len(schemas_db_dump)))
+        logger.info("*   Do spirits convers: " + str(do_convert_spirits))
+        logger.info("*   Do push to ftp:     " + str(do_push_ftp))
+        logger.info("")
+
+        # do_bucardo_config
+        if do_bucardo_config:
+            system_bucardo_config()
+
+        # do_data_sync
+        operation = 'data_sync'
+        if do_data_sync:
+            check_time = check_delay_time(operation, delay_minutes=delay_data_sync_minutes)
+            logger.info("check_time: " + str(check_time))
+            if check_time:
+                logger.info("Executing data synchronization")
+                data_source = es_constants.es2globals['processing_dir']
+                # data_target = ip_target+'::products'+es_constants.es2globals['processing_dir']
+                data_target = 'PC3::products'
+                system_data_sync(data_source, data_target)
+                check_delay_time(operation, delay_minutes=delay_data_sync_minutes, write=True)
+
+        # DB sync: execute every cycle if in system_setting (no delay)
+        operation = 'db_sync'
+        if len(schemas_db_sync) > 0:
+            if do_db_sync:
+                logger.info("Executing db synchronization")
+                # Call the function
+                system_bucardo_service(bucardo_action)
+
+        # DB dump
+        operation = 'db_dump'
+        if len(schemas_db_dump) > 0:
+            check_time = check_delay_time(operation, time=time_for_db_dump)
+            if check_time:
+                # Execute the dump of the schemas active on the machine - Correct Tuleap #10905
+                logger.info("Executing db dump")
+                if systemsettings['docker_install']:
+                    system_db_dump_docker(schemas_db_dump)
+                else:
+                    system_db_dump(schemas_db_dump)
+
+                # Manage the file dumps (rotation)
+                logger.info("Executing manage dumps")
+                system_manage_dumps()
+
+        # Convert to spirits format
+        operation = 'convert_spirits'
+        if do_convert_spirits:
+            check_time = check_delay_time(operation, time=time_for_spirits_conv)
+            if check_time:
+                logger.info("Convert to SPIRITS format")
+                output_dir = es_constants.es2globals['spirits_output_dir']
+                conv.convert_driver(output_dir)
+
+        # Push data to ftp server
+        operation = 'push_to_ftp'
+        if do_push_ftp:
+            check_time = check_delay_time(operation, time=time_for_push_ftp)
+            if check_time:
+                logger.info("Push data to remote ftp server")
+                status = push_data_ftp()
+
+        # Clean temporary directory
+        operation = 'clean_temp'
+        if do_clean_tmp:
+            logger.info("Cleaning Temporary dirs")
+            clean_temp_dir()
+
+        # Exit in case of dry_run
+        if dry_run:
+            execute_loop = False
+            return 0
+
+        # Sleep some time
+        time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))
 
 
 class SystemDaemon(DaemonDryRunnable):
