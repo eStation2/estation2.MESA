@@ -345,8 +345,7 @@ class TestIngestion(unittest.TestCase):
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
-        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger,
-                               echo_query=1)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger,echo_query=1)
         # in_date = '20200321'
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
@@ -392,7 +391,7 @@ class TestIngestion(unittest.TestCase):
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
-    #   Rainfall - CHIRPS  \\Tested -->Not working 29-04-2020 (Working --> 28-04-2020) --> Vijay\\
+    #   Rainfall - CHIRPS  \\Tested -->Working -->30-04-2020, 28-04-2020 (Not working 29-04-2020) --> Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_chirps(self):
         productcode = 'chirps-dekad'
@@ -644,7 +643,7 @@ class TestIngestion(unittest.TestCase):
         subproducts.append(sprod)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
-        ingestion.ingestion(date_fileslist[0], in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+        # ingestion.ingestion(date_fileslist[0], in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         in_date = '20200120'
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
@@ -1229,7 +1228,7 @@ class TestIngestion(unittest.TestCase):
     #     self.assertEqual(1, 1)
 
     #   ---------------------------------------------------------------------------
-    #   INLAND WATER - WBD AVG \\Not working --> memory problem --->28-04-2020\\ @Marco can you please check
+    #   INLAND WATER - WBD AVG \\Not working --> memory problem in checking the array --->28-04-2020\\ @Marco can you please check
     #   ---------------------------------------------------------------------------
     def test_ingest_jrc_wbd_avg_tarzip(self):
         productcode = 'wd-gee'
