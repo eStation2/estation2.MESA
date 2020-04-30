@@ -3822,11 +3822,13 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
             # Close output file
             trg_ds = None
+            out_driver = None
             sds_meta.assign_input_files(in_files)
 
           else:
             # Close output file
             trg_ds = None
+            out_driver = None
 
             # Merge the old and new output products into a 'tmp' file
             # try:
@@ -4043,6 +4045,7 @@ def ingest_file_vers_1_0(input_file, in_date, product_def, target_mapset, my_log
 
     sds_meta.write_to_ds(trg_ds)
     trg_ds = None
+    out_driver = None
 
 
 def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete=False):
@@ -4197,6 +4200,7 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
     # -------------------------------------------------------------------------
     # Close dataset
     trg_ds = None
+    out_driver = None
 
     sds_meta_out.assign_es2_version()
     sds_meta_out.assign_mapset(target_mapsetid)
