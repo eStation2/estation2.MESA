@@ -89,7 +89,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(1, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - WSI CROP/PASTURE  \\Tested Matching --> 29-04-2020 (Not matching--> 28-04-2020) --> Vijay\\
+    #   Vegetation - WSI CROP/PASTURE \\Ok 30-04-2020 Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_mars_wsi(self):
         productcode = 'wsi-hp'
@@ -132,7 +132,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - DMP V2.0.1   \\Tested --> 28-04-2020 --> Vijay\\
+    #   Vegetation - DMP V2.0.1 \\Ok 30-04-2020 Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_g_cls_dmp_2_0_1(self):
 
@@ -222,7 +222,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - FAPAR V2.0.1 Global (Internet source)\\Tested --Working 29-04-2020  (Array different --> 28-04-2020) --> Vijay\\
+    #   Vegetation - FAPAR V2.0.1 Global (Internet source)\\Ok 30-04-2020 Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_g_cls_fapar_global_2_0_1(self):
 
@@ -266,7 +266,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Vegetation - NDVI V2.2.1 \\Tested --Working 29-04-2020 --> Vijay\\
+    #   Vegetation - NDVI V2.2.1 \\Ok 30-04-2020 Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_g_cls_ndvi_2_2(self):
 
@@ -352,7 +352,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Rainfall - ARC2   \\Tested --> 29-04-2020 --> Vijay\\
+    #   Rainfall - ARC2 \\Ok 30-04-2020 Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_arc2_rain(self):
         productcode = 'arc2-rain'
@@ -391,7 +391,7 @@ class TestIngestion(unittest.TestCase):
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
-    #   Rainfall - CHIRPS  \\Tested -->Working -->30-04-2020, 28-04-2020 (Not working 29-04-2020) --> Vijay\\
+    #   Rainfall - CHIRPS  \\Ok 30-04-2020 Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_chirps(self):
         productcode = 'chirps-dekad'
@@ -431,7 +431,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #   Rainfall - CHIRPS TIF  \\Tested -Matching --> 29-04-2020 (Not matching --> 28-04-2020) --> Vijay\\
+    #   Rainfall - CHIRPS TIF \\Ok 30-04-2020 Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_chirps_tif(self):
         productcode = 'chirps-dekad'
@@ -473,7 +473,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    Rainfall - Fewsnet 2  \\Tested Matching --> 29-04-2020 (Not matching with warning below--> 28-04-2020) --> Vijay\\
+    #    Rainfall - Fewsnet 2  \\Ok 30-04-2020 Vijay\\
     #   ---------------------------------------------------------------------------
     # web          | ERROR 1: PROJ: proj_create_from_database: crs not found
     # web          | ERROR 1: PROJ: proj_create_from_database: crs not found
@@ -519,7 +519,7 @@ class TestIngestion(unittest.TestCase):
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
-    #    Rainfall - TAMSAT 3  \\Tested Matching 29-04-2020 --> 28-04-2020 --> Vijay\\
+    #    Rainfall - TAMSAT 3  \\Ok 30-04-2020 Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_tamsat_rfe(self):
         productcode = 'tamsat-rfe'
@@ -563,7 +563,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    FIRE - MODIS FIRMS 6  \\Tested -->29-04-2020 28-04-2020 --> Vijay\\
+    #    FIRE - MODIS FIRMS 6  \\Ok 30-04-2020 Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_modis_firms(self):
         productcode = 'modis-firms'
@@ -651,7 +651,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    OCEANOGRAPHY - MODIS CHLA  \\Tested -->29-04-2020 28-04-2020 --> Vijay\\
+    #    OCEANOGRAPHY - MODIS CHLA \\Ok 30-04-2020 Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_modis_chlor_netcdf(self):
         productcode = 'modis-chla'
@@ -770,7 +770,7 @@ class TestIngestion(unittest.TestCase):
     #     self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    OCEANOGRAPHY - MODIS SST  \\Not matching with below warning -- QGIS same results--> 29-04-2020 --> Vijay\\
+    #    OCEANOGRAPHY - MODIS SST  \\Ok 30-04-2020 Vijay\\
     #   ---------------------------------------------------------------------------
     # web          | /opt/project/src/apps/acquisition/ingestion.py:3535: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/eStation2/apps.acquisition.ingestiond0mdd_10_AQUA_MODIS.20200320.L3m.DAY.SST.sst.4km.NRT.nc/scaling.txt' mode='r' encoding='UTF-8'>
     #  [in_scale_factor, in_offset] = functions.read_netcdf_scaling(intermFile)
@@ -814,7 +814,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    OCEANOGRAPHY - PML MODIS SST \\Similar method tested --> Vijay\\
+    #    OCEANOGRAPHY - PML MODIS SST \\Similar method tested PML MODIS OC --> Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_pml_modis_sst(self):
         productcode = 'pml-modis-sst'
@@ -856,7 +856,7 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
-    #    OCEANOGRAPHY - PML MODIS CHL \\Tested --> 29-04-2020 , 28-04-2020 --> Vijay\\
+    #    OCEANOGRAPHY - PML MODIS CHL \\Ok 30-04-2020 Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_pml_modis_oc(self):
         productcode = 'pml-modis-chl'
@@ -1067,7 +1067,7 @@ class TestIngestion(unittest.TestCase):
                                version=productversion, mapsetcode=mapsetcode,date=in_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
-    #    Miscellaneous - CPC SM     \\Tested working -- 29-04-2020 \\ -> Vijay
+    #    Miscellaneous - CPC SM  \\Ok 30-04-2020 Vijay\\
     #   ---------------------------------------------------------------------------
     def test_ingest_cpc_soilmoisture(self):
         productcode = 'cpc-sm'
@@ -1228,7 +1228,7 @@ class TestIngestion(unittest.TestCase):
     #     self.assertEqual(1, 1)
 
     #   ---------------------------------------------------------------------------
-    #   INLAND WATER - WBD AVG \\Not working --> memory problem in checking the array --->28-04-2020\\ @Marco can you please check
+    #   INLAND WATER - WBD AVG \\Not working --> memory problem in checking the array --->30-04-2020\\ @Marco can you please check
     #   ---------------------------------------------------------------------------
     def test_ingest_jrc_wbd_avg_tarzip(self):
         productcode = 'wd-gee'
