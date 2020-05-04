@@ -83,6 +83,29 @@ class TestIngestion(unittest.TestCase):
 
         return result
 
+    def remove_output_file(self, productcode, subproductcode, version, mapset_id, out_date):
+        # Define output directory and make sure it exists
+        output_directory = self.ingest_out_dir + functions.set_path_sub_directory(productcode,
+                                                                           subproductcode,
+                                                                           'Ingest',
+                                                                           version,
+                                                                           mapset_id)
+
+        # Define output filename
+        output_filename = output_directory + functions.set_path_filename(out_date,
+                                                                         productcode,
+                                                                         subproductcode,
+                                                                         mapset_id,
+                                                                         version,
+                                                                         '.tif')
+
+        try:
+            if os.path.exists(output_filename):
+                os.remove(output_filename)
+        except:
+            # my_logger.error('Cannot create output directory: ' + output_directory)
+            return 1
+
     def TestDriveAll(self):
         dry_run = True
         ingestion.loop_ingestion(dry_run=dry_run)
@@ -102,6 +125,7 @@ class TestIngestion(unittest.TestCase):
                           os.path.join(input_dir,'wsi_hp_pasture_20200221.hdr')]
 
         in_date = '20200221'
+        out_date = '20200221'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -122,13 +146,15 @@ class TestIngestion(unittest.TestCase):
 
         subproducts = [sprod]
 
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
 
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
@@ -147,7 +173,7 @@ class TestIngestion(unittest.TestCase):
         date_fileslist = [os.path.join(input_dir,'c_gls_DMP-RT0_202003200000_GLOBE_PROBAV_V2.0.1.nc')]
 
         in_date = '20200320'
-
+        out_date= '20200311'
         product = {"productcode": productcode,
                    "version": productversion}
 
@@ -167,14 +193,15 @@ class TestIngestion(unittest.TestCase):
                              're_process': re_process}
 
         subproducts = [sprod]
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
 
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-        in_date = '20200311'
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
@@ -193,6 +220,7 @@ class TestIngestion(unittest.TestCase):
         date_fileslist = [os.path.join(input_dir,'c_gls_FAPAR-RT0_202004100000_AFRI_PROBAV_V2.0.1.zip')]
 
         in_date = '202004010000'
+        out_date = '20200401'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -211,14 +239,62 @@ class TestIngestion(unittest.TestCase):
                              're_process': re_process}
 
         subproducts = [sprod]
-
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
 
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        in_date = '20200401'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
+        self.assertEqual(status, 1)
+
+
+    #   ---------------------------------------------------------------------------
+    #   Vegetation - LAI V2.0.1 AFRI (EumetCast source)//Tested 21.04.01// --> Marco
+    #   ---------------------------------------------------------------------------
+    def test_ingest_g_cls_lai_afri_2_0_1(self):
+
+        # Test Copernicus Products version 2.0.1 (for FAPAR)
+        # Products released from VITO in March 2017
+        productcode = 'vgt-lai'
+        productversion = 'V2.0'
+        subproductcode = 'lai'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID='EO:EUM:DAT:PROBA-V2.0:LAI'   #
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir,'c_gls_LAI-RT0_202004300000_AFRI_PROBAV_V2.0.1.zip')]
+
+        in_date = '202004300000'
+        out_date = '20200421'
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts = [sprod]
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                         source_id=datasource_descrID)
+
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
+        status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
@@ -236,7 +312,7 @@ class TestIngestion(unittest.TestCase):
         input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
         date_fileslist = [os.path.join(input_dir,'c_gls_FAPAR-RT0_202003310000_GLOBE_PROBAV_V2.0.1.nc')]
         in_date = '202003310000'
-
+        out_date = '20200321'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -255,14 +331,15 @@ class TestIngestion(unittest.TestCase):
                              're_process': re_process}
 
         subproducts = [sprod]
-
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
 
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        in_date = '20200321'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
@@ -280,7 +357,7 @@ class TestIngestion(unittest.TestCase):
         date_fileslist = [os.path.join(input_dir,'c_gls_NDVI_202003010000_AFRI_PROBAV_V2.2.1.zip')]
         # date_fileslist = glob.glob('/data/TestIngestion/c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.zip*')
         in_date = '202003010000'
-
+        out_date = '20200301'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -299,13 +376,14 @@ class TestIngestion(unittest.TestCase):
                              're_process': re_process}
 
         subproducts = [sprod]
-
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        in_date = '20200301'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
@@ -321,7 +399,7 @@ class TestIngestion(unittest.TestCase):
         # date_fileslist = [os.path.join(self.test_ingest_dir,'PROBAV_S10_TOC_*20200201**')]
         date_fileslist = glob.glob(input_dir+'/PROBAV_S10_TOC_*20200201**')
         in_date = '20200201'
-
+        out_date = '20200201'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -342,13 +420,14 @@ class TestIngestion(unittest.TestCase):
                  'nodata': nodata}
 
         subproducts = [sprod]
-
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger,echo_query=1)
-        # in_date = '20200321'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
@@ -364,7 +443,7 @@ class TestIngestion(unittest.TestCase):
         date_fileslist = [os.path.join(input_dir,'africa_arc.20200318.tif.zip')]
         # date_fileslist = glob.glob('/data/ingest/africa_arc.20200318.tif.zip')
         in_date = '20200318'
-
+        out_date = '20200318'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -383,12 +462,14 @@ class TestIngestion(unittest.TestCase):
                              're_process': re_process}
 
         subproducts = [sprod]
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        # in_date = '20200321'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
     #   Rainfall - CHIRPS  \\Ok 30-04-2020 Vijay\\
@@ -403,7 +484,7 @@ class TestIngestion(unittest.TestCase):
         date_fileslist = [os.path.join(input_dir, 'chirps-v2.0.2020.02.3.tif.gz')]
         # date_fileslist = ['/data/ingest/chirps-v2.0.2020.02.3.tif.gz']
         in_date = '2020.02.3'
-
+        out_date = '20200221'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -422,12 +503,14 @@ class TestIngestion(unittest.TestCase):
                              're_process': re_process}
 
         subproducts = [sprod]
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        in_date = '20200221'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
@@ -443,7 +526,7 @@ class TestIngestion(unittest.TestCase):
         date_fileslist = [os.path.join(input_dir, 'chirps-v2.0.2020.03.1.tif')]
         # date_fileslist = ['/data/ingest/chirps-v2.0.2020.03.1.tif']
         in_date = '2020.03.1'
-
+        out_date = '20200301'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -462,14 +545,15 @@ class TestIngestion(unittest.TestCase):
                              're_process': re_process}
 
         subproducts = [sprod]
-
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
 
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        in_date = '20200301'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
@@ -488,7 +572,7 @@ class TestIngestion(unittest.TestCase):
         date_fileslist = [os.path.join(input_dir, 'a20013rb.zip')]
         # date_fileslist = glob.glob('/data/ingest/a20013rb.zip')
         in_date = '20013'
-
+        out_date = '20200121'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -509,14 +593,14 @@ class TestIngestion(unittest.TestCase):
                  'nodata': no_data}
 
         subproducts = [sprod]
-
-
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        in_date = '20200121'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
     #    Rainfall - TAMSAT 3  \\Ok 30-04-2020 Vijay\\
@@ -531,7 +615,7 @@ class TestIngestion(unittest.TestCase):
         date_fileslist = [os.path.join(input_dir, 'rfe2020_01-dk3.v3.nc')]
         # date_fileslist = glob.glob('/data/ingest/rfe2020_01-dk3.v3.nc')
         in_date = '2020_01-dk3'
-
+        out_date = '20200121'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -552,14 +636,14 @@ class TestIngestion(unittest.TestCase):
                  'nodata': no_data}
 
         subproducts = [sprod]
-
-
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        in_date = '20200121'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
@@ -575,7 +659,7 @@ class TestIngestion(unittest.TestCase):
         date_fileslist = [os.path.join(input_dir, 'MODIS_C6_Global_MCD14DL_NRT_2020020.txt')]
         # date_fileslist = glob.glob('/data/ingest/MODIS_C6_Global_MCD14DL_NRT_2020020.txt')
         in_date = '2020020'
-
+        out_date = '20200120'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -596,13 +680,14 @@ class TestIngestion(unittest.TestCase):
                  'nodata': no_data}
 
         subproducts = [sprod]
-
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        in_date = '20200120'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
     #    FIRE - PROBA BA 300 NOT WORKING    -> Marco (memory problem?)
@@ -622,6 +707,7 @@ class TestIngestion(unittest.TestCase):
 
         one_filename = os.path.basename(date_fileslist[0])
         in_date = '20200310'
+        out_date = '20200310'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -639,15 +725,16 @@ class TestIngestion(unittest.TestCase):
                              're_process': re_process,
                              'nodata': product_in_info.no_data }
 
-        subproducts=[]
-        subproducts.append(sprod)
+        subproducts=[sprod]
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
-        # ingestion.ingestion(date_fileslist[0], in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+        ingestion.ingestion(date_fileslist[0], in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
-        in_date = '20200120'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
@@ -663,7 +750,7 @@ class TestIngestion(unittest.TestCase):
         date_fileslist = [os.path.join(input_dir, 'A2020078.L3m_DAY_CHL_chlor_a_4km.nc')]
         # date_fileslist = ['/data/ingest/A2020078.L3m_DAY_CHL_chlor_a_4km.nc']
         in_date = '2020078'
-
+        out_date = '20200318'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -682,13 +769,14 @@ class TestIngestion(unittest.TestCase):
                              're_process': re_process}
 
         subproducts = [sprod]
-
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
                                                       source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        in_date = '20200318'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
@@ -727,7 +815,7 @@ class TestIngestion(unittest.TestCase):
     #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
     #     in_date = functions.conv_date_yyyydoy_2_yyyymmdd(in_date)#'20200318'
     #     status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-    #                            version=productversion, mapsetcode=mapsetcode,date=in_date)
+    #                            version=productversion, mapsetcode=mapsetcode,date=out_date)
     #     self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
@@ -766,7 +854,7 @@ class TestIngestion(unittest.TestCase):
     #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
     #     in_date = functions.conv_date_yyyydoy_2_yyyymmdd(in_date)#'20200318'
     #     status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-    #                            version=productversion, mapsetcode=mapsetcode,date=in_date)
+    #                            version=productversion, mapsetcode=mapsetcode,date=out_date)
     #     self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
@@ -785,7 +873,7 @@ class TestIngestion(unittest.TestCase):
         date_fileslist = [os.path.join(input_dir, 'AQUA_MODIS.20200320.L3m.DAY.SST.sst.4km.NRT.nc')]
         # date_fileslist = ['/data/ingest/AQUA_MODIS.20200320.L3m.DAY.SST.sst.4km.NRT.nc']
         in_date = '20200320'
-
+        out_date = '20200320'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -804,13 +892,14 @@ class TestIngestion(unittest.TestCase):
                              're_process': re_process}
 
         subproducts = [sprod]
-
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr=querydb.get_datasource_descr(source_type='INTERNET',
                                                       source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        # in_date = functions.conv_date_yyyydoy_2_yyyymmdd(in_date)#'20200318'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
@@ -826,7 +915,7 @@ class TestIngestion(unittest.TestCase):
         date_fileslist = [os.path.join(input_dir, 'PML_Tanzania_MODIS_sst_3daycomp_20200312_20200314.nc.bz2')]
         # date_fileslist = ['/data/ingest/PML_Tanzania_MODIS_sst_3daycomp_20200312_20200314.nc.bz2']
         in_date = '20200314'
-
+        out_date = '20200314'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -847,12 +936,14 @@ class TestIngestion(unittest.TestCase):
                              'nodata': no_data}
 
         subproducts = [sprod]
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr=querydb.get_datasource_descr(source_type='EUMETCAST',
                                                       source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        # in_date = functions.conv_date_yyyydoy_2_yyyymmdd(in_date)#'20200318'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
@@ -868,7 +959,7 @@ class TestIngestion(unittest.TestCase):
         date_fileslist = [os.path.join(input_dir, 'PML_Tanzania_MODIS_oc_3daycomp_20200312_20200314.nc.bz2')]
         # date_fileslist = ['/data/ingest/PML_Tanzania_MODIS_oc_3daycomp_20200312_20200314.nc.bz2']
         in_date = '20200314'
-
+        out_date = '20200314'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -889,13 +980,14 @@ class TestIngestion(unittest.TestCase):
                              'nodata': no_data}
 
         subproducts = [sprod]
-
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr=querydb.get_datasource_descr(source_type='EUMETCAST',
                                                       source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        # in_date = functions.conv_date_yyyydoy_2_yyyymmdd(in_date)#'20200318'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
@@ -914,6 +1006,7 @@ class TestIngestion(unittest.TestCase):
         single_date =  os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
         in_date = in_date.split('T')[0] #+ '0000'
+        out_date = in_date
         productcode = 'olci-wrr'
         productversion = 'V02.0'
         subproductcode = 'chl-oc4me'
@@ -941,15 +1034,16 @@ class TestIngestion(unittest.TestCase):
                              'nodata': no_data}
 
         subproducts = [sprod]
-
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         # datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
         #                                                  source_id=datasource_descrID)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        # in_date = functions.conv_date_yyyydoy_2_yyyymmdd(in_date)#'20200318'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
@@ -969,6 +1063,7 @@ class TestIngestion(unittest.TestCase):
         single_date = os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
         in_date = in_date.split('T')[0]  # + '0000'
+        out_date = in_date
         # for one_file in date_fileslist:
         #
         #     one_filename = os.path.basename(one_file)
@@ -1004,13 +1099,14 @@ class TestIngestion(unittest.TestCase):
                  'nodata': no_data}
 
         subproducts = [sprod]
-
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                         source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        # in_date = functions.conv_date_yyyydoy_2_yyyymmdd(in_date)#'20200318'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
     #    OCEANOGRAPHY - Sentinel 3 SLSTR WST \\Not working\\ -> Marco
@@ -1028,6 +1124,7 @@ class TestIngestion(unittest.TestCase):
         single_date = os.path.basename(date_fileslist[0])
         in_date = single_date.split('_')[7]
         in_date = in_date.split('T')[0]  # + '0000'
+        out_date = in_date
         # for one_file in date_fileslist:
         #
         #     one_filename = os.path.basename(one_file)
@@ -1056,15 +1153,16 @@ class TestIngestion(unittest.TestCase):
                  'nodata': no_data}
 
         subproducts = [sprod]
-
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                         source_id=datasource_descrID)
         # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type='EUMETCAST',
         #                                                                       source_id=datasource_descrID):
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-       # in_date = functions.conv_date_yyyydoy_2_yyyymmdd(in_date)#'20200318'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                               version=productversion, mapsetcode=mapsetcode,date=in_date)
+                               version=productversion, mapsetcode=mapsetcode,date=out_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
     #    Miscellaneous - CPC SM  \\Ok 30-04-2020 Vijay\\
@@ -1081,7 +1179,7 @@ class TestIngestion(unittest.TestCase):
         date_fileslist = [os.path.join(input_dir, filename)]
         # date_fileslist = glob.glob('/data/ingest/w30.202002.mon')
         in_date = '202002'
-
+        out_date = '20200201'
 
         product = {"productcode": productcode,
                    "version": productversion}
@@ -1101,13 +1199,14 @@ class TestIngestion(unittest.TestCase):
                              're_process': re_process}
 
         subproducts = [sprod]
-
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        in_date = '20200201'
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                                        version=productversion, mapsetcode=mapsetcode, date=in_date)
+                                        version=productversion, mapsetcode=mapsetcode, date=out_date)
         self.assertEqual(status, 1)
     #   ---------------------------------------------------------------------------
     #    Miscellaneous - LSASAF ET DISK   \\Problem with native mapset wkt --> 28-04-2020\\
@@ -1122,7 +1221,7 @@ class TestIngestion(unittest.TestCase):
         input_dir= self.test_ingest_dir+os.path.sep+productcode+os.path.sep+self.native_dir
         date_fileslist = [os.path.join(input_dir, 'S-LSA_-HDF5_LSASAF_MSG_ET_MSG-Disk_202004201200.bz2')]
         in_date = '202004201200'
-
+        out_date = '202004201200'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -1141,12 +1240,13 @@ class TestIngestion(unittest.TestCase):
                              're_process': re_process}
 
         subproducts = [sprod]
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
-        in_date = '202004201200'
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                                        version=productversion, mapsetcode=mapsetcode, date=in_date)
+                                        version=productversion, mapsetcode=mapsetcode, date=out_date)
         self.assertEqual(status, 1)
     # #   ---------------------------------------------------------------------------
     # #    Miscellaneous - LSASAF ET \\Not used\\
@@ -1185,7 +1285,7 @@ class TestIngestion(unittest.TestCase):
     #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
     #     in_date = '202004201200'
     #     status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-    #                                     version=productversion, mapsetcode=mapsetcode, date=in_date)
+    #                                     version=productversion, mapsetcode=mapsetcode, date=out_date)
     #     self.assertEqual(status, 1)
 
     # #   ---------------------------------------------------------------------------
@@ -1241,7 +1341,7 @@ class TestIngestion(unittest.TestCase):
         # date_fileslist = glob.glob('/data/ingest/MESA_JRC_wd-gee_avg_1201_WD-GEE-IGAD-AVG_1.0.tgz')
         # date_fileslist = ['/data/ingest/test/JRC_WBD/JRC-WBD_20151201-0000000000-0000000000.tif']
         in_date = '20191201'
-
+        out_date= '20191201'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -1260,13 +1360,14 @@ class TestIngestion(unittest.TestCase):
                  're_process': re_process}
 
         subproducts = [sprod]
-
+        # Remove existing output
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                         source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
         # in_date = '202004201200'
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                                        version=productversion, mapsetcode=mapsetcode, date=in_date)
+                                        version=productversion, mapsetcode=mapsetcode, date=out_date)
         self.assertEqual(status, 1)
 
     # def test_preprocess_ecmwf_mars(self):
@@ -2014,7 +2115,7 @@ if __name__ == '__main__':
     #     ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
     #     # in_date = '20200321'
     #     status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-    #                            version=productversion, mapsetcode=mapsetcode,date=in_date)
+    #                            version=productversion, mapsetcode=mapsetcode,date=out_date)
     #     self.assertEqual(status, 1)
     # #   ---------------------------------------------------------------------------
     # #   Vegetation - NDVI V2.2.1  //not tested//
