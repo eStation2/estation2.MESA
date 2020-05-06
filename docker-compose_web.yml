@@ -1,0 +1,30 @@
+version: '3.5'
+
+services:
+
+  web:
+    build:
+      context: ./build-docker/web/
+      dockerfile: DockerfilePython3.7
+    container_name: web
+#    links:
+#      - postgres
+    environment:
+      - PYTHONPATH=${PYTHONPATH}
+      - PROJ_LIB=${PROJ_LIB}
+    #   http_proxy: "${HTTP_PROXY}"
+    #   https_proxy: "${HTTP_PROXY}"
+    #   ftp_proxy: "${HTTP_PROXY}"
+    #   no_proxy: "${NO_PROXY}"
+    image: "estation2python37docker/web:1.0"
+    ports:
+    - 80:80
+    restart: unless-stopped
+#    privileged: true
+    volumes: 
+#    - /var/run/docker.sock:/var/run/docker.sock:rw
+    - ./log/web:/var/log/apache2
+    - ./src:/var/www/estation2:rw
+    - ${DATA_VOLUME}:/data:rw
+    - ${ESTATION2_VOLUME}:/eStation2:rw
+    - ${TMP_VOLUME}:/tmp/eStation2:rw
