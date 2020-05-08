@@ -406,7 +406,7 @@ def ingest_archives_eumetcast_product(product_code, version, subproduct_code, ma
                     logger.warning("Error in ingesting file %s" % in_file)
 
 
-def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_logger, echo_query=False):
+def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_logger, echo_query=False, test_mode=False):
 #   Manages ingestion of 1/more file/files for a given date
 #   Arguments:
 #       input_files: input file full names
@@ -437,7 +437,8 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
 
     # Create temp output dir
     try:
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_files[0]),
+        # Reduce the length of the tmp_dir: the resulting path was too long for operating in the docker container (see ES2-544)
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_files[0])[0:6],
                                   dir=es_constants.base_tmp_dir)
     except:
         my_logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')
@@ -466,14 +467,15 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
         except:
             # Error occurred and was NOT detected in pre_process routine
             my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
-            # Move files to 'error/storage' directory
-            for error_file in input_files:
-                if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
-                    shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
-                try:
-                    shutil.move(error_file, ingest_error_dir)
-                except:
-                    my_logger.warning("Error in moving file: %s " % error_file)
+            # Move files to 'error/storage' directory (ingest.wrong)
+            if not test_mode:
+                for error_file in input_files:
+                    if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
+                        shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
+                    try:
+                        shutil.move(error_file, ingest_error_dir)
+                    except:
+                        my_logger.warning("Error in moving file: %s " % error_file)
 
             shutil.rmtree(tmpdir)
             raise NameError('Caught Error in preprocessing routine')
@@ -482,13 +484,14 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
         if str(composed_file_list)=='1':
             my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
             # Move files to 'error/storage' directory
-            for error_file in input_files:
-                if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
-                    shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
-                try:
-                    shutil.move(error_file, ingest_error_dir)
-                except:
-                    my_logger.warning("Error in moving file: %s " % error_file)
+            if not test_mode:
+                for error_file in input_files:
+                    if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
+                        shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
+                    try:
+                        shutil.move(error_file, ingest_error_dir)
+                    except:
+                        my_logger.warning("Error in moving file: %s " % error_file)
 
             shutil.rmtree(tmpdir)
             raise NameError('Detected Error in preprocessing routine')
@@ -501,13 +504,14 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
     except:
         my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
         # Move files to 'error/storage' directory
-        for error_file in input_files:
-            if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
-                shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
-            try:
-                shutil.move(error_file, ingest_error_dir)
-            except:
-                my_logger.warning("Error in moving file: %s " % error_file)
+        if not test_mode:
+            for error_file in input_files:
+                if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
+                    shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
+                try:
+                    shutil.move(error_file, ingest_error_dir)
+                except:
+                    my_logger.warning("Error in moving file: %s " % error_file)
 
         shutil.rmtree(tmpdir)
         raise NameError('Error in ingestion routine')
@@ -2233,7 +2237,6 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
 
     list_input_files = []
 
-
     # Make sure input is a list (if only a string is received, it loops over chars)
     if isinstance(input_files, list):
         temp_list_input_files = input_files
@@ -2939,7 +2942,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
             return -1
 
         if len(interm_files_list) > 1 :
-            command = es_constants.gdal_merge + ' -n '+ scaled_no_data+' -a_nodata '+ str(int(no_data))+' -ot Float32 ' + ' -o '  # -co \"compress=lzw\" -ot Float32  -n -32768 -a_nodata -32768
+            command = es_constants.gdal_merge + ' -of GTiff '+ '-n '+ scaled_no_data+' -a_nodata '+ str(int(no_data))+' -ot Float32 ' + ' -o '  # -co \"compress=lzw\" -ot Float32  -n -32768 -a_nodata -32768
 
             out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
 
