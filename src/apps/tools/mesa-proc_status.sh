@@ -3,7 +3,7 @@
 SEND_EMAIL=False
 MESA_STATUS_ALERT_FILE=/home/adminuser/scripts/mesa_status.txt
 THRESHOLD=95
-MESA_PSWD=rootroot
+MESA_PSWD=
 SUBJECT='MESA-PROC_STATUS_ALERT'
 MESA_STATUS_ALERT_FILE=/home/adminuser/scripts/mesa_status.txt
 EMAIL_IDS=vijaycharan.irs@gmail.com,Vijay.VENKATACHALAM@ext.ec.europa.eu,clerici.marco@gmail.com,jurvtk@gmail.com
