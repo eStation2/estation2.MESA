@@ -3799,18 +3799,23 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
 # ##########################
 # Compare Two Raster Array
 ############################
-def compare_two_raster_array(input_file_1='', input_file_2='', max_delta=None, create_plot=False):
+def compare_two_raster_array(input_file_1='', input_file_2='', max_delta=None, create_plot=False, fast=False):
     debug = False
     try:
         no_difference = False
         # open first input file
         dataset1 = gdal.Open(input_file_1, GA_ReadOnly)
-
         # open second input file
         dataset2 = gdal.Open(input_file_2, GA_ReadOnly)
 
-        r1 = N.array(dataset1.ReadAsArray())
-        r2 = N.array(dataset2.ReadAsArray())
+        if not fast:
+            r1 = N.array(dataset1.ReadAsArray())
+            r2 = N.array(dataset2.ReadAsArray())
+        else:
+            x_red = int(dataset1.RasterXSize/8)
+            y_red = int(dataset1.RasterYSize/8)
+            r1 = N.array(dataset1.ReadAsArray(x_red*3, y_red*3, x_red,y_red))
+            r2 = N.array(dataset2.ReadAsArray(x_red*3, y_red*3, x_red,y_red))
 
         no_difference = N.array_equal(r1, r2)
 
