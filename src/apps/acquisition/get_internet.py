@@ -42,6 +42,8 @@ from database import querydb
 from apps.productmanagement import datasets
 from lib.python.api import coda_eum_api, jeodpp_api, motu_api
 from lib.python import functions
+from apps.acquisition.ingestion import get_list_ingestion_trigger
+from apps.acquisition import ingestion
 
 logger = log.my_logger(__name__)
 
@@ -571,6 +573,96 @@ def build_list_matching_files_jeodpp(base_url, template, from_date, to_date, fre
         raise
 
     return list_productid_band
+
+
+#####################################################################################
+#   build_list_matching_files_jeodpp_eos
+#   Purpose: return the list of file names matching a 'template' with 'date' placeholders
+#            It is the entry point for the 'http_templ' source type
+#   Author: VIJAY CHARAN VENKATACHALAM, JRC, European Commission
+#   Date: 2019/09
+#   Inputs: template: object with the needed parameters to fill the template get
+#           from_date: start date for the dataset (datetime.datetime object)
+#           to_date: end date for the dataset (datetime.datetime object)
+#           frequency: dataset 'frequency' (see DB 'frequency' table)
+#
+def build_list_matching_files_jeodpp_eos(base_url, template, from_date, to_date, frequency_id, files_filter_expression):
+    # Add a check on frequency
+    try:
+        frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
+    except Exception as inst:
+        logger.debug("Error in datasets.Dataset.get_frequency: %s" % inst.args[0])
+        raise
+
+    # Manage the start_date (mandatory).
+    try:
+        # If it is a date, convert to datetime
+        if functions.is_date_yyyymmdd(str(from_date), silent=True):
+            datetime_start = datetime.datetime.strptime(str(from_date), '%Y%m%d')
+        else:
+            # If it is a negative number, subtract from current date
+            if isinstance(from_date, int) or isinstance(from_date, int):
+                if from_date < 0:
+                    datetime_start = datetime.datetime.today() - datetime.timedelta(days=-from_date)
+            else:
+                logger.debug("Error in Start Date: must be YYYYMMDD or -Ndays")
+                raise Exception("Start Date not valid")
+    except:
+        raise Exception("Start Date not valid")
+
+    # Manage the end_date (mandatory).
+    try:
+        if functions.is_date_yyyymmdd(str(to_date), silent=True):
+            datetime_end = datetime.datetime.strptime(str(to_date), '%Y%m%d')
+        # If it is a negative number, subtract from current date
+        elif isinstance(to_date, int) or isinstance(to_date, int):
+            if to_date < 0:
+                datetime_end = datetime.datetime.today() - datetime.timedelta(days=-to_date)
+        else:
+            datetime_end = datetime.datetime.today()
+    except:
+        pass
+
+    try:
+        dates = frequency.get_dates(datetime_start, datetime_end)
+    except Exception as inst:
+        logger.debug("Error in frequency.get_dates: %s" % inst.args[0])
+        raise
+
+    try:
+        if sys.platform == 'win32':
+            template.replace("-", "#")
+
+        import json
+        parameters = json.loads(template)
+        producttype = parameters.get('producttype')
+
+        list_input_files = []
+        for date in dates:
+            dirs=[]
+            full_dir_path = base_url+os.path.sep+producttype+os.path.sep+str(date.year)+os.path.sep+date.strftime('%m')+os.path.sep+date.strftime('%d')
+            if os.path.exists(full_dir_path):
+                dirs = next(os.walk(full_dir_path))[1]
+            for dir in dirs:
+                fn = os.path.join(full_dir_path, dir)
+                import glob
+                input_files = []
+                input_files = glob.glob(fn + os.path.sep + files_filter_expression)
+                for one_file in input_files:
+                    one_filename = os.path.basename(one_file)
+                    in_date = one_filename.split('_')[7]
+                    day_data = functions.is_data_captured_during_day(in_date)
+                    if day_data:
+                        list_input_files.append(one_file)
+        # return lst
+        # list_productid_band = jeodpp_api.generate_list_products(dates, template, frequency, base_url, usr_pwd)
+
+    except Exception as inst:
+        logger.debug("Error in frequency.get_internet_dates: %s" % inst.args[0])
+        raise
+
+    return list_input_files
+
 
 
 ######################################################################################
@@ -1123,7 +1215,7 @@ def wget_file_from_url(remote_url_file, target_dir, target_file=None, userpwd=''
 #   Date: 2014/09/01
 #   Inputs: none
 #   Arguments: dry_run -> if set, read tables and report activity ONLY
-def loop_get_internet(dry_run=False, test_one_source=False, my_source=None):
+def loop_get_internet(dry_run=False, test_one_source=False, my_source=None, product=None):
     global processed_list_filename, processed_list
     global processed_info_filename, processed_info
 
@@ -1505,7 +1597,6 @@ def loop_get_internet(dry_run=False, test_one_source=False, my_source=None):
                                     functions.dump_obj_to_pickle(processed_list, processed_list_filename)
                                     # functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
-
                                 except:
                                     logger.error("Error in JEODPP Internet service. Continue")
                                     b_error = True
@@ -1514,6 +1605,114 @@ def loop_get_internet(dry_run=False, test_one_source=False, my_source=None):
                                     logger.info("JEODPP Internet service completed")
                                     current_list = []
 
+                            elif internet_type == 'jeodpp_eos':
+                                # Create the full filename from a 'template' which contains
+                                jeodpp_internet_url = str(internet_source.url)
+
+                                if product is None:
+                                    logger.error("Product is not passed")
+                                    return
+
+                                # Datasource description
+                                datasource_descr = querydb.get_datasource_descr(source_type='INTERNET', source_id=internet_id)
+                                datasource_descr = datasource_descr[0]
+                                # Get list of subproducts
+
+                                subproducts = get_list_ingestion_trigger(product, datasource_descr.datasource_descr_id)
+
+
+                                try:
+                                    current_list = build_list_matching_files_jeodpp_eos(jeodpp_internet_url,
+                                                                                    str(
+                                                                                        internet_source.include_files_expression),
+                                                                                    internet_source.start_date,
+                                                                                    internet_source.end_date,
+                                                                                    str(internet_source.frequency_id),
+                                                                                    str(internet_source.files_filter_expression)
+                                                                                    )
+
+                                    # ongoing_product_band_list = jeodpp_api.get_product_id_band_from_list(ongoing_list)
+
+                                    # Loop over current list
+                                    if len(current_list) > 0:
+                                        listtoprocessrequest = []
+                                        listofmonths = []
+                                        listofdays = []
+                                        listoffiles = []
+                                        for current_file in current_list:
+                                            # TODO Getting the dates could be also done from database info.
+                                            current_file_day = current_file.split('/')[-3]
+                                            current_file_month = current_file.split('/')[-4]
+                                            current_file_year = current_file.split('/')[-5]
+
+                                            processed_list = []
+                                            processed_list_filename_month_day = es_constants.get_internet_processed_list_prefix + internet_id +current_file_year+ current_file_month + current_file_day +'.list'
+                                            processed_list = functions.restore_obj_from_pickle(processed_list,
+                                                                                               processed_list_filename_month_day)
+
+                                            # Check if current list is not in processed list
+                                            if len(processed_list) == 0 :
+                                                listtoprocessrequest.append(current_file)
+                                                listoffiles.append(current_file.split('/')[-1])
+                                                if current_file_month not in listofmonths:
+                                                    listofmonths.append(current_file_month)
+                                                if current_file_day not in listofdays:
+                                                    listofdays.append(current_file_day)
+                                            else:
+                                                if current_file not in processed_list:
+                                                    listtoprocessrequest.append(current_file)
+                                                    listoffiles.append(current_file.split('/')[-1])
+                                                    if current_file_month not in listofmonths:
+                                                        listofmonths.append(current_file_month)
+                                                    if current_file_day not in listofdays:
+                                                        listofdays.append(current_file_day)
+                                        # List to Ingestion
+                                        if listtoprocessrequest != set([]) and len(listtoprocessrequest) > 0:
+
+                                            dates_list = ingestion.get_list_unique_dates(datasource_descr,listoffiles, dates_not_in_filename=False, product_in_info=None, ingest=None)
+                                            # for month in list(listofmonths):
+                                            for date in list(dates_list):
+                                                # Filter files for singe day
+                                                # for day in list(listofdays):
+                                                # Create a ingest list per day
+                                                to_ingest_list=[]
+                                                day = date[6:8]
+                                                year = date[0:4]
+                                                month = date[4:6]
+                                                for filename in list(listtoprocessrequest):
+                                                    current_file_day = filename.split('/')[-3]
+                                                    current_file_month = filename.split('/')[-4]
+                                                    if current_file_day == day and current_file_month == month:
+                                                        to_ingest_list.append(filename)
+                                                if len(to_ingest_list) == 0:
+                                                    # logger_spec.info("No files to ingest: " + str(date))
+                                                    continue
+
+                                                # Intialize the list to enter in processed list
+                                                processed_list = []
+                                                processed_list_filename_month_day = es_constants.get_internet_processed_list_prefix + internet_id +year+ month + day + '.list'
+                                                processed_list = functions.restore_obj_from_pickle(processed_list, processed_list_filename_month_day)
+
+                                                # Ingest file now
+                                                logger_spec.info("Ingesting files of date: " + str(date))
+                                                try:
+                                                    ingestion.ingestion(to_ingest_list, year+month+day, product, subproducts, datasource_descr, logger, echo_query=1, test_mode=True)
+                                                    processed_list.extend(to_ingest_list)
+                                                    functions.dump_obj_to_pickle(processed_list, processed_list_filename_month_day)
+                                                except:
+                                                    logger.error("Error in Ingestion")
+                                                    b_error = True
+                                        else:
+                                            logger_spec.info("No active files to process")
+
+                                except:
+                                    logger.error("Error in JEODPP Internet service. Continue")
+                                    b_error = True
+
+                                finally:
+                                    logger.info("END OF JEODPP EOS Acquistion")
+                                    current_list = []
+                                    processed_list = []
 
                             # elif internet_type == 'sentinel_sat':
                             #     # Create the full filename from a 'template' which contains

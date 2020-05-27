@@ -18,373 +18,6 @@ logger = log.my_logger(__name__)
 #   Extracted from loo_get_internet to get a single source
 #
 
-# def get_one_source(internet_source, target_dir=None):
-#
-#     output_dir = es_constants.get_internet_output_dir
-#     logger.debug("Check if the Ingest Server input directory : %s exists.", output_dir)
-#     if not os.path.exists(output_dir):
-#         logger.fatal("The Ingest Server input directory : %s doesn't exists.", output_dir)
-#         exit(1)
-#
-#     if not os.path.exists(es_constants.processed_list_int_dir):
-#         os.mkdir(es_constants.processed_list_int_dir)
-#
-#
-#     # # Check internet connection (or die)
-#     # if not functions._internet_on():
-#     #     logger.error("The computer is not currently connected to the internet. Wait 1 minute.")
-#     #     time.sleep(1)
-#
-#     else:
-#         execute_trigger = True
-#
-#         logger_spec = log.my_logger('apps.get_internet.'+internet_source['internet_id'])
-#
-#         # Create objects for list and info
-#         processed_info_filename = es_constants.get_internet_processed_list_prefix+str(internet_source['internet_id'])+'.info'
-#
-#         # Restore/Create Info
-#         processed_info = None
-#         processed_info=functions.restore_obj_from_pickle(processed_info, processed_info_filename)
-#         if processed_info is not None:
-#             # Check the delay
-#             current_delta=datetime.datetime.now()-processed_info['time_latest_exec']
-#             current_delta_minutes=int(old_div(current_delta.seconds,60))
-#             if current_delta_minutes < 0:
-#                 logger.debug("Still waiting up to %i minute - since latest execution.", 0)
-#                 execute_trigger = False
-#         else:
-#             # Create processed_info object
-#             processed_info = {'lenght_proc_list': 0,
-#                               'time_latest_exec': datetime.datetime.now(),
-#                               'time_latest_copy': datetime.datetime.now()}
-#             execute_trigger = True
-#
-#         # Force execution
-#         execute_trigger = True
-#         if execute_trigger:
-#             # Restore/Create List
-#             processed_list = []
-#             processed_list_filename = es_constants.get_internet_processed_list_prefix+str(internet_source['internet_id'])+'.list'
-#             processed_list=functions.restore_obj_from_pickle(processed_list, processed_list_filename)
-#
-#             processed_info['time_latest_exec']=datetime.datetime.now()
-#
-#             logger.debug("Create current list of file to process for source %s.", internet_source['internet_id'])
-#             if internet_source['user_name'] is None:
-#                 user_name = "anonymous"
-#             else:
-#                 user_name = internet_source['user_name']
-#
-#             if internet_source['password'] is None:
-#                 password = "anonymous"
-#             else:
-#                 password = internet_source['password']
-#
-#             usr_pwd = str(user_name)+':'+str(password)
-#
-#             logger_spec.debug("              Url is %s.", internet_source['url'])
-#             logger_spec.debug("              usr/pwd is %s.", usr_pwd)
-#             logger_spec.debug("              regex   is %s.", internet_source['include_files_expression'])
-#
-#             internet_type = internet_source['type']
-#
-#             # 'force_ftp' is for JRC only, for the h05-ftp.jrc.it (MCD14DL)
-#             if internet_type == 'ftp' or internet_type == 'http' or internet_type == 'force_ftp':
-#                 # Manage the end_date (added for MODIS_FIRMS)
-#                 if (internet_source['end_date'] != ''):
-#                     end_date = internet_source['end_date']
-#                 else:
-#                     end_date = None
-#                 # Note that the following list might contain sub-dirs (it reflects full_regex)
-#                 current_list = get_list_matching_files(str(internet_source['url']), str(usr_pwd), str(internet_source['include_files_expression']), internet_type, end_date=end_date)
-#
-#             elif internet_type == 'http_tmpl' or internet_type == 'http_tmpl_modis':
-#                 # Create the full filename from a 'template' which contains
-#                 try:
-#                     current_list = build_list_matching_files_tmpl(str(internet_source['url']),
-#                                                                   str(internet_source['include_files_expression']),
-#                                                                   internet_source['start_date'],
-#                                                                   internet_source['end_date'],
-#                                                                   str(internet_source['frequency_id']))
-#                 except:
-#                     logger.error("Error in creating date lists. Continue")
-#
-#             elif internet_type == 'http_multi_tmpl':
-#                 # Create the full filename from a 'template' which contains
-#                 try:
-#                     current_list = build_list_matching_files_tmpl(str(internet_source['url']),
-#                                                                   str(internet_source['include_files_expression']),
-#                                                                   internet_source['start_date'],
-#                                                                   internet_source['end_date'],
-#                                                                   str(internet_source['frequency_id']),
-#                                                                   multi_template=True)
-#                 except:
-#                     logger.error("Error in creating date lists. Continue")
-#
-#             elif internet_type == 'http_tmpl_vito':
-#                 # Create the full filename from a 'template' which contains
-#                 try:
-#                     current_list = build_list_matching_files_tmpl_vito(str(internet_source['url']),
-#                                                                 str(internet_source['include_files_expression']),
-#                                                                 internet_source['start_date'],
-#                                                                 internet_source['end_date'],
-#                                                                 str(internet_source['frequency_id']))
-#                 except:
-#                     logger.error("Error in creating date lists. Continue")
-#
-#             elif internet_type == 'http_tmpl_theia':
-#                 # Create the full filename from a 'template' which contains
-#                 try:
-#                     current_list = build_list_matching_files_tmpl_theia(str(internet_source['url']),
-#                                                                 str(internet_source['include_files_expression']),
-#                                                                 internet_source['start_date'],
-#                                                                 internet_source['end_date'],
-#                                                                 str(internet_source['frequency_id']),
-#                                                                 user_name,
-#                                                                 password)
-#                 except:
-#                     logger.error("Error in creating date lists. Continue")
-#
-#             elif internet_type == 'jeodpp':
-#                 # Create the full filename from a 'template' which contains
-#                 # To be moved to the top
-#                 from apps.tools import jeodpp_api
-#
-#                 ongoing_list = []
-#                 ongoing_list_filename = es_constants.get_internet_processed_list_prefix + str(
-#                     internet_source['internet_id']) + '_Ongoing' + '.list'
-#                 ongoing_list = functions.restore_obj_from_pickle(ongoing_list, ongoing_list_filename)
-#                 try:
-#                     current_list=[] #['S2A_MSIL2A_20160901T092032_N0204_R093_T34SFF_20160901T092028']
-#                     current_list = build_list_matching_files_jeodpp(str(internet_source['url']),
-#                                                                 str(internet_source['include_files_expression']),
-#                                                                 internet_source['start_date'],
-#                                                                 internet_source['end_date'],
-#                                                                 str(internet_source['frequency_id']),
-#                                                                 str(usr_pwd))
-#
-#                     ongoing_product_list = jeodpp_api.get_product_id_from_list(ongoing_list)
-#                     product_product_list = jeodpp_api.get_product_id_from_list(processed_list)
-#
-#                     ongoing_product_band_list = jeodpp_api.get_product_id_band_from_list(ongoing_list)
-#                     product_product_band_list = jeodpp_api.get_product_id_band_from_list(processed_list)
-#                     if len(current_list) > 0:
-#                         listtoprocessrequest = []
-#                         for current_file in current_list:
-#                             # Check if current list is not in processed list
-#                             if len(processed_list) == 0 and len(ongoing_list) == 0:
-#                                 listtoprocessrequest.append(current_file)
-#                             else:
-#                                 if current_file not in product_product_band_list and current_file not in ongoing_product_band_list:   # This case doesnt work if the one band job goes in error
-#                                 # if current_file not in processed_list and current_file not in ongoing_list:
-#                                     listtoprocessrequest.append(current_file)
-#                         # listtoprocessrequest.append('S2A_MSIL2A_20160901T092032_N0204_R093_T34SFF_20160901T092028')  #line for test vto be commented
-#                         if listtoprocessrequest != set([]):
-#                             logger_spec.debug("Loop on the List to Process Request files.")
-#                             for filename in list(listtoprocessrequest):
-#                                 logger_spec.debug("Processing file: " + str(internet_source['url']) + os.path.sep + filename)
-#                                 try:
-#                                     #Give request to JEODPP to process
-#                                     # HTTP request to JEODPP follow here once the request is success add the oid to ongoing list
-#                                     current_product_id = filename.split(':')[0]
-#                                     current_product_band = filename.split(':')[1]
-#                                     created_ongoing_link = jeodpp_api.create_jeodpp_job(base_url=str(internet_source['url']), product_id=current_product_id, band=current_product_band,usr_pwd=usr_pwd, https_params=str(internet_source['https_params']))
-#                                     if created_ongoing_link is not None:
-#                                         ongoing_list.append(created_ongoing_link)
-#
-#                                 except:
-#                                     logger_spec.warning("Problem while creating Job request to JEODPP: %s.", filename)
-#                     # ongoing_list= ['product_id:4:download_url']
-#                     if len(ongoing_list) > 0:
-#
-#                         ongoing_product_list = jeodpp_api.get_product_id_from_list(ongoing_list)
-#                         ongoing_product_list = functions.conv_list_2_unique_value(ongoing_product_list)
-#                         for each_product_id in ongoing_product_list:
-#                             listtodownload = []
-#                             for ongoing in ongoing_list:
-#                                 ongoing_product_id = ongoing.split(':')[0]
-#
-#                                 if each_product_id == ongoing_product_id:
-#                                     ongoing_job_id = ongoing.split(':')[2]
-#                                     job_status = jeodpp_api.get_jeodpp_job_status(base_url=str(internet_source['url']),
-#                                                                                             job_id=ongoing_job_id, usr_pwd=usr_pwd, https_params=str(internet_source['https_params']))
-#                                     if job_status:
-#                                         listtodownload.append(ongoing)
-#
-#                             if listtodownload != set([]):
-#                                 logger_spec.debug("Loop on the downloadable_list files.")
-#                                 download_urls = []
-#                                 for ongoing in list(listtodownload):
-#                                     # logger_spec.debug("Processing file: " + str(internet_source['url']) + os.path.sep + filename)
-#                                     # ongoing_job_id = ongoing.split(':')[1]
-#                                     download_urls.append(ongoing.split(':')[3])
-#
-#                                 if len(download_urls) > 0:
-#                                     logger_spec.debug("Downloading Product: " + str(each_product_id) )
-#                                     try:
-#                                         download_result = jeodpp_api.download_file(str(internet_source['url']), target_dir=target_dir, product_id=each_product_id, userpwd=usr_pwd, https_params=str(internet_source['https_params']), download_urls=download_urls)
-#                                         if download_result:
-#                                             for ongoing in list(listtodownload):
-#                                                 processed_list.append(ongoing)
-#                                                 ongoing_list.remove(ongoing)
-#                                                 ongoing_job_id = ongoing.split(':')[2]
-#                                                 deleted = jeodpp_api.delete_results_jeodpp_job(base_url=str(internet_source['url']),job_id=ongoing_job_id, usr_pwd=usr_pwd,https_params=str(internet_source['https_params']))
-#                                     except:
-#                                         logger_spec.warning("Problem while Downloading Product: %s.", str(each_product_id))
-#                     functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
-#                     # functions.dump_obj_to_pickle(ongoing_info, ongoing_info_filename)
-#                     #  Processed list will be added atlast
-#                     functions.dump_obj_to_pickle(processed_list, processed_list_filename)
-#                     # functions.dump_obj_to_pickle(processed_info, processed_info_filename)
-#
-#
-#                 except:
-#                     logger.error("Error in JEODPP Internet service. Continue")
-#
-#                 finally:
-#                     current_list = []
-#                     self.assertEqual(status, 0) current_list
-#
-#             elif internet_type == 'ftp_tmpl':
-#                 # Create the full filename from a 'template' which contains
-#                 try:
-#                     current_list = build_list_matching_files_ftp_tmpl(str(internet_source['url']),
-#                                                                 str(internet_source['include_files_expression']),
-#                                                                 internet_source['start_date'],
-#                                                                 internet_source['end_date'],
-#                                                                 str(internet_source['frequency_id']),
-#                                                                 str(usr_pwd),
-#                                                                 str(internet_source['files_filter_expression']))
-#                 except:
-#                     logger.error("Error in creating date lists. Continue")
-#
-#             elif internet_type == 'motu_client':
-#                 # Create the motu command which contains
-#                 try:
-#                     current_list = build_list_matching_files_motu(str(internet_source['url']),
-#                                                                   str(internet_source['include_files_expression']),
-#                                                                   internet_source['start_date'],
-#                                                                   internet_source['end_date'],
-#                                                                   str(internet_source['frequency_id']),
-#                                                                   str(internet_source['user_name']),
-#                                                                   str(internet_source['password']),
-#                                                                   str(internet_source['files_filter_expression'])
-#                                                                   )
-#
-#                 except:
-#                     logger.error("Error in creating date lists. Continue")
-#
-#             elif internet_type == 'http_coda_eum':
-#                 # Create the motu command which contains
-#                 try:
-#                     current_list = build_list_matching_files_eum_http(str(internet_source['url']),
-#                                                                   str(internet_source['include_files_expression']),
-#                                                                   internet_source['start_date'],
-#                                                                   internet_source['end_date'],
-#                                                                   str(internet_source['frequency_id']),
-#                                                                   str(internet_source['user_name']),
-#                                                                   str(internet_source['password'])
-#                                                                   #str(internet_source['files_filter_expression'])
-#                                                                   )
-#
-#                 except:
-#                     logger.error("Error in creating date lists. Continue")
-#
-#             # elif internet_type == 'sentinel_sat':
-#             #     # Create the motu command which contains
-#             #     try:
-#             #         current_list = build_list_matching_files_sentinel_sat(str(internet_source['url']),
-#             #                                                       str(internet_source['include_files_expression']),
-#             #                                                       internet_source['start_date'],
-#             #                                                       internet_source['end_date'],
-#             #                                                       str(internet_source['frequency_id']),
-#             #                                                       str(internet_source['user_name']),
-#             #                                                       str(internet_source['password'])
-#             #                                                       #str(internet_source['files_filter_expression'])
-#             #                                                       )
-#             #
-#             #     except:
-#             #         logger.error("Error in creating date lists. Continue")
-#
-#             elif internet_type == 'offline':
-#                      logger.info("This internet source is meant to work offline (GoogleDrive)")
-#                      current_list = []
-#
-#             elif internet_type == 'local':
-#                 logger.info("This internet source is meant to copy data on local filesystem")
-#                 try:
-#                     current_list = get_list_matching_files_dir_local(str(internet_source['url']),
-#                                                                      str(internet_source['include_files_expression']))
-#                 except:
-#                     logger.error("Error in creating date lists. Continue")
-#                     current_list = []
-#             else:
-#                      logger.error("No correct type for this internet source type: %s" %internet_type)
-#                      current_list = []
-#
-#             if len(current_list) > 0:
-#                 listtoprocess = []
-#                 for current_file in current_list:
-#                     if len(processed_list) == 0:
-#                         listtoprocess.append(current_file)
-#                     else:
-#                         #if os.path.basename(current_file) not in processed_list: -> save in .list subdirs as well !!
-#                         if current_file not in processed_list:
-#                             listtoprocess.append(current_file)
-#
-#                 if listtoprocess != set([]):
-#                      logger_spec.debug("Loop on the found files.")
-#                      for filename in list(listtoprocess):
-#                          logger_spec.debug("Processing file: "+str(internet_source['url'])+os.path.sep+filename)
-#                          try:
-#                             if internet_type == 'local':
-#                                 shutil.copyfile(str(internet_source['url'])+os.path.sep+filename,es_constants.ingest_dir+os.path.basename(filename))
-#                                 result = 0
-#                             elif internet_type == 'motu_client':
-#                                 result = get_file_from_motu_command(str(filename),
-#                                                            #target_file=internet_source['files_filter_expression'],
-#                                                            target_dir=es_constants.ingest_dir, userpwd=str(usr_pwd))
-#
-#                             # elif internet_type == 'sentinel_sat':
-#                             #     result = get_file_from_sentinelsat_url(str(filename), target_dir=es_constants.ingest_dir)
-#
-#                             elif internet_type == 'http_tmpl_vito':
-#                                 result = get_file_from_url(str(internet_source['url']) + os.path.sep + filename,
-#                                                            target_dir=es_constants.ingest_dir,
-#                                                            target_file=os.path.basename(filename), userpwd=str(usr_pwd), https_params='Referer: '+str(internet_source['url'])+os.path.dirname(filename)+'?mode=tif')
-#
-#                             elif internet_type == 'http_tmpl_theia':
-#                                 result = get_file_from_url(str(internet_source['url'] + os.path.sep + os.path.split(filename)[0]),
-#                                                            target_dir=es_constants.ingest_dir,
-#                                                            target_file=os.path.basename(os.path.split(filename)[1]), userpwd=str(usr_pwd), https_params='')
-#
-#                             # elif internet_type == 'jeodpp':
-#                             #     result = get_json_from_url(str(internet_source['url'] + os.path.sep + filename), userpwd=str(usr_pwd), https_params='')
-#
-#                             elif internet_type == 'http_coda_eum':
-#                                 download_link = 'https://coda.eumetsat.int/odata/v1/Products(\'{0}\')/$value'.format(os.path.split(filename)[0])#os.path.split('asdasdad/dasdasds')[0]
-#                                 result = get_file_from_url(str(download_link), target_dir=es_constants.ingest_dir,
-#                                                            target_file=os.path.basename(filename)+'.zip', userpwd=str(usr_pwd), https_params='')
-#
-#                             elif internet_type == 'http_tmpl_modis':
-#                                 result = wget_file_from_url(str(internet_source['url']) + os.path.sep + filename,
-#                                                            target_dir=es_constants.ingest_dir,
-#                                                            target_file=os.path.basename(filename), userpwd=str(usr_pwd), https_params=str(internet_source['https_params']))
-#                             else:
-#                                 result = get_file_from_url(str(internet_source['url']) + os.path.sep + filename,
-#                                                            target_dir=es_constants.ingest_dir,
-#                                                            target_file=os.path.basename(filename), userpwd=str(usr_pwd), https_params=str(internet_source['https_params']))
-#                             if not result:
-#                                 logger_spec.info("File %s copied.", filename)
-#                                 processed_list.append(filename)
-#                             else:
-#                                 logger_spec.warning("File %s not copied: ", filename)
-#                          except:
-#                            logger_spec.warning("Problem while copying file: %s.", filename)
-#
-#             functions.dump_obj_to_pickle(processed_list, processed_list_filename)
-#             functions.dump_obj_to_pickle(processed_info, processed_info_filename)
 
 class Source:
     def __init__(self,
@@ -426,7 +59,6 @@ class Source:
         self.start_date = start_date
         self.end_date = end_date
         self.https_params = https_params
-
 
 class TestGetInternet(unittest.TestCase):
     pattern = True
@@ -1883,6 +1515,91 @@ class TestGetInternet(unittest.TestCase):
             if self.download:
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
                 self.assertEqual(result, 0)
+
+    #   ---------------------------------------------------------------------------
+    #    OCEANOGRAPHY - Sentinel 3 OLCI WRR - JEODESK EOS file system
+    #   ---------------------------------------------------------------------------
+    def testLocal_EOS_JEODESK_OLCI(self):
+        source_active = False
+        internet_id = 'EOS:S3A:OLCI:WRR'
+        start_date_fixed = 20200301
+        end_date_fixed = 20200310
+        start_date_dyn = -22
+        end_date_dyn = -15
+        file_to_check = '44c285d7-3809-4810-836e-510ee52f326a/S3A_OL_2_WRR____20200310T065044_20200310T073438_20200311T133228_2634_056_006______MAR_O_NT_002'
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+                source_active = True
+
+        if source_active:
+            my_source = Source(internet_id=internet_id,
+                               url=internet_source.url,
+                               descriptive_name="OLCI WRR",
+                               include_files_expression=internet_source.include_files_expression,
+                               pull_frequency=internet_source.pull_frequency,
+                               user_name=internet_source.user_name,
+                               password=internet_source.password,
+                               start_date=start_date_dyn,
+                               end_date=end_date_dyn,
+                               frequency_id=internet_source.frequency_id,
+                               type=internet_source.type,
+                               files_filter_expression=internet_source.files_filter_expression,
+                               https_params=internet_source.https_params)
+
+            productcode = 'olci-wrr'
+            productversion = 'V02.0'
+            product = {"productcode": productcode,
+                       "version": productversion}
+
+            if True:
+                result = loop_get_internet(test_one_source=internet_id, my_source=my_source, product=product)
+                self.assertEqual(result, 0)
+
+    #   ---------------------------------------------------------------------------
+    #    OCEANOGRAPHY - Sentinel 3 SLSTR WST - JEODESK EOS file system
+    #   ---------------------------------------------------------------------------
+    def testLocal_EOS_JEODESK_SLSTR(self):
+        source_active = False
+        internet_id = 'EOS:S3A:SLSTR:WST'
+        start_date_fixed = 20200301
+        end_date_fixed = 20200310
+        start_date_dyn = -45
+        end_date_dyn = -30
+        file_to_check = '32e61b08-0bcb-4d0a-a06e-f3d499dfb5fc/S3A_SL_2_WST____20200310T073813_20200310T091913_20200311T185257_6059_056_006______MAR_O_NT_003'
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+                source_active = True
+
+        if source_active:
+            my_source = Source(internet_id=internet_id,
+                               url=internet_source.url,
+                               descriptive_name='sentinel',
+                               include_files_expression=internet_source.include_files_expression,
+                               pull_frequency=internet_source.pull_frequency,
+                               user_name=internet_source.user_name,
+                               password=internet_source.password,
+                               start_date=start_date_dyn,
+                               end_date=end_date_dyn,
+                               frequency_id=internet_source.frequency_id,
+                               type=internet_source.type,
+                               files_filter_expression=internet_source.files_filter_expression,
+                               https_params=internet_source.https_params)
+
+            productcode = 'slstr-sst'
+            productversion = '1.0'
+            product = {"productcode": productcode,
+                       "version": productversion}
+            # Test download (dynamic dates
+            if True:
+                result = loop_get_internet(test_one_source=internet_id, my_source=my_source, product=product)
+                self.assertEqual(result, 0)
+
 
     #   ---------------------------------------------------------------------------
     #    OCEANOGRAPHY - Sentinel 3 SLSTR WST
