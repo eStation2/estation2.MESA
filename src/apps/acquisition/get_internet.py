@@ -643,17 +643,17 @@ def build_list_matching_files_jeodpp_eos(base_url, template, from_date, to_date,
             full_dir_path = base_url+os.path.sep+producttype+os.path.sep+str(date.year)+os.path.sep+date.strftime('%m')+os.path.sep+date.strftime('%d')
             if os.path.exists(full_dir_path):
                 dirs = next(os.walk(full_dir_path))[1]
-            for dir in dirs:
-                fn = os.path.join(full_dir_path, dir)
-                import glob
-                input_files = []
-                input_files = glob.glob(fn + os.path.sep + files_filter_expression)
-                for one_file in input_files:
-                    one_filename = os.path.basename(one_file)
-                    in_date = one_filename.split('_')[7]
-                    day_data = functions.is_data_captured_during_day(in_date)
-                    if day_data:
-                        list_input_files.append(one_file)
+                for dir in dirs:
+                    fn = os.path.join(full_dir_path, dir)
+                    import glob
+                    input_files = []
+                    input_files = glob.glob(fn + os.path.sep + files_filter_expression)
+                    for one_file in input_files:
+                        one_filename = os.path.basename(one_file)
+                        in_date = one_filename.split('_')[7]
+                        day_data = functions.is_data_captured_during_day(in_date)
+                        if day_data:
+                            list_input_files.append(one_file)
         # return lst
         # list_productid_band = jeodpp_api.generate_list_products(dates, template, frequency, base_url, usr_pwd)
 
