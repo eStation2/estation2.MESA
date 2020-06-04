@@ -576,6 +576,75 @@ def build_list_matching_files_jeodpp(base_url, template, from_date, to_date, fre
 
 
 #####################################################################################
+#   build_list_matching_files_jeodpp_catalog
+#   Purpose: return the list of file names matching a 'template' with 'date' placeholders
+#            It is the entry point for the 'http_templ' source type
+#   Author: VIJAY CHARAN VENKATACHALAM, JRC, European Commission
+#   Date: 2019/09
+#   Inputs: template: object with the needed parameters to fill the template get
+#           from_date: start date for the dataset (datetime.datetime object)
+#           to_date: end date for the dataset (datetime.datetime object)
+#           frequency: dataset 'frequency' (see DB 'frequency' table)
+#
+def build_list_matching_files_jeodpp_catalog(base_url, template, from_date, to_date, frequency_id, files_filter_expression):
+    # Add a check on frequency
+    try:
+        frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
+    except Exception as inst:
+        logger.debug("Error in datasets.Dataset.get_frequency: %s" % inst.args[0])
+        raise
+
+    # Manage the start_date (mandatory).
+    try:
+        # If it is a date, convert to datetime
+        if functions.is_date_yyyymmdd(str(from_date), silent=True):
+            datetime_start = datetime.datetime.strptime(str(from_date), '%Y%m%d')
+        else:
+            # If it is a negative number, subtract from current date
+            if isinstance(from_date, int) or isinstance(from_date, int):
+                if from_date < 0:
+                    datetime_start = datetime.datetime.today() - datetime.timedelta(days=-from_date)
+            else:
+                logger.debug("Error in Start Date: must be YYYYMMDD or -Ndays")
+                raise Exception("Start Date not valid")
+    except:
+        raise Exception("Start Date not valid")
+
+    # Manage the end_date (mandatory).
+    try:
+        if functions.is_date_yyyymmdd(str(to_date), silent=True):
+            datetime_end = datetime.datetime.strptime(str(to_date), '%Y%m%d')
+        # If it is a negative number, subtract from current date
+        elif isinstance(to_date, int) or isinstance(to_date, int):
+            if to_date < 0:
+                datetime_end = datetime.datetime.today() - datetime.timedelta(days=-to_date)
+        else:
+            datetime_end = datetime.datetime.today()
+    except:
+        pass
+
+    try:
+        dates = frequency.get_dates(datetime_start, datetime_end)
+    except Exception as inst:
+        logger.debug("Error in frequency.get_dates: %s" % inst.args[0])
+        raise
+
+    try:
+        if sys.platform == 'win32':
+            template.replace("-", "#")
+
+        # return lst
+        list_input_files =  jeodpp_api.get_filedir_Jeodpp_catalog(datetime_start, datetime_end, template, base_url, None)
+
+    except Exception as inst:
+        logger.debug("Error in frequency.get_internet_dates: %s" % inst.args[0])
+        raise
+
+    return list_input_files
+
+
+
+#####################################################################################
 #   build_list_matching_files_jeodpp_eos
 #   Purpose: return the list of file names matching a 'template' with 'date' placeholders
 #            It is the entry point for the 'http_templ' source type
@@ -1620,19 +1689,15 @@ def loop_get_internet(dry_run=False, test_one_source=False, my_source=None, prod
 
                                 subproducts = get_list_ingestion_trigger(product, datasource_descr.datasource_descr_id)
 
-
                                 try:
-                                    current_list = build_list_matching_files_jeodpp_eos(jeodpp_internet_url,
-                                                                                    str(
-                                                                                        internet_source.include_files_expression),
+                                    current_list = build_list_matching_files_jeodpp_catalog(jeodpp_internet_url,
+                                                                                    str(internet_source.include_files_expression),
                                                                                     internet_source.start_date,
                                                                                     internet_source.end_date,
                                                                                     str(internet_source.frequency_id),
                                                                                     str(internet_source.files_filter_expression)
                                                                                     )
-
                                     # ongoing_product_band_list = jeodpp_api.get_product_id_band_from_list(ongoing_list)
-
                                     # Loop over current list
                                     if len(current_list) > 0:
                                         listtoprocessrequest = []

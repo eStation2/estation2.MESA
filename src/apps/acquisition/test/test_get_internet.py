@@ -1525,7 +1525,7 @@ class TestGetInternet(unittest.TestCase):
         start_date_fixed = 20200301
         end_date_fixed = 20200310
         start_date_dyn = -5
-        end_date_dyn = -1
+        end_date_dyn = -3
         file_to_check = '44c285d7-3809-4810-836e-510ee52f326a/S3A_OL_2_WRR____20200310T065044_20200310T073438_20200311T133228_2634_056_006______MAR_O_NT_002'
 
         internet_sources = querydb.get_active_internet_sources()
@@ -1566,8 +1566,8 @@ class TestGetInternet(unittest.TestCase):
         internet_id = 'EOS:S3A:SLSTR:WST'
         start_date_fixed = 20200301
         end_date_fixed = 20200310
-        start_date_dyn = -2
-        end_date_dyn = -1
+        start_date_dyn = -5
+        end_date_dyn = -3
         file_to_check = '32e61b08-0bcb-4d0a-a06e-f3d499dfb5fc/S3A_SL_2_WST____20200310T073813_20200310T091913_20200311T185257_6059_056_006______MAR_O_NT_003'
 
         internet_sources = querydb.get_active_internet_sources()
