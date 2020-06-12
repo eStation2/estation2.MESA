@@ -29,10 +29,12 @@ class ConnectDB(object):
 
     @staticmethod
     def get_db_url():
-        db_url = "postgresql://%s:%s@%s/%s" % (es_constants.es2globals['dbuser'],
+        db_url = "postgresql://%s:%s@%s:%s/%s" % (es_constants.es2globals['dbuser'],
                                                es_constants.es2globals['dbpass'],
                                                es_constants.es2globals['host'],
-                                               es_constants.es2globals['dbname'])
+                                               es_constants.es2globals['port'],
+                                               es_constants.es2globals['dbname']
+                                               )
         # logger.debug("Connect string: %s " % db_url)
         return db_url
 
