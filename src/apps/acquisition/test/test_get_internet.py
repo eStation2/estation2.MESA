@@ -7,6 +7,8 @@ from future import standard_library
 
 standard_library.install_aliases()
 from apps.acquisition.get_eumetcast import *
+from database import querydb
+
 
 import unittest
 import shutil
@@ -1524,8 +1526,8 @@ class TestGetInternet(unittest.TestCase):
         internet_id = 'EOS:S3A:OLCI:WRR'
         start_date_fixed = 20200301
         end_date_fixed = 20200310
-        start_date_dyn = -5
-        end_date_dyn = -3
+        start_date_dyn = -2
+        end_date_dyn = -1
         file_to_check = '44c285d7-3809-4810-836e-510ee52f326a/S3A_OL_2_WRR____20200310T065044_20200310T073438_20200311T133228_2634_056_006______MAR_O_NT_002'
 
         internet_sources = querydb.get_active_internet_sources()
