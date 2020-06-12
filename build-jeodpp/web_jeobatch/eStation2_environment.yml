@@ -1,4 +1,4 @@
-name: eStation2_env
+name: eStation2
 channels:
   - anaconda
   - conda-forge
