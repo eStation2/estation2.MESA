@@ -1,0 +1,78 @@
+#FROM ubuntu:18.04 AS ubuntu
+FROM continuumio/miniconda3
+
+USER root
+
+#Setup user
+ARG UID
+ARG GID
+
+#ARG http_proxy=http://10.168.209.72:8012
+#ARG https_proxy=http://10.168.209.72:8012
+#ARG ftp_proxy=http://10.168.209.72:8012
+#ARG no_proxy="127.0.0.1, localhost, jrc.ec.europa.eu, jrc.it, jrc.org"
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Add essential() packages
+RUN apt-get update && apt-get install -y make cmake gcc
+
+# Add optional packages
+RUN apt update && apt install -y software-properties-common
+RUN apt-get update && apt-get install -y nano vim wget git unzip iputils-ping locales mlocate
+RUN apt-get update && apt-get install -y build-essential ca-certificates libcurl4-openssl-dev libssl-dev
+# To have locate work
+RUN updatedb
+
+ENV PATH="/root/miniconda3/bin:${PATH}"
+ARG PATH="/root/miniconda3/bin:${PATH}"
+
+# Create the Conda environment from the JEODESK env file
+RUN conda create --name env python=3.7
+RUN echo "source activate env" > ~/.bashrc
+ENV PATH /opt/conda/envs/env/bin:$PATH
+ADD eStation2_environment.yml /tmp/eStation2_environment.yml
+RUN conda env create -f /tmp/environment.yml
+# Pull the environment name out of the environment.yml
+RUN echo "source activate $(head -1 /tmp/environment.yml | cut -d' ' -f2)" > ~/.bashrc
+ENV PATH /opt/conda/envs/$(head -1 /tmp/environment.yml | cut -d' ' -f2)/bin:$PATH
+
+# Add GDAL from conda-forge -> gdal contains gdal-bin libgdal-dev
+RUN conda update conda
+RUN conda install conda-forge::gdal
+
+# Add GEOS and PROJ from apt-get -> needed for mapscript
+RUN apt-get update && apt-get install -y libgeos-dev libproj-dev proj-bin
+
+
+# SNAP Installation
+RUN wget http://step.esa.int/downloads/7.0/installers/esa-snap_all_unix_7_0.sh
+ADD esa-snap_all_unix_7_0.sh /tmp
+RUN chmod 755 -R /tmp
+RUN /tmp/esa-snap_all_unix_7_0.sh -q -dir "/usr/local"
+
+# Configuring web folder tree
+RUN mkdir -p /var/www/estation2 && mkdir -p /var/log/apache2/
+
+ADD ../../src /var/www/eStation2
+WORKDIR /var/www/estation2
+
+
+##########################################################
+###### TO RUN THE SERVICE DIRECTLY IN THE CONTAINER  #####
+##########################################################
+
+#ADD pythonpath /pythonpath
+#RUN PYTHONPATH=$(cat /pythonpath);
+#COPY docker-entrypoint.sh /usr/local/bin/
+#RUN ln -s /usr/local/bin/docker-entrypoint.sh /
+#ADD docker-entrypoint.sh /docker-entrypoint.sh
+#ADD setup_pythonenvironment.sh /setup_pythonenvironment.sh
+#ENV PYTHONPATH "${PYTONPATH}:/var/www/estation2"
+#CMD [ "python", "-c", "import sys; sys.path.append('/var/www/estation2')" ]
+#ENTRYPOINT /docker-entrypoint.sh
+#ENTRYPOINT ["docker-entrypoint.sh"]
+#ENTRYPOINT /setup_pythonenvironment.sh
+
+
+
+
