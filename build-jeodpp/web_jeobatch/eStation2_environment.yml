@@ -113,5 +113,5 @@ dependencies:
     - sqlsoup==0.9.1
     - tqdm==4.46.0
     - urllib3==1.25.9
-prefix: /home/venkavi/.conda/envs/eStation2
+prefix: ~/.conda/envs/eStation2
 
