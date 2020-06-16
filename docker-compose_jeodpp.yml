@@ -1,0 +1,16 @@
+version: '3.5'
+
+services:
+  jeobatch:
+    build:
+      context: .
+      dockerfile: ./build-jeodpp/web_jeobatch/DockerfileJEOBATCH
+    container_name: jeobatch
+    environment:
+      - PYTHONPATH=/var/www/estation2/
+    image: "estation2/jeobatch:1.0"
+    restart: unless-stopped
+    volumes: 
+    - C:/data:/data:rw
+    - C:/data/eStation2:/eStation2:rw
+    - C:/data/tmp:/tmp/estation2:rw
