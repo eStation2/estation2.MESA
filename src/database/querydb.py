@@ -4138,7 +4138,10 @@ def get_active_internet_sources():
     global db
 
     try:
-        query = "SELECT * FROM products.internet_source i " + \
+
+        query = "SELECT pads1.*, i.* FROM products.internet_source i " + \
+                " INNER JOIN products.product_acquisition_data_source pads1 " + \
+                " ON i.internet_id = pads1.data_source_id " + \
                 "WHERE i.internet_id IN (  " + \
                 "    SELECT data_source_id " + \
                 "    FROM products.product_acquisition_data_source pads JOIN products.product p " + \
