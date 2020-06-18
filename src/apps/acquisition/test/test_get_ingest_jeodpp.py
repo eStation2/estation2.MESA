@@ -116,7 +116,7 @@ class TestGetEOS(unittest.TestCase):
                 product = {"productcode": productcode,
                            "version": productversion}
 
-                result = get_internet.loop_get_internet(test_one_source=internet_id, my_source=my_source, product=product)
+                result = get_internet.loop_get_internet(test_one_source=internet_id, my_source=my_source)
                 self.assertEqual(0, 0)
 
     #   ---------------------------------------------------------------------------
@@ -157,8 +157,7 @@ class TestGetEOS(unittest.TestCase):
                            "version": productversion}
                 # Test download (dynamic dates
 
-                result = get_internet.loop_get_internet(test_one_source=internet_id, my_source=my_source, product=product)
+                result = get_internet.loop_get_internet(test_one_source=internet_id, my_source=my_source)
                 self.assertEqual(0, 0)
 
-    def trigger_ingestion(self):
-        return None
+
