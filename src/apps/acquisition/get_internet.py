@@ -1314,7 +1314,7 @@ def loop_get_internet(dry_run=False, test_one_source=False, my_source=None):
         while b_loop:
 
             # Check internet connection (or continue)
-            if False: #not functions.internet_on():
+            if not functions.internet_on():  #False: JEodesk- doesnt detect internet connection properly so provide False#
                 logger.error("The computer is not currently connected to the internet. Wait 1 minute.")
                 b_error = True
                 time.sleep(60)
