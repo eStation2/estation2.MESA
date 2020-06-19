@@ -73,13 +73,11 @@ RUN gosu "${USER_ID}":"${GROUP_ID}" conda env create -f /tmp/eStation2_environme
 #RUN chmod 755 -R /tmp
 #RUN /tmp/esa-snap_all_unix_7_0.sh -q -dir "/usr/local"
 
-
 # Initialize eStation code dir
-base_tmp_dir
 ARG BASE_TMP_DIR=/tmp/eStation2
 ARG BASE_LOCAL_DIR=/home/venkavi/eStation2
 ARG DATA_DIR=/eos/jeodpp/data/projects/GMES4AFRICA/data
-ARD WWW_ROOT_DIR=/home/venkavi/PycharmProjects/estation2.MESA
+ARG WWW_ROOT_DIR=/home/venkavi/PycharmProjects/estation2.MESA
 
 ENV BASE_TMP_DIR=${BASE_TMP_DIR}
 ENV BASE_LOCAL_DIR=${BASE_LOCAL_DIR}
@@ -101,15 +99,15 @@ RUN chmod 755 -R "${BASE_TMP_DIR}"
 # Debug entry point TOBE removed
 #ENTRYPOINT ["conda", "run", "-n", "eStation2", "python", "/var/www/estation2/run.py"]
 # Production entry point to start the service:
-ENTRYPOINT ["conda", "run", "-n", "eStation2", "python", ${WWW_ROOT_DIR}"/apps/acquisition/drive_get_internet.py"]
+#ENTRYPOINT ["conda", "run", "-n", "eStation2", "python", ${WWW_ROOT_DIR}"/apps/acquisition/drive_get_internet.py"]
 
 # we switch to root, but we will drop privileges within the entrypoint
-COPY docker-entrypoint.sh /usr/bin/docker-entrypoint.sh
-USER root
-ENTRYPOINT ["/usr/bin/docker-entrypoint.sh"]
+#COPY docker-entrypoint.sh /usr/bin/docker-entrypoint.sh
+#USER root
+#ENTRYPOINT ["/usr/bin/docker-entrypoint.sh"]
 
 # The actual script that I want to run it's default arguments
-COPY jeodpp_batch_runner.py /usr/bin/jeodpp_batch_runner.py
+COPY ./src/run.py /usr/bin/run.py
 CMD ["--help"]
 
 
