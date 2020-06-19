@@ -1,8 +1,6 @@
 #FROM ubuntu:18.04 AS ubuntu
 FROM continuumio/miniconda3
 
-USER root
-
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Add essential() packages
@@ -56,9 +54,6 @@ RUN set -xeu; \
 # Create the Conda environment from the JEODESK env file
 COPY ./build-jeodpp/web_jeobatch/eStation2_environment.yml /tmp/eStation2_environment.yml
 RUN gosu "${USER_ID}":"${GROUP_ID}" conda env create -f /tmp/eStation2_environment.yml
-#ADD ./build-jeodpp/web_jeobatch/eStation2_environment.yml /tmp/eStation2_environment.yml
-#RUN conda env create -f /tmp/eStation2_environment.yml
-#SHELL ["conda", "run", "-n", "eStation2", "/bin/bash", "-c"]
 
 # Add GDAL from conda-forge -> gdal contains gdal-bin libgdal-dev (May not needed for JEOBATCH)
 #RUN conda update conda
@@ -73,42 +68,35 @@ RUN gosu "${USER_ID}":"${GROUP_ID}" conda env create -f /tmp/eStation2_environme
 #RUN chmod 755 -R /tmp
 #RUN /tmp/esa-snap_all_unix_7_0.sh -q -dir "/usr/local"
 
-# Initialize eStation code dir
+# Initialize eStation tmp dir
 ARG BASE_TMP_DIR=/tmp/eStation2
-ARG BASE_LOCAL_DIR=/home/venkavi/eStation2
-ARG DATA_DIR=/eos/jeodpp/data/projects/GMES4AFRICA/data
-ARG WWW_ROOT_DIR=/home/venkavi/PycharmProjects/estation2.MESA
-
 ENV BASE_TMP_DIR=${BASE_TMP_DIR}
-ENV BASE_LOCAL_DIR=${BASE_LOCAL_DIR}
-ENV DATA_DIR=${DATA_DIR}
-ENV WWW_ROOT_DIR=${WWW_ROOT_DIR}
-
 RUN mkdir -p "${BASE_TMP_DIR}"
 RUN chmod 755 -R "${BASE_TMP_DIR}"
 
-# Configuring web folder tree ( This approach may not be possible in JEOBATCH unless we create symbolic link )
-#RUN mkdir -p /var/www/estation2 && mkdir -p /var/log/apache2/
+# Configuring web folder tree ! COPY eStation code in the container
+RUN mkdir -p /var/www/estation2
+#ADD /eos/jeodpp/home/users/venkavi/PycharmProjects/estation2.MESA/src /var/www/estation2
+ADD ./src /var/www/estation2
 
-#ADD ./src /var/www/estation2
-#WORKDIR /var/www/estation2
+# Working dir and python path
+WORKDIR /var/www/estation2
+ENV PYTHONPATH = /var/www/estation2
 
 ##########################################################
 ###### TO RUN THE SERVICE DIRECTLY IN THE CONTAINER  #####
 ##########################################################
-# Debug entry point TOBE removed
-#ENTRYPOINT ["conda", "run", "-n", "eStation2", "python", "/var/www/estation2/run.py"]
 # Production entry point to start the service:
-#ENTRYPOINT ["conda", "run", "-n", "eStation2", "python", ${WWW_ROOT_DIR}"/apps/acquisition/drive_get_internet.py"]
+#ENTRYPOINT ["conda", "run", "-n", "eStation2", "python", "/var/www/estation2/apps/acquisition/drive_get_internet.py"]
 
 # we switch to root, but we will drop privileges within the entrypoint
-#COPY docker-entrypoint.sh /usr/bin/docker-entrypoint.sh
+COPY ./build-jeodpp/web_jeobatch/docker-entrypoint.sh /usr/bin/docker-entrypoint.sh
 #USER root
 #ENTRYPOINT ["/usr/bin/docker-entrypoint.sh"]
 
 # The actual script that I want to run it's default arguments
-COPY ./src/run.py /usr/bin/run.py
-CMD ["--help"]
+#COPY ../../src/run.py /usr/bin/run.py
+#CMD ["--help"]
 
 
 
