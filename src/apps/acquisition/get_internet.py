@@ -1284,7 +1284,7 @@ def wget_file_from_url(remote_url_file, target_dir, target_file=None, userpwd=''
 #   Date: 2014/09/01
 #   Inputs: none
 #   Arguments: dry_run -> if set, read tables and report activity ONLY
-def loop_get_internet(dry_run=False, test_one_source=False, my_source=None, product=None):
+def loop_get_internet(dry_run=False, test_one_source=False, my_source=None):
     global processed_list_filename, processed_list
     global processed_info_filename, processed_info
 
@@ -1314,7 +1314,7 @@ def loop_get_internet(dry_run=False, test_one_source=False, my_source=None, prod
         while b_loop:
 
             # Check internet connection (or continue)
-            if not functions.internet_on():
+            if not functions.internet_on():  #False: JEodesk- doesnt detect internet connection properly so provide False#
                 logger.error("The computer is not currently connected to the internet. Wait 1 minute.")
                 b_error = True
                 time.sleep(60)
@@ -1678,10 +1678,12 @@ def loop_get_internet(dry_run=False, test_one_source=False, my_source=None, prod
                                 # Create the full filename from a 'template' which contains
                                 jeodpp_internet_url = str(internet_source.url)
 
-                                if product is None:
+                                if internet_source.productcode is None or internet_source.version is None:
                                     logger.error("Product is not passed")
                                     return
 
+                                product = {"productcode": internet_source.productcode,
+                                           "version": internet_source.version}
                                 # Datasource description
                                 datasource_descr = querydb.get_datasource_descr(source_type='INTERNET', source_id=internet_id)
                                 datasource_descr = datasource_descr[0]
