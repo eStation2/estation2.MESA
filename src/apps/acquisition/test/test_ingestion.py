@@ -1117,7 +1117,7 @@ class TestIngestion(unittest.TestCase):
         # in_date = '202004201200'
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
                                         version=productversion, mapsetcode=mapsetcode, date=out_date,
-                                        fast=true)
+                                        fast=True)
         self.assertEqual(status, 1)
 
 
