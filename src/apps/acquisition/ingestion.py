@@ -1723,7 +1723,10 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         region_code = region_code.split('-')[3]
     else:
         #JRC-WBD_NA_20190101-0000000000-0000000000.tif
-        date = input_file_name.split('_')[2]  # 0601-0000000000-0000000000.tif
+        #For Other region
+        # date = input_file_name.split('_')[2]  # 0601-0000000000-0000000000.tif
+        #For ECOWAS
+        date = input_file_name.split('_')[1]
         date = date.split('-')[0]
         region_code = input_file_name.split('_')[1]
         # region_code = region_code.split('-')[3]
