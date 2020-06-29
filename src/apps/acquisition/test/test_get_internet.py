@@ -428,6 +428,7 @@ class Source:
         self.https_params = https_params
 
 class TestGetInternet(unittest.TestCase):
+
     pattern = True
     download = False
     direct_download = False
