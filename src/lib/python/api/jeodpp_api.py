@@ -25,9 +25,11 @@ import tempfile
 import shutil
 import zipfile
 import base64
-from lib.python import es_logging as log
+
 from io import BytesIO
 from config import es_constants
+from lib.python import functions
+from lib.python import es_logging as log
 logger = log.my_logger(__name__)
 
 def generate_list_products(dates, template, frequency, base_url, usr_pwd):
@@ -238,6 +240,38 @@ def http_request_jeodpp(remote_url_file, userpwd='', https_params='', post=False
         return 1
     finally:
         c = None
+
+def http_get_request_jeodpp(remote_url_file, userpwd='', https_params=''):
+    try:
+
+        remote_url_file = remote_url_file.replace('\\','') #Pierluigi
+
+        if userpwd is not ':':
+            https_params = "Basic "+base64.b64encode(userpwd.encode()).decode()
+
+        # Adding empty header as parameters are being sent in payload
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": str(https_params) #"Basic dmVua2F2aTpORVZaOW4zWERIU1hrRHpv"
+        }
+
+        r = requests.get(url=remote_url_file, headers=headers )
+        # print (r.content)
+
+        # Check the result (filter server/client errors http://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
+        if r.status_code >= 400:
+            raise Exception('HTTP Error in downloading the file: %i' %r.status_code)
+        # See ES2-67
+        elif r.status_code == 301:
+            raise Exception('File moved permanently: %i' % r.status_code)
+        else:
+            list_dict = json.loads(r.content)
+            return list_dict
+    except:
+        logger.warning('Error in HTTP GET Request of JEODPP: %s - error : %i' %(remote_url_file,r.status_code))
+        return 1
+    finally:
+        r = None
 
 
 def http_post_request_jeodpp(remote_url_file, userpwd='', https_params=''):
@@ -492,3 +526,70 @@ def get_json_from_url(remote_url_file, userpwd='', https_params=''):
     finally:
         c = None
         # shutil.rmtree(tmpdir)
+
+######################################################################################
+#                            JEODPP CATALOG SERVICE
+######################################################################################
+#   In this section you will find list of method to access the catalogue service of JEODPP
+#   Purpose: Query JEODPP CATALOG --- https://jeodpp.jrc.ec.europa.eu/services/catalogue/dataset?
+
+
+######################################################################################
+#   In this section you will find list of method to access the catalogue service of JEODPP
+#   Purpose: Query JEODPP CATALOG --- https://jeodpp.jrc.ec.europa.eu/services/catalogue/dataset?
+#   productType=SL_2_WST___&acquisitionStartTime=%3E=2020-03-01&acquisitionStopTime=%3C=2020-03-01&footprint=POLYGON((21.80910642591091%2040.9831398608581,22.49575193372341%2040.9831398608581,22.49575193372341%2040.494091967663174,21.80910642591091%2040.494091967663174,21.80910642591091%2040.9831398608581))
+#   Author: Vijay Charan, JRC, European Commission
+#   Date: 2020/03/20
+#   Inputs: remote_url_file: full file path
+#           target_file: target file name (by default 'test_output_file')
+#           target_dir: target directory (by default a tmp dir is created)
+#   Output: full pathname is returned (or positive number for error)
+
+def get_filedir_Jeodpp_catalog(datetime_start, datetime_end, template, base_url, usr_pwd):
+
+    list_products_files = []
+
+    #Get the parameters from the template
+    parameters = json.loads(template)
+    product_type = parameters.get('product_type')
+    processingMode = parameters.get('processingMode')
+    platformShortName = parameters.get('platformShortName')
+
+    minlon = parameters.get('minlon')
+    minlat = parameters.get('minlat')
+    maxlon = parameters.get('maxlon')
+    maxlat = parameters.get('maxlat')
+
+    download_link = 'dataset?productType='+product_type+'&acquisitionStartTime=>='+datetime_start.strftime("%Y-%m-%d")+'&acquisitionStopTime=<='+datetime_end.strftime("%Y-%m-%d")
+
+    if processingMode is not None:
+        download_link += '&processingMode='+processingMode
+
+    if platformShortName is not None:
+        download_link += '&platformShortName='+platformShortName
+
+    if minlat is not None and maxlat is not None and minlon is not None and  maxlon is not None:
+        upper_left_coord = minlon + ' ' + maxlat
+        upper_right_coord = maxlon + ' ' + maxlat
+        lower_right_coord = maxlon + ' ' + minlat
+        lower_left_coord = minlon + ' ' + minlat
+        #wkt = 'POLYGON(('+upper_left_coord+','+upper_right_coord+','+lower_right_coord+','+lower_left_coord+','+upper_left_coord+'))'   #POLYGON((36.11 -8.92,36.45 -8.92,36.45 -9.15,36.11 -9.15,36.11 -8.92))
+        wkt = 'POLYGON(('+upper_left_coord+','+upper_right_coord+','+lower_right_coord+','+lower_left_coord+','+upper_left_coord+','+upper_left_coord+'))'
+
+        download_link += '&footprint=' + str(wkt)
+
+    result = http_get_request_jeodpp(str(base_url + os.path.sep + download_link), userpwd=':', https_params='')
+    if result is not 1:
+        for index, each_dict in enumerate(result):
+            if index==0:
+                continue
+            dataset = each_dict.get("dataset")
+            metadata = dataset.get("metadata")
+            filepath = metadata.get("filepath")
+            one_filename = os.path.basename(filepath)
+            in_date = one_filename.split('_')[7]
+            day_data = functions.is_data_captured_during_day(in_date)
+            if day_data:
+                list_products_files.append(filepath)
+
+    return list_products_files

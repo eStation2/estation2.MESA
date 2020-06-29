@@ -2226,12 +2226,20 @@ def pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=None):
     return interm_files_list
 
 
-def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=None, zipped=False):
+def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=None, data_format='TAR'):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
 #   Returns -1 if nothing has to be done on the passed files
+##   Description: the current implementation is based on GPT, and includes the following steps
+#       1. Unzip or untar or just copy files into a temp dir
+#       2. Write a 'subset' graph xml in order to:
+#           a. Subset geographically:
+#           b. Band subset (depends on subdatasource)
+#           c. Apply a flag (band math)
+#       3. Write a reprojection ..
+#       4. Merge by applying input and output nodata (-n -54.53 -a_nodata -32768)
+#   NOTE: now we mask by using l2p_flags_cloud ('True' means cloud detected -> reject)
 #
-
     # Prepare the output file list
     pre_processed_list = []
 
@@ -2260,26 +2268,22 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
     # Unzips the file
     for input_file in list_input_files:
 
-        if zipped:
+        if data_format == 'ZIP':
             # Unzip the .tar file in 'tmpdir'
             command = 'unzip ' + input_file + ' -d ' + tmpdir + os.path.sep  # ' --strip-components 1'
             print (command)
             status = os.system(command)
-            # TODO: Change the code to OS independent
-            # from zipfile import ZipFile
-            # with ZipFile('input_file','r') as zipObj:
-            #     zipObj.extractall(tmpdir + os.path.sep)
 
-        else:
+        elif data_format == 'TAR':
             # Unzip the .tar file in 'tmpdir'
             command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep  # ' --strip-components 1'
             print (command)
             status = os.system(command)
-            # TODO: Change the code to OS independent
-            # import tarfile
-            # tar = tarfile.open(input_file)
-            # tar.extractall(path=tmpdir + os.path.sep)  # untar file into same directory
-            # tar.close()
+
+        # JEODPP EOS data: In this case we just need to copy the folder tmp dir and remaining process is carried out asusal
+        else :
+            tmp_img_file_path = tmpdir + os.path.sep + os.path.basename(input_file)
+            shutil.copytree(input_file, tmp_img_file_path)
 
     # Loop over subproducts and extract associated files. In case of more Mapsets, more sprods exist
     for sprod in subproducts:
@@ -2311,15 +2315,9 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
             # ------------------------------------------------------------------------------------------
             # Write a graph xml and subset the product for specific band, also applying flags
             # ------------------------------------------------------------------------------------------
-            #functions.write_graph_xml_subset(output_dir=tmpdir_untar, band_name=re_process)
-            # if subproductcode == 'chl-oc4me-filtered':
-            #     expression = '(WQSF_lsb_CLOUD or WQSF_lsb_CLOUD_AMBIGUOUS or WQSF_lsb_CLOUD_MARGIN or WQSF_lsb_INVALID or WQSF_lsb_COSMETIC or WQSF_lsb_SATURATED or WQSF_lsb_SUSPECT or WQSF_lsb_HISOLZEN or WQSF_lsb_HIGHGLINT or WQSF_lsb_SNOW_ICE or WQSF_msb_ANNOT_ABSO_D or WQSF_lsb_OC4ME_FAIL or WQSF_msb_ANNOT_MIXR1 or WQSF_msb_ANNOT_DROUT or WQSF_msb_ANNOT_TAU06 or WQSF_msb_RWNEG_O2 or WQSF_msb_RWNEG_O3 or WQSF_msb_RWNEG_O4 or WQSF_msb_RWNEG_O5 or WQSF_msb_RWNEG_O6 or WQSF_msb_RWNEG_O7 or WQSF_msb_RWNEG_O8 or WQSF_lsb_AC_FAIL or WQSF_lsb_WHITECAPS) ? NaN : CHL_OC4ME'
-            # else:
-            #     expression='(WQSF_lsb_CLOUD or WQSF_lsb_CLOUD_AMBIGUOUS or WQSF_lsb_CLOUD_MARGIN or WQSF_lsb_INVALID or WQSF_lsb_COSMETIC or WQSF_lsb_SATURATED or WQSF_lsb_SUSPECT or WQSF_lsb_HISOLZEN or WQSF_lsb_HIGHGLINT or WQSF_lsb_SNOW_ICE) ? NaN : CHL_OC4ME'
             expression = '(WQSF_lsb_CLOUD or WQSF_lsb_CLOUD_AMBIGUOUS or WQSF_lsb_CLOUD_MARGIN or WQSF_lsb_INVALID or WQSF_lsb_COSMETIC or WQSF_lsb_SATURATED or WQSF_lsb_SUSPECT or WQSF_lsb_HISOLZEN or WQSF_lsb_HIGHGLINT or WQSF_lsb_SNOW_ICE or WQSF_msb_ANNOT_ABSO_D or WQSF_lsb_OC4ME_FAIL or WQSF_msb_ANNOT_MIXR1 or WQSF_msb_ANNOT_DROUT or WQSF_msb_ANNOT_TAU06 or WQSF_msb_RWNEG_O2 or WQSF_msb_RWNEG_O3 or WQSF_msb_RWNEG_O4 or WQSF_msb_RWNEG_O5 or WQSF_msb_RWNEG_O6 or WQSF_msb_RWNEG_O7 or WQSF_msb_RWNEG_O8 or WQSF_lsb_AC_FAIL or WQSF_lsb_WHITECAPS) ? NaN : CHL_OC4ME'
             functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process, expression= expression)     #'l2p_flags_cloud ? NaN : sea_surface_temperature')
             #functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process)
-
 
             graph_xml_subset = tmpdir_untar_band + os.path.sep + 'graph_xml_subset.xml'
             output_subset_tif = tmpdir_untar_band + os.path.sep + 'band_subset.tif'
@@ -2372,12 +2370,9 @@ def pre_process_snap_subset_nc(subproducts, tmpdir, input_files, my_logger, in_d
 #   Pre-process the netcdf using snap - subset and merge the tiles
 #   Returns -1 if nothing has to be done on the passed files
 #
-
     # Prepare the output file list
     pre_processed_list = []
-
     list_input_files = []
-
 
     # Make sure input is a list (if only a string is received, it loops over chars)
     if isinstance(input_files, list):
@@ -2386,26 +2381,10 @@ def pre_process_snap_subset_nc(subproducts, tmpdir, input_files, my_logger, in_d
         temp_list_input_files = []
         temp_list_input_files.append(input_files)
 
-    # Select only the 'day-time' files
-    # for one_file in temp_list_input_files:
-    #     one_filename = os.path.basename(one_file)
-    #     in_date = one_filename.split('_')[7]
-    #     day_data = functions.is_data_captured_during_day(in_date)
-    #     if day_data:
-    #         list_input_files.append(one_file)
-
     # Check at least 1 day-time file is there
     if len(temp_list_input_files) == 0:
         my_logger.debug('No any file captured during the day. Return')
         return -1
-
-    # for input_file in temp_list_input_files:
-    #
-    #     # Unzip the .tar file in 'tmpdir'
-    #     command = 'cp ' + input_file + ' ' + tmpdir + os.path.sep # ' --strip-components 1'
-    #     # print (command)
-    #     status = os.system(command)
-    #     # ToDo : check the status or use try/except
 
     # Loop over subproducts and extract associated files. In case of more Mapsets, more sprods exist
     for sprod in subproducts:
@@ -2437,13 +2416,11 @@ def pre_process_snap_subset_nc(subproducts, tmpdir, input_files, my_logger, in_d
                     os.makedirs(tmpdir_output_band)
                 else:
                     continue
-
-            # ------------------------------------------------------------------------------------------
+            # -----------------------------------------------------------------------------------------
             # Write a graph xml and subset the product for specific band, also applying flags
             # ------------------------------------------------------------------------------------------
             functions.write_graph_xml_subset(input_file=input_file, output_dir=tmpdir_output, band_name=bandname)     #'l2p_flags_cloud ? NaN : sea_surface_temperature')
             #functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process)
-
 
             graph_xml_subset = tmpdir_output_band  + os.path.sep + 'graph_xml_subset.xml'
             output_subset_tif = tmpdir_output_band + os.path.sep + 'band_subset.tif'
@@ -2491,7 +2468,6 @@ def pre_process_netcdf_VGT300(subproducts, tmpdir, input_files, my_logger, in_da
 
     list_input_files = []
 
-
     # Make sure input is a list (if only a string is received, it loops over chars)
     if isinstance(input_files, list):
         temp_list_input_files = input_files
@@ -2499,27 +2475,10 @@ def pre_process_netcdf_VGT300(subproducts, tmpdir, input_files, my_logger, in_da
         temp_list_input_files = []
         temp_list_input_files.append(input_files)
 
-    # Select only the 'day-time' files
-    # for one_file in temp_list_input_files:
-    #     one_filename = os.path.basename(one_file)
-    #     in_date = one_filename.split('_')[7]
-    #     day_data = functions.is_data_captured_during_day(in_date)
-    #     if day_data:
-    #         list_input_files.append(one_file)
-
     # Check at least 1 day-time file is there
     if len(temp_list_input_files) == 0:
         my_logger.debug('No any file captured during the day. Return')
         return -1
-
-    # Unzips the files
-    # for input_file in list_input_files:
-    #
-    #     # Unzip the .tar file in 'tmpdir'
-    #     command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep # ' --strip-components 1'
-    #     # print (command)
-    #     status = os.system(command)
-    #     # ToDo : check the status or use try/except
 
     # Loop over subproducts and extract associated files. In case of more Mapsets, more sprods exist
     for sprod in subproducts:
@@ -2563,265 +2522,17 @@ def pre_process_netcdf_VGT300(subproducts, tmpdir, input_files, my_logger, in_da
 
             pre_processed_list.append(output_subset_tif)
             # # ToDo : check the status or use try/except
-            # if os.path.exists(output_subset_tif):
-            #     functions.write_graph_xml_reproject(output_dir=tmpdir_untar_band, nodata_value=scaled_no_data)
-            #
-            #     graph_xml_reproject = tmpdir_untar_band + os.path.sep + 'graph_xml_reproject.xml'
-            #     output_reproject_tif = tmpdir_untar_band + os.path.sep + 'reprojected.tif'
-            #
-            #     command_reproject = es_constants.gpt_exec+' '+ graph_xml_reproject
-            #     # print (command_reproject)
-            #     os.system(command_reproject)
-            #
-            #     if os.path.exists(output_reproject_tif):
-            #         output_vrt = tmpdir_untar_band + os.path.sep + 'single_band_vrt.vrt'
-            #         command_translate = 'gdal_translate -b 1 -a_nodata '+scaled_no_data+' -of VRT '+output_reproject_tif+ ' '+output_vrt
-            #         os.system(command_translate)
-            #         interm_files_list.append(output_vrt)
-
-        # # Check at least 1 file is reprojected file is there
-        # if len(interm_files_list) == 0:
-        #     my_logger.debug('No any file overlapping the ROI. Return')
-        #     return -1
-        #
-        # if len(interm_files_list) > 1 :
-        #     out_tmp_file_gtiff = tmpdir + os.path.sep + re_process+'_merged.tif'
-        #     input_files_str = ''
-        #     for file_add in interm_files_list:
-        #         input_files_str += ' '
-        #         input_files_str += file_add
-        #     command = 'gdalwarp -srcnodata "{}" -dstnodata "{}" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(scaled_no_data, int(no_data),
-        #          input_files_str, out_tmp_file_gtiff)
-        #     # command = 'gdalwarp -srcnodata "103.69266" -dstnodata "1000" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
-        #     #     input_files_str, out_tmp_file_gtiff)
-        #     my_logger.info('Command for merging is: ' + command)
-        #     os.system(command)
-        #     pre_processed_list.append(out_tmp_file_gtiff)
-        # else:
-        #     pre_processed_list.append(interm_files_list[0])
 
     return pre_processed_list
 
 
-# def pre_process_netcdf_s3_wrr_gdal(subproducts, tmpdir, input_files, my_logger, in_date=None):
-# # -------------------------------------------------------------------------------------------------------
-# #   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
-# #
-#     import h5py
-#     # Hard-coded definitions:
-#     geo_file = 'geo_coordinates.nc'
-#     coord_scale = 1000000.0
-#     lat_file = 'latitude.tif'
-#     long_file = 'longitude.tif'
-#
-#     # Prepare the output file list
-#     pre_processed_list = []
-#
-#     interm_files_list = []
-#     list_input_files = []
-#
-#     # Build a list of subdatasets to be extracted
-#     # list_to_extr = []
-#     # for sprod in subproducts:
-#     #     if sprod != 0:
-#     #         list_to_extr.append(sprod['re_extract'])
-#
-#
-#     # Make sure input is a list (if only a string is received, it loops over chars)
-#     if isinstance(input_files, list):
-#         temp_list_input_files = input_files
-#     else:
-#         temp_list_input_files = []
-#         temp_list_input_files.append(input_files)
-#
-#     # Select only the 'day-time' files
-#     for one_file in temp_list_input_files:
-#         one_filename = os.path.basename(one_file)
-#         in_date = one_filename.split('_')[7]
-#         day_data = functions.is_data_captured_during_day(in_date)
-#         if day_data:
-#             list_input_files.append(one_file)
-#
-#     # Unzips the files
-#     for input_file in list_input_files:
-#
-#         # Unzip the .tar file in 'tmpdir'
-#         command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep # ' --strip-components 1'
-#         # print (command)
-#         status = os.system(command)
-#
-#
-#     # Loop over subproducts and extract associated files
-#     for sprod in subproducts:
-#
-#         # In each unzipped folder pre-process the dataset and store the list of files to be merged
-#         for untar_file in os.listdir(tmpdir):
-#
-#             # Define the re_expr for extracting files
-#             bandname = sprod['re_extract']
-#             re_process = sprod['re_process']
-#             target_mapset = sprod['mapsetcode']
-#
-#             # get map set
-#             mapset_info = querydb.get_mapset(mapsetcode=target_mapset)
-#
-#             x_size = mapset_info.pixel_shift_long  # 0.00892857
-#             y_size = mapset_info.pixel_shift_lat  # -0.00892857
-#
-#             upper_left_long = mapset_info.upper_left_long
-#             upper_left_lat = mapset_info.upper_left_lat
-#             lower_right_long = upper_left_long + (x_size * mapset_info.pixel_size_x)
-#             lower_right_lat = upper_left_lat + (y_size * mapset_info.pixel_size_y)
-#
-#             lon_min = min(upper_left_long, lower_right_long)
-#             lon_max = max(upper_left_long, lower_right_long)
-#             lat_min = min(upper_left_lat, lower_right_lat)
-#             lat_max = max(upper_left_lat, lower_right_lat)
-#
-#             mapset_bbox = [lon_min, lat_min, lon_max, lat_max]
-#
-#             # get data footprint
-#             data_bbox = functions.sentinel_get_footprint(dir=tmpdir+ os.path.sep + untar_file)
-#
-#             # Test the overlap of the footprint with the BB of mapset
-#             overlap = functions.check_polygons_intersects(mapset_bbox, data_bbox)
-#
-#             if not overlap:
-#                 continue
-#
-#             # ------------------------------------------------------------------------------------------
-#             # Extract latitude and longitude as geotiff in tmp_dir
-#             # ------------------------------------------------------------------------------------------
-#             tmpdir_untar = tmpdir + os.path.sep + untar_file
-#
-#             geo_fullname = tmpdir_untar+ os.path.sep + geo_file
-#
-#             fd = h5py.File(geo_fullname, 'r')
-#
-#             ds = fd['latitude']
-#             data_read64 = N.zeros(ds.shape, dtype=float)
-#             ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-#             latitude = ds.value / coord_scale
-#             # my_logger.debug('The min/avg/max for latitude in {} are: {}/{}/{}'.format(geo_file, N.min(latitude),
-#             #                                                                           N.mean(latitude),
-#             #                                                                           N.max(latitude)))
-#
-#             output_file = tmpdir_untar + os.path.sep + lat_file
-#             output_driver = gdal.GetDriverByName('GTiff')
-#             orig_size_x = latitude.shape[1]
-#             orig_size_y = latitude.shape[0]
-#             in_data_type = gdal.GDT_Float32
-#             output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-#             output_ds.GetRasterBand(1).WriteArray(latitude)
-#             output_ds = None
-#
-#             ds = fd['longitude']
-#             data_read64 = N.zeros(ds.shape, dtype=float)
-#             ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-#             longitude = ds.value / coord_scale
-#             # my_logger.debug('The min/avg/max for longitude in {} are: {}/{}/{}'.format(geo_file, N.min(longitude),
-#             #                                                                            N.mean(longitude),
-#             #                                                                            N.max(longitude)))
-#
-#             output_file = tmpdir_untar + os.path.sep + long_file
-#             output_driver = gdal.GetDriverByName('GTiff')
-#             orig_size_x = longitude.shape[1]
-#             orig_size_y = longitude.shape[0]
-#             in_data_type = gdal.GDT_Float32
-#             output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-#             output_ds.GetRasterBand(1).WriteArray(longitude)
-#             output_ds = None
-#
-#             fd.close()
-#
-#             # ------------------------------------------------------------------------------------------
-#             # Extract the requested band and
-#             # ------------------------------------------------------------------------------------------
-#
-#             bandpath = tmpdir_untar + os.path.sep + bandname
-#             if bandpath is None:
-#                 return
-#
-#             fd = h5py.File(bandpath, 'r')
-#
-#             bandname_without_ext = os.path.splitext(bandname)[0]
-#             ds = fd[re_process]
-#             data_read64 = N.zeros(ds.shape, dtype=float)
-#             ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-#             bandvalues = ds.value
-#             # my_logger.debug(
-#             #     'The min/avg/max for reflectance in {} are: {}/{}/{}'.format(geo_file, N.min(bandvalues),
-#             #                                                                  N.mean(bandvalues),
-#             #                                                                  N.max(bandvalues)))
-#
-#             un_proj_filename = bandname_without_ext + '_un_proj.tif'
-#             output_file = tmpdir_untar + os.path.sep + un_proj_filename
-#             output_driver = gdal.GetDriverByName('GTiff')
-#             orig_size_x = bandvalues.shape[1]
-#             orig_size_y = bandvalues.shape[0]
-#             in_data_type = gdal.GDT_Float32
-#             output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-#             output_ds.GetRasterBand(1).WriteArray(bandvalues)
-#             output_ds = None
-#             del output_ds
-#
-#             # ------------------------------------------------------------------------------------------
-#             # Write a vrt file and Reproject to lat/long
-#             # ------------------------------------------------------------------------------------------
-#
-#             # TODO: replace the part below with info from mapset -> comment ?
-#             d_lon_min = N.min(longitude)
-#             d_lat_min = N.min(latitude)
-#             d_lon_max = N.max(longitude)
-#             d_lat_max = N.max(latitude)
-#
-#             functions.write_vrt_georef(output_dir=tmpdir_untar, band_file=un_proj_filename, n_lines=orig_size_x,
-#                                        n_cols=orig_size_y)
-#
-#             input_vrt = tmpdir_untar + os.path.sep + 'reflectance.vrt'
-#             output_tif = tmpdir + os.path.sep + untar_file+bandname_without_ext + '.tif'
-#
-#             command = 'gdalwarp -srcnodata "255" -dstnodata "255" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
-#                 d_lon_min, d_lat_min, d_lon_max, d_lat_max, abs(x_size), abs(y_size), input_vrt, output_tif)
-#
-#             os.system(command)
-#
-#             interm_files_list.append(output_tif)
-#
-#     if len(interm_files_list) > 1 :
-#         out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
-#         input_files_str = ''
-#         for file_add in interm_files_list:
-#             input_files_str += ' '
-#             input_files_str += file_add
-#
-#         command = 'gdalwarp -srcnodata "255" -dstnodata "255" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
-#             lon_min, lat_min, lon_max, lat_max, abs(x_size), abs(y_size), input_files_str, out_tmp_file_gtiff)
-#         ###Take gdal_merge.py from es2globals
-#         # command = es_constants.gdal_merge + ' -n 255 -a_nodata 255' + ' -o '   #-co \"compress=lzw\" -ot Float32
-#         #
-#         # out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
-#         #
-#         # command += out_tmp_file_gtiff
-#         #
-#         # for file_add in interm_files_list:
-#         #     command += ' '
-#         #     command += file_add
-#         my_logger.info('Command for merging is: ' + command)
-#         os.system(command)
-#         pre_processed_list.append(out_tmp_file_gtiff)
-#     else:
-#         pre_processed_list.append(interm_files_list[0])
-#     return pre_processed_list
-
-
-def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=None, zipped=False):
+def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=None, data_format='FOLDER'):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process the Sentinel 3 Level 2 product from SLSTR - WST
 #
 #   Description: the current implementation is based on GPT, and includes the following steps
 #
-#       1. Unzipping into a temp dir
+#       1. Unzip or untar or just copy files into a temp dir
 #       2. Write a 'subset' graph xml in order to:
 #           a. Subset geographically:
 #           b. Band subset (SST only)
@@ -2860,26 +2571,22 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
     # Unzips the file
     for input_file in list_input_files:
 
-        if zipped:
+        if data_format == 'ZIP':
             # Unzip the .tar file in 'tmpdir'
             command = 'unzip ' + input_file + ' -d ' + tmpdir + os.path.sep  # ' --strip-components 1'
             print (command)
             status = os.system(command)
-            # TODO: Change the code to OS independent
-            # from zipfile import ZipFile
-            # with ZipFile('input_file','r') as zipObj:
-            #     zipObj.extractall(tmpdir + os.path.sep)
 
-        else:
+        elif data_format == 'TAR':
             # Unzip the .tar file in 'tmpdir'
             command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep  # ' --strip-components 1'
             print (command)
             status = os.system(command)
-            # TODO: Change the code to OS independent
-            # import tarfile
-            # tar = tarfile.open(input_file)
-            # tar.extractall(path=tmpdir + os.path.sep)  # untar file into same directory
-            # tar.close()
+
+        # JEODPP EOS data: In this case we just need to copy the folder tmp dir and remaining process is carried out asusal
+        else :
+            tmp_img_file_path = tmpdir + os.path.sep + os.path.basename(input_file)
+            shutil.copytree(input_file, tmp_img_file_path)
 
     # Loop over subproducts and extract associated files
     for sprod in subproducts:
@@ -2909,8 +2616,6 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
             # ------------------------------------------------------------------------------------------
             # Write a graph xml and subset the product for specific band
             # ------------------------------------------------------------------------------------------
-            #functions.write_graph_xml_subset(output_dir=tmpdir_untar, band_name=re_process)
-            #functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process, expression='l2p_flags_cloud ? NaN : sea_surface_temperature')
             functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process, expression='(quality_level_acceptable_quality or quality_level_best_quality) ? sea_surface_temperature : NaN')
             graph_xml_subset = tmpdir_untar_band + os.path.sep + 'graph_xml_subset.xml'
             output_subset_tif = tmpdir_untar_band + os.path.sep + 'band_subset.tif'
@@ -2957,149 +2662,6 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
         else:
             pre_processed_list.append(interm_files_list[0])
     return pre_processed_list
-
-
-    # ------------------------------------------------------------------------------------------------------------
-    # The part below is the GDAL (rather then GPT) implementation, which we keep for possible re-use in the future.
-    # ------------------------------------------------------------------------------------------------------------
-
-    # command = es_constants.gdal_merge + ' -n -32768 -a_nodata -32768' + ' -o '     #-ot Float32    -co \"compress=lzw\"  -n -32768
-    #
-    # out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
-    #
-    # command += out_tmp_file_gtiff
-    #
-    # for file_add in interm_files_list:
-    #         command += ' '
-    #         command += file_add
-    # my_logger.info('Command for merging is: ' + command)
-    # os.system(command)
-    # pre_processed_list.append(out_tmp_file_gtiff)
-    #
-    # return pre_processed_list
-
-
-    # command='tar -xvf '+input_file+' -C '+tmpdir+os.path.sep +' --strip-components 1'
-    # print (command)
-    # status = os.system(command)
-    #
-    # # Test the overlap of the footprint with the BB of mapset
-    # # get map set
-    # mapset_info = querydb.get_mapset(mapsetcode=target_mapset)
-    #
-    # x_size = mapset_info.pixel_shift_long  # 0.00892857
-    # y_size = mapset_info.pixel_shift_lat  # 0.00892857
-    #
-    # upper_left_long = mapset_info.upper_left_long
-    # upper_left_lat = mapset_info.upper_left_lat
-    # lower_right_long = upper_left_long + (x_size * mapset_info.pixel_size_x)
-    # lower_right_lat = upper_left_lat + (y_size * mapset_info.pixel_size_y)
-    #
-    # lon_min = min(upper_left_long, lower_right_long)
-    # lon_max = max(upper_left_long, lower_right_long)
-    # lat_min = min(upper_left_lat, lower_right_lat)
-    # lat_max = max(upper_left_lat, lower_right_lat)
-    #
-    # mapset_bbox = [lon_min, lat_min, lon_max, lat_max]
-    #
-    # # get data footprint
-    # data_bbox = functions.sentinel_get_footprint(dir=tmpdir)
-    #
-    # # Test the overlap of the footprint with the BB of mapset
-    # overlap = functions.check_polygons_intersects(mapset_bbox, data_bbox)
-    #
-    # if not overlap:
-    #     return
-    #
-    # for ifile in os.listdir(tmpdir):
-    #
-    #     # Unzip to tmpdir and add to list
-    #     if re.match('.*' + bandname + '*.', ifile):
-    #         geo_fullname = tmpdir + os.path.sep + ifile
-    #
-    # if geo_fullname is None:
-    #     return
-    #
-    # fd=h5py.File(geo_fullname,'r')
-    #
-    # ds=fd['lat']
-    # data_read64=N.zeros(ds.shape,dtype=float)
-    # ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-    # latitude=ds.value
-    # my_logger.debug('The min/avg/max for latitude in {} are: {}/{}/{}'.format(bandname, N.min(latitude),N.mean(latitude),N.max(latitude)))
-    #
-    # output_file = tmpdir+ os.path.sep+lat_file
-    # output_driver = gdal.GetDriverByName('GTiff')
-    # orig_size_x = latitude.shape[1]
-    # orig_size_y = latitude.shape[0]
-    # in_data_type= gdal.GDT_Float32
-    # output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-    # output_ds.GetRasterBand(1).WriteArray(latitude)
-    # output_ds = None
-    #
-    # ds=fd['lon']
-    # data_read64=N.zeros(ds.shape,dtype=float)
-    # ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-    # longitude=ds.value
-    # my_logger.debug('The min/avg/max for longitude in {} are: {}/{}/{}'.format(bandname, N.min(longitude),N.mean(longitude),N.max(longitude)))
-    #
-    # output_file = tmpdir+ os.path.sep+long_file
-    # output_driver = gdal.GetDriverByName('GTiff')
-    # orig_size_x = longitude.shape[1]
-    # orig_size_y = longitude.shape[0]
-    # in_data_type= gdal.GDT_Float32
-    # output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-    # output_ds.GetRasterBand(1).WriteArray(longitude)
-    # output_ds = None
-    #
-    # # ------------------------------------------------------------------------------------------
-    # # Extract the requested band and
-    # # ------------------------------------------------------------------------------------------
-    #
-    #
-    # ds = fd[re_process]
-    # data_read64 = N.zeros(ds.shape, dtype=float)
-    # ds.id.read(h5py.h5s.ALL, h5py.h5s.ALL, data_read64, mtype=h5py.h5t.NATIVE_DOUBLE)
-    # bandvalues = ds.value
-    # my_logger.debug('The min/avg/max for reflectance in {} are: {}/{}/{}'.format(bandname, N.min(bandvalues), N.mean(bandvalues),
-    #                                                                    N.max(bandvalues)))
-    #
-    # un_proj_filename = re_process + '_un_proj.tif'
-    # output_file = tmpdir+ os.path.sep + un_proj_filename
-    # output_driver = gdal.GetDriverByName('GTiff')
-    # orig_size_x = bandvalues.shape[2]
-    # orig_size_y = bandvalues.shape[1]
-    # in_data_type = gdal.GDT_Float32
-    # output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-    # #If the dataset is three dimension use this case(In this case sst is skin sst so there is just single ds)
-    # for i, bandvalue in enumerate(bandvalues, 1):
-    #     output_ds.GetRasterBand(i).WriteArray(bandvalue)
-    # output_ds = None
-    # del output_ds
-    #
-    # # ------------------------------------------------------------------------------------------
-    # # Write a vrt file and Reproject to lat/long
-    # # ------------------------------------------------------------------------------------------
-    #
-    # # TODO: replace the part below with info from mapset
-    # lon_min = N.min(longitude)
-    # lat_min = N.min(latitude)
-    # lon_max = N.max(longitude)
-    # lat_max = N.max(latitude)
-    #
-    # functions.write_vrt_georef(output_dir=tmpdir, band_file=un_proj_filename,n_lines=orig_size_x, n_cols=orig_size_y)
-    # input_vrt_filename = 'reflectance.vrt'
-    # input_vrt = tmpdir + os.path.sep+ input_vrt_filename
-    # output_tif = tmpdir+ os.path.sep + re_process + '.tif'
-    #
-    # command = 'gdalwarp -dstnodata "-32768" -te {} {} {} {} -s_srs "epsg:4326" -tr {} {} -r near -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
-    #     lon_min, lat_min, lon_max, lat_max, abs(x_size), abs(y_size), input_vrt, output_tif)
-    #
-    # os.system(command)
-    #
-    # interm_files_list.append(output_tif)
-    #
-    # return interm_files_list
 
 
 def pre_process_oilspill_detection_sentinel1(subproducts, tmpdir, input_files, my_logger, in_date=None):
@@ -3293,8 +2855,12 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 #           CPC_BINARY: binary file in big-endian
 #           BINARY: .bil product (e.g. GEOWRSI)
 #           ENVI_2_GTIFF: convert ENVI files(.img,.hdr) to GEOTIF
-#           NETCDF_S3_WRR: S3A OLCI WRR data treatment using SNAP-GPT to do band subset, reproject.
-#           NETCDF_S3_WST: S3A SLSTR WST data treatment using SNAP-GPT to do band subset, reproject.
+#           NETCDF_S3_WRR: TAR data format - S3A OLCI WRR data treatment using SNAP-GPT to do band subset, reproject.
+#           NETCDF_S3_WRR_JEODPP :JEODPP EOS data format: S3A OLCI WRR data treatment using SNAP-GPT to do band subset, reproject.
+#           NETCDF_S3_WRR_ZIP :ZIP data format  3A OLCI WRR data treatment using SNAP-GPT to do band subset, reproject.
+#           NETCDF_S3_WST: TAR data format - S3A SLSTR WST data treatment using SNAP-GPT to do band subset, reproject.
+#           NETCDF_S3_WST_ZIP: ZIP data format - S3A SLSTR WST data treatment using SNAP-GPT to do band subset, reproject.
+#           NETCDF_S3_WST_JEODPP: JEODPP- FOLDER - FORMAT : S3A SLSTR WST data treatment using SNAP-GPT to do band subset, reproject.
 #           MERGE_TILE: Merge the tiles from VITO website and convert to nobigtif format
 #           JRC_WBD_GEE: merges the various tiles of the .tif files retrieved from GEE application and remove the bigtif tag(works only in developement machine)
 #       native_mapset_code: id code of the native mapset (from datasource_descr)
@@ -3378,19 +2944,28 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
             interm_files = pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
 
         elif preproc_type == 'NETCDF_S3_WRR_ZIP':
-            interm_files = pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=in_date, zipped=True)
+            interm_files = pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=in_date,
+                                                     data_format='ZIP')
 
         elif preproc_type == 'NETCDF_S3_WRR':
-            interm_files = pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
+            interm_files = pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=in_date,
+                                                     data_format='TAR')
+        #JEODPP EOS data: In this case we just need to copy the folder tmp dir and remaining process is carried out asusal
+        elif preproc_type == 'NETCDF_S3_WRR_JEODPP':
+            interm_files = pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=in_date,
+                                                     data_format='FOLDER')
 
         elif preproc_type == 'NETCDF_GPT_SUBSET':
             interm_files = pre_process_netcdf_VGT300(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
 
         elif preproc_type == 'NETCDF_S3_WST':
-            interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
+            interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date, data_format='TAR')
 
         elif preproc_type == 'NETCDF_S3_WST_ZIP':
-            interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date, zipped=True)
+            interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date, data_format='ZIP')
+
+        elif preproc_type == 'NETCDF_S3_WST_JEODPP':
+            interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date, data_format='FOLDER')
 
         elif preproc_type == 'TARZIP':
             interm_files = pre_process_tarzip(subproducts, tmpdir, input_files, my_logger)
@@ -4487,6 +4062,98 @@ def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in
     # Return the output array
 
     return trg_data
+
+def get_list_ingestion_trigger(product, datasource_descr_id):
+    # Get list of ingestions triggers [prod/subprod/mapset]
+    ingestions = querydb.get_ingestion_subproduct(allrecs=False, **product)
+
+    # Loop over ingestion triggers
+    subproducts = list()
+    for ingest in ingestions:
+
+        dates_not_in_filename = False
+        if ingest.input_to_process_re == 'dates_not_in_filename':
+            dates_not_in_filename = True
+
+        logger.debug(" --> processing subproduct: %s" % ingest.subproductcode)
+        args = {"productcode": product['productcode'],
+                "subproductcode": ingest.subproductcode,
+                "datasource_descr_id": datasource_descr_id,
+                "version": product['version']}
+        product_in_info = querydb.get_product_in_info(**args)
+        try:
+            re_process = product_in_info.re_process
+            re_extract = product_in_info.re_extract
+            nodata_value = product_in_info.no_data
+            sprod = {'subproduct': ingest.subproductcode,
+                     'mapsetcode': ingest.mapsetcode,
+                     're_extract': re_extract,
+                     're_process': re_process,
+                     'nodata': nodata_value}
+            subproducts.append(sprod)
+        except:
+            logger.warning("Subproduct %s not defined for source %s" % (
+            ingest.subproductcode, datasource_descr_id))
+
+    return subproducts
+
+
+def get_list_unique_dates(datasource_descr, files,dates_not_in_filename=False, product_in_info=None, ingest=None):
+    # Get the list of unique dates by extracting the date from all files.
+    dates_list = []
+
+    #   Check the case 'dates_not_in_filename' (e.g. GSOD -> yearly files continuously updated)
+    if dates_not_in_filename:
+
+        # Build the list of dates from datasource description
+        start_datetime = datetime.datetime.strptime(str(datasource_descr.start_date), "%Y%m%d")
+        if datasource_descr.end_date is None:
+            end_datetime = datetime.date.today()
+        else:
+            end_datetime = datetime.datetime.strptime(str(datasource_descr.end_date), "%Y%m%d")
+
+        all_starting_dates = proc_functions.get_list_dates_for_dataset(product_in_info.productcode, \
+                                                                       product_in_info.subproductcode, \
+                                                                       product_in_info.version, \
+                                                                       start_date=datasource_descr.start_date,
+                                                                       end_date=datasource_descr.end_date)
+
+        my_dataset = products.Dataset(product_in_info.productcode,
+                                      product_in_info.subproductcode,
+                                      ingest.mapsetcode,
+                                      version=product_in_info.version,
+                                      from_date=start_datetime,
+                                      to_date=end_datetime)
+        my_dates = my_dataset.get_dates()
+
+        my_formatted_dates = []
+        for my_date in my_dates:
+            my_formatted_dates.append(my_dataset._frequency.format_date(my_date))
+
+        my_missing_dates = []
+        for curr_date in all_starting_dates:
+            if curr_date not in my_formatted_dates:
+                my_missing_dates.append(curr_date)
+
+        dates_list = sorted(my_missing_dates, reverse=False)
+
+    else:
+        # Build the list of dates from filenames
+        for filename in files:
+            date_position = int(datasource_descr.date_position)
+            if datasource_descr.format_type == 'delimited':
+                splitted_fn = re.split(datasource_descr.delimiter, filename)
+                date_string = splitted_fn[date_position]
+                if len(date_string) > len(datasource_descr.date_format):
+                    date_string = date_string[0:len(datasource_descr.date_format)]
+                dates_list.append(date_string)
+            else:
+                dates_list.append(filename[date_position:date_position + len(datasource_descr.date_format)])
+
+        dates_list = set(dates_list)
+        dates_list = sorted(dates_list, reverse=False)
+
+    return dates_list
 
 #
 # Converts the string data type to numpy types

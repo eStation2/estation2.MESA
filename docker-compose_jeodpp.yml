@@ -1,0 +1,55 @@
+version: '3.5'
+
+services:
+  jeobatch:
+    build:
+      context: .
+      dockerfile: ./build-jeodpp/web_jeobatch/DockerfileJEOBATCH
+    container_name: jeobatch
+    environment:
+      - PYTHONPATH=/var/www/estation2/
+    image: "estation2/jeobatch:1.0"
+    #restart: unless-stopped
+    volumes:
+    - C:/data/:/data:rw
+    - C:/data/eStation2:/eStation2:rw
+    - C:/data/tmp:/tmp/eStation2:rw
+
+#   postgres:
+#     build:
+#       context: ./
+#       dockerfile: ./build-docker/postgres12/Dockerfile
+#     container_name: postgres
+#     environment:
+#       PGPASSWORD: "mesadmin"
+#       POSTGRES_USER: "estation"
+#       POSTGRES_PASS: "mesadmin"
+#       POSTGRES_DBNAME: "estationdb"
+#       POSTGRES_PORT: "5432"
+#       DEFAULT_ENCODING: "UTF8"
+#       DEFAULT_COLLATION: "en_US.UTF-8"
+#       DEFAULT_CTYPE: "en_US.UTF-8"
+#       POSTGRES_MULTIPLE_EXTENSIONS: "postgis,adminpack,postgis_topology"
+#       POSTGRES_TEMPLATE_EXTENSIONS: "true"
+#       WAL_SIZE: "4GB"
+#       MIN_WAL_SIZE: "2048MB"
+#       WAL_SEGSIZE: "1024"
+#       MAINTAINANCE_WORK_MEM: "128MB"
+#       DB_VERSION: "2200"
+#     image: "estation2python3docker/postgis:12"
+#     #command: sleep infinity
+#     ports:
+#     - 5432:5432
+#     restart: unless-stopped
+# #    privileged: true
+#     volumes:
+#     - C:/data/eStation2/db_dump:/eStation2/db_dump:rw
+#     - C:/data/eStation2:/eStation2:rw
+#     - ./src:/var/www/eStation2:rw
+#     - docker-postgresql12-volume:/var/lib/postgresql:rw
+#     - ./log/postgres:/var/log/eStation2:rw
+
+# # create an external docker volume: docker volume create --name docker-postgresql12-volume -d local
+# volumes:
+#   docker-postgresql12-volume:
+#     external: true
