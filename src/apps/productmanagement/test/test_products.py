@@ -93,11 +93,11 @@ class TestProducts(unittest.TestCase):
                                                   mapset=self.mapsets[0]), Dataset)
 
     def test_all_products_to_json(self):
-        def row2dict(row):
-            d = {}
-            for column_name in list(row.c.keys()):  # all_cols:
-                d[column_name] = str(getattr(row, column_name))
-            return d
+        # def row2dict(row):
+        #     d = {}
+        #     for column_name in list(row.c.keys()):  # all_cols:
+        #         d[column_name] = str(getattr(row, column_name))
+        #     return d
 
         # get full distinct list of products (native only)
         db_products = querydb.get_products()
@@ -109,7 +109,8 @@ class TestProducts(unittest.TestCase):
         products_dict_all = []
         # loop the products list
         for product in db_products:
-            prod_dict = row2dict(product)
+            # prod_dict = row2dict(product)
+            prod_dict = product
             productcode = prod_dict['productcode']
             version = prod_dict['version']
             p = Product(product_code=productcode, version=version)

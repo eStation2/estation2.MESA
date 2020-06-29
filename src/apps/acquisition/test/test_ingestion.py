@@ -309,7 +309,7 @@ class TestIngestion(unittest.TestCase):
 
     #   ---------------------------------------------------------------------------
     #   Vegetation - NDVI V2.2.1 //Ok 30-04-2020 Vijay//
-    #   Tested ok (metadata diff) 4.5.20
+    #   Tested ok (metadata diff) 24.6.20 -> 25s PyCh
     #   ---------------------------------------------------------------------------
     def test_ingest_g_cls_ndvi_2_2(self):
 
@@ -1076,7 +1076,7 @@ class TestIngestion(unittest.TestCase):
 
     #   ---------------------------------------------------------------------------
     #    Inland Water - WBD-GEE
-    #    Tested 08.05.2020 ->
+    #    Tested 24.06.2020 -> 14s
     #   ---------------------------------------------------------------------------
     def test_ingest_jrc_wbd_avg_tarzip(self):
         productcode = 'wd-gee'
@@ -1117,13 +1117,33 @@ class TestIngestion(unittest.TestCase):
         # in_date = '202004201200'
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
                                         version=productversion, mapsetcode=mapsetcode, date=out_date,
-                                        fast=true)
+                                        fast=True)
         self.assertEqual(status, 1)
 
-
+# Suite with all tests
 suite_ingestion = unittest.TestLoader().loadTestsFromTestCase(TestIngestion)
+
+# Suite with a partial coverage, but faster to run
+suite_ingestion_fast = unittest.TestSuite()
+suite_ingestion_fast.addTest(TestIngestion('test_ingest_mars_wsi'))
+suite_ingestion_fast.addTest(TestIngestion('test_ingest_arc2_rain'))
+suite_ingestion_fast.addTest(TestIngestion('test_ingest_chirps'))
+suite_ingestion_fast.addTest(TestIngestion('test_ingest_chirps_tif'))
+suite_ingestion_fast.addTest(TestIngestion('test_ingest_fewsnet_rfe'))
+suite_ingestion_fast.addTest(TestIngestion('test_ingest_tamsat_rfe'))
+suite_ingestion_fast.addTest(TestIngestion('test_ingest_modis_firms'))
+suite_ingestion_fast.addTest(TestIngestion('test_ingest_modis_chlor_netcdf'))
+suite_ingestion_fast.addTest(TestIngestion('test_ingest_modis_sst_netcdf'))
+suite_ingestion_fast.addTest(TestIngestion('test_ingest_pml_modis_oc'))
+suite_ingestion_fast.addTest(TestIngestion('test_ingest_s3_olci_wrr_chl_oc4me'))
+suite_ingestion_fast.addTest(TestIngestion('test_ingest_s3_slstr_sst'))
+suite_ingestion_fast.addTest(TestIngestion('test_ingest_cpc_soilmoisture'))
+suite_ingestion_fast.addTest(TestIngestion('test_ingest_lsasaf_et_disk'))
+suite_ingestion_fast.addTest(TestIngestion('test_ingest_jrc_wbd_avg_tarzip'))
+
 if __name__ == '__main__':
-    unittest.TextTestRunner(verbosity=2).run(suite_ingestion)
+    unittest.TextTestRunner(verbosity=2).run(suite_ingestion_fast)
+
 
     #   ---------------------------------------------------------------------------
     #    OCEANOGRAPHY - PML MODIS SST // Not yet tested -> pml-modis-chla instead //

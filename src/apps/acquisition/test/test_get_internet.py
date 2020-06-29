@@ -63,6 +63,7 @@ class Source:
         self.https_params = https_params
 
 class TestGetInternet(unittest.TestCase):
+
     pattern = True
     download = False
     direct_download = False
@@ -117,7 +118,7 @@ class TestGetInternet(unittest.TestCase):
             if self.pattern:
                 self.assertTrue(file_to_check in list)
 
-            # Test download (dynamic dates
+            # Test download (dynamic dates)
             if self.download:
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
                 self.assertEqual(result, 0)

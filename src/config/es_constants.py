@@ -25,7 +25,7 @@ import sys
 import configparser
 from osgeo import gdalconst
 
-from lib.python import functions
+#from lib.python import functions
 # logger = log.my_logger(__name__)
 
 standard_library.install_aliases()
@@ -34,14 +34,15 @@ standard_library.install_aliases()
 os.umask(0000)
 
 if sys.platform != 'win32':
-    system_settings = functions.getSystemSettings()
-    install_type = system_settings['type_installation'].lower()
-    if install_type == 'jeobatch':
-        factory_settings_filename = 'factory_settings_jeobatch.ini'
-    elif install_type == 'jeodesk':
-        factory_settings_filename = 'factory_settings_jeodesk.ini'
-    else:
-        factory_settings_filename = 'factory_settings.ini'
+    # system_settings = functions.getSystemSettings()
+    # install_type = system_settings['type_installation'].lower()
+    # if install_type == 'jeobatch':
+    #     factory_settings_filename = 'factory_settings_jeobatch.ini'
+    # elif install_type == 'jeodesk':
+    #     factory_settings_filename = 'factory_settings_jeodesk.ini'
+    # else:
+    #     factory_settings_filename = 'factory_settings.ini'
+    factory_settings_filename = 'factory_settings.ini'
 else:
     factory_settings_filename = 'factory_settings_windows.ini'
 
