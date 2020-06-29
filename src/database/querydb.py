@@ -207,7 +207,7 @@ def getDefaultUserGraphTemplateID(userid, graph_type, istemplate=False, graph_tp
     if not defaultworkspaceid:
         return False
 
-    query = " SELECT workspaceid as lastworkspaceid FROM analysis.user_graph_templates " + \
+    query = " SELECT graph_tpl_id as default_graph_tpl_id FROM analysis.user_graph_templates " + \
             " WHERE userid = '" + userid + "'" + \
             "  AND workspaceid = '" + defaultworkspaceid + "'" + \
             "  AND graph_type = '" + graph_type + "'" + \
@@ -237,7 +237,7 @@ def getDefaultUserGraphTemplateID(userid, graph_type, istemplate=False, graph_tp
             defaultgraphtpl = db_analysis.execute(query).fetchall()
             if defaultgraphtpl.__len__() > 0:
                 for row in defaultgraphtpl:
-                    graph_tpl_id = row['lastworkspaceid']
+                    graph_tpl_id = row['default_graph_tpl_id']
                 # graph_tpl_id = defaultgraphtpl[0].graph_tpl_id
             else:
                 return False
@@ -245,7 +245,7 @@ def getDefaultUserGraphTemplateID(userid, graph_type, istemplate=False, graph_tp
             return False
     else:
         for row in defaultgraphtpl:
-            graph_tpl_id = row['lastworkspaceid']
+            graph_tpl_id = row['default_graph_tpl_id']
         # graph_tpl_id = defaultgraphtpl[0].graph_tpl_id
 
     return graph_tpl_id
