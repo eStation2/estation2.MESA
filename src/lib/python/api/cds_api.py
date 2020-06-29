@@ -24,7 +24,7 @@ logger = log.my_logger(__name__)
 #           https_params: Additional Http parameters
 #   Output: List of resources
 #   Output type: Python Dict
-def get_resources_list(base_url, usr_pwd, https_params):
+def get_resources_list(base_url, usr_pwd=None, https_params=None):
 
     get_jobs_url = base_url + '/resources'
     response = http_request_cds(get_jobs_url, userpwd=usr_pwd, https_params=https_params)
@@ -70,7 +70,7 @@ def get_resources_applications(base_url, usr_pwd, https_params):
 #           https_params: Additional Http parameters
 #   Output: Resource detail
 #   Output type: Python Dict
-def get_resource_details(base_url, resourcename_uuid, usr_pwd, https_params):
+def get_resource_details(base_url, resourcename_uuid, usr_pwd=None, https_params=None):
 
     get_jobs_url = base_url + '/resources/'+ resourcename_uuid
     response = http_request_cds(get_jobs_url, userpwd=usr_pwd, https_params=https_params)
@@ -86,7 +86,7 @@ def get_resource_details(base_url, resourcename_uuid, usr_pwd, https_params):
 #           https_params: Additional Http parameters
 #   Output: Availability of the resource
 #   Output type: Boolean
-def get_resource_availablity(base_url, resourcename_uuid, usr_pwd, https_params):
+def get_resource_availablity(base_url, resourcename_uuid, usr_pwd=None, https_params=None):
 
     get_jobs_url = base_url + '/resources/'+ resourcename_uuid+ '/availability'
     response = http_request_cds(get_jobs_url, userpwd=usr_pwd, https_params=https_params)
@@ -130,7 +130,7 @@ def post_request_resource(base_url, resourcename_uuid, usr_pwd, https_params, pa
 #           https_params: Additional Http parameters
 #   Output: status and location to download the file
 #   Output type: Boolean , string
-def get_task_details(base_url, request_id, usr_pwd, https_params):
+def get_task_details(base_url, request_id, usr_pwd=None, https_params=None):
     # url and job
     get_jobs_url = base_url + '/tasks/' + request_id
     response = http_request_cds(get_jobs_url, userpwd=usr_pwd, https_params=https_params)
@@ -148,7 +148,7 @@ def get_task_details(base_url, request_id, usr_pwd, https_params):
 #           https_params: Additional Http parameters
 #   Output: List of task
 #   Output type: Python Dict
-def get_tasks_list(base_url,  usr_pwd, https_params):
+def get_tasks_list(base_url, usr_pwd=None, https_params=None):
 
     get_jobs_url = base_url + '/tasks'
     response = http_request_cds(get_jobs_url, userpwd=usr_pwd, https_params=https_params)
@@ -164,7 +164,7 @@ def get_tasks_list(base_url,  usr_pwd, https_params):
 #           https_params: Additional Http parameters
 #   Output:
 #   Output type: Boolean
-def delete_cds_task(base_url, task_id, usr_pwd, https_params=''):
+def delete_cds_task(base_url, task_id, usr_pwd, https_params=None):
     # url and job
     success = False
     # To check if the user and password is not defined and throw error
@@ -200,7 +200,7 @@ def get_file(download_url, usr_pwd, https_params, target_path):
 #           https_params: Additional Http parameters
 #   Output: List of Terms and condition
 #   Output type: Python Dict
-def get_termsConditions_list(base_url, usr_pwd, https_params):
+def get_termsConditions_list(base_url, usr_pwd=None, https_params=None):
 
     get_jobs_url = base_url + '/terms/list'
     response = http_request_cds(get_jobs_url, userpwd=usr_pwd, https_params=https_params)
@@ -254,7 +254,7 @@ def http_post_request_cds(remote_url_file, userpwd='', https_params='', data=Non
         remote_url_file = remote_url_file.replace('\\','') #Pierluigi
 
         if userpwd is not None:
-            https_params = "Basic "+base64.b64encode(userpwd)
+            https_params = "Basic "+base64.b64encode(userpwd.encode()).decode()
 
         # Adding empty header as parameters are being sent in payload
         headers = {
@@ -271,8 +271,8 @@ def http_post_request_cds(remote_url_file, userpwd='', https_params='', data=Non
         # See ES2-67
         elif r.status_code == 301:
             raise Exception('File moved permanently: %i' % r.status_code)
-        elif r.status_code == 202:
-            return True
+        # elif r.status_code == 202:
+        #     return True
         else:
             list_dict = json.loads(r.content)
             return list_dict
@@ -310,7 +310,7 @@ def http_request_cds(remote_url_file, userpwd='', https_params='', post=False, d
 
         if userpwd is not None:
             c.setopt(c.USERPWD,userpwd)
-            https_params = "Authorization: Basic "+base64.b64encode(userpwd)
+            https_params = "Authorization: Basic "+base64.b64encode(userpwd.encode()).decode()
         if remote_url_file.startswith('https'):
             c.setopt(c.CAINFO, certifi.where()) #Pierluigi
             if https_params is not None:
@@ -355,7 +355,7 @@ def get_cds_file_from_url(remote_url_file, target_fullpath, userpwd='', https_pa
         c.setopt(c.WRITEFUNCTION, outputfile.write)
         if userpwd is not ':':
             c.setopt(c.USERPWD,userpwd)
-            https_params = "Authorization: Basic "+base64.b64encode(userpwd)
+            https_params = "Authorization: Basic "+base64.b64encode(userpwd.encode()).decode()
         if remote_url_file.startswith('https'):
             c.setopt(c.CAINFO, certifi.where())  # Pierluigi
             if https_params is not '':
@@ -402,7 +402,7 @@ def http_delete_request_cds(remote_url_file, userpwd='', https_params=''):
         remote_url_file = remote_url_file.replace('\\','') #Pierluigi
 
         if userpwd is not ':':
-            https_params = "Basic "+base64.b64encode(userpwd)
+            https_params = "Basic "+base64.b64encode(userpwd.encode()).decode()
 
         # Adding empty header as parameters are being sent in payload
         headers = {
@@ -721,7 +721,7 @@ def http_delete_request_cds(remote_url_file, userpwd='', https_params=''):
 #
 #         if userpwd is not ':':
 #             c.setopt(c.USERPWD,userpwd)
-#             https_params = "Authorization: Basic "+base64.b64encode(userpwd)
+#             https_params = "Authorization: Basic "+base64.b64encode(userpwd.encode()).decode()
 #
 #         if remote_url_file.startswith('https'):
 #             c.setopt(c.CAINFO, certifi.where()) #Pierluigi
