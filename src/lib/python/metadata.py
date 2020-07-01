@@ -429,8 +429,9 @@ class GdalInfo(object):
 
             print("Band Type={}".format(gdal.GetDataTypeName(band.DataType)))
 
-            print("Min={:.3f}, Max={:.3f}".format(self.BandMin,self.BandMax))
-            print("Mean={:.3f}, Std={:.3f}".format(self.BandMean,self.BandStd))
+            # Skip .. gives error
+            # print("Min={:.3f}, Max={:.3f}".format(self.BandMin,self.BandMax))
+            # print("Mean={:.3f}, Std={:.3f}".format(self.BandMean,self.BandStd))
 
         return 0
 
