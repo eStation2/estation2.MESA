@@ -256,7 +256,7 @@ class TestQuerydb(TestCase):
         result1 = querydb.get_eumetcast(source_id=source_id, allrecs=allrecs)
         if result1:
             print_rows(result1)
-            self.assertEqual(result1.eumetcast_id, source_id)
+            self.assertEqual(result1[0]['eumetcast_id'], source_id)
         else:
             self.assertFalse(True)  # Test fails: result1 = False because of an exception error!
 
@@ -297,7 +297,7 @@ class TestQuerydb(TestCase):
         result = querydb.get_frequency(frequency_id=frequency_id)
         if result:
             print_rows(result)
-            self.assertEqual(result[0].frequency_id, frequency_id)
+            self.assertEqual(result.frequency_id, frequency_id)
         else:
             self.assertFalse(True)  # Test fails: result = False because of an exception error!
 
