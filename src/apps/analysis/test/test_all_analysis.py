@@ -11,5 +11,5 @@ from apps.analysis.test import test_generatelegendhtml
 
 suite_list = [test_gettimeseries.suite_gettimeseries, test_generatelegendhtml.suite_generatelegendhtml]
 
-suite_combo = unittest.TestSuite(suite_list)
-unittest.TextTestRunner(verbosity=2).run(suite_combo)
+suite_combo_analysis = unittest.TestSuite(suite_list)
+unittest.TextTestRunner(verbosity=2).run(suite_combo_analysis)

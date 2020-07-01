@@ -15,5 +15,5 @@ suite_list.append(test_functions.suite_functions)
 suite_list.append(test_metadata.suite_metadata)
 suite_list.append(test_mapset.suite_mapset)
 
-suite_combo = unittest.TestSuite(suite_list)
-unittest.TextTestRunner(verbosity=2).run(suite_combo)
+suite_combo_python = unittest.TestSuite(suite_list)
+unittest.TextTestRunner(verbosity=2).run(suite_combo_python)
