@@ -47,7 +47,7 @@ class TestMetaData(unittest.TestCase):
             os.chmod(self.testresultdir, 0o755)
 
         self.testfile_fewsnet = self.testdatadir + os.path.sep + 'tif/20110111_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif '
-        self.testfile_ndvi = self.testdatadir + os.path.sep + 'tif/20180801_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
+        self.testfile_ndvi = self.testdatadir + os.path.sep + 'vgt-ndvi/ndvi-linearx2/20101221_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
 
     def test_assign_compute_time_now(self):
         sds_meta = SdsMetadata()
@@ -304,8 +304,7 @@ class TestMetaData(unittest.TestCase):
         if os.path.exists(self.testfile_ndvi):
             target_filepath = sds_meta.get_target_filepath(self.testfile_ndvi)
             self.assertEqual(target_filepath, '/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi'
-                                              '-linearx2/20180801_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2'
-                                              '.tif')
+                                              '-linearx2/20101221_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif')
         else:
             logger.info('Test file not existing: skip test')
 
@@ -399,10 +398,10 @@ class TestMetaData(unittest.TestCase):
         self.assertEqual(my_value, read_value)
 
     def test_get_gdalinfo(self):
-        my_file = '/data/test_data/refs_output/wsi-hp/pasture/20200221_wsi-hp_pasture_SPOTV-Africa-1km_V1.0.tif'
+        my_file = '/data/test_data/wsi-hp/pasture/20200221_wsi-hp_pasture_SPOTV-Africa-1km_V1.0.tif'
         gdal_info = GdalInfo()
         status = gdal_info.get_gdalinfo(my_file, print_out=True)
-        self.assertEqual(status, 1)
+        self.assertEqual(status, 0)
 
     def test_compare_gdalinfo(self):
         my_file1 = '/data/test_data/refs_output/wsi-hp/pasture/20200221_wsi-hp_pasture_SPOTV-Africa-1km_V1.0.tif'
