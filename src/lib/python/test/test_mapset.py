@@ -101,14 +101,14 @@ class TestMapSet(unittest.TestCase):
         my_mapset.compute_pixel_area(n_line, n_col)
         self.assertEqual(my_mapset.pixel_area, 939119.6688635349)
 
-    def test_create_raster_surface(self):
-        # Todo: Remove method? Method is not used anywhere in the code!
-        mapsetcode = 'MODIS-IOC2-4km'  # 'CHIRP-Africa-5km'
-        filename = self.testresultdir + os.path.sep + 'pixelsize.tif'
-        my_mapset = MapSet()
-        my_mapset.assigndb(mapsetcode)
-        my_mapset.create_raster_surface(filename=filename)
-        self.assertTrue(os.path.isfile(filename))
+    # def test_create_raster_surface(self):
+    #     # Todo: Remove method? Method is not used anywhere in the code!
+    #     mapsetcode = 'MODIS-IOC2-4km'  # 'CHIRP-Africa-5km'
+    #     filename = self.testresultdir + os.path.sep + 'pixelsize.tif'
+    #     my_mapset = MapSet()
+    #     my_mapset.assigndb(mapsetcode)
+    #     my_mapset.create_raster_surface(filename=filename)
+    #     self.assertTrue(os.path.isfile(filename))
 
     def test_get_larger_mapset(self):
         mapsetcode = 'SPOTV-IGAD-1km'
