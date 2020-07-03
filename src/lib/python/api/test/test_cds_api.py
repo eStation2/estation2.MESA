@@ -54,7 +54,7 @@ class TestCDSAPI(TestCase):
 
     def test_get_task_details(self):
         https_params=None
-        request_id='c982dc60-e520-4982-8789-dd5d89e17b49'
+        request_id='c345fb4c-6931-4407-96fd-7a35b07e6610'
         response = cds_api.get_task_details(self.base_url, request_id, self.usr_pwd, https_params)
         return True
 
