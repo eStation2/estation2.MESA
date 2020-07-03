@@ -12,5 +12,5 @@ from database.test import test_crud
 
 suite_list = [test_connectdb.suite_connectdb, test_querydb.suite_querydb, test_crud.suite_crud]
 
-suite_combo = unittest.TestSuite(suite_list)
-unittest.TextTestRunner(verbosity=2).run(suite_combo)
+suite_combo_database = unittest.TestSuite(suite_list)
+unittest.TextTestRunner(verbosity=2).run(suite_combo_database)

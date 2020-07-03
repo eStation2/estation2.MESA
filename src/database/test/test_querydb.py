@@ -333,6 +333,7 @@ class TestQuerydb(TestCase):
         else:
             self.assertFalse(True)  # Test fails: result2 = False because of an exception error!
 
+    @unittest.skipIf(True, "DB not yet populated automaically with Users WS - to be updated")
     def test_get_graph_tsdrawprops(self):
         query = "SELECT graph_tpl_id FROM analysis.user_graph_templates where userid = 'jrc_ref' LIMIT 1"
         queryresult = dbschema_analysis.execute(query)
@@ -1126,6 +1127,7 @@ class TestQuerydb(TestCase):
         else:
             self.assertFalse(True)  # Test fails: result = False because of an exception error!
 
+    @unittest.skipIf(True, "DB not yet populated automaically with Users WS - to be updated")
     def test_get_user_workspaces(self):
         userid = 'jrc_ref'
         result = querydb.get_user_workspaces(userid=userid)
@@ -1151,6 +1153,7 @@ class TestQuerydb(TestCase):
         else:
             self.assertFalse(True)  # Test fails: result = False because of an exception error!
 
+    @unittest.skipIf(True, "DB not yet populated automaically with Users WS - to be updated")
     def test_get_workspace_maps(self):
         query = "SELECT workspaceid FROM analysis.user_workspaces where userid = 'jrc_ref' LIMIT 1"
         queryresult = dbschema_analysis.execute(query)
@@ -1450,6 +1453,7 @@ class TestQuerydb(TestCase):
         else:
             self.assertFalse(True)  # Test fails: result = False because of an exception error!
 
+    @unittest.skipIf(True, "DB not yet populated automaically with Users WS - to be updated")
     def test_update_user_graph_tpl_drawproperties(self):
         # The default user_graph_templates for jrc_ref does not have user_graph_tpl_drawproperties,
         # so get the graph_tpl_id of a non default user_graph_templates for user jrc_ref
@@ -1498,6 +1502,7 @@ class TestQuerydb(TestCase):
         else:
             self.assertFalse(True)  # Test fails: result = False because of an exception error!
 
+    @unittest.skipIf(True, "DB not yet populated automaically with Users WS - to be updated")
     def test_update_user_tpl_timeseries_drawproperties(self):
         # The default user_graph_templates for jrc_ref does not have user_graph_tpl_timeseries_drawproperties,
         # so get the graph_tpl_id and graph_tpl_name of a non default user_graph_templates for user jrc_ref

@@ -27,6 +27,7 @@ install_type = systemsettings['type_installation'].lower()
 class TestFunctions(unittest.TestCase):
 
     def setUp(self):
+
         self.str_yyyy = '2011'
         self.str_month = '05'
         self.str_day = '01'
@@ -93,6 +94,9 @@ class TestFunctions(unittest.TestCase):
             os.mkdir(self.testresultdir)
             os.chmod(self.testresultdir, 0o755)
 
+        # File should be there
+        self.src_file = self.testdatadir + '/tamsat-rfe/native/rfe2020_01-dk3.v3.nc'
+
     def test_check_output_dir(self):
         output_dir = '/tmp/eStation2'
         self.assertTrue(functions.check_output_dir(output_dir))
@@ -143,9 +147,9 @@ class TestFunctions(unittest.TestCase):
                                                              new_mapset=target_mapsetid), result)
 
     def test_create_sym_link(self):
-        src_file = self.testdatadir + '/tif/20181201_vgt-dmp_dmp_SPOTV-Africa-1km_V2.0.tif'
+        src_file = self.src_file
         fake_file = self.testdatadir + '/tif/fakefile.tif'
-        trg_file = self.testresultdir + '/link_to_20181201_vgt-dmp_dmp_SPOTV-Africa-1km_V2.0.tif'
+        trg_file = self.testresultdir + '/link_to_rfe2020_01-dk3.v3.nc'
 
         self.assertEqual(functions.create_sym_link(src_file, trg_file, force=False), 0)  # SYM LINK CREATED
         self.assertEqual(functions.create_sym_link(src_file, trg_file, force=False), 1)  # SYM LINK ALREADY CREATED
@@ -224,11 +228,20 @@ class TestFunctions(unittest.TestCase):
         self.assertEqual(str_hour, '0000')
 
     def test_files_temp_ajacent(self):
-        # ToDo: jurvtk -> I don't know what the input filename have do be.
-        #       Applies to ndvi-linearx-1 and ndvi-linearx-2.
-        file_t0 = '/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/ndvi-linearx2/20181201_vgt-ndvi_ndvi-linearx2_SPOTV-Africa-1km_sv2-pv2.2.tif'
-        ajacent_file_list = functions.files_temp_ajacent(file_t0)
-        self.assertFalse(True)  # Test fails for now!
+
+        file_t0 = '/data/test_data/tamsat-rfe/3.0/TAMSAT-Africa-4km/tif/10d/20190101_tamsat-rfe_10d_TAMSAT-Africa-4km_3.0.tif'
+        file_t1 = '/data/test_data/tamsat-rfe/3.0/TAMSAT-Africa-4km/tif/10d/20190111_tamsat-rfe_10d_TAMSAT-Africa-4km_3.0.tif'
+
+        adjacent_file_list = functions.files_temp_ajacent(file_t0)
+        self.assertEqual(adjacent_file_list[0],file_t1)
+
+    def test_previous_files(self):
+
+        file_t0 = '/data/test_data/tamsat-rfe/3.0/TAMSAT-Africa-4km/tif/10d/20190101_tamsat-rfe_10d_TAMSAT-Africa-4km_3.0.tif'
+        file_t1 = '/data/test_data/tamsat-rfe/3.0/TAMSAT-Africa-4km/tif/10d/20190111_tamsat-rfe_10d_TAMSAT-Africa-4km_3.0.tif'
+
+        previous_file_list = functions.previous_files(file_t1)
+        self.assertEqual(previous_file_list[0],file_t0)
 
     def test_get_eumetcast_info(self):
         # TODO: REMOVE function?  NOT used anywhere in the code!
@@ -241,7 +254,7 @@ class TestFunctions(unittest.TestCase):
         self.assertIsInstance(machine_mac_address, str)
 
     def test_get_modified_time_from_file(self):
-        file_path = '/data/processing/chirps-dekad/2.0/CHIRP-Africa-5km/tif/10d/20180101_chirps-dekad_10d_CHIRP-Africa-5km_2.0.tif'
+        file_path = self.src_file
         modified_time_sec = functions.get_modified_time_from_file(file_path)
         self.assertIsInstance(modified_time_sec, float)
 
@@ -297,7 +310,7 @@ class TestFunctions(unittest.TestCase):
         self.assertTrue(result)
         jrc_refsettings = functions.getJRCRefSettings()
         if 'update' in jrc_refsettings.keys():
-            self.assertEqual(jrc_refsettings['version'], 'false')
+            self.assertEqual(jrc_refsettings[setting], value)
         else:
             self.assertTrue(False)
 
@@ -314,7 +327,7 @@ class TestFunctions(unittest.TestCase):
         self.assertTrue(current_month)
 
     def test_is_file_exists_in_path(self):
-        file_path = '/data/processing/chirps-dekad/2.0/CHIRP-Africa-5km/tif/10d/20180101_chirps-dekad_10d_CHIRP-Africa-5km_2.0.tif'
+        file_path = '/data/test_data/tamsat-rfe/3.0/TAMSAT-Africa-4km/tif/10d/20190101_tamsat-rfe_10d_TAMSAT-Africa-4km_3.0.tif'
         is_file_exists = functions.is_file_exists_in_path(file_path)
         self.assertTrue(is_file_exists)
 
@@ -382,18 +395,10 @@ class TestFunctions(unittest.TestCase):
         self.assertEqual(h1, 19)
         self.assertEqual(v1, 6)
 
-    def test_previous_files(self):
-        # ToDo: jurvtk -> I don't know what the input filename have do be.
-        #       Applies to processing_std_rain_onset.py.
-        file_t0 = ''
-        previous_file_list = functions.previous_files(file_t0)
-        self.assertFalse(True)  # Test fails for now!
-
     def test_ProcLists(self):
-        # TODO: Not clear to me how to test this class!
         # Create 'manually' an empty proc_list (normally done by pipeline)
         proc_lists = functions.ProcLists()
-        self.assertTrue(False)  # Test fails for now!
+        self.assertEqual(type(proc_lists).__name__,'ProcLists')
 
     def test_rgb2html(self):
         rgb = [250, 250, 250]
@@ -580,6 +585,7 @@ class TestFunctions(unittest.TestCase):
         else:
             self.assertFalse(True)
 
+    @unittest.skipIf(install_type != 'full', "Test only on MESA Station - Full install")
     def test_check_connection(self):
         # mesaproc = "139.191.147.79:22"
         # mesaproc = 'mesa-proc.ies.jrc.it'
@@ -620,18 +626,17 @@ class TestFunctions(unittest.TestCase):
         status = functions.internet_on()
         self.assertTrue(status)
 
-    def test_save_netcdf_scaling(self):
-        # TODO: Test data needed! To be put in es_constants.es2globals['test_data_dir']
-        preproc_file = '/tmp/eStation2/apps.acquisition.ingestion4Losxu_A2016201.L3m_DAY_SST_sst_4km.nc/A2016201.L3m_DAY_SST_sst_4km.nc.geotiff'
-        sds = 'NETCDF:/data/test/A2016201.L3m_DAY_SST_sst_4km.nc:sst'
-        status = functions.save_netcdf_scaling(sds, preproc_file)
-        self.assertTrue(False)  # Test fails for now!
+    def test_save_read_netcdf_scaling(self):
 
-    def test_read_netcdf_scaling(self):
-        # TODO: Test data needed! To be put in es_constants.es2globals['test_data_dir']
-        preproc_file = '/tmp/eStation2/apps.acquisition.ingestion4Losxu_A2016201.L3m_DAY_SST_sst_4km.nc/A2016201.L3m_DAY_SST_sst_4km.nc.geotiff'
-        [fact, off] = functions.read_netcdf_scaling(preproc_file)
-        self.assertTrue(False)  # Test fails for now!
+        nc_file = '/data/test_data/modis-sst/native/AQUA_MODIS.20200320.L3m.DAY.SST.sst.4km.NRT.nc'
+
+        sds = 'NETCDF:'+nc_file+':sst'
+        status = functions.save_netcdf_scaling(sds, nc_file)
+        self.assertFalse(status)  # Test fails for now!
+
+        [fact, off] = functions.read_netcdf_scaling(nc_file)
+        self.assertTrue(isinstance(fact,float))
+        self.assertTrue(isinstance(off, float))
 
     def test_getStatusAllServices(self):
         services_status = functions.getStatusAllServices()

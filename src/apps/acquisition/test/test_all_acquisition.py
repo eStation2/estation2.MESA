@@ -15,5 +15,5 @@ suite_list.append(test_ingestion.suite_ingestion_fast)
 suite_list.append(test_get_eumetcast.suite_get_eumetcast)
 suite_list.append(test_get_internet.suite_get_internet)
 
-suite_combo = unittest.TestSuite(suite_list)
-unittest.TextTestRunner(verbosity=2).run(suite_combo)
+suite_combo_acquisition = unittest.TestSuite(suite_list)
+unittest.TextTestRunner(verbosity=2).run(suite_combo_acquisition)

@@ -21,5 +21,5 @@ suite_list.append(test_mapsets.suite_mapsets)
 suite_list.append(test_products.suite_products)
 suite_list.append(test_requests.suite_requests)
 
-suite_combo = unittest.TestSuite(suite_list)
-unittest.TextTestRunner(verbosity=2).run(suite_combo)
+suite_combo_pm = unittest.TestSuite(suite_list)
+unittest.TextTestRunner(verbosity=2).run(suite_combo_pm)
