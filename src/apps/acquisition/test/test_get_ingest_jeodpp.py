@@ -163,13 +163,12 @@ class TestGetEOS(unittest.TestCase):
 
     def testRemote_CDS_SST_1DAY(self):
         internet_id = 'JRC:MARS:WSI:CROP'
-        template= {"resourcename_uuid" : "reanalysis-era5-single-levels", "format": "netcdf", "product_type": "reanalysis",
-        "variable": "sea_surface_temperature",
-        "year": "2019","month": "01","day":"01","time": "12:00"}
-        remote_url='https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/'
-        from_date = '20200610'
+        template= {"resourcename_uuid":"reanalysis-era5-single-levels", "format": "netcdf", "product_type": "reanalysis",
+        "variable": "sea_surface_temperature", "year": None,"month": None, "day":None }
+        remote_url='https://cds.climate.copernicus.eu/api/v2'
+        from_date = '20200619'
         to_date = '20200620'
-        frequency = 'e1hour'
+        frequency = 'e1day'
         my_source = SourceEOS(internet_id=internet_id,
                               url=remote_url,
                               descriptive_name='CDS',
@@ -185,5 +184,30 @@ class TestGetEOS(unittest.TestCase):
                               https_params='')
 
         #files_list = get_internet.build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
+        result = get_internet.loop_get_internet(test_one_source=internet_id, my_source=my_source)
+
+    def testRemote_CDS_SST_1Month(self):
+        internet_id = "JRC:MARS:WSI:CROP"#'CDS:ERA5:REANALYSIS:SST:MONTH'
+        template = {"resourcename_uuid":"reanalysis-era5-single-levels-monthly-means", "format": "netcdf", "product_type": "monthly_averaged_reanalysis",
+"variable": "sea_surface_temperature", "year": None,"month": None }
+        remote_url = 'https://cds.climate.copernicus.eu/api/v2'
+        from_date = '20200101'
+        to_date = '20200701'
+        frequency = 'e1month'
+        my_source = SourceEOS(internet_id=internet_id,
+                              url=remote_url,
+                              descriptive_name='CDS',
+                              include_files_expression=template,
+                              pull_frequency=3,
+                              user_name='32952',
+                              password='f0154805-2620-4288-a412-18bc89b98c7d',
+                              start_date=from_date,
+                              end_date=to_date,
+                              frequency_id=frequency,
+                              type='cds_api',
+                              files_filter_expression='reanalysis-era5-single-levels-monthly-means',
+                              https_params='')
+
+        # files_list = get_internet.build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
         result = get_internet.loop_get_internet(test_one_source=internet_id, my_source=my_source)
 

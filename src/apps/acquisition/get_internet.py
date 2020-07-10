@@ -40,7 +40,7 @@ from lib.python import es_logging as log
 from config import es_constants
 from database import querydb
 from apps.productmanagement import datasets
-from lib.python.api import coda_eum_api, jeodpp_api, motu_api
+from lib.python.api import coda_eum_api, jeodpp_api, motu_api, cds_api
 from lib.python import functions
 from apps.acquisition.ingestion import get_list_ingestion_trigger
 from apps.acquisition import ingestion
@@ -585,7 +585,8 @@ def build_list_matching_files_jeodpp(base_url, template, from_date, to_date, fre
 #           to_date: end date for the dataset (datetime.datetime object)
 #           frequency: dataset 'frequency' (see DB 'frequency' table)
 #
-def build_list_matching_files_cds(base_url, template, from_date, to_date, frequency_id, files_filter_expression):
+def build_list_matching_files_cds(base_url, template, from_date, to_date, frequency_id, files_filter_expression,
+                                  resourcename_uuid):
     # Add a check on frequency
     try:
         frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
@@ -631,9 +632,9 @@ def build_list_matching_files_cds(base_url, template, from_date, to_date, freque
     try:
         if sys.platform == 'win32':
             template.replace("-", "#")
-        from lib.python.api import cds_api
+
         # return lst
-        list_input_files =  cds_api.create_list_cds(dates, template, base_url)
+        list_input_files =  cds_api.create_list_cds(dates, template, base_url, resourcename_uuid)
 
     except Exception as inst:
         logger.debug("Error in frequency.get_internet_dates: %s" % inst.args[0])
@@ -1848,143 +1849,8 @@ def loop_get_internet(dry_run=False, test_one_source=False, my_source=None):
                                     processed_list = []
 
 
-                            # elif internet_type == 'cds_api':
-                            #     # Create the full filename from a 'template' which contains
-                            #     cds_internet_url = str(internet_source.url)
-                            #
-                            #     ongoing_list = []
-                            #     ongoing_list_filename = es_constants.get_internet_processed_list_prefix + str(
-                            #         internet_source.internet_id) + '_Ongoing' + '.list'
-                            #     ongoing_list = functions.restore_obj_from_pickle(ongoing_list, ongoing_list_filename)
-                            #
-                            #     try:
-                            #         current_list = []
-                            #         # Create current list in format IM:Band
-                            #         current_list = build_list_matching_files_cds(cds_internet_url,
-                            #                                                         str(internet_source.include_files_expression),
-                            #                                                         internet_source.start_date,
-                            #                                                         internet_source.end_date,
-                            #                                                         str(internet_source.frequency_id),
-                            #                                                         str(usr_pwd)
-                            #                                                         )
-                            #
-                            #         # read ongoing list from the file (in format IM:Band:ID:url) and convert to format IM:Band
-                            #         #ongoing_product_band_list = jeodpp_api.get_product_id_band_from_list(ongoing_list)
-                            #         # Loop over current list
-                            #         if len(current_list) > 0:
-                            #             listtoprocessrequest = []
-                            #             for current_file in current_list:
-                            #                 # Check if current list is not in processed list
-                            #                 if len(processed_list) == 0 and len(ongoing_list) == 0:
-                            #                     listtoprocessrequest.append(current_file)
-                            #                 else:
-                            #                     if current_file not in processed_list and current_file not in ongoing_product_band_list:
-                            #                         # if current_file not in processed_list and current_file not in ongoing_product_band_list:
-                            #                         listtoprocessrequest.append(current_file)
-                            #             # ongoing_list= listtoprocessrequest   #line for test vto be commented
-                            #             if listtoprocessrequest != set([]):  # What if error occurs in this loop
-                            #                 # logger_spec.info("Loop on the List to Process Request files.")
-                            #                 for filename in list(
-                            #                         listtoprocessrequest):  # What if error occurs in this loop
-                            #                     logger_spec.info(
-                            #                         "Creating Job request for Product ID with Band: " + filename)
-                            #                     try:
-                            #                         # Give request to JEODPP to process
-                            #                         # HTTP request to JEODPP follow here once the request is success add the oid to ongoing list
-                            #                         current_product_id = filename.split(':')[0]
-                            #                         current_product_band = filename.split(':')[1]
-                            #                         created_ongoing_link = jeodpp_api.create_jeodpp_job(
-                            #                             base_url=jeodpp_internet_url,
-                            #                             product_id=current_product_id, band=current_product_band,
-                            #                             usr_pwd=usr_pwd,
-                            #                             https_params=str(internet_source.https_params)
-                            #                         )
-                            #                         if created_ongoing_link is not None:
-                            #                             ongoing_list.append(
-                            #                                 created_ongoing_link)  ## TODO have to dump object to pickle
-                            #                             functions.dump_obj_to_pickle(ongoing_list,
-                            #                                                          ongoing_list_filename)
-                            #                     except:
-                            #                         logger_spec.warning(
-                            #                             "Problem while creating Job request to JEODPP: %s.", filename)
-                            #                         b_error = True
-                            #         # functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
-                            #         if len(ongoing_list) > 0:
-                            #             logger_spec.info("Loop over the downloadable list files.")
-                            #             ongoing_product_list = jeodpp_api.get_product_id_from_list(ongoing_list)
-                            #             # Make the ongoing_product_list unique to loop over
-                            #             ongoing_product_list = functions.conv_list_2_unique_value(ongoing_product_list)
-                            #             # ongoing_job_list = jeodpp_api.get_job_id_from_list(ongoing_list)
-                            #             for each_product_id in ongoing_product_list:  # What if error occurs in this loop
-                            #                 listtodownload = []
-                            #                 for ongoing in ongoing_list:
-                            #                     ongoing_product_id = ongoing.split(':')[0]
-                            #
-                            #                     if each_product_id == ongoing_product_id:
-                            #                         ongoing_job_id = ongoing.split(':')[2]
-                            #                         job_status = jeodpp_api.get_jeodpp_job_status(
-                            #                             base_url=jeodpp_internet_url,
-                            #                             job_id=ongoing_job_id, usr_pwd=usr_pwd,
-                            #                             https_params=str(internet_source.https_params))
-                            #                         if job_status:
-                            #                             listtodownload.append(ongoing)
-                            #
-                            #                 if listtodownload != set([]):
-                            #                     download_urls = []
-                            #                     for ongoing in list(listtodownload):
-                            #                         download_urls.append(ongoing.split(':')[3])
-                            #
-                            #                     if len(download_urls) > 0:
-                            #                         logger_spec.info("Downloading Product: " + str(each_product_id))
-                            #                         try:
-                            #                             download_result = jeodpp_api.download_file(
-                            #                                 jeodpp_internet_url, target_dir=es_constants.ingest_dir,
-                            #                                 product_id=each_product_id, userpwd=usr_pwd,
-                            #                                 https_params=str(internet_source.https_params),
-                            #                                 download_urls=download_urls)
-                            #                             if download_result:
-                            #                                 logger_spec.info(
-                            #                                     "Downloading Success for : " + str(each_product_id))
-                            #                                 for ongoing in list(listtodownload):
-                            #                                     ongoing_product_id = ongoing.split(':')[0]
-                            #                                     ongoing_product_band = ongoing.split(':')[1]
-                            #                                     ongoing_product_id_band = str(
-                            #                                         ongoing_product_id) + ':' + str(
-                            #                                         ongoing_product_band)
-                            #                                     processed_list.append(
-                            #                                         ongoing_product_id_band)  # Add the processed list only with product id and band
-                            #                                     # processed_list.append(ongoing)
-                            #                                     functions.dump_obj_to_pickle(processed_list,
-                            #                                                                  processed_list_filename)
-                            #                                     ongoing_list.remove(ongoing)
-                            #                                     functions.dump_obj_to_pickle(ongoing_list,
-                            #                                                                  ongoing_list_filename)
-                            #                                     ongoing_job_id = ongoing.split(':')[2]
-                            #                                     deleted = jeodpp_api.delete_results_jeodpp_job(
-                            #                                         base_url=jeodpp_internet_url,
-                            #                                         job_id=ongoing_job_id, usr_pwd=usr_pwd,
-                            #                                         https_params=str(internet_source.https_params))
-                            #                                     if not deleted:  # To manage the delete store the job id in the  delete list and remove the job
-                            #                                         logger_spec.warning(
-                            #                                             "Problem while deleting Product job id: %s.",
-                            #                                             str(each_product_id) + str(ongoing_job_id))
-                            #                         except:
-                            #                             logger_spec.warning("Problem while Downloading Product: %s.",
-                            #                                                 str(each_product_id))
-                            #                             b_error = True
-                            #         functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
-                            #         # functions.dump_obj_to_pickle(ongoing_info, ongoing_info_filename)
-                            #         #  Processed list will be added atlast
-                            #         functions.dump_obj_to_pickle(processed_list, processed_list_filename)
-                            #         # functions.dump_obj_to_pickle(processed_info, processed_info_filename)
-                            #
-                            #     except:
-                            #         logger.error("Error in CDS Internet service. Continue")
-                            #         b_error = True
-                            #
-                            #     finally:
-                            #         logger.info("JEODPP CDS service completed")
-                            #         current_list = []
+                            elif internet_type == 'cds_api':
+                                current_list = cds_api_loop_internet(internet_source)
 
                             # elif internet_type == 'sentinel_sat':
                             #     # Create the full filename from a 'template' which contains
@@ -2206,3 +2072,118 @@ def get_list_matching_files_subdir_local(list, local_dir, regex, level, max_leve
                                                      new_sub_dir)
 
     return 0
+
+
+def cds_api_loop_internet(internet_source):
+    logger_spec = log.my_logger('apps.get_internet.' + internet_source.internet_id)
+
+    if internet_source.user_name is None:
+        user_name = "anonymous"
+    else:
+        user_name = internet_source.user_name
+
+    if internet_source.password is None:
+        password = "anonymous"
+    else:
+        password = internet_source.password
+
+    usr_pwd = str(user_name) + ':' + str(password)
+
+    # Create the full filename from a 'template' which contains
+    cds_internet_url = str(internet_source.url)
+    internet_source.internet_id = "CDS:reanalysis:era5:sst"
+    internet_source.internet_id = "CDS:reanalysis:era5:sst:daily"
+    internet_source.internet_id = "CDS:ERA5:REANALYSIS:SST:MONTH"
+    internet_source.resourcename_uuid = internet_source.files_filter_expression
+    # internet_source.include_files_expression = {"resourcename_uuid":"reanalysis-era5-single-levels", "format": "netcdf", "product_type": "reanalysis",
+    #     "variable": "sea_surface_temperature", "year": None,"month": None, "day":None }
+
+    # template = remove_resoucename(internet_source.include_files_expression)
+
+    ongoing_list = []
+    ongoing_list_filename = es_constants.get_internet_processed_list_prefix + str(
+        internet_source.internet_id) + '_Ongoing' + '.list'
+    ongoing_list = functions.restore_obj_from_pickle(ongoing_list, ongoing_list_filename)
+
+    processed_list = []
+    processed_list_filename = es_constants.get_internet_processed_list_prefix + internet_source.internet_id + '.list'
+    processed_list = functions.restore_obj_from_pickle(processed_list,
+                                                       processed_list_filename)
+
+    try:
+        current_list = []
+        # Create current list in format IM:Band
+        current_list = build_list_matching_files_cds(cds_internet_url, internet_source.include_files_expression,
+                                                     internet_source.start_date, internet_source.end_date,
+                                                     str(internet_source.frequency_id), str(usr_pwd), internet_source.resourcename_uuid)
+
+        # Current list and ongoing list in format (Datetime:ResourceID:variable)
+        ongoing_list_reduced = cds_api.get_cds_current_list_pattern(ongoing_list)
+
+        # Loop over current list to check if the file is already processed and exist in filesystem
+        if len(current_list) > 0:
+            listtoprocessrequest = []
+            listtoprocessrequest = cds_api.check_processed_list(current_list, processed_list, ongoing_list_reduced)
+            # ongoing_list= listtoprocessrequest   #line for test vto be commented
+            if listtoprocessrequest != set([]):  # What if error occurs in this loop
+                # logger_spec.info("Loop on the List to Process Request files.")
+                for filename in list(listtoprocessrequest):  # What if error occurs in this loop
+                    logger_spec.info("Creating Job request for Product ID: " + filename)
+                    try:
+                        # Give request to CDS to process
+                        # HTTP request to CDS follow here once the request is success add the request ID to ongoing list
+                        current_datetime_str = filename.split(':')[0]
+                        current_resource_id = filename.split(':')[1]
+                        template_without_date=internet_source.include_files_expression
+                        template = cds_api.build_cds_date_template(current_datetime_str, template_without_date)
+                        created_ongoing_request_id = cds_api.create_cds_job(internet_source, usr_pwd, template)
+
+                        if created_ongoing_request_id is not None:
+                            ongoing_list.append(filename+":"+created_ongoing_request_id)
+                            functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+                    except:
+                        logger_spec.warning(
+                            "Problem while creating Job request to JEODPP: %s.", filename)
+                        b_error = True
+        # functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+        if len(ongoing_list) > 0:
+            logger_spec.info("Loop over the downloadable list files.")
+            # Current list and ongoing list in format (Datetime:ResourceID:variable)
+            # ongoing_list_reduced = cds_api.get_cds_current_list_pattern(ongoing_list)
+            # Make the ongoing_product_list unique to loop over
+            #ongoing_list_reduced = functions.conv_list_2_unique_value(ongoing_list_reduced)
+            # ongoing_job_list = jeodpp_api.get_job_id_from_list(ongoing_list)
+            listtodownload = []
+            for ongoing in ongoing_list:
+                ongoing_request_id = ongoing.split(':')[-1]
+                job_status_link = cds_api.get_task_details(internet_source.url, ongoing_request_id, usr_pwd)
+                if job_status_link is not False:
+                        logger_spec.info("Downloading Product: " + str(ongoing))
+                        try:
+                            target_path = cds_api.get_cds_target_path(es_constants.ingest_dir, ongoing, internet_source.include_files_expression)
+                            download_result = cds_api.get_file(job_status_link, usr_pwd, None, target_path)
+                            if download_result:
+                                logger_spec.info("Downloading Success for : " + str(ongoing))
+                                processed_item = cds_api.get_cds_current_pattern(ongoing)
+                                processed_list.append(processed_item)  # Add the processed list only with datetime, resourceid_product_type and variable
+                                functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+                                ongoing_list.remove(ongoing)
+                                functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+                                request_id = ongoing.split(':')[-1]
+                                deleted = cds_api.delete_cds_task(internet_source.url, request_id, usr_pwd, internet_source.https_params)
+                                if not deleted:  # To manage the delete store the job id in the  delete list and remove the job
+                                    logger_spec.warning("Problem while deleting Product job id: %s.", str(ongoing))
+                        except:
+                            logger_spec.warning("Problem while Downloading Product: %s.", str(ongoing))
+                            b_error = True
+        functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+        functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+
+    except:
+        logger.error("Error in CDS service. Continue")
+        b_error = True
+
+    finally:
+        logger.info("CDS service completed")
+        current_list = []
+
