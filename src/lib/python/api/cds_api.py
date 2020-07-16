@@ -15,6 +15,7 @@ from lib.python import es_logging as log
 from io import BytesIO
 logger = log.my_logger(__name__)
 from datetime import datetime
+from config import es_constants
 
 ######################################################################################
 #   Purpose: Get list of resources available
@@ -186,7 +187,7 @@ def delete_cds_task(base_url, task_id, usr_pwd, https_params=None):
     success = False
     # To check if the user and password is not defined and throw error
     if usr_pwd is ':' or usr_pwd is None:
-        logger.warning('User and password is not defined to query the JEODPP server')
+        logger.error('User and password is not defined to delete CDS task')
         return success
 
     job_url = base_url + '/tasks/'+str(task_id)
@@ -294,7 +295,7 @@ def http_post_request_cds(remote_url_file, userpwd='', https_params='', data=Non
             list_dict = json.loads(r.content)
             return list_dict
     except:
-        logger.warning('Error in HTTP POST Request of CDS: %s - error : %i' %(remote_url_file,r.status_code))
+        logger.error('Error in HTTP POST Request of CDS: %s - error : %i' %(remote_url_file,r.status_code))
         return 1
     finally:
         r = None
@@ -347,7 +348,7 @@ def http_request_cds(remote_url_file, userpwd='', https_params='', post=False, d
             list_dict = json.loads(data.getvalue())
             return list_dict
     except:
-        logger.warning('Error in HTTP Request of CDS API: %s - error : %i' %(remote_url_file,c.getinfo(pycurl.HTTP_CODE)))
+        logger.error('Error in HTTP Request of CDS API: %s - error : %i' %(remote_url_file,c.getinfo(pycurl.HTTP_CODE)))
         return 1
     finally:
         c = None
@@ -397,7 +398,7 @@ def get_cds_file_from_url(remote_url_file, target_fullpath, userpwd='', https_pa
             # shutil.move(target_fullpath, target_final)
             return True
     except:
-        logger.warning('Output NOT downloaded: %s - error : %i' % (remote_url_file, c.getinfo(pycurl.HTTP_CODE)))
+        logger.error('Output NOT downloaded: %s - error : %i' % (remote_url_file, c.getinfo(pycurl.HTTP_CODE)))
         return False
     finally:
         c = None
@@ -438,9 +439,9 @@ def http_delete_request_cds(remote_url_file, userpwd='', https_params=''):
             return True
         else:
             # list_dict = json.loads(r.content)
-            logger.warning('Task deletion : %s - error : %i' % (remote_url_file, r.status_code))
+            logger.error('Task deletion : %s - error : %i' % (remote_url_file, r.status_code))
     except:
-        logger.warning('Error in HTTP DELETE Request of JEODPP: %s - error : %i' %(remote_url_file,r.status_code))
+        logger.error('Error in HTTP DELETE Request of CDS: %s - error : %i' %(remote_url_file,r.status_code))
         return 1
     finally:
         r = None
@@ -451,7 +452,12 @@ def http_delete_request_cds(remote_url_file, userpwd='', https_params=''):
 def create_list_cds(dates, template, base_url, resourcename_uuid):
     # resources_parameters = {"format": "netcdf", "product_type": "reanalysis",
     #     "variable": "sea_surface_temperature"}
-    resources_parameters = json.loads(template)
+    #Check if template is dict or string them create resources_parameters
+    if type(template) is dict:
+        resources_parameters = template
+    else:
+        resources_parameters = json.loads(template)
+
     variable = resources_parameters.get('variable')
     if 'product_type' in resources_parameters:
         product_type = resources_parameters.get('product_type')
@@ -468,16 +474,22 @@ def create_list_cds(dates, template, base_url, resourcename_uuid):
 
     return list_resource
 
-def create_cds_job(internet_source, usr_pwd, template):
+def create_cds_job(internet_source, usr_pwd, template, resourcename_uuid):
     # template =json.loads(template)
-    request_id = post_request_resource(internet_source.url, internet_source.files_filter_expression, usr_pwd, internet_source.https_params, template)
+    request_id = post_request_resource(internet_source.url, resourcename_uuid, usr_pwd, internet_source.https_params, template)
     return request_id
 
 #Currently current list is checked with ongoing and processed list
 # TODO Check the list also in the file system
 def check_processed_list(current_list, processed_list, ongoing_list):
     listtoprocessrequest = []
+
     for current_file in current_list:
+        # Check if current list (file is already there in filesystem)
+        file_location = get_cds_target_path(es_constants.ingest_dir, current_file)
+        if os.path.exists(file_location):
+            continue
+
         # Check if current list is not in processed list
         if len(processed_list) == 0 and len(ongoing_list) == 0:
             listtoprocessrequest.append(current_file)
@@ -492,7 +504,10 @@ def build_cds_date_template(date_str, template):
     # resources_parameters = {"format": "netcdf", "product_type": "reanalysis",
     #     "variable": "sea_surface_temperature",
     #     "year": "2019","month": "01","day":"01","time": "12:00"}
-    template = json.loads(template)
+    if type(template) is dict:
+        resources_parameters = template
+    else:
+        resources_parameters = json.loads(template)
     datetimeObj = datetime.strptime(date_str, "%Y%m%d%H%M%S")
     template["year"] = str(datetimeObj.year)
     template["month"] = str(datetimeObj.month)
@@ -521,9 +536,9 @@ def get_cds_current_Item_pattern(item):
     reduced_item = datetime+':'+resource_id+':'+variable
     return reduced_item
 
-def get_cds_target_path(dir, cs_parameters, resources_parameters):
-    resources_parameters = {"format": "netcdf", "product_type": "reanalysis",
-        "variable": "sea_surface_temperature"}
+def get_cds_target_path(dir, cs_parameters, resources_parameters=None):
+    # resources_parameters = {"format": "netcdf", "product_type": "reanalysis",
+    #     "variable": "sea_surface_temperature"}
     datetime = cs_parameters.split(':')[0]
     resourcename_uuid = cs_parameters.split(':')[1]
     variable = cs_parameters.split(':')[2]
@@ -540,3 +555,14 @@ def remove_resoucename(dict):
         del dict['resourcename_uuid']
 
     return dict
+
+def read_cds_parameter_file(internet_id):
+    #Read the CDS parameters from the file.
+    try:
+        parameter_file = '/eStation2/get_lists/get_cds/' +internet_id.replace(":", "_")+'.txt'
+        with open(parameter_file) as json_file:
+            data = json.load(json_file)
+    except:
+        logger.error('Error in loading the CDS parameters from the file: %s ' %(parameter_file))
+        return None
+    return data

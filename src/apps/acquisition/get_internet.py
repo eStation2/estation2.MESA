@@ -585,7 +585,7 @@ def build_list_matching_files_jeodpp(base_url, template, from_date, to_date, fre
 #           to_date: end date for the dataset (datetime.datetime object)
 #           frequency: dataset 'frequency' (see DB 'frequency' table)
 #
-def build_list_matching_files_cds(base_url, template, from_date, to_date, frequency_id, files_filter_expression,
+def build_list_matching_files_cds(base_url, template, from_date, to_date, frequency_id,
                                   resourcename_uuid):
     # Add a check on frequency
     try:
@@ -2092,6 +2092,9 @@ def cds_api_loop_internet(internet_source):
     # Create the full filename from a 'template' which contains
     cds_internet_url = str(internet_source.url)
 
+    #Read the CDS parameters from the file.
+    parameter = cds_api.read_cds_parameter_file(internet_source.internet_id)
+
     # internet_source.internet_id = "CDS:ERA5:REANALYSIS:SST:MONTH"
     # internet_source.internet_id = "CDS:ERA5:REANALYSIS:SST:HOUR"
     # internet_source.internet_id = "CDS:ERA5:REANALYSIS:SST:DAY"
@@ -2099,8 +2102,12 @@ def cds_api_loop_internet(internet_source):
     # internet_source.resourcename_uuid = internet_source.files_filter_expression
     # internet_source.include_files_expression = {"resourcename_uuid":"reanalysis-era5-single-levels", "format": "netcdf", "product_type": "reanalysis",
     #     "variable": "sea_surface_temperature", "year": None,"month": None, "day":None }
-
-    # template = remove_resoucename(internet_source.include_files_expression)
+    if parameter is not None:
+        resourcename_uuid = parameter.get('resourcename_uuid')
+        template_paramater = parameter.get('template')
+    else:
+        resourcename_uuid = internet_source.files_filter_expression
+        template_paramater = internet_source.include_files_expression
 
     ongoing_list = []
     ongoing_list_filename = es_constants.get_internet_processed_list_prefix + str(
@@ -2115,9 +2122,9 @@ def cds_api_loop_internet(internet_source):
     try:
         current_list = []
         # Create current list in format IM:Band
-        current_list = build_list_matching_files_cds(cds_internet_url, internet_source.include_files_expression,
-                                                     internet_source.start_date, internet_source.end_date,
-                                                     str(internet_source.frequency_id), str(usr_pwd), internet_source.files_filter_expression)
+        current_list = build_list_matching_files_cds(cds_internet_url, template=template_paramater,
+                                                     from_date=internet_source.start_date, to_date=internet_source.end_date,
+                                                     frequency_id=str(internet_source.frequency_id), resourcename_uuid=resourcename_uuid)
 
         # Current list and ongoing list in format (Datetime:ResourceID:variable)
         ongoing_list_reduced = cds_api.get_cds_current_list_pattern(ongoing_list)
@@ -2136,9 +2143,9 @@ def cds_api_loop_internet(internet_source):
                         # HTTP request to CDS follow here once the request is success add the request ID to ongoing list
                         current_datetime_str = filename.split(':')[0]
                         current_resource_id = filename.split(':')[1]
-                        template_without_date=internet_source.include_files_expression
+                        template_without_date=template_paramater
                         template = cds_api.build_cds_date_template(current_datetime_str, template_without_date)
-                        created_ongoing_request_id = cds_api.create_cds_job(internet_source, usr_pwd, template)
+                        created_ongoing_request_id = cds_api.create_cds_job(internet_source, usr_pwd, template, resourcename_uuid)
 
                         if created_ongoing_request_id is not None:
                             ongoing_list.append(filename+":"+created_ongoing_request_id)
@@ -2166,7 +2173,8 @@ def cds_api_loop_internet(internet_source):
                             if download_url is False:
                                 logger_spec.warning("Problem in getting download Url : %s.", str(ongoing))
                                 continue
-                            target_path = cds_api.get_cds_target_path(es_constants.ingest_dir, ongoing, internet_source.include_files_expression)
+                            target_path = cds_api.get_cds_target_path(es_constants.ingest_dir, ongoing,
+                                                                      template_paramater)
                             download_result = cds_api.get_file(download_url, usr_pwd, None, target_path)
                             if download_result:
                                 logger_spec.info("Download Success for : " + str(ongoing))
@@ -2204,4 +2212,5 @@ def cds_api_loop_internet(internet_source):
     finally:
         logger.info("CDS service completed")
         current_list = []
+        return current_list
 
