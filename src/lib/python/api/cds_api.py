@@ -113,16 +113,34 @@ def post_request_resource(base_url, resourcename_uuid, usr_pwd, https_params, pa
     return response.get('request_id')
 
 ######################################################################################
-#   Purpose: Get task information
+#   Purpose: Get task status
 #   Author: Vijay Charan, JRC, European Commission
 #   Date: 2020/03/04
 #   Inputs: base_url: base url of the cds API
 #           request_id: request id
 #           usr_pwd: User and password separated by ":" (eg user:password)
 #           https_params: Additional Http parameters
+#   Output: status
+#   Output type: string
+def get_task_status(base_url, request_id, usr_pwd=None, https_params=None):
+    # url and job
+    get_jobs_url = base_url + '/tasks/' + request_id
+    response = http_request_cds(get_jobs_url, userpwd=usr_pwd, https_params=https_params)
+    status = response.get('state')
+    return str(status)
+
+
+######################################################################################
+#   Purpose: Get task information
+#   Author: Vijay Charan, JRC, European Commission
+#   Date: 2020/06/10
+#   Inputs: base_url: base url of the cds API
+#           request_id: request id
+#           usr_pwd: User and password separated by ":" (eg user:password)
+#           https_params: Additional Http parameters
 #   Output: status and location to download the file
 #   Output type: Boolean , string
-def get_task_details(base_url, request_id, usr_pwd=None, https_params=None):
+def get_job_download_url(base_url, request_id, usr_pwd=None, https_params=None):
     # url and job
     download_url = False
     get_jobs_url = base_url + '/tasks/' + request_id
@@ -130,6 +148,12 @@ def get_task_details(base_url, request_id, usr_pwd=None, https_params=None):
     status = response.get('state')
     if str(status) == 'completed':
         download_url = str(response.get('location'))
+    # elif str(status) == 'failed':
+    #     download_url = str(status)
+    # elif str(status) == 'queued':
+    #     download_url = str(status)
+    # else:
+    #     download_url = str(status)
     return download_url
 
 ######################################################################################
@@ -421,14 +445,21 @@ def http_delete_request_cds(remote_url_file, userpwd='', https_params=''):
     finally:
         r = None
 
+##############################
+####### CDS WRAPPER ##########
+##############################
 def create_list_cds(dates, template, base_url, resourcename_uuid):
     # resources_parameters = {"format": "netcdf", "product_type": "reanalysis",
     #     "variable": "sea_surface_temperature"}
-    resources_parameters = template #json.load(template)
+    resources_parameters = json.loads(template)
     variable = resources_parameters.get('variable')
     if 'product_type' in resources_parameters:
         product_type = resources_parameters.get('product_type')
         resourcename_uuid = resourcename_uuid+'_'+product_type
+
+    if 'pressure_level' in resources_parameters:
+        pressure_level = resources_parameters.get('pressure_level')
+        resourcename_uuid = resourcename_uuid+'_'+pressure_level
 
     product_type = resources_parameters.get('product_type')
     list_resource = []
@@ -438,8 +469,8 @@ def create_list_cds(dates, template, base_url, resourcename_uuid):
     return list_resource
 
 def create_cds_job(internet_source, usr_pwd, template):
-    #resources_parameters = template #json.load(template)
-    request_id = post_request_resource(internet_source.url, internet_source.resourcename_uuid, usr_pwd, internet_source.https_params, template)
+    # template =json.loads(template)
+    request_id = post_request_resource(internet_source.url, internet_source.files_filter_expression, usr_pwd, internet_source.https_params, template)
     return request_id
 
 #Currently current list is checked with ongoing and processed list
@@ -461,12 +492,13 @@ def build_cds_date_template(date_str, template):
     # resources_parameters = {"format": "netcdf", "product_type": "reanalysis",
     #     "variable": "sea_surface_temperature",
     #     "year": "2019","month": "01","day":"01","time": "12:00"}
+    template = json.loads(template)
     datetimeObj = datetime.strptime(date_str, "%Y%m%d%H%M%S")
-    template["year"] = datetimeObj.year
-    template["month"] = datetimeObj.month
+    template["year"] = str(datetimeObj.year)
+    template["month"] = str(datetimeObj.month)
 
     if 'day' in template:
-        template["day"] = datetimeObj.day
+        template["day"] = str(datetimeObj.day)
     if 'time' in template:
         template["time"] = datetimeObj.strftime("%H:%M")
     final_template_object = remove_resoucename(template)
@@ -478,11 +510,11 @@ def build_cds_date_template(date_str, template):
 def get_cds_current_list_pattern(list):
     list_reduced = []
     for item in list:
-        reduced = get_cds_current_pattern(item)
+        reduced = get_cds_current_Item_pattern(item)
         list_reduced.append(reduced)
     return  list_reduced
 
-def get_cds_current_pattern(item):
+def get_cds_current_Item_pattern(item):
     datetime = item.split(':')[0]
     resource_id = item.split(':')[1]
     variable = item.split(':')[2]

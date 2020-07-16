@@ -188,12 +188,24 @@ class TestGetEOS(unittest.TestCase):
 
     def testRemote_CDS_SST_1Month(self):
         internet_id = "JRC:MARS:WSI:CROP"#'CDS:ERA5:REANALYSIS:SST:MONTH'
-        template = {"resourcename_uuid":"reanalysis-era5-single-levels-monthly-means", "format": "netcdf", "product_type": "monthly_averaged_reanalysis",
-"variable": "sea_surface_temperature", "year": None,"month": None }
+
+        template_month = {"resourcename_uuid":"reanalysis-era5-single-levels-monthly-means", "format": "netcdf", "product_type": "monthly_averaged_reanalysis",
+        "variable": "sea_surface_temperature", "year": None,"month": None, "time":None }
+        template_hour = {"resourcename_uuid":"reanalysis-era5-single-levels", "format": "netcdf", "product_type": "reanalysis",
+            "variable": "sea_surface_temperature", "year": None,"month": None, "day":None, "time":None}
+        template_day = {"resourcename_uuid":"reanalysis-era5-single-levels", "format": "netcdf", "product_type": "reanalysis",
+            "variable": "sea_surface_temperature", "year": None,"month": None, "day":None}
+        template_hour_pressure = {"resourcename_uuid":"reanalysis-era5-pressure-levels", "format": "netcdf", "product_type": "reanalysis",
+            "variable": "temperature","pressure_level": "925", "year": None,"month": None, "day":None,"time":None}
+        template = template_hour_pressure
         remote_url = 'https://cds.climate.copernicus.eu/api/v2'
-        from_date = '20200101'
-        to_date = '20200701'
-        frequency = 'e1month'
+        from_date = '20200701'
+        to_date = '20200702'
+        #frequency = 'e1month'
+        frequency = 'e1hour'
+        files_filter_expression='reanalysis-era5-single-levels-monthly-means'
+        files_filter_expression = 'reanalysis-era5-single-levels'
+        files_filter_expression = 'reanalysis-era5-pressure-levels'
         my_source = SourceEOS(internet_id=internet_id,
                               url=remote_url,
                               descriptive_name='CDS',
@@ -205,7 +217,7 @@ class TestGetEOS(unittest.TestCase):
                               end_date=to_date,
                               frequency_id=frequency,
                               type='cds_api',
-                              files_filter_expression='reanalysis-era5-single-levels-monthly-means',
+                              files_filter_expression=files_filter_expression,
                               https_params='')
 
         # files_list = get_internet.build_list_matching_files_tmpl(remote_url, template, from_date, to_date, frequency)
