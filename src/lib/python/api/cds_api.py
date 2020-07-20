@@ -467,6 +467,13 @@ def create_list_cds(dates, template, base_url, resourcename_uuid):
         pressure_level = resources_parameters.get('pressure_level')
         resourcename_uuid = resourcename_uuid+'_'+pressure_level
 
+    if 'area' in resources_parameters:
+        area = resources_parameters.get('area')
+        area_str = ''
+        for ele in area:
+            area_str += str(ele)
+        resourcename_uuid = resourcename_uuid+'_'+str(area_str)
+
     product_type = resources_parameters.get('product_type')
     list_resource = []
     for date in dates:
