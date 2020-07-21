@@ -24,7 +24,7 @@ import pycurl
 import certifi  # Pierluigi
 import signal
 import io
-# import cStringIO
+import json
 import tempfile
 import sys
 import os
@@ -486,7 +486,6 @@ def build_list_matching_files_tmpl_theia(base_url, template, from_date, to_date,
             template.replace("-", "#")
 
         list_matches = []
-        import json
         # Load the template json object and get the parameters
         parameters = json.loads(template)
         products = parameters.get('products')
@@ -769,7 +768,6 @@ def build_list_matching_files_jeodpp_eos(base_url, template, from_date, to_date,
         if sys.platform == 'win32':
             template.replace("-", "#")
 
-        import json
         parameters = json.loads(template)
         producttype = parameters.get('producttype')
 
@@ -2121,10 +2119,19 @@ def cds_api_loop_internet(internet_source):
 
     try:
         current_list = []
-        # Create current list in format IM:Band
-        current_list = build_list_matching_files_cds(cds_internet_url, template=template_paramater,
-                                                     from_date=internet_source.start_date, to_date=internet_source.end_date,
-                                                     frequency_id=str(internet_source.frequency_id), resourcename_uuid=resourcename_uuid)
+        # Check if template is dict or string them create resources_parameters
+        if type(template_paramater) is dict:
+            resources_parameters = template_paramater
+        else:
+            resources_parameters = json.loads(template_paramater)
+
+        if 'period' in resources_parameters:
+            current_list = cds_api.build_list_matching_files_cds_period(cds_internet_url, template=template_paramater, resourcename_uuid=resourcename_uuid)
+        else:
+            # Dates defined are dynamic not based on the configuration file
+            current_list = build_list_matching_files_cds(cds_internet_url, template=template_paramater,
+                                                         from_date=internet_source.start_date, to_date=internet_source.end_date,
+                                                         frequency_id=str(internet_source.frequency_id), resourcename_uuid=resourcename_uuid)
 
         # Current list and ongoing list in format (Datetime:ResourceID:variable)
         ongoing_list_reduced = cds_api.get_cds_current_list_pattern(ongoing_list)
@@ -2132,7 +2139,7 @@ def cds_api_loop_internet(internet_source):
         # Loop over current list to check if the file is already processed and exist in filesystem
         if len(current_list) > 0:
             listtoprocessrequest = []
-            listtoprocessrequest = cds_api.check_processed_list(current_list, processed_list, ongoing_list_reduced)
+            listtoprocessrequest = cds_api.check_processed_list(current_list, processed_list, ongoing_list_reduced, template_paramater)
             # ongoing_list= listtoprocessrequest   #line for test vto be commented
             if listtoprocessrequest != set([]):  # What if error occurs in this loop
                 # logger_spec.info("Loop on the List to Process Request files.")
