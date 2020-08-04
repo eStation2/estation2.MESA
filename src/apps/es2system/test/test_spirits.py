@@ -12,9 +12,9 @@ from lib.python import functions
 from lib.python import es_logging as log
 from apps.es2system import convert_2_spirits as conv
 logger = log.my_logger(__name__)
-from unittest import TestCase
+import unittest
 
-class TestSpirits(TestCase):
+class TestSpirits(unittest.TestCase):
     def test_spirits_modify_header(self):
 
         # Should get here the role of my machine ...
@@ -52,3 +52,7 @@ class TestSpirits(TestCase):
     def test_driver(self):
         output_dir = '/data/processing/exchange/spirits/'
         conv.convert_driver(output_dir)
+
+suite_spirits = unittest.TestLoader().loadTestsFromTestCase(TestSpirits)
+if __name__ == "__main__":
+    unittest.TextTestRunner(verbosity=2).run(suite_spirits)

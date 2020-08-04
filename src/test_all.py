@@ -8,6 +8,7 @@
 import unittest
 # from apps.acquisition.test import test_all_acquisition
 from apps.analysis.test import test_all_analysis
+from apps.es2system.test import test_all_es2system
 from apps.productmanagement.test import test_all_productmanagement
 from database.test import test_all_database
 from lib.python.test import test_all_python
@@ -15,6 +16,7 @@ from lib.python.test import test_all_python
 suite_list = []
 # suite_list.append(test_all_acquisition.suite_combo_acquisition)
 suite_list.append(test_all_analysis.suite_combo_analysis)
+suite_list.append(test_all_es2system.suite_combo_es2system)
 suite_list.append(test_all_productmanagement.suite_combo_pm)
 suite_list.append(test_all_database.suite_combo_database)
 suite_list.append(test_all_python.suite_combo_python)
