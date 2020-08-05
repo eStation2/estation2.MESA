@@ -31,9 +31,9 @@ from lib.python import es_logging as log
 
 logger = log.my_logger(__name__)
 
-
 class TestIngestion(unittest.TestCase):
 
+    only_fast_tests = True
     def setUp(self):
         root_test_dir = es_constants.es2globals['test_data_dir']
         self.test_ingest_dir = root_test_dir  # os.path.join(root_test_dir,'native')
@@ -109,16 +109,13 @@ class TestIngestion(unittest.TestCase):
             # my_logger.error('Cannot create output directory: ' + output_directory)
             return 1
 
-    # Commented -> not relevant here
-    # def TestDriveAll(self):
-    #     dry_run = True
-    #     ingestion.loop_ingestion(dry_run=dry_run)
-    #     self.assertEqual(1, 1)
 
     #   ---------------------------------------------------------------------------
     #   Vegetation - WSI CROP/PASTURE //Ok 30-04-2020 Vijay//
     #   Tested ok 4.5.20 -> 2m 31s PyCh
     #   ---------------------------------------------------------------------------
+
+    @unittest.skipIf(only_fast_tests, 'Only FAST tests.')
     def test_ingest_mars_wsi(self):
         productcode = 'wsi-hp'
         productversion = 'V1.0'
@@ -167,7 +164,8 @@ class TestIngestion(unittest.TestCase):
     #   Vegetation - DMP V2.0.1 //Ok 30-04-2020 Vijay// - 3m 7s
     #   Tested ok (metadata diff) 4.5.20 -> 3m 7s PyCh
     #   ---------------------------------------------------------------------------
-    def test_ingest_g_cls_dmp_2_0_1(self):
+    @unittest.skipIf(only_fast_tests, 'Only FAST tests.')
+    def test_ingest_c_gls_dmp_2_0_1(self):
 
         # Test Copernicus Products version 2.0.1 (for DMP)
         # Products released from VITO in March 2017
@@ -216,7 +214,8 @@ class TestIngestion(unittest.TestCase):
     #   Vegetation - FAPAR V2.0.1 AFRI (EumetCast source)
     #   Tested ok (metadata diff) 4.5.20 -> 35s PyCh
     #   ---------------------------------------------------------------------------
-    def test_ingest_g_cls_fapar_afri_2_0_1(self):
+    @unittest.skipIf(only_fast_tests, 'Only FAST tests.')
+    def test_ingest_c_gls_fapar_afri_2_0_1(self):
 
         # Test Copernicus Products version 2.0.1 (for FAPAR)
         # Products released from VITO in March 2017
@@ -264,7 +263,8 @@ class TestIngestion(unittest.TestCase):
     #   Vegetation - FAPAR V2.0.1 Global (Internet source)//Ok 30-04-2020 Vijay//
     #   Tested ok (metadata diff) 4.5.20 -> 2m 2s PyCh
     #   ---------------------------------------------------------------------------
-    def test_ingest_g_cls_fapar_global_2_0_1(self):
+    @unittest.skipIf(only_fast_tests, 'Only FAST tests.')
+    def test_ingest_c_gls_fapar_global_2_0_1(self):
 
         # Test Copernicus Products version 2.0.1 (for FAPAR)
         # Products released from VITO in March 2017
@@ -311,7 +311,8 @@ class TestIngestion(unittest.TestCase):
     #   Vegetation - NDVI V2.2.1 //Ok 30-04-2020 Vijay//
     #   Tested ok (metadata diff) 24.6.20 -> 25s PyCh
     #   ---------------------------------------------------------------------------
-    def test_ingest_g_cls_ndvi_2_2(self):
+    @unittest.skipIf(only_fast_tests, 'Only FAST tests.')
+    def test_ingest_c_gls_ndvi_2_2(self):
 
         # Test Copernicus Products version 2.2 (starting with NDVI 2.2.1)
         productcode = 'vgt-ndvi'
@@ -357,6 +358,7 @@ class TestIngestion(unittest.TestCase):
     #   Vegetation - NDVI 300m
     #   Tested ok 4.5.20 - 5m 47s PyCh
     #   ---------------------------------------------------------------------------
+    @unittest.skipIf(only_fast_tests, 'Only FAST tests.')
     def test_ingest_probav_ndvi_300(self):
 
         productcode = 'vgt-ndvi'
@@ -544,9 +546,7 @@ class TestIngestion(unittest.TestCase):
         mapsetcode = 'FEWSNET-Africa-8km'
         datasource_descrID = 'USGS:EARLWRN:FEWSNET'
         input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
-        # Test the ingestion of the Sentinel-3/SLSTR Level-2 WST product (on d6-dev-vm19 !!!!!)
         date_fileslist = [os.path.join(input_dir, 'a20013rb.zip')]
-        # date_fileslist = glob.glob('/data/ingest/a20013rb.zip')
         in_date = '20013'
         out_date = '20200121'
         product = {"productcode": productcode,
@@ -678,6 +678,7 @@ class TestIngestion(unittest.TestCase):
     #                       -> 22s for Check with 'fast' procedure
     #                       -> 6m 8s for Ingestion + Check-fast
     #   ---------------------------------------------------------------------------
+    @unittest.skipIf(only_fast_tests, 'Only FAST tests.')
     def test_ingest_g_cls_ba_300m_global(self):
         # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
         # Products released from VITO in March 2017
@@ -871,6 +872,7 @@ class TestIngestion(unittest.TestCase):
     #   OK FTTB -> check when back to the office (step-by-step w.r.t. mesa-proc intermediate results)
     #   In Pycharm: 2m 9s
     #   ---------------------------------------------------------------------------
+    @unittest.skipIf(only_fast_tests, 'Only FAST tests.')
     def test_ingest_s3_olci_wrr_chl_oc4me(self):
 
         eumetcast = True
@@ -936,6 +938,7 @@ class TestIngestion(unittest.TestCase):
     #   NOTE: running by Pycharm causes the output file (the remove file method is called again at the end of
     #         of the procedure ?!?)
     #   ---------------------------------------------------------------------------
+    @unittest.skipIf(only_fast_tests, 'Only FAST tests.')
     def test_ingest_s3_slstr_sst(self):
 
         eumetcast = True
@@ -1078,6 +1081,7 @@ class TestIngestion(unittest.TestCase):
     #    Inland Water - WBD-GEE
     #    Tested 24.06.2020 -> 14s
     #   ---------------------------------------------------------------------------
+    @unittest.skipIf(only_fast_tests, 'Only FAST tests.')
     def test_ingest_jrc_wbd_avg_tarzip(self):
         productcode = 'wd-gee'
         productversion = '1.0'
@@ -1123,26 +1127,26 @@ class TestIngestion(unittest.TestCase):
 # Suite with all tests
 suite_ingestion = unittest.TestLoader().loadTestsFromTestCase(TestIngestion)
 
-# Suite with a partial coverage, but faster to run
-suite_ingestion_fast = unittest.TestSuite()
-suite_ingestion_fast.addTest(TestIngestion('test_ingest_mars_wsi'))
-suite_ingestion_fast.addTest(TestIngestion('test_ingest_arc2_rain'))
-suite_ingestion_fast.addTest(TestIngestion('test_ingest_chirps'))
-suite_ingestion_fast.addTest(TestIngestion('test_ingest_chirps_tif'))
-suite_ingestion_fast.addTest(TestIngestion('test_ingest_fewsnet_rfe'))
-suite_ingestion_fast.addTest(TestIngestion('test_ingest_tamsat_rfe'))
-suite_ingestion_fast.addTest(TestIngestion('test_ingest_modis_firms'))
-suite_ingestion_fast.addTest(TestIngestion('test_ingest_modis_chlor_netcdf'))
-suite_ingestion_fast.addTest(TestIngestion('test_ingest_modis_sst_netcdf'))
-suite_ingestion_fast.addTest(TestIngestion('test_ingest_pml_modis_oc'))
-suite_ingestion_fast.addTest(TestIngestion('test_ingest_s3_olci_wrr_chl_oc4me'))
-suite_ingestion_fast.addTest(TestIngestion('test_ingest_s3_slstr_sst'))
-suite_ingestion_fast.addTest(TestIngestion('test_ingest_cpc_soilmoisture'))
-suite_ingestion_fast.addTest(TestIngestion('test_ingest_lsasaf_et_disk'))
-suite_ingestion_fast.addTest(TestIngestion('test_ingest_jrc_wbd_avg_tarzip'))
+# Suite with a partial coverage, but faster to run -> does not work in pycharm (does not go to __main__)
+# suite_ingestion_fast = unittest.TestSuite()
+# suite_ingestion_fast.addTest(TestIngestion('test_ingest_mars_wsi'))
+# suite_ingestion_fast.addTest(TestIngestion('test_ingest_arc2_rain'))
+# suite_ingestion_fast.addTest(TestIngestion('test_ingest_chirps'))
+# suite_ingestion_fast.addTest(TestIngestion('test_ingest_chirps_tif'))
+# suite_ingestion_fast.addTest(TestIngestion('test_ingest_fewsnet_rfe'))
+# suite_ingestion_fast.addTest(TestIngestion('test_ingest_tamsat_rfe'))
+# suite_ingestion_fast.addTest(TestIngestion('test_ingest_modis_firms'))
+# suite_ingestion_fast.addTest(TestIngestion('test_ingest_modis_chlor_netcdf'))
+# suite_ingestion_fast.addTest(TestIngestion('test_ingest_modis_sst_netcdf'))
+# suite_ingestion_fast.addTest(TestIngestion('test_ingest_pml_modis_oc'))
+# suite_ingestion_fast.addTest(TestIngestion('test_ingest_s3_olci_wrr_chl_oc4me'))
+# suite_ingestion_fast.addTest(TestIngestion('test_ingest_s3_slstr_sst'))
+# suite_ingestion_fast.addTest(TestIngestion('test_ingest_cpc_soilmoisture'))
+# suite_ingestion_fast.addTest(TestIngestion('test_ingest_lsasaf_et_disk'))
+# suite_ingestion_fast.addTest(TestIngestion('test_ingest_jrc_wbd_avg_tarzip'))
 
 if __name__ == '__main__':
-    unittest.TextTestRunner(verbosity=2).run(suite_ingestion_fast)
+    unittest.TextTestRunner(verbosity=2).run(suite_ingestion)
 
 
     #   ---------------------------------------------------------------------------
