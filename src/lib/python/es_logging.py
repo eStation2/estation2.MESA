@@ -17,6 +17,7 @@ from sys import platform
 from future import standard_library
 
 from config import es_constants
+import inspect
 
 try:
     import os, stat, glob, logging, logging.handlers
@@ -41,6 +42,18 @@ standard_library.install_aliases()
 #        os.umask(prevumask)
 #        return rtv
 
+# Used to detect if called by unittest (for disabling logging)
+# Reference: https://stackoverflow.com/questions/25025928/how-can-a-piece-of-python-code-tell-if-its-running-under-unittest
+def in_unit_test():
+  current_stack = inspect.stack()
+  for stack_frame in current_stack:
+    for program_line in stack_frame[4]:    # This element of the stack frame contains
+      if "unittest" in program_line:       # some contextual program lines
+        return True
+  return False
+
+if 'check_unittest' not in locals():
+    check_unittest = in_unit_test()
 
 def parse_user_setting(user_def):
     log_level = logging.INFO
@@ -105,5 +118,8 @@ def my_logger(name):
     except:
         console_handler.setLevel(logging.INFO)
         file_handler.setLevel(logging.INFO)
+
+    if check_unittest:
+        logger.disabled = True
 
     return logger
