@@ -1,7 +1,7 @@
 from lib.python.api import jeodpp_api
 import datetime
 
-def test_jeodpp_catalog():
+def debug_jeodpp_catalog():
 
     template =  {"platformname": "Sentinel-3", "producttype": "SL2WST", "max_clouds":"50", "minlon":"-33.23047637939453","minlat":"-42.923343658447266","maxlon":"65.0774154663086","maxlat":"41.53836441040039","product_type":"SL_2_WST___" }
     #   Purpose: Query JEODPP CATALOG --- https://jeodpp.jrc.ec.europa.eu/services/catalogue/dataset?       -42.923343658447266,-33.23047637939453 ,41.53836441040039,65.0774154663086
@@ -20,4 +20,4 @@ def test_jeodpp_catalog():
     datetime_end = datetime.datetime.today() - datetime.timedelta(days=1)
     list = jeodpp_api.get_filedir_Jeodpp_catalog(datetime_start, datetime_end, template, base_url, None)
 
-test_jeodpp_catalog()
+debug_jeodpp_catalog()
