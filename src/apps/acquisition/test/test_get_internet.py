@@ -9,17 +9,7 @@ standard_library.install_aliases()
 from apps.acquisition.get_eumetcast import *
 from database import querydb
 
-
 import unittest
-import shutil
-
-logger = log.my_logger(__name__)
-
-
-#
-#   Extracted from loo_get_internet to get a single source
-#
-
 
 class Source:
     def __init__(self,
@@ -68,6 +58,14 @@ class TestGetInternet(unittest.TestCase):
     download = False
     direct_download = False
     target_dir = '/data/tmp'
+
+    # def setUp(self):
+    #     # Suppress logging
+    #     log.disable(logging.CRITICAL)
+    #
+    # def tearDown(self):
+    #     # RE-ACTIVATE logging
+    #     logging.disable(logging.NONSET)
 
     #   ---------------------------------------------------------------------------
     #   Vegetation - WSI CROP
@@ -1603,7 +1601,6 @@ class TestGetInternet(unittest.TestCase):
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source, product=product)
                 self.assertEqual(result, 0)
 
-
     #   ---------------------------------------------------------------------------
     #    OCEANOGRAPHY - Sentinel 3 SLSTR WST
     #   ---------------------------------------------------------------------------
@@ -2692,7 +2689,6 @@ class TestGetInternet(unittest.TestCase):
     #
     #     # Check last 90 days (check list length = 9)
     #     result = get_one_source(my_source)
-
 
 suite_get_internet = unittest.TestLoader().loadTestsFromTestCase(TestGetInternet)
 if __name__ == '__main__':

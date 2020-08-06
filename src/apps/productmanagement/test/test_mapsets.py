@@ -13,14 +13,13 @@ from __future__ import print_function
 from future import standard_library
 
 import unittest
-from ..mapsets import Mapset
-from ..exceptions import NoMapsetFound
+from apps.productmanagement.mapsets import Mapset
+from apps.productmanagement.exceptions import NoMapsetFound
 
 from database import querydb
 from database import connectdb
 
 standard_library.install_aliases()
-
 
 class TestMapsets(unittest.TestCase):
     def setUp(self):
