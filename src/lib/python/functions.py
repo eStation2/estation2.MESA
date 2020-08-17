@@ -1047,6 +1047,57 @@ def conv_yyyydmmdk_2_yyyymmdd(yymmk):
     date_yyyymmdd = str(year)+month+day
     return date_yyyymmdd
 
+######################################################################################
+#   conv_yyyydk_2_yyyymmdd
+#   Purpose: Function returns a date (YYYYMMDD) with yyyydk as input.
+#   Author: Vijay Charan
+#   Date: 2020/08/10
+#   Input: string of numbers in the format YYYYdMMdK
+#   Output: date (YYYYMMDD), otherwise -1
+#
+def conv_yyyydk_2_yyyymmdd(yyyydk):
+
+    year = int(str(yyyydk)[0:4])
+    dekad = int(str(yyyydk)[5:7])
+    # day = int(str(yyyydk)[6:8])
+    if dekad in [1,4,7,10,13,16,19,22,25,28,31,34]:
+        day = '01'
+    elif dekad in [2,5,8,11,14,17,20,23,26,29,32,35]:
+        day = '11'
+    elif dekad in [3,6,9,12,15,18,21,24,27,30,33,36]:
+        day = '21'
+    else:
+        day = '41'
+
+    if dekad in [1,2,3]:
+        month='01'
+    elif dekad in [4,5,6]:
+        month = '02'
+    elif dekad in [7,8,9]:
+        month = '03'
+    elif dekad in [10,11,12]:
+        month = '04'
+    elif dekad in [13,14,15]:
+        month = '05'
+    elif dekad in [18,17,16]:
+        month = '06'
+    elif dekad in [20,21,19]:
+        month = '07'
+    elif dekad in [22,23,24]:
+        month = '08'
+    elif dekad in [27,25,26]:
+        month = '09'
+    elif dekad in [28,29,30]:
+        month = '10'
+    elif dekad in [31,32,33]:
+        month = '11'
+    elif dekad in [34, 35, 36]:
+        month = '12'
+    else:
+        month = '13'
+
+    date_yyyymmdd = str(year)+month+day
+    return date_yyyymmdd
 
 ######################################################################################
 #   conv_yyyymmdd_g2_2_yyyymmdd
@@ -2427,6 +2478,68 @@ def write_graph_xml_subset(input_file, output_dir, band_name):
         outFile.write('    </node>\n')
         outFile.write('    <node id="Subset">\n')
         outFile.write('      <displayPosition x="247.0" y="137.0"/>\n')
+        outFile.write('    </node>\n')
+        outFile.write('    <node id="Write">\n')
+        outFile.write('            <displayPosition x="455.0" y="135.0"/>\n')
+        outFile.write('    </node>\n')
+        outFile.write('  </applicationData>\n')
+        outFile.write('</graph>\n')
+
+
+######################################################################################
+#   Purpose: write a graph file for band select
+#   Author: Vijay Charan Venkatachalam, JRC, European Commission
+#   Date: 2020/08/06
+#   Inputs: output_dir and bandname
+#   Output: none
+#
+def write_graph_xml_bandselect(input_file, output_dir, band_name):
+
+    # Check/complete arguments
+    if band_name is None:
+        band_name = 'CHL_NN'
+
+    file_xml = output_dir + os.path.sep+ band_name  + os.path.sep+ 'graph_xml_subset.xml'
+
+    with open(file_xml, 'w') as outFile:
+        outFile.write('<graph id="Graph">\n')
+        outFile.write('  <version>1.0</version>\n')
+        outFile.write('  <node id="Read">\n')
+        outFile.write('    <operator>Read</operator>\n')
+        outFile.write('    <sources/>\n')
+        outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
+        outFile.write('      <file>'+input_file+'</file>\n')
+        outFile.write('      <formatName>NetCDF</formatName>\n')
+        outFile.write('    </parameters>\n')
+        outFile.write('  </node>\n')
+        outFile.write('  <node id="BandSelect">\n')
+        outFile.write('    <operator>BandSelect</operator>\n')
+        outFile.write('    <sources>\n')
+        outFile.write('      <sourceProduct refid="Read"/>\n')
+        outFile.write('    </sources>\n')
+        outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
+        outFile.write('      <selectedPolarisations/>\n')
+        outFile.write('      <sourceBands>'+band_name+'</sourceBands>\n')
+        outFile.write('      <bandNamePattern/>\n')
+        outFile.write('    </parameters>\n')
+        outFile.write('  </node>\n')
+        outFile.write('  <node id="Write">\n')
+        outFile.write('    <operator>Write</operator>\n')
+        outFile.write('    <sources>\n')
+        outFile.write('      <sourceProduct refid="BandSelect"/>\n')
+        outFile.write('    </sources>\n')
+        outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
+        outFile.write('      <file>'+output_dir+ os.path.sep+ band_name + '.tif</file>\n')
+        outFile.write('      <formatName>GeoTIFF</formatName>\n')
+        outFile.write('    </parameters>\n')
+        outFile.write('  </node>\n')
+        outFile.write('  <applicationData id="Presentation">\n')
+        outFile.write('    <Description/>\n')
+        outFile.write('    <node id="Read">\n')
+        outFile.write('            <displayPosition x="37.0" y="134.0"/>\n')
+        outFile.write('    </node>\n')
+        outFile.write('    <node id="BandSelect">\n')
+        outFile.write('      <displayPosition x="229.0" y="130.0"/>\n')
         outFile.write('    </node>\n')
         outFile.write('    <node id="Write">\n')
         outFile.write('            <displayPosition x="455.0" y="135.0"/>\n')

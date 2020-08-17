@@ -988,8 +988,8 @@ class TestIngestion(unittest.TestCase):
     def test_ingest_jrc_wbd_occ(self):
 
 
-        date_fileslist = glob.glob('/data/ingest/JRC-WBD_ICPAC_20181201*.tif')
-        in_date = '20181201'
+        date_fileslist = glob.glob('/data/ingest/JRC-WBD_CA_20200601*.tif')
+        in_date = '20200601'
         productcode = 'wd-gee'
         productversion = '1.0'
         subproductcode = 'occurr'
@@ -1629,6 +1629,46 @@ class TestIngestion(unittest.TestCase):
         subproducts.append(sprod)
 
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                         source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
+
+        self.assertEqual(1, 1)
+
+    def test_ingest_modis_fapar_zscore(self):
+
+        # Test Copernicus Products version 2.0.1 (for FAPAR)
+        # Products released from VITO in March 2017
+
+        date_fileslist = glob.glob('/data/ingest/fAPAR_anom_MOD_2020_01.tif*')
+        in_date = '2020_01'
+        productcode = 'modis-fapar'
+        productversion = '1.0'
+        subproductcode = '10dzscore'
+        mapsetcode = 'MODIS-Africa-1-1km'
+        datasource_descrID='JRC:DRO:FAPAR:10ZSCORE'
+
+
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                             'mapsetcode': mapsetcode,
+                             're_extract': re_extract,
+                             're_process': re_process}
+
+        subproducts=[]
+        subproducts.append(sprod)
+
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
                                                          source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger, echo_query=1)
 
