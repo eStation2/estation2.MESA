@@ -449,10 +449,8 @@ def http_delete_request_cds(remote_url_file, userpwd='', https_params=''):
 ##############################
 ####### CDS WRAPPER ##########
 ##############################
-def create_list_cds(dates, template, base_url, resourcename_uuid):
-    # resources_parameters = {"format": "netcdf", "product_type": "reanalysis",
-    #     "variable": "sea_surface_temperature"}
-    #Check if template is dict or string them create resources_parameters
+# This method creates the basic resource name(id to differentiate products with different parameters)
+def create_basic_resourcename_identifier(template, resourcename_identifier):
     if type(template) is dict:
         resources_parameters = template
     else:
@@ -461,16 +459,75 @@ def create_list_cds(dates, template, base_url, resourcename_uuid):
     variable = resources_parameters.get('variable')
     if 'product_type' in resources_parameters:
         product_type = resources_parameters.get('product_type')
-        resourcename_uuid = resourcename_uuid+'_'+product_type
+        resourcename_identifier = resourcename_identifier + '_' + product_type
 
     if 'pressure_level' in resources_parameters:
         pressure_level = resources_parameters.get('pressure_level')
-        resourcename_uuid = resourcename_uuid+'_'+pressure_level
+        resourcename_identifier = resourcename_identifier + '_' + pressure_level
 
-    product_type = resources_parameters.get('product_type')
+    if 'ensemble_member' in resources_parameters:
+        ensemble_member = resources_parameters.get('ensemble_member')
+        resourcename_identifier = resourcename_identifier + '_' + ensemble_member
+
+    if 'experiment' in resources_parameters:
+        experiment = resources_parameters.get('experiment')
+        resourcename_identifier = resourcename_identifier + '_' + experiment
+
+    if 'model' in resources_parameters:
+        model = resources_parameters.get('model')
+        resourcename_identifier = resourcename_identifier + '_' + model
+
+    if 'area' in resources_parameters:
+        area = resources_parameters.get('area')
+        area_str = ''
+        for ele in area:
+            area_str += str(ele)
+        resourcename_identifier = resourcename_identifier + '_' + str(area_str)
+
+    return resourcename_identifier
+
+
+def create_list_cds(dates, template, base_url, resourcename_uuid):
+
+    #Check if template is dict or string them create resources_parameters
+    if type(template) is dict:
+        resources_parameters = template
+    else:
+        resources_parameters = json.loads(template)
+
+    variable = resources_parameters.get('variable')
+
+    resourcename_identifier = create_basic_resourcename_identifier(resources_parameters, resourcename_uuid)
     list_resource = []
     for date in dates:
-        list_resource.append(date.strftime("%Y%m%d%H%M%S")+':'+resourcename_uuid+':'+variable)
+        list_resource.append(date.strftime("%Y%m%d%H%M%S")+':'+resourcename_identifier+':'+variable)
+
+    return list_resource
+
+def create_list_cds_with_period(template, base_url, resourcename_uuid):
+
+    list_resource = []
+    period_list = []
+    # Check if template is dict or string them create resources_parameters
+    if type(template) is dict:
+        resources_parameters = template
+    else:
+        resources_parameters = json.loads(template)
+
+    variable = resources_parameters.get('variable')
+
+    resourcename_identifier = create_basic_resourcename_identifier(resources_parameters, resourcename_uuid)
+
+    if 'period' in resources_parameters:
+        period = resources_parameters.get('period')
+        if type(period) is list:
+            period_list = period
+        else:
+            # convert string to list
+            period_list.append(period)
+
+    for date in period_list:
+        list_resource.append(date+':'+resourcename_identifier+':'+variable)
 
     return list_resource
 
@@ -481,12 +538,12 @@ def create_cds_job(internet_source, usr_pwd, template, resourcename_uuid):
 
 #Currently current list is checked with ongoing and processed list
 # TODO Check the list also in the file system
-def check_processed_list(current_list, processed_list, ongoing_list):
+def check_processed_list(current_list, processed_list, ongoing_list, template_paramater):
     listtoprocessrequest = []
 
     for current_file in current_list:
         # Check if current list (file is already there in filesystem)
-        file_location = get_cds_target_path(es_constants.ingest_dir, current_file)
+        file_location = get_cds_target_path(es_constants.ingest_dir, current_file, template_paramater)
         if os.path.exists(file_location):
             continue
 
@@ -508,15 +565,19 @@ def build_cds_date_template(date_str, template):
         resources_parameters = template
     else:
         resources_parameters = json.loads(template)
-    datetimeObj = datetime.strptime(date_str, "%Y%m%d%H%M%S")
-    template["year"] = str(datetimeObj.year)
-    template["month"] = str(datetimeObj.month)
 
-    if 'day' in template:
-        template["day"] = str(datetimeObj.day)
-    if 'time' in template:
-        template["time"] = datetimeObj.strftime("%H:%M")
-    final_template_object = remove_resoucename(template)
+    if 'period' in template:
+        final_template_object = template
+    else:
+        datetimeObj = datetime.strptime(date_str, "%Y%m%d%H%M%S")
+        template["year"] = str(datetimeObj.year)
+        template["month"] = str(datetimeObj.month)
+
+        if 'day' in template:
+            template["day"] = str(datetimeObj.day)
+        if 'time' in template:
+            template["time"] = datetimeObj.strftime("%H:%M")
+        final_template_object = remove_resoucename(template)
     # if datetimeObj.second != "00":
     #     template["seconds"] = datetimeObj.seconds
     return final_template_object
@@ -536,15 +597,23 @@ def get_cds_current_Item_pattern(item):
     reduced_item = datetime+':'+resource_id+':'+variable
     return reduced_item
 
-def get_cds_target_path(dir, cs_parameters, resources_parameters=None):
+def get_cds_target_path(dir, cs_parameters, resources_parameters):
     # resources_parameters = {"format": "netcdf", "product_type": "reanalysis",
     #     "variable": "sea_surface_temperature"}
     datetime = cs_parameters.split(':')[0]
     resourcename_uuid = cs_parameters.split(':')[1]
     variable = cs_parameters.split(':')[2]
     filename = datetime + '_' + resourcename_uuid + '_' + variable
+
+    if 'format' in resources_parameters:
+        format = resources_parameters["format"]
+
     if format == "GRIB":
         filename += ".GRIB"
+    elif format == "zip":
+        filename += ".zip"
+    elif format == "tgz":
+        filename += ".tar.gz"
     else:
         filename += ".nc"
     target_path = os.path.join(dir, filename)
@@ -566,3 +635,30 @@ def read_cds_parameter_file(internet_id):
         logger.error('Error in loading the CDS parameters from the file: %s ' %(parameter_file))
         return None
     return data
+
+
+#####################################################################################
+#   build_list_matching_files_cds
+#   Purpose: return the list of file names matching a 'template' with 'date' placeholders
+#            It is the entry point for the 'http_cds' source type
+#   Author: VIJAY CHARAN VENKATACHALAM, JRC, European Commission
+#   Date: 2020/06
+#   Inputs: template: object with the needed parameters to fill the template get
+#           from_date: start date for the dataset (datetime.datetime object)
+#           to_date: end date for the dataset (datetime.datetime object)
+#           frequency: dataset 'frequency' (see DB 'frequency' table)
+#
+def build_list_matching_files_cds_period(base_url, template, resourcename_uuid):
+    list_input_files = []
+    try:
+        # if sys.platform == 'win32':
+        #     template.replace("-", "#")
+
+        # return lst
+        list_input_files =  create_list_cds_with_period(template, base_url, resourcename_uuid)
+
+    except Exception as inst:
+        logger.debug("Error in frequency.get_internet_dates: %s" % inst.args[0])
+        raise
+
+    return list_input_files

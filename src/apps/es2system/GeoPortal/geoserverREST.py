@@ -28,7 +28,7 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 # documentation: https://mesa-geoportals.slack.com/files/bruno.combal/F1A99U3PZ/Publishing_raster_in_geoserver
 
 # session variables
-with open('/var/www/eStation2/apps/es2system/GeoPortal/geoportal.conf') as confFile:
+with open('./geoportal.conf') as confFile:
     conf = json.load(confFile)
 
 restLogin = str(conf["restLogin"])

@@ -22,8 +22,7 @@ class TestRasterImage(unittest.TestCase):
         root_test_dir = es_constants.es2globals['test_data_dir']
 
         self.ref_dir = root_test_dir
-        self.input_dir = '/data/test_data/tif/'
-        self.root_out_dir = '/data/tmp/'
+        self.root_out_dir = es_constants.es2globals['base_tmp_dir']
         self.ref_avg_file = os.path.join(self.ref_dir,'fewsnet-rfe/10davg/1221_fewsnet-rfe_10davg_FEWSNET-Africa-8km_2.0.tif')
         self.input_files = [self.ref_dir+'/fewsnet-rfe/10d/20011221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
                             self.ref_dir+'/fewsnet-rfe/10d/20021221_fewsnet-rfe_10d_FEWSNET-Africa-8km_2.0.tif',
@@ -404,6 +403,7 @@ class TestRasterImage(unittest.TestCase):
         self.assertEqual(equal,1)
 
     # Very slow - Problem could be my latop memory
+    @unittest.skipIf(True, 'Very slow - to be activated manually - or modified.')
     def test_stats_4_raster(self):
 
         # Define the Native mapset
