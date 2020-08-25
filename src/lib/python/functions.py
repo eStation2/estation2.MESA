@@ -2471,6 +2471,66 @@ def write_graph_xml_subset(input_file, output_dir, band_name):
         outFile.write('  </applicationData>\n')
         outFile.write('</graph>\n')
 
+######################################################################################
+#   Purpose: write a graph file for band select
+#   Author: Vijay Charan Venkatachalam, JRC, European Commission
+#   Date: 2020/08/06
+#   Inputs: output_dir and bandname
+#   Output: none
+#
+def write_graph_xml_bandselect(input_file, output_dir, band_name):
+
+    # Check/complete arguments
+    if band_name is None:
+        band_name = 'CHL_NN'
+
+    file_xml = output_dir + os.path.sep+ band_name  + os.path.sep+ 'graph_xml_subset.xml'
+
+    with open(file_xml, 'w') as outFile:
+        outFile.write('<graph id="Graph">\n')
+        outFile.write('  <version>1.0</version>\n')
+        outFile.write('  <node id="Read">\n')
+        outFile.write('    <operator>Read</operator>\n')
+        outFile.write('    <sources/>\n')
+        outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
+        outFile.write('      <file>'+input_file+'</file>\n')
+        outFile.write('      <formatName>NetCDF</formatName>\n')
+        outFile.write('    </parameters>\n')
+        outFile.write('  </node>\n')
+        outFile.write('  <node id="BandSelect">\n')
+        outFile.write('    <operator>BandSelect</operator>\n')
+        outFile.write('    <sources>\n')
+        outFile.write('      <sourceProduct refid="Read"/>\n')
+        outFile.write('    </sources>\n')
+        outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
+        outFile.write('      <selectedPolarisations/>\n')
+        outFile.write('      <sourceBands>'+band_name+'</sourceBands>\n')
+        outFile.write('      <bandNamePattern/>\n')
+        outFile.write('    </parameters>\n')
+        outFile.write('  </node>\n')
+        outFile.write('  <node id="Write">\n')
+        outFile.write('    <operator>Write</operator>\n')
+        outFile.write('    <sources>\n')
+        outFile.write('      <sourceProduct refid="BandSelect"/>\n')
+        outFile.write('    </sources>\n')
+        outFile.write('    <parameters class="com.bc.ceres.binding.dom.XppDomElement">\n')
+        outFile.write('      <file>'+output_dir+ os.path.sep+ band_name + '.tif</file>\n')
+        outFile.write('      <formatName>GeoTIFF</formatName>\n')
+        outFile.write('    </parameters>\n')
+        outFile.write('  </node>\n')
+        outFile.write('  <applicationData id="Presentation">\n')
+        outFile.write('    <Description/>\n')
+        outFile.write('    <node id="Read">\n')
+        outFile.write('            <displayPosition x="37.0" y="134.0"/>\n')
+        outFile.write('    </node>\n')
+        outFile.write('    <node id="BandSelect">\n')
+        outFile.write('      <displayPosition x="229.0" y="130.0"/>\n')
+        outFile.write('    </node>\n')
+        outFile.write('    <node id="Write">\n')
+        outFile.write('            <displayPosition x="455.0" y="135.0"/>\n')
+        outFile.write('    </node>\n')
+        outFile.write('  </applicationData>\n')
+        outFile.write('</graph>\n')
 
 ######################################################################################
 #   Purpose: write a graph file for S3 Level 2 products ingestion
