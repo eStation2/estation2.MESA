@@ -3824,6 +3824,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             mem_ds.SetGeoTransform(trg_mapset.geo_transform)
             mem_ds.SetProjection(out_cs.ExportToWkt())
             # Initialize output to Output Nodata value (for PML SST UoG region)
+            # mem_ds.GetRasterBand(1).Fill(in_nodata)  #ES2-595
             mem_ds.GetRasterBand(1).Fill(out_nodata)
 
             # Manage data type - if it is different input/output

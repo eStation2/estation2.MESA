@@ -1639,8 +1639,8 @@ class TestIngestion(unittest.TestCase):
         # Test Copernicus Products version 2.0.1 (for FAPAR)
         # Products released from VITO in March 2017
 
-        date_fileslist = glob.glob('/data/ingest/fAPAR_anom_MOD_2020_01.tif*')
-        in_date = '2020_01'
+        date_fileslist = glob.glob('/data/ingest/fAPAR_anom_MOD_2020_23.tif*')
+        in_date = '2020_23'
         productcode = 'modis-fapar'
         productversion = '1.0'
         subproductcode = '10dzscore'
