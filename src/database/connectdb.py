@@ -30,11 +30,12 @@ class ConnectDB(object):
     @staticmethod
     def get_db_url():
         db_url = "postgresql://%s:%s@%s:%s/%s" % (es_constants.es2globals['dbuser'],
-                                               es_constants.es2globals['dbpass'],
-                                               es_constants.es2globals['host'],
-                                               es_constants.es2globals['port'],
-                                               es_constants.es2globals['dbname']
-                                               )
+                                                  es_constants.es2globals['dbpass'],
+                                                  es_constants.es2globals['host'],
+                                                  es_constants.es2globals['port'],
+                                                  es_constants.es2globals['dbname']
+                                                  )
+
         # logger.debug("Connect string: %s " % db_url)
         return db_url
 
@@ -51,7 +52,7 @@ class ConnectDB(object):
                 dburl = self.get_db_url()
                 self.db = sqlsoup.SQLSoup(dburl)
                 # myengine = self.db.engine
-                self.session = sqlsoup.Session    # self.db.session
+                self.session = sqlsoup.Session  # self.db.session
             else:
                 self.db = self.get_db_engine()
                 mysession = sessionmaker(bind=self.db, autoflush=False)
@@ -67,10 +68,9 @@ class ConnectDB(object):
             self.db.engine.logger.level = logging.NOTSET
             logging.basicConfig(level=logging.NOTSET)
             # sqllogger = logging.getLogger('sqlalchemy.engine')
-            logging.getLogger('sqlalchemy.engine').setLevel(logging.NOTSET)   # NOTSET
+            logging.getLogger('sqlalchemy.engine').setLevel(logging.NOTSET)  # NOTSET
         except:
             exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
-            #print traceback.format_exc()
+            # print traceback.format_exc()
             # Exit the script and print an error telling what happened.
             logger.error("Database connection failed!\n -> {}".format(exceptionvalue))
-

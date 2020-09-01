@@ -6509,6 +6509,11 @@ def CreateIngestSubProduct(params):
     else:
         version = params['version']
 
+        if params['masked'] == 'false':
+            masked = False
+        else:
+            masked = True
+
     productinfo = {'productcode': params['productcode'],
                    'version': version,
                    'subproductcode': params['subproductcode'],
@@ -6528,7 +6533,7 @@ def CreateIngestSubProduct(params):
                    'mask_min': params['mask_min'] if functions.str_is_float(params['mask_min']) else None,
                    'mask_max': params['mask_max'] if functions.str_is_float(params['mask_max']) else None,
                    'unit': params['unit'],
-                   'masked': params['masked'],
+                   'masked': masked,
                    'timeseries_role': params['timeseries_role'],
                    'display_index': int(params['display_index']) if params['display_index'].isdigit() else None
                    }
