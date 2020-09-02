@@ -9,10 +9,14 @@ from builtins import str
 import unittest
 import re
 import os
+import glob
 from database import querydb
 from apps.acquisition import get_internet
 #from apps.acquisition.test import test_get_interneT
-from apps.acquisition import acquisition
+from apps.acquisition import ingestion
+from lib.python import es_logging as log
+
+logger = log.my_logger(__name__)
 
 class SourceEOS:
     def __init__(self,
@@ -160,4 +164,49 @@ class TestGetEOS(unittest.TestCase):
                 result = get_internet.loop_get_internet(test_one_source=internet_id)
                 self.assertEqual(0, 0)
 
+    #   ---------------------------------------------------------------------------
+    #   Vegetation - NDVI V2.2.1 - New test for resampling 300 to 1 Km
+    #   Tested ok (metadata diff) 24.6.20 -> 25s PyCh
+    #   ---------------------------------------------------------------------------
+    def test_ingest_g_cls_ndvi_200_1Km(self):
+
+        # Test Copernicus Products version 2.2 (starting with NDVI 2.2.1)
+        productcode = 'vgt-ndvi'
+        productversion = 'proba-v2.2'
+        subproductcode = 'ndv'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID = 'PDF:GLS:PROBA-V1:NDVI300'
+        # input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        #date_fileslist = [os.path.join(input_dir, 'c_gls_NDVI_202003010000_AFRI_PROBAV_V2.2.1.zip')]
+        date_fileslist = glob.glob('/eos/jeodpp/home/users/venkavi/data/processing/vgt-ndvi/sv2-pv2.2/archive/c_gls_NDVI300_202007110000_GLOBE_PROBAV_V1.0.1.nc*')
+        in_date = '202007110000'
+        out_date = '20200711'
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
+
+        subproducts = [sprod]
+        # Remove existing output
+        # self.remove_output_file(productcode, subproductcode, productversion, mapsetcode, out_date)
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                        source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger,
+                            echo_query=1, test_mode=False)
+
+        # status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
+        #                                 version=productversion, mapsetcode=mapsetcode, date=out_date)
+        self.assertEqual(1, 1)
 

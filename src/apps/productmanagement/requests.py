@@ -22,6 +22,7 @@ from __future__ import print_function
 from builtins import open
 from builtins import int
 from future import standard_library
+
 standard_library.install_aliases()
 from builtins import str
 from builtins import map
@@ -39,6 +40,7 @@ from config import es_constants
 from .mapsets import Mapset
 
 from lib.python import es_logging as log
+
 logger = log.my_logger(__name__)
 
 
@@ -102,8 +104,8 @@ def get_from_date(frequency_id, dateformat):
     return from_date
 
 
-def create_request(productcode, version, mapsetcode=None, subproductcode=None, dekad_frequency=5, daily_frequency=1, high_frequency=3):
-
+def create_request(productcode, version, mapsetcode=None, subproductcode=None, dekad_frequency=5, daily_frequency=1,
+                   high_frequency=3):
     # Define the 'request' object
     request = {'product': productcode,
                'version': version}
@@ -132,8 +134,8 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None, d
                         to_date = None
 
                         dataset_dbinfo = querydb.get_subproduct(productcode=productcode,
-                                                              version=version,
-                                                              subproductcode=subproductcode)
+                                                                version=version,
+                                                                subproductcode=subproductcode)
                         kwargs = {'mapset': mapset,
                                   'sub_product_code': subproductcode}
                         if dataset_dbinfo is not None:
@@ -164,7 +166,7 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None, d
                                     kwargs = {'mapset': mapset,
                                               'sub_product_code': subproductcode,
                                               'from_date': from_date}
-                                elif dataset_dbinfo.date_format == 'YYYYMMDD':      # dataset_dbinfo.frequency_id == 'e1dekad' and
+                                elif dataset_dbinfo.date_format == 'YYYYMMDD':  # dataset_dbinfo.frequency_id == 'e1dekad' and
                                     today = datetime.date.today()
                                     from_date = today - relativedelta(years=int(dekad_frequency))
                                     from_date = from_date.replace(day=1)  # always start at the first of the month!
@@ -199,7 +201,8 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None, d
 
                             # Remove the processing dir from file path because this can be different for each
                             # installation (especially the windows version) than on the cloud service processing dir
-                            filenames[:] = [os.path.join(os.path.sep, os.path.relpath(filename, es_constants.es2globals['processing_dir'])) for
+                            filenames[:] = [os.path.join(os.path.sep, os.path.relpath(filename, es_constants.es2globals[
+                                'processing_dir'])) for
                                             filename in filenames]
                             # for filename in filenames:
                             #     print filename
@@ -292,8 +295,10 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None, d
 
                     # Remove the processing dir from file path because this can be different for each
                     # installation (especially the windows version) than on the cloud service processing dir
-                    filenames[:] = [os.path.join(os.path.sep, os.path.relpath(filename, es_constants.es2globals['processing_dir'])) for filename in
-                                    filenames]
+                    filenames[:] = [
+                        os.path.join(os.path.sep, os.path.relpath(filename, es_constants.es2globals['processing_dir']))
+                        for filename in
+                        filenames]
                     # for filename in filenames:
                     #     print filename
 
@@ -352,7 +357,7 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None, d
                     elif dataset_dbinfo.date_format == 'YYYYMMDD':  # dataset_dbinfo.frequency_id == 'e1dekad' and
                         today = datetime.date.today()
                         from_date = today - relativedelta(years=int(dekad_frequency))
-                        from_date = from_date.replace(day=1)    # always start at the first of the month!
+                        from_date = from_date.replace(day=1)  # always start at the first of the month!
 
                         kwargs = {'mapset': mapsetcode,
                                   'sub_product_code': subproductcode,
@@ -384,8 +389,10 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None, d
 
                 # Remove the processing dir from file path because this can be different for each
                 # installation (especially the windows version) than on the cloud service processing dir
-                filenames[:] = [os.path.join(os.path.sep, os.path.relpath(filename, es_constants.es2globals['processing_dir'])) for filename in
-                                filenames]
+                filenames[:] = [
+                    os.path.join(os.path.sep, os.path.relpath(filename, es_constants.es2globals['processing_dir'])) for
+                    filename in
+                    filenames]
                 # for filename in filenames:
                 #     print filename
 
@@ -397,7 +404,6 @@ def create_request(productcode, version, mapsetcode=None, subproductcode=None, d
 
 
 def __create_request(productcode, version, mapsetcode=None, subproductcode=None):
-
     # Define the 'request' object
     request = {'product': productcode,
                'version': version}
@@ -422,7 +428,8 @@ def __create_request(productcode, version, mapsetcode=None, subproductcode=None)
                     dataset_dict = {}
                     all_mapset_datasets = product.get_subproducts(mapset=mapset)
                     for subproductcode in all_mapset_datasets:
-                        missing = product.get_missing_datasets(mapset=mapset, sub_product_code=subproductcode, from_date=None, to_date=None)
+                        missing = product.get_missing_datasets(mapset=mapset, sub_product_code=subproductcode,
+                                                               from_date=None, to_date=None)
                         # dataset_dict['subproductcode'] = row_dict['subproductcode']
                         # dataset_dict['product_type'] = row_dict['product_type']
                         dataset_dict = {'subproductcode': subproductcode,
@@ -442,7 +449,8 @@ def __create_request(productcode, version, mapsetcode=None, subproductcode=None)
             dataset_dict = {}
             all_mapset_datasets = product.get_subproducts(mapset=mapsetcode)
             for subproductcode in all_mapset_datasets:
-                missing = product.get_missing_datasets(mapset=mapsetcode, sub_product_code=subproductcode, from_date=None, to_date=None)
+                missing = product.get_missing_datasets(mapset=mapsetcode, sub_product_code=subproductcode,
+                                                       from_date=None, to_date=None)
                 # dataset_dict['subproductcode'] = row_dict['subproductcode']
                 # dataset_dict['product_type'] = row_dict['product_type']
                 dataset_dict = {'subproductcode': subproductcode,
@@ -456,7 +464,8 @@ def __create_request(productcode, version, mapsetcode=None, subproductcode=None)
         else:
             # All variable defined -> get missing object
             # product = Product(product_code=productcode, version=version)
-            missing = product.get_missing_datasets(mapset=mapsetcode, sub_product_code=subproductcode, from_date=None, to_date=None)
+            missing = product.get_missing_datasets(mapset=mapsetcode, sub_product_code=subproductcode, from_date=None,
+                                                   to_date=None)
             request['productmapsets'] = []
             mapset_dict = {'mapsetcode': mapsetcode, 'mapsetdatasets': []}
             dataset_dict = {'subproductcode': subproductcode, 'missing': missing}
@@ -467,7 +476,6 @@ def __create_request(productcode, version, mapsetcode=None, subproductcode=None)
 
 
 def create_archive_from_request(request_file):
-
     # Creates an archive file (.tgz) from a 'json' request file
     # Create a self-extracting archive (.bsx) from a template script and the .tgz
 
@@ -490,7 +498,7 @@ def create_archive_from_request(request_file):
         return 1
 
     n_mapsets = len(my_mapsets)
-    incresing_number=1
+    incresing_number = 1
 
     # Loop over defined mapsets
     for my_mapset in my_mapsets:
@@ -500,32 +508,31 @@ def create_archive_from_request(request_file):
 
         # Loop over all datasets in a mapset
         for mapsetdataset in mapsetdatasets:
-            subproductcode =  mapsetdataset['subproductcode']
+            subproductcode = mapsetdataset['subproductcode']
             missing_info = mapsetdataset['missing']
-            archive_base_name=request_file.replace('.req','')
-            archive_name=archive_base_name+'_{0:04d}'.format(incresing_number)+'.tgz'
-            self_extracting_name=archive_name
-            self_extracting_name=self_extracting_name.replace('.tgz','.bsx')
-            logger.debug( 'Archive file name: {0}'.format(archive_name))
+            archive_base_name = request_file.replace('.req', '')
+            archive_name = archive_base_name + '_{0:04d}'.format(incresing_number) + '.tgz'
+            self_extracting_name = archive_name
+            self_extracting_name = self_extracting_name.replace('.tgz', '.bsx')
+            logger.debug('Archive file name: {0}'.format(archive_name))
 
             # Create a product object - no date indication
             product = Product(product_code=my_product, version=my_version)
-            [tarfile , results] = product.create_tar(missing_info, filetar=archive_name, tgz=True)
-            logger.debug('Files found for {0}: {1}'.format(subproductcode,results['n_file_copied']))
+            [tarfile, results] = product.create_tar(missing_info, filetar=archive_name, tgz=True)
+            logger.debug('Files found for {0}: {1}'.format(subproductcode, results['n_file_copied']))
             # Test there is - at list - 1 file missing
             if results['n_file_copied'] > 0:
-
                 logger.info('Creating file {0}'.format(self_extracting_name))
                 # Get the decompression script template
                 decompress_file = es_constants.decompress_script
 
-                target = open(self_extracting_name,'wb')
-                shutil.copyfileobj(open(decompress_file,'rb'),target)
-                shutil.copyfileobj(open(archive_name,'rb'),target)
+                target = open(self_extracting_name, 'wb')
+                shutil.copyfileobj(open(decompress_file, 'rb'), target)
+                shutil.copyfileobj(open(archive_name, 'rb'), target)
                 target.close()
                 os.chmod(self_extracting_name, 775)
                 # Increase the counter
-                incresing_number+=1
+                incresing_number += 1
 
                 # Remove .tgz file
                 os.remove(archive_name)
@@ -533,74 +540,73 @@ def create_archive_from_request(request_file):
             product = None
     return 0
 
-def get_archive_name(productcode, version, id):
 
-    filename = es_constants.es2globals['base_tmp_dir']+os.path.sep
-    filename += 'archive_'+productcode+'_'+version+'_'+id+'.tgz'
+def get_archive_name(productcode, version, id):
+    filename = es_constants.es2globals['base_tmp_dir'] + os.path.sep
+    filename += 'archive_' + productcode + '_' + version + '_' + id + '.tgz'
     return filename
+
 
 def get_request_filename(productcode, version, subproductcode, mapsetcode, date=None):
-
     if date is None:
-        filename = productcode+'_'+subproductcode+'_'+mapsetcode+'_'+version
+        filename = productcode + '_' + subproductcode + '_' + mapsetcode + '_' + version
 
     return filename
 
-def create_archive_vars(productcode, version, mapsetcode, subproductcode, from_date=None, to_date=None, time_suffix=None, output_dir=None):
 
+def create_archive_vars(productcode, version, mapsetcode, subproductcode, from_date=None, to_date=None,
+                        time_suffix=None, output_dir=None):
     # Creates an archive file (.tgz) for a single period (prod/version/sprod/mapset)
-    incresing_number=1
+    incresing_number = 1
 
     if output_dir is None:
         output_dir = es_constants.es2globals['base_tmp_dir']
 
     if time_suffix is not None:
-        time_token=str(time_suffix)
+        time_token = str(time_suffix)
     else:
         if from_date is not None:
-            time_token=from_date
+            time_token = from_date
             if to_date is not None:
-                time_token+='_to_'
-                time_token+=to_date
+                time_token += '_to_'
+                time_token += to_date
         else:
-            time_token='alltimes'
+            time_token = 'alltimes'
 
     # Define archive name
-    archive_base_name=output_dir+os.path.sep+ \
-                      productcode+'_'+version+'_'+mapsetcode+'_'+subproductcode+'_'+time_token
+    archive_base_name = output_dir + os.path.sep + \
+                        productcode + '_' + version + '_' + mapsetcode + '_' + subproductcode + '_' + time_token
 
-    archive_name=archive_base_name+'_{0:04d}'.format(incresing_number)+'.tgz'
-    self_extracting_name=archive_name
-    self_extracting_name=self_extracting_name.replace('.tgz','.bsx')
+    archive_name = archive_base_name + '_{0:04d}'.format(incresing_number) + '.tgz'
+    self_extracting_name = archive_name
+    self_extracting_name = self_extracting_name.replace('.tgz', '.bsx')
 
-    logger.debug( 'Archive file name: {0}'.format(archive_name))
+    logger.debug('Archive file name: {0}'.format(archive_name))
 
     # Create a product object - no date indication
     product = Product(product_code=productcode, version=version)
-    [tarfile , results] = product.create_tar_vars(productcode, version, subproductcode, mapsetcode, from_date=from_date,
-                                                  to_date=to_date, filetar=archive_name, tgz=True)
+    [tarfile, results] = product.create_tar_vars(productcode, version, subproductcode, mapsetcode, from_date=from_date,
+                                                 to_date=to_date, filetar=archive_name, tgz=True)
 
-    logger.info( 'Tar archive created: {0}'.format(archive_name))
-    logger.debug('Files found for {0}: {1}'.format(subproductcode,results['n_file_copied']))
+    logger.info('Tar archive created: {0}'.format(archive_name))
+    logger.debug('Files found for {0}: {1}'.format(subproductcode, results['n_file_copied']))
 
     # Test there is - at list - 1 file missing
     if results['n_file_copied'] > 0:
-
         logger.info('Creating file {0}'.format(self_extracting_name))
         # Get the decompression script template
         decompress_file = es_constants.decompress_script
 
-        target = open(self_extracting_name,'wb')
-        shutil.copyfileobj(open(decompress_file,'rb'),target)
-        shutil.copyfileobj(open(archive_name,'rb'),target)
+        target = open(self_extracting_name, 'wb')
+        shutil.copyfileobj(open(decompress_file, 'rb'), target)
+        shutil.copyfileobj(open(archive_name, 'rb'), target)
         target.close()
         os.chmod(self_extracting_name, 775)
         # Increase the counter
-        incresing_number+=1
+        incresing_number += 1
 
     # Remove .tgz file
     os.remove(archive_name)
     product = None
 
     return self_extracting_name
-

@@ -126,3 +126,34 @@ class TestEcoagris(TestCase):
         print ("  Value is             : {}".format(ecoagric_record["tsvalue"]))
 
         self.assertAlmostEqual(ecoagric_record["tsvalue"],371.32997537572163)
+
+    def test_scatter_plot(self):
+        from osgeo import gdal
+        import numpy as np
+        from apps.tools import scatter_plot
+        file= 'modis-chla/gradient/20200301_modis-chla_gradient_MODIS-Africa-4km_v2013.1.tif'
+        file_1 = "/eos/jeodpp/home/users/venkavi/eStation2/20200601_vgt-ndvi_ndv_SPOTV-Africa-1km_sv2-pv2.2.tif"
+        file_2 = "/home/venkavi/eStation2/tmp/eStation2/vgt-ndvi/proba-v2.2/SPOTV-Africa-1km/tif/ndv/20200601_vgt-ndvi_ndv_SPOTV-Africa-1km_sv2-pv2.2.tif"
+
+        if not os.path.isfile(file_1):
+            print("Error: file does not exist: "+file_1)
+
+        if not os.path.isfile(file_2):
+            print("Error: file does not exist: "+file_2)
+
+        ds_1 = gdal.Open(file_1)
+        data_1 = np.array(ds_1.GetRasterBand(1).ReadAsArray())
+        #
+        ds_2 = gdal.Open(file_2)
+        data_2 = np.array(ds_2.GetRasterBand(1).ReadAsArray())
+        #
+        data_1 = data_1.astype('float')
+        data_2 = data_2.astype('float')
+        data_1[data_1==-32768]=np.nan
+        data_2[data_2==-32768]=np.nan
+
+        # Trivial test
+        #data_1 = np.random.sample((10, 10))
+        #data_2 = np.random.sample((10, 10))
+
+        scatter_plot.plot_1o1(data_1, data_2, x_label="Reference", y_label="Local", figure_title=os.path.basename(file))

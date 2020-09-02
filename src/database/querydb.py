@@ -3182,18 +3182,21 @@ def get_dataacquisitions():
         # pa = db.map(s, primary_key=[s.c.productid])
         # dataacquisitions = pa.order_by(desc(pa.productcode)).all()
 
-        query = " SELECT CONCAT(products.product_acquisition_data_source.productcode, '_', " + \
-                "        products.product_acquisition_data_source.version) AS productid, " + \
-                "        productcode, " + \
-                "        subproductcode, " + \
-                "        version, " + \
-                "        data_source_id, " + \
-                "        defined_by, " + \
-                "        type, " + \
-                "        activated, " + \
-                "        store_original_data, " + \
-                "        '05/06/2014' AS latest " + \
-                " FROM products.product_acquisition_data_source ORDER BY productcode DESC"
+        query = "SELECT CONCAT(pads.productcode, '_', pads.version) AS productid, \
+                        pads.productcode, \
+                        pads.subproductcode, \
+                        pads.version, \
+                        pads.data_source_id, \
+                        pads.defined_by, \
+                        pads.type, \
+                        pads.activated, \
+                        pads.store_original_data, \
+                        '05/06/2014' AS latest, \
+                        CASE WHEN pads.type = 'INTERNET' THEN i.descriptive_name ELSE 'EUMETCAST' END as descriptive_name \
+                FROM products.product_acquisition_data_source pads \
+                LEFT OUTER JOIN products.internet_source i on pads.data_source_id = i.internet_id \
+                ORDER BY productcode DESC"
+
         dataacquisitions = db.execute(query)
         dataacquisitions = dataacquisitions.fetchall()
 
@@ -3241,7 +3244,7 @@ def get_products_acquisition(activated=None):
                 "        subprods.totsubprods " + \
                 " FROM products.product as p INNER JOIN products.product_category as pc " + \
                 "   ON p.category_id = pc.category_id " + \
-                " INNER JOIN (SELECT COUNT(pads.data_source_id) as totgets, " + \
+                " LEFT OUTER JOIN (SELECT COUNT(pads.data_source_id) as totgets, " + \
                 "                    pads.productcode as pads_productcode, " + \
                 "                    pads.subproductcode as pads_subproductcode, " + \
                 "                    pads.version as pads_version " + \
@@ -3250,7 +3253,7 @@ def get_products_acquisition(activated=None):
                 "     ON p.productcode = pads.pads_productcode " + \
                 "        AND p.version = pads.pads_version " + \
                 "        AND p.subproductcode = pads.pads_subproductcode " + \
-                " RIGHT OUTER JOIN (SELECT COUNT(subprods.subproductcode) as totsubprods, " + \
+                " LEFT OUTER JOIN (SELECT COUNT(subprods.subproductcode) as totsubprods, " + \
                 "                     subprods.productcode as subprods_productcode, " + \
                 "                     subprods.version as subprods_version " + \
                 "             FROM products.product as subprods " + \
