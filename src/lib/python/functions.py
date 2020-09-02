@@ -1185,7 +1185,7 @@ def day_per_dekad(yyyymmdd):
 
 
 ######################################################################################
-#   day_per_dekad
+#   get_number_days_month
 #   Purpose: Function returns the number of days per dekad (from 8 to 11)
 #   Author: M. Clerici
 #   Date: 2015/02/25
