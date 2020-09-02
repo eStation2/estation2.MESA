@@ -1119,6 +1119,52 @@ def conv_yyyydmmdk_2_yyyymmdd(yymmk):
             return -1
     except:
         return -1
+######################################################################################
+#   conv_yyyydk_2_yyyymmdd
+#   Purpose: Function returns a date (YYYYMMDD) with yyyydk as input.
+#   Author: Vijay Charan
+#   Date: 2020/08/10
+#   Input: string of numbers in the format YYYYdMMdK
+#   Output: date (YYYYMMDD), otherwise -1
+#
+def conv_yyyydk_2_yyyymmdd(yyyydk):
+
+    year = int(str(yyyydk)[0:4])
+    dekad = int(str(yyyydk)[5:7])
+    # day = int(str(yyyydk)[6:8])
+
+    if (dekad % 3) == 1: #dekad in [1,4,7,10,13,16,19,22,25,28,31,34]:
+        day = '01'
+    elif (dekad % 3) == 2: #dekad in [2,5,8,11,14,17,20,23,26,29,32,35]:
+        day = '11'
+    elif (dekad % 3) == 0:#dekad in [3,6,9,12,15,18,21,24,27,30,33,36]:
+        day = '21'
+    else:
+        day = '41'
+
+    month = ((dekad-1)/3)+1
+    month = str(month).zfill(2)
+
+    date_yyyymmdd = str(year)+month+day
+    return date_yyyymmdd
+
+######################################################################################
+#   conv_yyyymmdd_2_dky
+#   Purpose: Function returns a date dky(yearly dekad) using(YYYYMMDD) as input.
+#   Author: Vijay Charan
+#   Date: 2020/08/10
+#   Input: string of numbers in the format year_month_day
+#   Output: date dky(yearly dekad) , otherwise -1
+#
+def conv_yyyymmdd_2_dky(year_month_day):
+    # year = int(str(year_month_day)[0:4])
+    month = int(str(year_month_day)[4:6])
+    day = int(str(year_month_day)[6:8])
+
+    dekad = (month -1)*3+((day-1)/10)+1
+
+    return str(dekad).zfill(2)
+
 
 
 ######################################################################################

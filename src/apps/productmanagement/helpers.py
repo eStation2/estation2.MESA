@@ -173,6 +173,7 @@ def add_years(date, years=1):
 
 SPECIAL_DKM = "%{dkm}"
 SPECIAL_DKM2 = "%{dkm2}"
+SPECIAL_DKY = "%{dky}"
 SPECIAL_ADD = re.compile("(%{)([+-])(\d)([dh])(.+)(})")
 
 def manage_date(date, template):
@@ -180,15 +181,18 @@ def manage_date(date, template):
     while True:
         pos = template.find(SPECIAL_DKM)
         pos2 = template.find(SPECIAL_DKM2)
+        pos3 = template.find(SPECIAL_DKY)
 
-        if pos == -1 and pos2 == -1:
+        if pos == -1 and pos2 == -1 and pos3 == -1:
             break
-        if pos2 == -1:
+        if pos != -1:
             template = template[:pos] + ("3" if date.day > 20
                     else "2" if date.day > 10 else "1") + template[pos+len(SPECIAL_DKM):]
-        else:
+        elif pos2 != -1:
             template = template[:pos2] + ("21" if date.day > 20
                     else "11" if date.day > 10 else "01") + template[pos2+len(SPECIAL_DKM2):]
+        elif pos3 != -1:
+            template = template[:pos3] + (functions.conv_yyyymmdd_2_dky(date.strftime('%Y%m%d'))) + template[pos3 + len(SPECIAL_DKY):]
 
     #%{+/-<Nt><strftime>} = +/- N delta days/hours/
     def manage_add_factory(date):

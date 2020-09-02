@@ -3378,6 +3378,10 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             # Convert from YYYYMM -> YYYYMMDD
             output_date_str = str(in_date)+'01'
 
+        if datasource_descr.date_format == 'YYYY_DK':
+            # The date (e.g. 2020_36) is converted to the dekad it belongs to (e.g. 20201221)
+            output_date_str = functions.conv_yyyydk_2_yyyymmdd(in_date)
+
         if output_date_str == -1:
             output_date_str = in_date+'_DATE_ERROR_'
         else:
