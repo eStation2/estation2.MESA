@@ -1690,7 +1690,7 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger):
         outFile.write('<OGRVRTDataSource>\n')
         outFile.write('    <OGRVRTLayer name="firms_file">\n')
         outFile.write('        <SrcDataSource>'+file_csv+'</SrcDataSource>\n')
-        outFile.write('        <OGRVRTLayer name="firms_file" />\n')
+        # outFile.write('        <OGRVRTLayer name="firms_file" />\n')
         outFile.write('        <GeometryType>wkbPoint</GeometryType>\n')
         outFile.write('        <LayerSRS>WGS84</LayerSRS>\n')
         outFile.write('        <GeometryField encoding="PointFromColumns" x="longitude" y="latitude" />\n')
@@ -3036,6 +3036,7 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
             orig_ds.SetGeoTransform(native_mapset.geo_transform)
             orig_ds.SetProjection(native_mapset.spatial_ref.ExportToWkt())
 
+
     return list_interm_files
 
 
@@ -3336,6 +3337,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 
             # Apply Reproject-Image to the memory-driver
             orig_wkt = orig_cs.ExportToWkt()
+
             res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
                                       es_constants.ES2_OUTFILE_INTERP_METHOD)
 
