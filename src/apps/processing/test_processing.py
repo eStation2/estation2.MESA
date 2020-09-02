@@ -814,6 +814,30 @@ def test_subprocess_vgt_fapar(pipe_run=4, pipe_print=0, touch_files_only=False):
 
     processing_std_vgt_prods_only(res_queue, **args)
 
+def test_subprocess_modis_fapar(pipe_run=4, pipe_print=0, touch_files_only=False):
+    start_date = '20200101'
+    end_date = None
+
+    if start_date is not None and end_date is not None:
+        starting_dates = proc_functions.get_list_dates_for_dataset('modis-fapar', 'fapar', '1.0', start_date=start_date, end_date=end_date)
+    else:
+        starting_dates = None
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': 'modis-fapar',\
+            'starting_sprod':'fapar',\
+            'mapset': 'MODIS-Africa-1-1km',\
+            'version':'1.0',
+            'starting_dates': starting_dates,
+            'logfile':'modis-fapar',
+            'upsert_db' : False,
+            'touch_only':touch_files_only
+            }
+    res_queue = None
+
+    processing_std_vgt_prods_only(res_queue, **args)
+
 def test_subprocess_vgt_fcover(pipe_run=4, pipe_print=0, touch_files_only=False):
     start_date = '19990101'
     end_date = '20181221'
@@ -899,9 +923,10 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 # test_subprocess_swi(pipe_run=3, pipe_print=0, touch_files_only=False)
 # test_subprocess_vgt_lai(pipe_run=0, pipe_print=4, touch_files_only=False)
 # test_subprocess_vgt_fcover(pipe_run=3, pipe_print=0, touch_files_only=False)
+test_subprocess_modis_fapar(pipe_run=3, pipe_print=0, touch_files_only=False)
 # test_subprocess_vgt_fapar(pipe_run=0, pipe_print=4, touch_files_only=False)
 # my_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False)
-my_proc_std_ndvi_res(pipe_run=3, pipe_print=0, touch_files_only=False)
+# my_proc_std_ndvi_res(pipe_run=3, pipe_print=0, touch_files_only=False)
 #my_proc_ndvi_merge(pipe_run=0, pipe_print=3, touch_files_only=False)
 # my_proc_pml_modis_fronts(pipe_run=3, pipe_print=0, touch_files_only=False)
 #my_proc_std_fronts(pipe_run=0, pipe_print=3, touch_files_only=False)

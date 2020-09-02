@@ -604,7 +604,7 @@ class TestGetInternet(unittest.TestCase):
     # Test 2.1.0 - Get 1 source
     def TestRemoteHttp_TAMSAT_1(self):
 
-        internet_id='READINGS:TAMSAT:10D:NC'
+        internet_id='READINGS:TAMSAT:3.0:10D:NC'
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
             if s.internet_id == internet_id:
@@ -617,8 +617,8 @@ class TestGetInternet(unittest.TestCase):
                          'pull_frequency': internet_source.pull_frequency,
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
-                         'start_date':20170701,
-                         'end_date':20170711,
+                         'start_date':-60,
+                         'end_date':-10,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type}
 
@@ -913,8 +913,8 @@ class TestGetInternet(unittest.TestCase):
                          'pull_frequency': internet_source.pull_frequency,
                          'user_name':internet_source.user_name,
                          'password':internet_source.password,
-                         'start_date':20200101,
-                         'end_date':20200122,
+                         'start_date':20200821,
+                         'end_date':-2,
                          'frequency_id': internet_source.frequency_id,
                          'type':internet_source.type,
                          'https_params': internet_source.https_params}
@@ -1147,31 +1147,31 @@ class TestGetInternet(unittest.TestCase):
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
 
-    def test_RemoteHttps_MODIS_FIRMS_6(self):
-
-        internet_id='MODAPS:EOSDIS:FIRMS:NASA:HTTP'
-
-        internet_sources = querydb.get_active_internet_sources()
-        for s in internet_sources:
-            if s.internet_id == internet_id:
-                internet_source = s
-
-        # Copy for modifs
-        my_source =     {'internet_id': internet_id,
-                         'url': internet_source.url,
-                         'include_files_expression':internet_source.include_files_expression,
-                         'pull_frequency': internet_source.pull_frequency,
-                         'user_name':internet_source.user_name,
-                         'password':internet_source.password,
-                         'https_params': internet_source.https_params,
-                         'start_date':  '20190315',
-                         'end_date':None,
-                         'frequency_id': internet_source.frequency_id,
-                         'type':internet_source.type}
-
-
-        # Check last 90 days (check list length = 9)
-        result = get_one_source(my_source)
+    # def test_RemoteHttps_MODIS_FIRMS_6(self):
+    #
+    #     internet_id='MODAPS:EOSDIS:FIRMS:NASA:HTTP'
+    #
+    #     internet_sources = querydb.get_active_internet_sources()
+    #     for s in internet_sources:
+    #         if s.internet_id == internet_id:
+    #             internet_source = s
+    #
+    #     # Copy for modifs
+    #     my_source =     {'internet_id': internet_id,
+    #                      'url': internet_source.url,
+    #                      'include_files_expression':internet_source.include_files_expression,
+    #                      'pull_frequency': internet_source.pull_frequency,
+    #                      'user_name':internet_source.user_name,
+    #                      'password':internet_source.password,
+    #                      'https_params': internet_source.https_params,
+    #                      'start_date':  '20190315',
+    #                      'end_date':None,
+    #                      'frequency_id': internet_source.frequency_id,
+    #                      'type':internet_source.type}
+    #
+    #
+    #     # Check last 90 days (check list length = 9)
+    #     result = get_one_source(my_source)
 
     def TestRemoteHttps_DMP_2(self):
 
@@ -1235,6 +1235,39 @@ class TestGetInternet(unittest.TestCase):
 
         # Check last 90 days (check list length = 9)
         result = get_one_source(my_source)
+
+    def TestRemoteHttpsMODIS_FAPAR(self):
+
+        internet_id='JRC:DRO:FAPAR:10ZSCORE'
+
+        # Direct test !
+        if False:
+            filename='fAPAR_anom_MOD_2020_23.tif'
+            remote_url = 'https://edo.jrc.ec.europa.eu/gisdata/gmes4africa_estation2/'+filename
+            status = get_file_from_url(remote_url, '/tmp/', target_file=filename, userpwd=':')
+            return
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+
+        # Copy for modifs
+        my_source =     {'internet_id': internet_id,
+                         'url': internet_source.url,
+                         'include_files_expression':internet_source.include_files_expression,
+                         'pull_frequency': internet_source.pull_frequency,
+                         'user_name':internet_source.user_name,
+                         'password':internet_source.password,
+                         'https_params': internet_source.https_params,
+                         'start_date':20200101,
+                         'end_date': -10,
+                         'frequency_id': internet_source.frequency_id,
+                         'type':internet_source.type}
+
+        # Check last 90 days (check list length = 9)
+        result = get_one_source(my_source)
+
 
     def TestRemoteHttps_NDVI100(self):
 
