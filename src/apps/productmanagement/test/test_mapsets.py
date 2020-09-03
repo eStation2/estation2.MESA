@@ -20,13 +20,15 @@ class TestMapsets(unittest.TestCase):
         setattr(querydb, 'db', connectdb.ConnectDB().db)
 
     def test_mapset_not_existent(self):
-        kwargs = {'mapset_code':"---mapset---"}
+        kwargs = {'mapset_code': "---mapset---"}
+        # ES2-596 : Regexp in python 2.7
         self.assertRaisesRegexp(NoMapsetFound, "(?i).*found.*mapset.*", Mapset, **kwargs)
 
     def test_mapset(self):
-        kwargs = {'mapset_code':"SPOTV-Africa-1km"}
+        kwargs = {'mapset_code': "SPOTV-Africa-1km"}
         mapset = Mapset(**kwargs)
         self.assertIsInstance(mapset, Mapset)
+
 
 suite_mapsets = unittest.TestLoader().loadTestsFromTestCase(TestMapsets)
 if __name__ == '__main__':

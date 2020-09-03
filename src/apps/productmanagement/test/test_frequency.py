@@ -30,15 +30,15 @@ class TestFrequency(unittest.TestCase):
         self.assertRaises(WrongFrequencyType, Frequency, *(1, Frequency.UNIT.DEKAD, '-' + Frequency.TYPE.PER))
 
     def test_dataformat_default_1(self):
-        frequency =  Frequency(1, Frequency.UNIT.DEKAD, Frequency.TYPE.PER)
+        frequency = Frequency(1, Frequency.UNIT.DEKAD, Frequency.TYPE.PER)
         self.assertEqual(frequency.dateformat, Frequency.DATEFORMAT.DATE)
 
     def test_dataformat_default_2(self):
-        frequency =  Frequency(4, Frequency.UNIT.HOUR, Frequency.TYPE.PER)
+        frequency = Frequency(4, Frequency.UNIT.HOUR, Frequency.TYPE.PER)
         self.assertEqual(frequency.dateformat, Frequency.DATEFORMAT.DATETIME)
 
     def test_dataformat_default_3(self):
-        frequency =  Frequency(9, Frequency.UNIT.YEAR, Frequency.TYPE.EVERY)
+        frequency = Frequency(9, Frequency.UNIT.YEAR, Frequency.TYPE.EVERY)
         self.assertEqual(frequency.dateformat, Frequency.DATEFORMAT.DATE)
 
     # Test the single file frequency
@@ -116,6 +116,7 @@ class TestFrequency(unittest.TestCase):
         templates = frequency.get_internet_dates(dates, "/Modis_%{+8dY-m-d}_%Y%m/mcd14dl.%Y-%m-%d.tif")
         self.assertEqual(templates[0], '/Modis_2014-01-09_201401/mcd14dl.2014-01-01.tif')
         self.assertEqual(templates[1], '/Modis_2014-01-10_201401/mcd14dl.2014-01-02.tif')
+
 
 
 suite_frequency = unittest.TestLoader().loadTestsFromTestCase(TestFrequency)
