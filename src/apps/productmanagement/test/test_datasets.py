@@ -140,9 +140,11 @@ class TestDatasets(unittest.TestCase):
 
     def test_normalized_info_15_minutes(self):
         kwargs = self.kwargs.copy()
+
+        # ES2-596: had to change 2016 -> 2026 since on stations some data are present.
         kwargs.update({
-            'from_date': datetime.datetime(2016, 2, 1),
-            'to_date': datetime.datetime(2016, 2, 20),
+            'from_date': datetime.datetime(2026, 2, 1),
+            'to_date': datetime.datetime(2026, 2, 20),
             'product_code': "lsasaf-et",
             'version': 'undefined',
             'sub_product_code': "et",
@@ -285,8 +287,10 @@ class TestDatasets(unittest.TestCase):
         self.assertEqual(last_date, current_date)
 
     def test_find_gaps(self):
-        from_date = datetime.date(2020, 1, 1)
-        to_date = datetime.date(2020, 12, 31)
+
+        # ES2-596: had to change 2020 -> 2032 since on stations some data are present.
+        from_date = datetime.date(2032, 1, 1)
+        to_date = datetime.date(2032, 12, 31)
 
         kwargs = {
             'product_code': "modis-pp",

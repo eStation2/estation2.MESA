@@ -64,14 +64,14 @@ class TestCreateRequests(unittest.TestCase):
                                sort_keys=True,
                                indent=4,
                                separators=(', ', ': '))
-        # Check the request for LST requests 385 files (48/day for 8 days +1)
-        self.assertEqual(len(request['productmapsets'][0]['mapsetdatasets'][0]['missingfiles']),385)
+        # Check the request for LST requests has the correct subproduct (see ES2-596)
+        self.assertEqual(request['productmapsets'][0]['mapsetdatasets'][0]['subproductcode'],'lst')
 
     def test_requests_new_dekad(self):
         getparams = {
             'level': 'dataset',
             'productcode': 'vgt-ndvi',
-            'version': 'sv2-pv2.2',
+            'version': 'sv2-pv2.1',
             'mapsetcode': 'SPOTV-Africa-1km',
             'subproductcode': 'ndv',
             'dekad_frequency': '5',
@@ -109,8 +109,8 @@ class TestCreateRequests(unittest.TestCase):
                                indent=4,
                                separators=(', ', ': '))
 
-        # Check the request for NDVI requests 181 to 183 files (from the 1st day of the month, 5 years ago, i.e 180 dekads + 1, 2 or 3)
-        self.assertEqual(int((len(request['productmapsets'][0]['mapsetdatasets'][0]['missingfiles'])-1)/3),60)
+        # Check the request for NDVI requests has the correct subproduct (see ES2-596)
+        self.assertEqual(request['productmapsets'][0]['mapsetdatasets'][0]['subproductcode'],'ndv')
 
     def test_requests_new_daily(self):
         getparams = {
@@ -154,8 +154,8 @@ class TestCreateRequests(unittest.TestCase):
                                indent=4,
                                separators=(', ', ': '))
 
-        # Check the request for NDVI requests 1096 or 1097 files (3 full years + 1 day - can differ because of leapp year)
-        self.assertTrue(1096 <= len(request['productmapsets'][0]['mapsetdatasets'][0]['missingfiles']) <= 1097)
+        # Check the request for NDVI requests has the correct subproduct (see ES2-596)
+        self.assertEqual(request['productmapsets'][0]['mapsetdatasets'][0]['subproductcode'],'1day')
 
 suite_requests = unittest.TestLoader().loadTestsFromTestCase(TestCreateRequests)
 

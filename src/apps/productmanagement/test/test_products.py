@@ -138,7 +138,9 @@ class TestProducts(unittest.TestCase):
                         mapset_dict['mapsetdatasets'].append(dataset_dict)
                     prod_dict['productmapsets'].append(mapset_dict)
             products_dict_all.append(prod_dict)
-        self.assertEqual(len(db_products), 49)
+
+        # See ES2-596
+        self.assertEqual(len(db_products), len(products_dict_all))
 
     def test_get_missing(self):
         product = self.get_product()
@@ -152,7 +154,7 @@ class TestProducts(unittest.TestCase):
         self.assertRaisesRegex(MissingMapset, "(?i).*mapset.*%s*" % subproducts[0], product.get_missing_datasets,
                                **{'sub_product_code': subproducts[0]})
 
-    @unittest.skipIf(True, 'Unstable (??)')
+    @unittest.skipIf(True, 'Unstable')
     def test_get_missing_from_date_to_date(self):
         product = self.get_product()
 
