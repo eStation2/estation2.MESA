@@ -12,7 +12,8 @@ import unittest
 import os
 import datetime
 import glob
-import shutil
+import sys
+
 from apps.productmanagement.products import Product
 from apps.productmanagement.datasets import Dataset
 from apps.productmanagement.exceptions import (NoProductFound, MissingMapset)
@@ -22,8 +23,9 @@ from lib.python import functions
 from database import connectdb
 from database import querydb
 from lib.python import es_logging as log
-from lib.python import metadata
+
 logger = log.my_logger(__name__)
+version = sys.version_info[0]
 
 
 def glob_monkey(path):
@@ -145,8 +147,15 @@ class TestProducts(unittest.TestCase):
         self.assertEqual(len(missing), 2)
         # self.assertEqual(missing[0]['info']['missingfiles'], 1)
         self.assertEqual(len(product.get_missing_datasets()), 4)
-        self.assertRaisesRegexp(MissingMapset, "(?i).*mapset.*%s*" % subproducts[0], product.get_missing_datasets,
-                               **{'sub_product_code': subproducts[0]})
+
+        # ES2-596: 'assertRaisesRegex' not in python 2.7
+        if version == 2:
+            self.assertRaisesRegexp(MissingMapset, "(?i).*mapset.*%s*" % subproducts[0], product.get_missing_datasets,
+                                    **{'sub_product_code': subproducts[0]})
+
+        if version == 3:
+            self.assertRaisesRegex(MissingMapset, "(?i).*mapset.*%s*" % subproducts[0], product.get_missing_datasets,
+                                    **{'sub_product_code': subproducts[0]})
 
     @unittest.skipIf(True, 'Unstable')
     def test_get_missing_from_date_to_date(self):
