@@ -138,7 +138,7 @@ class TestProducts(unittest.TestCase):
                         mapset_dict['mapsetdatasets'].append(dataset_dict)
                     prod_dict['productmapsets'].append(mapset_dict)
             products_dict_all.append(prod_dict)
-        self.assertEqual(len(db_products), 49)
+        self.assertEqual(len(db_products), len(products_dict_all))
 
     def test_get_missing(self):
         product = self.get_product()
