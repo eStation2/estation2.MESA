@@ -84,7 +84,6 @@ class TestDatasets(unittest.TestCase):
         kwargs.update({'from_date':  '2018-12-31'})
 
         # ES2-596: 'assertRaisesRegex' not in python 2.7
-
         if version == 2:
             self.assertRaisesRegexp(WrongDateType, "(?i).*wrong.*date.*type.*",
                                Dataset, **kwargs)

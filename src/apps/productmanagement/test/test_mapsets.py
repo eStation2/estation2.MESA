@@ -9,11 +9,13 @@
 from __future__ import absolute_import
 
 import unittest
+import sys
 from ..mapsets import Mapset
 from ..exceptions import NoMapsetFound
 
 from database import querydb
 from database import connectdb
+version = sys.version_info[0]
 
 class TestMapsets(unittest.TestCase):
     def setUp(self):
@@ -21,8 +23,12 @@ class TestMapsets(unittest.TestCase):
 
     def test_mapset_not_existent(self):
         kwargs = {'mapset_code': "---mapset---"}
-        # ES2-596 : Regexp in python 2.7
-        self.assertRaisesRegexp(NoMapsetFound, "(?i).*found.*mapset.*", Mapset, **kwargs)
+        # ES2-596: 'assertRaisesRegex' not in python 2.7
+        if version == 2:
+            self.assertRaisesRegexp(NoMapsetFound, "(?i).*found.*mapset.*", Mapset, **kwargs)
+
+        if version == 3:
+            self.assertRaisesRegex(NoMapsetFound, "(?i).*found.*mapset.*", Mapset, **kwargs)
 
     def test_mapset(self):
         kwargs = {'mapset_code': "SPOTV-Africa-1km"}
