@@ -7,16 +7,12 @@
 #
 
 from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import division
-from future import standard_library
-from builtins import str
 
 import unittest
 import os
 import datetime
 import glob
+import sys
 
 from apps.productmanagement.products import Product
 from apps.productmanagement.datasets import Dataset
@@ -28,12 +24,8 @@ from database import connectdb
 from database import querydb
 from lib.python import es_logging as log
 
-# from lib.python import metadata
-
-standard_library.install_aliases()
-
 logger = log.my_logger(__name__)
-
+python_version = sys.version_info[0]
 
 def glob_monkey(path):
     return []
@@ -67,9 +59,11 @@ class TestProducts(unittest.TestCase):
     def test_class(self):
         self.assertIsInstance(Product(**self.kwargs), Product)
 
+    # ES2-596 -> does not rise exception ???
     def test_class_no_product(self):
-        kwargs = {'product_code': "---prod---"}
-        self.assertRaisesRegex(NoProductFound, "No.*Product.*Found.*", Product, **kwargs)
+
+        kwargs = {'product_code': "---prod--"}
+        self.assertRaisesRegexp(NoProductFound, "(?i).*found.*product.*", Product, **kwargs)
 
     def test_class_mapsets(self):
         product = self.get_product()
@@ -93,11 +87,11 @@ class TestProducts(unittest.TestCase):
                                                   mapset=self.mapsets[0]), Dataset)
 
     def test_all_products_to_json(self):
-        # def row2dict(row):
-        #     d = {}
-        #     for column_name in list(row.c.keys()):  # all_cols:
-        #         d[column_name] = str(getattr(row, column_name))
-        #     return d
+        def row2dict(row):
+            d = {}
+            for column_name in list(row.c.keys()):  # all_cols:
+                d[column_name] = str(getattr(row, column_name))
+            return d
 
         # get full distinct list of products (native only)
         db_products = querydb.get_products()
@@ -109,8 +103,10 @@ class TestProducts(unittest.TestCase):
         products_dict_all = []
         # loop the products list
         for product in db_products:
-            # prod_dict = row2dict(product)
-            prod_dict = product
+            if python_version == 2:
+                prod_dict = row2dict(product)
+            if python_version == 3:
+                prod_dict = product
             productcode = prod_dict['productcode']
             version = prod_dict['version']
             p = Product(product_code=productcode, version=version)
@@ -151,8 +147,15 @@ class TestProducts(unittest.TestCase):
         self.assertEqual(len(missing), 2)
         # self.assertEqual(missing[0]['info']['missingfiles'], 1)
         self.assertEqual(len(product.get_missing_datasets()), 4)
-        self.assertRaisesRegex(MissingMapset, "(?i).*mapset.*%s*" % subproducts[0], product.get_missing_datasets,
-                               **{'sub_product_code': subproducts[0]})
+
+        # ES2-596: 'assertRaisesRegex' not in python 2.7
+        if python_version == 2:
+            self.assertRaisesRegexp(MissingMapset, "(?i).*mapset.*%s*" % subproducts[0], product.get_missing_datasets,
+                                    **{'sub_product_code': subproducts[0]})
+
+        if python_version == 3:
+            self.assertRaisesRegex(MissingMapset, "(?i).*mapset.*%s*" % subproducts[0], product.get_missing_datasets,
+                                    **{'sub_product_code': subproducts[0]})
 
     @unittest.skipIf(True, 'Unstable')
     def test_get_missing_from_date_to_date(self):

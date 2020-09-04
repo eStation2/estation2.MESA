@@ -7,12 +7,7 @@
 #
 
 from __future__ import absolute_import
-from __future__ import unicode_literals
-from __future__ import division
-from __future__ import print_function
 
-from future import standard_library
-standard_library.install_aliases()
 import unittest
 import datetime
 
@@ -121,6 +116,7 @@ class TestFrequency(unittest.TestCase):
         templates = frequency.get_internet_dates(dates, "/Modis_%{+8dY-m-d}_%Y%m/mcd14dl.%Y-%m-%d.tif")
         self.assertEqual(templates[0], '/Modis_2014-01-09_201401/mcd14dl.2014-01-01.tif')
         self.assertEqual(templates[1], '/Modis_2014-01-10_201401/mcd14dl.2014-01-02.tif')
+
 
 
 suite_frequency = unittest.TestLoader().loadTestsFromTestCase(TestFrequency)

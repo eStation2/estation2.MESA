@@ -7,24 +7,24 @@
 #
 
 from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import division
 
-from builtins import open
-from builtins import int
-from future import standard_library
-standard_library.install_aliases()
 import unittest
 import json
+import pprint
+import datetime as dt
+
+from apps.productmanagement import requests
+from apps.productmanagement import products
 
 from config import es_constants
 from lib.python import es_logging as log
 from apps.productmanagement import requests
+from lib.python import functions
 
 logger = log.my_logger(__name__)
 
 req_dir=es_constants.es2globals['requests_dir']
+
 
 class TestCreateRequests(unittest.TestCase):
 
