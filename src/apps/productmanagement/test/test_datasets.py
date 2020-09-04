@@ -20,8 +20,7 @@ from apps.productmanagement.products import *
 from lib.python import functions
 from database import querydb
 from database import connectdb
-import json
-import lib.python.myunittest as myutest
+# import lib.python.myunittest as myutest
 version = sys.version_info[0]
 
 
