@@ -25,8 +25,7 @@ from database import querydb
 from lib.python import es_logging as log
 
 logger = log.my_logger(__name__)
-version = sys.version_info[0]
-
+python_version = sys.version_info[0]
 
 def glob_monkey(path):
     return []
@@ -87,7 +86,6 @@ class TestProducts(unittest.TestCase):
         self.assertIsInstance(product.get_dataset(sub_product_code=product.subproducts[-1],
                                                   mapset=self.mapsets[0]), Dataset)
 
-    # ES2-596: seems it checks the number of definition in the DB -> if so, cannot be cross-installations/robust
     def test_all_products_to_json(self):
         def row2dict(row):
             d = {}
@@ -105,8 +103,10 @@ class TestProducts(unittest.TestCase):
         products_dict_all = []
         # loop the products list
         for product in db_products:
-            prod_dict = row2dict(product)
-            # prod_dict = product
+            if python_version == 2:
+                prod_dict = row2dict(product)
+            if python_version == 3:
+                prod_dict = product
             productcode = prod_dict['productcode']
             version = prod_dict['version']
             p = Product(product_code=productcode, version=version)
@@ -149,15 +149,15 @@ class TestProducts(unittest.TestCase):
         self.assertEqual(len(product.get_missing_datasets()), 4)
 
         # ES2-596: 'assertRaisesRegex' not in python 2.7
-        if version == 2:
+        if python_version == 2:
             self.assertRaisesRegexp(MissingMapset, "(?i).*mapset.*%s*" % subproducts[0], product.get_missing_datasets,
                                     **{'sub_product_code': subproducts[0]})
 
-        if version == 3:
+        if python_version == 3:
             self.assertRaisesRegex(MissingMapset, "(?i).*mapset.*%s*" % subproducts[0], product.get_missing_datasets,
                                     **{'sub_product_code': subproducts[0]})
 
-    @unittest.skipIf(True, 'Unstable')
+    @unittest.skipIf(True, 'Unstable (??)')
     def test_get_missing_from_date_to_date(self):
         product = self.get_product()
 

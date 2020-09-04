@@ -10,8 +10,8 @@ from __future__ import absolute_import
 
 import unittest
 import sys
-from ..mapsets import Mapset
-from ..exceptions import NoMapsetFound
+from apps.productmanagement.mapsets import Mapset
+from apps.productmanagement.exceptions import NoMapsetFound
 
 from database import querydb
 from database import connectdb

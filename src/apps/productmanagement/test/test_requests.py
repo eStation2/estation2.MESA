@@ -161,4 +161,3 @@ suite_requests = unittest.TestLoader().loadTestsFromTestCase(TestCreateRequests)
 
 if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=2).run(suite_requests)
-

@@ -11,9 +11,10 @@ from __future__ import absolute_import
 import unittest
 import datetime
 
-from ..datasets import Frequency
-from ..helpers import find_gaps, add_years, add_months, add_days, add_dekads, add_pentads, cast_to_int, INTERVAL_TYPE
-from ..exceptions import WrongDateParameter
+from apps.productmanagement.datasets import Frequency
+from apps.productmanagement.helpers import find_gaps, add_years, add_months, add_days, add_dekads, add_pentads, cast_to_int, INTERVAL_TYPE
+from apps.productmanagement.exceptions import WrongDateParameter
+
 
 class TestCasters(unittest.TestCase):
     def test_cast_1_0(self):
