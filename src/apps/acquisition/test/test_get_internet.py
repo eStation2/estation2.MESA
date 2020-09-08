@@ -2,7 +2,7 @@
 from config import es_constants
 from apps.acquisition.get_internet import *
 from apps.acquisition.get_eumetcast import *
-from apps.tools import coda_eum_api
+# from apps.tools import coda_eum_api
 
 import unittest
 
