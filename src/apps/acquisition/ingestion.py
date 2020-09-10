@@ -58,6 +58,8 @@ ingest_dir_in = es_constants.ingest_dir
 ingest_error_dir = es_constants.ingest_error_dir
 data_dir_out = es_constants.processing_dir
 
+python_version = sys.version_info[0]
+
 def loop_ingestion(dry_run=False, test_one_product=None):
 
 #    Driver of the ingestion process
@@ -394,7 +396,7 @@ def ingest_archives_eumetcast_product(product_code, version, subproduct_code, ma
                     logger.warning("Error in ingesting file %s" % in_file)
 
 
-def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_logger, echo_query=False):
+def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_logger, echo_query=False, test_mode=False):
 #   Manages ingestion of 1/more file/files for a given date
 #   Arguments:
 #       input_files: input file full names
@@ -453,14 +455,15 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
         except:
             # Error occurred and was NOT detected in pre_process routine
             my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
-            # Move files to 'error/storage' directory
-            for error_file in input_files:
-                if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
-                    shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
-                try:
-                    shutil.move(error_file, ingest_error_dir)
-                except:
-                    my_logger.warning("Error in moving file: %s " % error_file)
+            # Move files to 'error/storage' directory (ingest.wrong)
+            if not test_mode:
+                for error_file in input_files:
+                    if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
+                        shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
+                    try:
+                        shutil.move(error_file, ingest_error_dir)
+                    except:
+                        my_logger.warning("Error in moving file: %s " % error_file)
 
             shutil.rmtree(tmpdir)
             raise NameError('Caught Error in preprocessing routine')
@@ -469,13 +472,14 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
         if str(composed_file_list)=='1':
             my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
             # Move files to 'error/storage' directory
-            for error_file in input_files:
-                if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
-                    shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
-                try:
-                    shutil.move(error_file, ingest_error_dir)
-                except:
-                    my_logger.warning("Error in moving file: %s " % error_file)
+            if not test_mode:
+                for error_file in input_files:
+                    if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
+                        shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
+                    try:
+                        shutil.move(error_file, ingest_error_dir)
+                    except:
+                        my_logger.warning("Error in moving file: %s " % error_file)
 
             shutil.rmtree(tmpdir)
             raise NameError('Detected Error in preprocessing routine')
@@ -488,13 +492,14 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
     except:
         my_logger.warning("Error in ingestion for prod: %s and date: %s" % (product['productcode'], in_date))
         # Move files to 'error/storage' directory
-        for error_file in input_files:
-            if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
-                shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
-            try:
-                shutil.move(error_file, ingest_error_dir)
-            except:
-                my_logger.warning("Error in moving file: %s " % error_file)
+        if not test_mode:
+            for error_file in input_files:
+                if os.path.isfile(ingest_error_dir+os.path.basename(error_file)):
+                    shutil.os.remove(ingest_error_dir+os.path.basename(error_file))
+                try:
+                    shutil.move(error_file, ingest_error_dir)
+                except:
+                    my_logger.warning("Error in moving file: %s " % error_file)
 
         shutil.rmtree(tmpdir)
         raise NameError('Error in ingestion routine')
@@ -1652,7 +1657,7 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger):
         outFile.write('<OGRVRTDataSource>\n')
         outFile.write('    <OGRVRTLayer name="firms_file">\n')
         outFile.write('        <SrcDataSource>'+file_csv+'</SrcDataSource>\n')
-        outFile.write('        <OGRVRTLayer name="firms_file" />\n')
+        # outFile.write('        <OGRVRTLayer name="firms_file" />\n')
         outFile.write('        <GeometryType>wkbPoint</GeometryType>\n')
         outFile.write('        <LayerSRS>WGS84</LayerSRS>\n')
         outFile.write('        <GeometryField encoding="PointFromColumns" x="longitude" y="latitude" />\n')
@@ -1666,7 +1671,11 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger):
             outFile.write(input_file.read())
 
     # Execute the ogr2ogr command
-    command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
+    if python_version == 2:
+        command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
+    elif python_version == 3:
+        command = 'ogr2ogr -s_srs EPSG:4326 -t_srs EPSG:4326 -oo X_POSSIBLE_NAMES=Lon* -- Y_POSSIBLE_NAMES=Lat* -f "ESRI Shapefile" '+ file_shp + ' '+file_csv
+
     my_logger.debug('Command is: '+command)
     try:
         os.system(command)
@@ -3568,6 +3577,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
 #                          MUST be specified.
 
     version_undef = 'undefined'
+    data_dir_out = es_constants.processing_dir
     my_logger.info("Entering routine %s for product %s - date %s" % ('ingest_file', product['productcode'], in_date))
 
     # Test the file/files exists  (if the file doesn't exists but if the file list is more than 1 then it proceed to next step
@@ -3887,7 +3897,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         sds_meta.assign_from_product(product['productcode'], subproducts[ii]['subproduct'], product['version'])
         sds_meta.assign_date(out_date_str_final)
         sds_meta.assign_subdir_from_fullpath(output_directory)
-        sds_meta.assign_comput_time_now()
+        sds_meta.assign_compute_time_now()
 
         # Check not WD-GEE
         if not trg_mapset.is_wbd():
