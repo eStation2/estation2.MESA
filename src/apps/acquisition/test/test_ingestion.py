@@ -12,6 +12,8 @@ import csv
 import numpy as np
 # import h5py
 from lib.python import functions
+from lib.python import metadata as md
+from lib.python.image_proc import raster_image_math
 
 from osgeo import gdal
 
@@ -21,7 +23,7 @@ logger = log.my_logger(__name__)
 
 class TestIngestion(unittest.TestCase):
 
-    only_fast_tests = True
+    only_fast_tests = False
     def setUp(self):
         root_test_dir = es_constants.es2globals['test_data_dir']
         self.test_ingest_dir = root_test_dir  # os.path.join(root_test_dir,'native')
@@ -44,13 +46,15 @@ class TestIngestion(unittest.TestCase):
         filename = functions.set_path_filename(date, productcode, subproductcode, mapsetcode, version, '.tif')
         sub_directory = functions.set_path_sub_directory(productcode, subproductcode, 'Ingest', version, mapsetcode)
 
-        ref_file = glob.glob(self.ref_out_dir + '**/*/*/' + filename, recursive=True)
+        # ref_file = glob.glob(self.ref_out_dir + '**/*/*/' + filename, recursive=True)
+        ref_file = glob.glob(self.ref_out_dir + '**/*/*/' + filename)
         if not len(ref_file) > 0:  # os.path.isfile(ref_file[0]):
             print("Error reference file does not exist: " + filename)
             return result
-        newly_computed_file = glob.glob(self.ingest_out_dir + sub_directory + filename, recursive=True)
+        # newly_computed_file = glob.glob(self.ingest_out_dir + sub_directory + filename, recursive=True)
+        newly_computed_file = glob.glob(self.ingest_out_dir + sub_directory + filename)
         if not len(newly_computed_file) > 0:  # os.path.isfile(newly_computed_file[0]):
-            print("Error reference file does not exist: " + filename)
+            print("Error new file does not exist: " + filename)
             return result
 
         # Compare the files by using gdal_info objects
