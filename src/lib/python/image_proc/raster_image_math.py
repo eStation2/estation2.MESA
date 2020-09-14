@@ -3732,6 +3732,67 @@ def compute_opFish_indicator(input_file='', nodata=None, output_file='', output_
     finally:
         shutil.rmtree(tmpdir)
 
+
+# ##########################
+# Compare Two Raster Array
+############################
+def compare_two_raster_array(input_file_1='', input_file_2='', max_delta=None, create_plot=False, fast=False):
+    debug = False
+    try:
+        no_difference = False
+        # open first input file
+        dataset1 = gdal.Open(input_file_1, GA_ReadOnly)
+        # open second input file
+        dataset2 = gdal.Open(input_file_2, GA_ReadOnly)
+
+        if not fast:
+            r1 = N.array(dataset1.ReadAsArray())
+            r2 = N.array(dataset2.ReadAsArray())
+        else:
+            x_red = int(dataset1.RasterXSize/8)
+            y_red = int(dataset1.RasterYSize/8)
+            r1 = N.array(dataset1.ReadAsArray(x_red*3, y_red*3, x_red,y_red))
+            r2 = N.array(dataset2.ReadAsArray(x_red*3, y_red*3, x_red,y_red))
+
+        no_difference = N.array_equal(r1, r2)
+
+        if not no_difference:
+            print("The arrays are differing, possibly due to NaN. Checking with testing.assert_equal")
+            try:
+                N.testing.assert_equal(r1,r2)
+            except:
+                print("The arrays are definitely different.")
+                no_difference = False
+            else:
+                no_difference = True
+
+            # Find out how-many/which files are differing
+            if max_delta is not None and no_difference == False:
+                diff = r1 - r2
+                max_diff = N.nanmax(diff)
+                min_diff = N.nanmin(diff)
+                if max_diff < max_delta and -min_diff < max_delta:
+                    no_difference = True
+                    print("Differences are within allowed delta")
+                if debug:
+                    if max_diff > 0.0:
+                        idx_max = N.where(diff == max_diff)
+                        print("Max diff is {} at position {}".format(max_diff, idx_max[0]))
+                    if min_diff < 0.0:
+                        idx_min = N.where(diff == min_diff)
+                        print("Min diff is {} at position {}".format(min_diff,idx_min[0]))
+                    idx_diff = [r1 != r2]
+                    print("Number of pixel differing is: {}".format(N.count_nonzero(idx_diff)))
+            if create_plot:
+                from apps.tools.scatter_plot import plot_1o1
+                output_file=es_constants.es2globals['test_data_dir']+'plot_1o1.png'
+                plot_1o1(r1,r2,x_label='Reference',y_label='Local',figure_title='',png_name=output_file)
+
+        return no_difference
+    except:
+        logger.warning('Error in Compare Two Raster Array.')
+
+
 def clip_landmask_inputdimension(input_file_gdalobj):
 
     landmask_file = es_constants.es2globals['estation2_layers_dir']+os.path.sep+'landmask_Earth_byte.tif'
