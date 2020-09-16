@@ -629,7 +629,7 @@ class TestGetInternet(unittest.TestCase):
                 self.assertEqual(result, 0)
 
     #   ---------------------------------------------------------------------------
-    #   Rainfall - CHIRPS PREL
+    #   Rainfall - CHIRPS PREL -- This test passes only when you have proxy in your factory settings once you are within JRC network. Outside the JRC network it works fine without proxy
     #   ---------------------------------------------------------------------------
     def testRemoteFtp_CHIRPS_PREL(self):
         source_active = False
@@ -697,7 +697,7 @@ class TestGetInternet(unittest.TestCase):
     #     self.assertTrue(file_to_check in list)
 
     #   ---------------------------------------------------------------------------
-    #    Rainfall - CHIRPS (id:  UCSB:CHIRPS:DEKAD:2.0)
+    #    Rainfall - CHIRPS (id:  UCSB:CHIRPS:DEKAD:2.0)  This test passes only when you have proxy in your factory settings once you are within JRC network. Outside the JRC network it works fine without proxy
     #   ---------------------------------------------------------------------------
     def testRemoteFtp_CHIRPS_2_0(self):
         source_active = False
