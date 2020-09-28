@@ -192,9 +192,6 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             my_logger.error('Input file: %s does not exist' % infile)
             return 1
 
-    # Instance metadata object
-    sds_meta = metadata.SdsMetadata()
-
     # Printout list of intermediate files
     readablelist = [' ' + os.path.basename(elem) for elem in interm_files_list]
     my_logger.info('In ingest_file: Intermediate file list: ' + ''.join(map(str, readablelist)))
@@ -218,15 +215,11 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # -------------------------------------------------------------------------
         # Collect info and prepare filenaming
         # -------------------------------------------------------------------------
-
-        # Get information about the dataset
-        args = {"productcode": product['productcode'],
-                "subproductcode": subproducts[ii]['subproduct'],
-                "datasource_descr_id": datasource_descr.datasource_descr_id,
-                "version": product['version']}
-
+        subproduct = subproducts[ii]['subproduct']
+        # Get only the short_name for output file naming
+        mapset_id = subproducts[ii]['mapsetcode']
         # Get information from sub_dataset_source table
-        product_in_info = querydb.get_product_in_info(**args)
+        product_in_info = get_product_in_info(product, subproduct, datasource_descr.datasource_descr_id, my_logger)
 
         # Check if the scaling has been read/save to .tmp dir (MC. 26.7.2016: Issue for MODIS SST .nc files)
         try:
@@ -236,57 +229,18 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             in_scale_factor = product_in_info.scale_factor
             in_offset = product_in_info.scale_offset
 
-        # See ES2-241 - remove indent to be always applied
-        in_scale_type = product_in_info.scale_type
-
-        in_nodata = product_in_info.no_data
-        in_mask_min = product_in_info.mask_min
-        in_mask_max = product_in_info.mask_max
-        in_data_type = product_in_info.data_type_id
-        in_data_type_gdal = conv_data_type_to_gdal(in_data_type)
+        in_data_type_gdal = conv_data_type_to_gdal(product_in_info.data_type_id)
 
         # Get information from 'product' table
-        args = {"productcode": product['productcode'], "subproductcode": subproducts[ii]['subproduct'], "version":product['version']}
-        product_info = querydb.get_product_out_info(**args)
-        product_info = functions.list_to_element(product_info)
-
-        out_data_type = product_info.data_type_id
-        out_scale_factor = product_info.scale_factor
-        out_offset = product_info.scale_offset
-        out_nodata = product_info.nodata
-        out_date_format = product_info.date_format
+        product_out_info = get_product_out_info(product, subproduct, my_logger)
 
         # Translate data type for gdal and numpy
-        out_data_type_gdal = conv_data_type_to_gdal(out_data_type)
-        out_data_type_numpy = conv_data_type_to_numpy(out_data_type)
+        out_data_type_gdal = conv_data_type_to_gdal(product_out_info.data_type_id)
+        out_data_type_numpy = conv_data_type_to_numpy(product_out_info.data_type_id)
+        out_date_str_final = define_output_data_format(datasource_descr, in_date, product_out_info.date_format)
 
-        out_date_str_final = define_data_format(datasource_descr, in_date, out_date_format)
-
-        # Get only the short_name for output file naming
-        mapset_id = subproducts[ii]['mapsetcode']
-
-        # Define output directory and make sure it exists
-        output_directory = data_dir_out + functions.set_path_sub_directory(product['productcode'],
-                                                                           subproducts[ii]['subproduct'],
-                                                                           'Ingest',
-                                                                           product['version'],
-                                                                           mapset_id,)
-        my_logger.debug('Output Directory is: %s' % output_directory)
-        try:
-            if not os.path.exists(output_directory):
-                os.makedirs(output_directory)
-        except:
-            my_logger.error('Cannot create output directory: ' + output_directory)
-            return 1
-
-        # Define output filename
-        output_filename = output_directory + functions.set_path_filename(out_date_str_final,
-                                                                         product['productcode'],
-                                                                         subproducts[ii]['subproduct'],
-                                                                         mapset_id,
-                                                                         product['version'],
-                                                                         '.tif')
-
+        # Define outputfilename, output directory and make sure it exists
+        output_directory, output_filename = define_output_dir_filename(product, subproduct, mapset_id, out_date_str_final, my_logger)
         # -------------------------------------------------------------------------
         # Manage the geo-referencing associated to input file
         # -------------------------------------------------------------------------
@@ -295,30 +249,10 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         native_mapset = mapset.MapSet()
         native_mapset.assigndb(native_mapset_code)
 
+        # Only_metadata_naming= only_metadata_naming()
         if not native_mapset.is_wbd():
-          if native_mapset_code != 'default':
-            orig_cs = osr.SpatialReference(wkt=native_mapset.spatial_ref.ExportToWkt())
-            #orig_cs.ImportFromWkt(native_mapset.spatial_ref)                     # ???
-            orig_geo_transform = native_mapset.geo_transform
-            orig_size_x = native_mapset.size_x
-            orig_size_y = native_mapset.size_y
-
-            # Complement orig_ds info (necessary to Re-project)
-            try:
-                orig_ds.SetGeoTransform(native_mapset.geo_transform)
-                orig_ds.SetProjection(orig_cs.ExportToWkt())
-            except:
-                my_logger.debug('Cannot set the geo-projection .. Continue')
-          else:
-            try:
-                # Read geo-reference from input file
-                orig_cs = osr.SpatialReference()
-                orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
-                orig_geo_transform = orig_ds.GetGeoTransform()
-                orig_size_x = orig_ds.RasterXSize
-                orig_size_y = orig_ds.RasterYSize
-            except:
-                my_logger.debug('Cannot read geo-reference from file .. Continue')
+          #   Get Georeferencing parameters
+          orig_cs, orig_geo_transform, orig_size_x, orig_size_y = get_geo_ref_parameters(native_mapset_code, native_mapset, orig_ds, my_logger)
 
         # TODO-M.C.: add a test on the mapset_id in DB table !
         trg_mapset = mapset.MapSet()
@@ -336,73 +270,31 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # Prepare output driver
         out_driver = gdal.GetDriverByName(es_constants.ES2_OUTFILE_FORMAT)
 
-        merge_existing_output = False
-        # Check if the output file already exists
-        if os.path.isfile(output_filename) and datasource_descr.area_type in ['tile','region'] and not trg_mapset.is_wbd():
-
-            merge_existing_output = True
+        merge_existing_output = os.path.isfile(output_filename) and datasource_descr.area_type in ['tile','region'] and not trg_mapset.is_wbd()
+        my_output_filename = output_filename   #This means you are creating files directly on the file dir
+        old_file_list = None
+        tmp_output_file = None
+        # Get old_file list
+        if merge_existing_output:
+            old_file_list = get_old_file_list(output_filename)
             # In case of merge, output_filename is generated first in 'tmp_dir', otherwise in final dir
-            my_output_filename = tmp_dir + os.path.sep+os.path.basename(output_filename)
-
+            my_output_filename = tmp_dir + os.path.sep + os.path.basename(output_filename)
             # Prepare a tmp file in tmp_dir (for merging)
-            tmp_output_file = tmp_dir + os.path.sep+os.path.basename(output_filename)+'.tmp'
-            sds_meta_old = metadata.SdsMetadata()
-            sds_meta_old.read_from_file(output_filename)
-            old_file_list = sds_meta_old.get_item('eStation2_input_files')
-            sds_meta_old = None
-        else:
-            my_output_filename = output_filename
-            old_file_list = None
-
+            tmp_output_file = tmp_dir + os.path.sep + os.path.basename(output_filename) + '.tmp'
         # Do re-projection, or write to GTIFF file
         if not native_mapset.is_wbd():
           if reprojection == 1:
-
             # Do Reprojection
-            # Read from the dataset in memory
-            my_logger.debug('Doing re-projection to target mapset: %s' % trg_mapset.short_name)
-            # Get target SRS from mapset
-            out_cs = trg_mapset.spatial_ref
-            out_size_x = trg_mapset.size_x
-            out_size_y = trg_mapset.size_y
-
-            # Create target in memory
-            mem_driver = gdal.GetDriverByName('MEM')
-
-            # Assign mapset to dataset in memory
-            mem_ds = mem_driver.Create('', out_size_x, out_size_y, 1, in_data_type_gdal)
-            mem_ds.SetGeoTransform(trg_mapset.geo_transform)
-            mem_ds.SetProjection(out_cs.ExportToWkt())
-            # Initialize output to Output Nodata value (for PML SST UoG region)
-            # mem_ds.GetRasterBand(1).Fill(in_nodata)  #ES2-595
-            mem_ds.GetRasterBand(1).Fill(out_nodata)
-
-            # Manage data type - if it is different input/output
-            out_ds = mem_driver.Create('', out_size_x, out_size_y, 1, out_data_type_gdal)
-            out_ds.SetGeoTransform(trg_mapset.geo_transform)
-            out_ds.SetProjection(out_cs.ExportToWkt())
-
-            # Apply Reproject-Image to the memory-driver
-            orig_wkt = orig_cs.ExportToWkt()
-            res = gdal.ReprojectImage(orig_ds, mem_ds, orig_wkt, out_cs.ExportToWkt(),
-                                      es_constants.ES2_OUTFILE_INTERP_METHOD)
-
-            my_logger.debug('Re-projection to target done.')
-
-            # Read from the dataset in memory
-            out_data = mem_ds.ReadAsArray()
+            out_data, out_ds = do_reprojection(trg_mapset, in_data_type_gdal, product_out_info.nodata, out_data_type_gdal, orig_cs, orig_ds, my_logger)
 
             # Apply rescale to data
-            scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
-                                       out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger,
-                                       in_scale_type)
+            scaled_data = rescale_data(out_data, in_scale_factor, in_offset, product_in_info, product_out_info, out_data_type_numpy, my_logger)
 
             # Create a copy to output_file
             trg_ds = out_driver.CreateCopy(my_output_filename, out_ds, 0, [es_constants.ES2_OUTFILE_OPTIONS])
             trg_ds.GetRasterBand(1).WriteArray(scaled_data)
-
+            trg_ds = None
           else:
-
             my_logger.debug('Doing only rescaling/format conversion')
 
             # Read from input file
@@ -417,71 +309,56 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             trg_ds.SetGeoTransform(orig_geo_transform)
 
             # Apply rescale to data
-            scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
-                                       out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger,
-                                       in_scale_type)
+            scaled_data = rescale_data(out_data, in_scale_factor, in_offset, product_in_info, product_out_info, out_data_type_numpy, my_logger)
             trg_ds.GetRasterBand(1).WriteArray(scaled_data)
 
             orig_ds = None
-
+            trg_ds = None
         # else:
         #     # Do only renaming (and exit)
         #     shutil.copy(intermFile,output_filename)
         #     return 0
-        # -------------------------------------------------------------------------
-        # Assign Metadata to the ingested file
-        # -------------------------------------------------------------------------
 
-        assign_metadata_generic(sds_meta, product, subproducts[ii]['subproduct'], mapset_id, out_date_str_final, output_directory)
-
+        # final list of files to assigned to metadata
+        final_list_files = []
         # Check not WD-GEE
         if not trg_mapset.is_wbd():
-          # Write metadata, if not merging is needed
-          if not merge_existing_output:
-            sds_meta.assign_input_files(in_files)
-            sds_meta.write_to_ds(trg_ds)
-
-            # Close output file
-            trg_ds = None
-            sds_meta.assign_input_files(in_files)
-
-          else:
-            # Close output file
-            trg_ds = None
-
-            # Merge the old and new output products into a 'tmp' file
-            try:
-                command = es_constants.gdal_merge + ' -n '+str(out_nodata)
-                command += ' -a_nodata '+str(out_nodata)
-                command += ' -co \"compress=lzw\" -o '
-                command += tmp_output_file
-                command += ' '+ my_output_filename+ ' '+output_filename
-                my_logger.debug('Command for merging is: ' + command)
-                os.system(command)
-            except:
-                pass  # TODO Should change this approach
-
-            # Write metadata to output
-            if old_file_list is not None:
-                # Merge the old and new file list (note that old list is a string !)
-                final_list = sds_meta.merge_input_file_lists(old_file_list, in_files)
-                sds_meta.assign_input_files(final_list)
+            # Write metadata, if not merging is needed
+            if not merge_existing_output:
+                final_list_files = in_files
+                file_write_metadata = my_output_filename
+                # sds_meta.assign_input_files(in_files)
+                # sds_meta.write_to_ds(trg_ds)   # Instead of writing to ds write to file
+                # Close output file
+                # trg_ds = None
+                # sds_meta.assign_input_files(in_files)  # TODO remove Why is this assigned again?
             else:
-                sds_meta.assign_input_files(in_files)
+                # Close output file
+                # TODO why here sds_meta.write_to_ds(trg_ds) is not done?
+                # trg_ds = None
+                final_list_files = merge_files_to_existings(in_files, product_out_info.nodata, old_file_list, tmp_output_file, my_output_filename, output_filename, my_logger)
+                # Save the .tmp as output
+                if os.path.isfile(output_filename):
+                    os.remove(output_filename)
+                shutil.move(tmp_output_file, output_filename)
+                file_write_metadata = output_filename
 
-            sds_meta.write_to_file(tmp_output_file)
-
-            # Save the .tmp as output
-            if os.path.isfile(output_filename):
-                os.remove(output_filename)
-            shutil.move(tmp_output_file,output_filename)
 
         # WD-GEE case
         else:
-            sds_meta.assign_input_files(in_files)
-            sds_meta.assign_input_files(os.path.basename(intermFile))
-            sds_meta.write_to_file(intermFile)
+            # sds_meta.assign_input_files(in_files)
+            # sds_meta.assign_input_files(os.path.basename(intermFile))
+            # sds_meta.write_to_file(intermFile)
+            final_list_files = in_files         #+ [intermFile]       #[in_files, os.path.basename(intermFile)]
+            file_write_metadata = output_filename
             shutil.copy(intermFile,output_filename)  # TODO why just copy? should be move like in other cases
+
+        # -------------------------------------------------------------------------
+        # Assign Metadata to the ingested file
+        # -------------------------------------------------------------------------
+        # Instance metadata object
+
+        assign_metadata_generic(product, subproduct, mapset_id, out_date_str_final, output_directory, final_list_files, file_write_metadata,my_logger)
 
         # -------------------------------------------------------------------------
         # Upsert into DB table 'products_data'
@@ -491,8 +368,147 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
         # Loop on interm_files
         ii += 1
 
+# def only_metadata_naming():
 
-def define_data_format(datasource_descr, in_date, out_date_format):
+
+def get_product_in_info(product, subproduct, datasource_descr_id, my_logger):
+    try:
+        # Get information about the dataset
+        args = {"productcode": product['productcode'],
+                "subproductcode": subproduct,
+                "datasource_descr_id": datasource_descr_id,
+                "version": product['version']}
+
+        # Get information from sub_dataset_source table
+        product_in_info = querydb.get_product_in_info(**args)
+
+        return product_in_info
+    except:
+        my_logger.error('Error defining Input product info ')
+
+
+def get_product_out_info(product, subproduct, my_logger):
+    try:
+        # Get information from 'product' table
+        args = {"productcode": product['productcode'], "subproductcode": subproduct, "version":product['version']}
+        product_out_info = querydb.get_product_out_info(**args)
+        product_out_info = functions.list_to_element(product_out_info)
+        return product_out_info
+    except:
+        my_logger.error('Error defining Output product info ')
+
+def define_output_dir_filename(product, subproduct, mapset_id, out_date_str_final, my_logger):
+    try:
+        output_directory = data_dir_out + functions.set_path_sub_directory(product['productcode'],
+                                                                           subproduct,
+                                                                           'Ingest',
+                                                                           product['version'],
+                                                                           mapset_id, )
+        my_logger.debug('Output Directory is: %s' % output_directory)
+        try:
+            if not os.path.exists(output_directory):
+                os.makedirs(output_directory)
+        except:
+            my_logger.error('Cannot create output directory: ' + output_directory)
+            return 1
+
+        # Define output filename
+        output_filename = output_directory + functions.set_path_filename(out_date_str_final,
+                                                                         product['productcode'],
+                                                                         subproduct,
+                                                                         mapset_id,
+                                                                         product['version'],
+                                                                         '.tif')
+        return output_directory, output_filename
+
+    except:
+        my_logger.error('Error defining output filename and directory ')
+        return 1
+
+def get_geo_ref_parameters(native_mapset_code, native_mapset, orig_ds, my_logger):
+    if native_mapset_code != 'default':
+      orig_cs = osr.SpatialReference(wkt=native_mapset.spatial_ref.ExportToWkt())
+      #orig_cs.ImportFromWkt(native_mapset.spatial_ref)                     # ???
+      orig_geo_transform = native_mapset.geo_transform
+      orig_size_x = native_mapset.size_x
+      orig_size_y = native_mapset.size_y
+      #
+      # # Complement orig_ds info (necessary to Re-project)
+      # try:
+      #     orig_ds.SetGeoTransform(native_mapset.geo_transform)
+      #     orig_ds.SetProjection(orig_cs.ExportToWkt())
+      # except:
+      #     my_logger.debug('Cannot set the geo-projection .. Continue')
+      my_logger.debug('Not assigning native mapset here')
+    else:
+        try:
+          # Read geo-reference from input file
+          orig_cs = osr.SpatialReference()
+          orig_cs.ImportFromWkt(orig_ds.GetProjectionRef())
+          orig_geo_transform = orig_ds.GetGeoTransform()
+          orig_size_x = orig_ds.RasterXSize
+          orig_size_y = orig_ds.RasterYSize
+        except:
+          my_logger.debug('Cannot read geo-reference from file .. Continue')
+
+    return orig_cs, orig_geo_transform, orig_size_x, orig_size_y    #, orig_ds
+
+def get_old_file_list(output_filename):
+    # Check if the output file already exists
+    sds_meta_old = metadata.SdsMetadata()
+    sds_meta_old.read_from_file(output_filename)
+    old_file_list = sds_meta_old.get_item('eStation2_input_files')
+    sds_meta_old = None
+    return old_file_list
+
+# Merge to existing file if any return and return the final list of files used to write to metadata.
+def merge_files_to_existings(in_files, out_nodata, old_file_list, tmp_output_file, my_output_filename, output_filename, my_logger):
+    final_list = in_files
+    # Merge the old and new output products into a 'tmp' file
+    try:
+        command = es_constants.gdal_merge + ' -n ' + str(out_nodata)
+        command += ' -a_nodata ' + str(out_nodata)
+        command += ' -co \"compress=lzw\" -o '
+        command += tmp_output_file
+        command += ' ' + my_output_filename + ' ' + output_filename
+        my_logger.debug('Command for merging is: ' + command)
+        os.system(command)
+    except:
+        pass  # TODO Should change this approach
+
+    # Write metadata to output
+    if old_file_list is not None:
+        # Merge the old and new file list (note that old list is a string !)
+        final_list = merge_input_file_lists(old_file_list, in_files)
+        # sds_meta.assign_input_files(final_list)
+    # else:
+    #     sds_meta.assign_input_files(in_files)
+
+    # sds_meta.write_to_file(tmp_output_file)
+    #
+    # # Save the .tmp as output
+    # if os.path.isfile(output_filename):
+    #     os.remove(output_filename)
+    # shutil.move(tmp_output_file, output_filename)
+    #
+    return final_list
+
+
+# TODO Should move it to functions
+def merge_input_file_lists(old_list, input_files):
+    #   Merge new list to the existing one (which is a string)
+
+    true_list = old_list.split(';')
+    true_list_not_empty = []
+    for elem in true_list:
+        if elem != '':
+            true_list_not_empty.append(os.path.basename(elem))
+    for infile in input_files:
+        if not infile in true_list_not_empty:
+            true_list_not_empty.append(os.path.basename(infile))
+    return true_list_not_empty
+
+def define_output_data_format(datasource_descr, in_date, out_date_format):
     # Convert the in_date format into a convenient one for DB and file naming
     # (i.e YYYYMMDD or YYYYMMDDHHMM)
     # Initialize to error value
@@ -600,21 +616,34 @@ def do_reprojection(trg_mapset, in_data_type_gdal, out_nodata, out_data_type_gda
 
     # Read from the dataset in memory
     out_data = mem_ds.ReadAsArray()
-
-    return out_data
+    # # Apply rescale to data
+    # scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
+    #                            out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger,
+    #                            in_scale_type)
+    #
+    # # Create a copy to output_file
+    # trg_ds = out_driver.CreateCopy(my_output_filename, out_ds, 0, [es_constants.ES2_OUTFILE_OPTIONS])
+    # trg_ds.GetRasterBand(1).WriteArray(scaled_data)
+    return out_data, out_ds
 
 
 # -------------------------------------------------------------------------
 # Assign generic Metadata to the ingested file  TODO can we generate these parameters from the full file name with dir
 # -------------------------------------------------------------------------
-def assign_metadata_generic(sds_meta, product, subproduct, mapset_id, out_date_str_final, output_directory):
+def assign_metadata_generic(product, subproduct, mapset_id, out_date_str_final, output_directory, final_list_files,file_write_metadata, my_logger):
+    try:
+        sds_meta = metadata.SdsMetadata()
+        sds_meta.assign_es2_version()
+        sds_meta.assign_mapset(mapset_id)
+        sds_meta.assign_from_product(product['productcode'], subproduct, product['version'])
+        sds_meta.assign_date(out_date_str_final)
+        sds_meta.assign_subdir_from_fullpath(output_directory)
+        sds_meta.assign_compute_time_now()
 
-    sds_meta.assign_es2_version()
-    sds_meta.assign_mapset(mapset_id)
-    sds_meta.assign_from_product(product['productcode'], subproduct, product['version'])
-    sds_meta.assign_date(out_date_str_final)
-    sds_meta.assign_subdir_from_fullpath(output_directory)
-    # sds_meta.assign_compute_time_now()
+        sds_meta.assign_input_files(final_list_files)
+        sds_meta.write_to_file(file_write_metadata)
+    except:
+        my_logger.debug('Cannot read geo-reference from file .. Continue')
 
 def ingest_file_vers_1_0(input_file, in_date, product_def, target_mapset, my_logger, product_in_info, echo_query=False):
 # -------------------------------------------------------------------------------------------------------
@@ -961,40 +990,7 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
         shutil.rmtree(tmpdir)
 
 
-def write_ds_to_geotiff(dataset, output_file):
-#
-#   Writes to geotiff file an osgeo.gdal.Dataset object
-#   Args:
-#       dataset: osgeo.gdal dataset (open and georeferenced)
-#       output_file: target output file
-#   Usage: e.g. for converting MODIS HDF4 tiled SDS to temporary  geotiff files
-#
-#   TODO-M.C.: add checks on the input dataset
-#
-    # Read from input ds
-    orig_cs = osr.SpatialReference()
-    orig_cs.ImportFromWkt(dataset.GetProjectionRef())
-    orig_geo_transform = dataset.GetGeoTransform()
-    orig_size_x = dataset.RasterXSize
-    orig_size_y = dataset.RasterYSize
-    band = dataset.GetRasterBand(1)
-    data = band.ReadAsArray(0, 0, orig_size_x, orig_size_y)
-    # Read the native data type of the band
-    in_data_type = band.DataType
-    gdt_type = conv_data_type_to_gdal(in_data_type)
-
-    # Create and write output file
-    output_driver = gdal.GetDriverByName('GTiff')
-    output_ds = output_driver.Create(output_file, orig_size_x, orig_size_y, 1, in_data_type)
-    output_ds.SetProjection(dataset.GetProjectionRef())
-    output_ds.SetGeoTransform(orig_geo_transform)
-    output_ds.GetRasterBand(1).WriteArray(data)
-
-    output_ds = None
-
-
-def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max, out_data_type,
-                 out_scale_factor, out_offset, out_nodata, my_logger, in_scale_type):
+def rescale_data(in_data, in_scale_factor, in_offset, product_in_info, product_out_info, out_data_type, my_logger):
 #
 #   Format/scale the output data taking into account input/output properties
 #   Args:
@@ -1017,6 +1013,17 @@ def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in
 #
 #   Returns: output data
 #
+    in_scale_type = product_in_info.scale_type
+    in_nodata = product_in_info.no_data
+    in_mask_min = product_in_info.mask_min
+    in_mask_max = product_in_info.mask_max
+    in_data_type = product_in_info.data_type_id
+
+    # out_data_type = product_out_info.data_type_id
+    out_scale_factor = product_out_info.scale_factor
+    out_offset = product_out_info.scale_offset
+    out_nodata = product_out_info.nodata
+    out_date_format = product_out_info.date_format
 
     # Check input
     if not isinstance(in_data, N.ndarray):
@@ -1088,7 +1095,6 @@ def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in
         trg_data[idx_mask_max] = out_nodata
 
     # Return the output array
-
     return trg_data
 
 #
