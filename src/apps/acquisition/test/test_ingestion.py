@@ -47,7 +47,7 @@ class TestIngestion(unittest.TestCase):
         sub_directory = functions.set_path_sub_directory(productcode, subproductcode, 'Ingest', version, mapsetcode)
 
         # ref_file = glob.glob(self.ref_out_dir + '**/*/*/' + filename, recursive=True)
-        ref_file = glob.glob(self.ref_out_dir + '**/*/*/' + filename)
+        ref_file = glob.glob(self.ref_out_dir + '**/*/' + filename)
         if not len(ref_file) > 0:  # os.path.isfile(ref_file[0]):
             print("Error reference file does not exist: " + filename)
             return result
@@ -1061,10 +1061,17 @@ class TestIngestion(unittest.TestCase):
         subproducts = [sprod]
         # Remove existing output
         self.remove_output_file(productcode, subproductcode, productversion, mapsetcode, out_date)
+
         datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                         source_id=datasource_descrID)
         ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger,
                             echo_query=1, test_mode=True)
+
+        # MC-22.09.20: Proposed modification to ingestion.ingestion:
+        #   ingestion (date_fileslist[], indate??, productcode, version, subproductcode[], mapsetcode[], datasource_descrID,
+        #              logger, echo_query, test_mode??)
+
+
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
                                         version=productversion, mapsetcode=mapsetcode, date=out_date)
         self.assertEqual(status, 1)
