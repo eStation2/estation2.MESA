@@ -229,9 +229,9 @@ def loop_ingestion_0(dry_run=False, test_one_product=None):
         productversion = active_product_ingest[1]
 
         # Verify the test-one-product case
-        do_ingest_source = verify_test_one_product(test_one_product, productcode)
+        do_ingest_product = verify_test_one_product(test_one_product, productcode)
 
-        if do_ingest_source:
+        if do_ingest_product:
             logger.info("Ingestion active for product: [%s] subproduct N. %s" % (active_product_ingest[0],
                                                                                  active_product_ingest[2]))
             # For the current active product ingestion: get all
