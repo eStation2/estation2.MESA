@@ -1,15 +1,17 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import unicode_literals
-from __future__ import absolute_import
 
-from future import standard_library
-
-standard_library.install_aliases()
+from config import es_constants
+from apps.acquisition.get_internet import *
 from apps.acquisition.get_eumetcast import *
-from database import querydb
+# from apps.tools import coda_eum_api
 
 import unittest
+
+logger = log.my_logger(__name__)
+
+#
+#   Extracted from loo_get_internet to get a single source
+#
+
 
 class Source:
     def __init__(self,
@@ -1311,7 +1313,8 @@ class TestGetInternet(unittest.TestCase):
         end_date_fixed = 20200315
         start_date_dyn = -45
         end_date_dyn = -30
-        file_to_check = 'PML_CapeVerde_MODIS_sst_3daycomp_20200320_20200322.nc.bz2'
+        # ES2-596 -> change date to dynamic
+        file_to_check = 'PML_CapeVerde_MODIS_sst_3daycomp_20200901_20200903.nc.bz2'
         include_files_expression = "PML_.*_MODIS_sst_3daycomp.*.nc.bz2"
 
         internet_sources = querydb.get_active_internet_sources()
@@ -1365,7 +1368,8 @@ class TestGetInternet(unittest.TestCase):
         end_date_fixed = 20200315
         start_date_dyn = -45
         end_date_dyn = -30
-        file_to_check = 'PML_CapeVerde_MODIS_oc_3daycomp_20200320_20200322.nc.bz2'
+        # ES2-596 -> Change date to dynamic
+        file_to_check = 'PML_CapeVerde_MODIS_oc_3daycomp_20200901_20200903.nc.bz2'
         include_files_expression = "PML_.*_MODIS_oc_3daycomp.*.nc.bz2"
 
         internet_sources = querydb.get_active_internet_sources()
@@ -2606,6 +2610,6 @@ class TestGetInternet(unittest.TestCase):
     #     # Check last 90 days (check list length = 9)
     #     result = get_one_source(my_source)
 
-suite_get_internet = unittest.TestLoader().loadTestsFromTestCase(TestGetInternet)
-if __name__ == '__main__':
-    unittest.TextTestRunner(verbosity=2).run(suite_get_internet)
+# suite_get_internet = unittest.TestLoader().loadTestsFromTestCase(TestGetInternet)
+# if __name__ == '__main__':
+#     unittest.TextTestRunner(verbosity=2).run(suite_get_internet)
