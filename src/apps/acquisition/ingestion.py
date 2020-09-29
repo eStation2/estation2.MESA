@@ -1705,6 +1705,7 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger):
 
     # Execute the ogr2ogr command
     command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
+    command = 'ogr2ogr -s_srs EPSG:4326 -t_srs EPSG:4326 -oo X_POSSIBLE_NAMES=Lon* -oo Y_POSSIBLE_NAMES=Lat* -f "ESRI Shapefile" '+ file_shp + ' '+file_csv
     my_logger.debug('Command is: '+command)
     try:
         os.system(command)
