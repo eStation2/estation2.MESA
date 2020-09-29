@@ -61,13 +61,15 @@ class TestGetInternet(unittest.TestCase):
     direct_download = False
     target_dir = '/data/tmp'
 
-    # def setUp(self):
-    #     # Suppress logging
-    #     log.disable(logging.CRITICAL)
-    #
-    # def tearDown(self):
-    #     # RE-ACTIVATE logging
-    #     logging.disable(logging.NONSET)
+    def setUp(self):
+        if self.pattern:
+            print('INFO: Only checking filenames correctly generated.')
+
+        if self.direct_download:
+            print('INFO: Directly download a single file.')
+
+        if self.download:
+            print('INFO: Call loop_internet for a single source.')
 
     #   ---------------------------------------------------------------------------
     #   Vegetation - WSI CROP
