@@ -24,6 +24,7 @@ logger = log.my_logger(__name__)
 class TestIngestion(unittest.TestCase):
 
     only_fast_tests = False
+
     def setUp(self):
         root_test_dir = es_constants.es2globals['test_data_dir']
         self.test_ingest_dir = root_test_dir  # os.path.join(root_test_dir,'native')
@@ -47,7 +48,7 @@ class TestIngestion(unittest.TestCase):
         sub_directory = functions.set_path_sub_directory(productcode, subproductcode, 'Ingest', version, mapsetcode)
 
         # ref_file = glob.glob(self.ref_out_dir + '**/*/*/' + filename, recursive=True)
-        ref_file = glob.glob(self.ref_out_dir + '**/*/*/' + filename)
+        ref_file = glob.glob(self.ref_out_dir + '**/*/' + filename)
         if not len(ref_file) > 0:  # os.path.isfile(ref_file[0]):
             print("Error reference file does not exist: " + filename)
             return result
