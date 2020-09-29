@@ -1,16 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from __future__ import unicode_literals
-from __future__ import division
-from __future__ import print_function
-from future import standard_library
-
 import unittest
-# from config import es_constants
+from config import es_constants
+
+__author__ = "Jurriaan van 't Klooster"
+
 from database import connectdb
-
-standard_library.install_aliases()
-
 
 class TestConnectDB(unittest.TestCase):
     def test_connection_sqlsoup(self):
@@ -28,6 +23,7 @@ class TestConnectDB(unittest.TestCase):
         self.assertEqual(schema, 'products.')
 
 
-suite_connectdb = unittest.TestLoader().loadTestsFromTestCase(TestConnectDB)
-if __name__ == '__main__':
-    unittest.TextTestRunner(verbosity=2).run(suite_connectdb)
+# suite_connectdb = unittest.TestLoader().loadTestsFromTestCase(TestConnectDB)
+# if __name__ == '__main__':
+#     unittest.TextTestRunner(verbosity=2).run(suite_connectdb)
+#
