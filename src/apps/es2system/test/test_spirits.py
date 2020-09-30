@@ -6,9 +6,9 @@ from lib.python import functions
 from lib.python import es_logging as log
 from apps.es2system import convert_2_spirits as conv
 logger = log.my_logger(__name__)
-from unittest import TestCase
+import unittest
 
-class TestSpirits(TestCase):
+class TestSpirits(unittest.TestCase):
     def test_spirits_modify_header(self):
 
         # Should get here the role of my machine ...
@@ -43,6 +43,11 @@ class TestSpirits(TestCase):
         metadata_spirits['date']=str_date
         conv.convert_geotiff_file(input_file, output_dir, str_date, naming_spirits, metadata_spirits)
 
-    def test_driver(self):
-        output_dir = '/data/processing/exchange/spirits/'
-        conv.convert_driver(output_dir)
+    # Skip it -> creates loads of data in /data/processing/exchange/spirits/ .. see also ES2-596
+    # def test_driver(self):
+    #     output_dir = '/data/processing/exchange/spirits/'
+    #     conv.convert_driver(output_dir)
+
+suite_spirits = unittest.TestLoader().loadTestsFromTestCase(TestSpirits)
+if __name__ == "__main__":
+    unittest.TextTestRunner(verbosity=2).run(suite_spirits)
