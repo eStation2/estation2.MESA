@@ -24,6 +24,7 @@ logger = log.my_logger(__name__)
 class TestIngestion(unittest.TestCase):
 
     only_fast_tests = False
+
     def setUp(self):
         root_test_dir = es_constants.es2globals['test_data_dir']
         self.test_ingest_dir = root_test_dir  # os.path.join(root_test_dir,'native')
