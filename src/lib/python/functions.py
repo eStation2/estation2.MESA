@@ -33,6 +33,11 @@ import urllib2
 import ast
 import sys
 import numpy as N
+import urllib
+import configparser
+from xml.dom import minidom
+from datetime import date
+from socket import socket
 from osgeo import gdal, osr
 from xml.dom import minidom
 # Import eStation2 modules
@@ -48,6 +53,14 @@ dict_subprod_type_2_dir = {'Ingest': 'tif', 'Native': 'archive', 'Derived': 'der
 #     def default(self, o):
 #         return o.__dict__
 
+
+def str_to_bool(s):
+    if s is True or s in ['True', 'true', '1', 't', 'y', 'Y', 'yes', 'Yes']:
+        return True
+    elif s is True or s in ['False', 'false', '0', 'f', 'n', 'N', 'no', 'No']:
+        return False
+    else:
+        return False
 
 def is_float(s):
     try:
@@ -400,6 +413,37 @@ def getUserSettings():
     usersettings = dict(usersettings)   # convert list of tuples to dict
     # print usersettings
     return usersettings
+
+
+def getJRCRefSettings():
+    jrc_ref_settingsfile = os.path.join(es_constants.es2globals['base_dir'],
+                                        'database/referenceWorkspaces/', 'jrc_ref_settings.ini')
+
+    config_jrc_ref_settings = configparser.ConfigParser()
+    config_jrc_ref_settings.read([jrc_ref_settingsfile])
+
+    jrc_ref_settings = config_jrc_ref_settings.items('JRC_REF_SETTINGS')  # returns a list of tuples
+    jrc_ref_settings = dict(jrc_ref_settings)
+    return jrc_ref_settings
+
+
+def setJRCRefSetting(setting=None, value=None):
+    if setting is not None:
+        jrc_ref_settingsfile = os.path.join(es_constants.es2globals['base_dir'],
+                                            'database/referenceWorkspaces/', 'jrc_ref_settings.ini')
+
+        config_jrc_ref_settings = configparser.ConfigParser()
+        config_jrc_ref_settings.read([jrc_ref_settingsfile])
+
+        if config_jrc_ref_settings.has_option('JRC_REF_SETTINGS', setting):
+            config_jrc_ref_settings.set('JRC_REF_SETTINGS', setting, value)
+
+        with open(jrc_ref_settingsfile, 'w') as configfile:
+            config_jrc_ref_settings.write(configfile)
+            configfile.close()
+        return True
+    else:
+        return False
 
 
 def checkIP():
@@ -1696,20 +1740,22 @@ def check_output_dir(output_dir):
 
     # Is it a list ?
     if isinstance(output_dir, list):
-        my_dir=output_dir[0]
+        my_dir = output_dir[0]
     else:
-        my_dir=output_dir
+        my_dir = output_dir
     # It does exist ?
     if not os.path.isdir(my_dir):
         try:
             os.makedirs(my_dir)
         except:
             logger.error("Cannot create directory %s" % my_dir)
+            return False
 
         logger.info("Output directory %s created" % my_dir)
 
     else:
         logger.debug("Output directory %s already exists" % my_dir)
+    return True
 
 
 ######################################################################################
@@ -2164,7 +2210,7 @@ def get_machine_mac_address():
 
 def get_eumetcast_info(eumetcast_id):
 
-    filename = es_constants.es2globals.get_eumetcast_processed_list_prefix+str(eumetcast_id)+'.info'
+    filename = es_constants.es2globals['get_eumetcast_processed_list_prefix']+str(eumetcast_id)+'.info'
     info = load_obj_from_pickle(filename)
     return info
 
@@ -2924,7 +2970,7 @@ def is_date_current_month(year_month_day):
 #                            PROCESSING CHAINS
 ######################################################################################
 
-class ProcLists:
+class ProcLists(object):
 
     def __init__(self):
         self.list_subprods = []
@@ -2934,34 +2980,33 @@ class ProcLists:
                          sprod,
                          group,
                          descriptive_name='',
-                         description = '',
-                         frequency_id = '',
-                         date_format = '',
-                         scale_factor = None,
-                         scale_offset = None,
-                         nodata = None,
-                         unit = None,
+                         description='',
+                         frequency_id='',
+                         date_format='',
+                         scale_factor=None,
+                         scale_offset=None,
+                         nodata=None,
+                         unit=None,
                          data_type_id=None,
-                         masked = '',
-                         timeseries_role = '10d',
+                         masked='',
+                         timeseries_role='10d',
                          final=False,
                          # display_index=None,
                          active_default=True):
-
         self.list_subprods.append(ProcSubprod(sprod,
                                               group,
                                               final,
                                               descriptive_name=descriptive_name,
-                                              description = description,
-                                              frequency_id = frequency_id,
-                                              date_format = date_format,
+                                              description=description,
+                                              frequency_id=frequency_id,
+                                              date_format=date_format,
                                               scale_factor=scale_factor,
                                               scale_offset=scale_offset,
                                               nodata=nodata,
                                               unit=unit,
                                               data_type_id=data_type_id,
-                                              masked = masked,
-                                              timeseries_role = timeseries_role,
+                                              masked=masked,
+                                              timeseries_role=timeseries_role,
                                               # display_index = display_index,
                                               active_default=True))
         return sprod
@@ -2985,26 +3030,27 @@ class ProcLists:
     #
     #     return False
     #
-class ProcSubprod:
+
+
+class ProcSubprod(object):
     def __init__(self,
                  sprod,
                  group,
                  final=False,
                  descriptive_name='',
-                 description = '',
-                 frequency_id = '',
-                 date_format = '',
+                 description='',
+                 frequency_id='',
+                 date_format='',
                  scale_factor=None,
                  scale_offset=None,
                  nodata=None,
                  unit=None,
                  data_type_id=None,
-                 masked = '',
-                 timeseries_role = '',
+                 masked='',
+                 timeseries_role='',
                  # display_index=None,
                  active_default=True,
                  active_depend=False):
-
         self.sprod = sprod
         self.group = group
         self.descriptive_name = descriptive_name
@@ -3020,8 +3066,8 @@ class ProcSubprod:
         self.timeseries_role = timeseries_role
         # self.display_index = display_index
         self.final = final
-        self.active_default=active_default
-        self.active_user = False                            # In the product table, it applies only to Native prods
+        self.active_default = active_default
+        self.active_user = False  # In the product table, it applies only to Native prods
         self.active_depend = active_depend
 
     def print_out(self):
@@ -3037,15 +3083,15 @@ class ProcSubprod:
         print('Data Type   : {}'.format(self.data_type_id))
         print('Masked      : {}'.format(self.masked))
         print('TS role     : {}'.format(self.timeseries_role))
-        # print('DisplayIndex: {}'.format(self.display_index))
+        # print ('DisplayIndex: {}'.format(self.display_index))
         print('Final       : {}'.format(self.final))
-        # print('active_default: {}'.format(self.active_default))
+        # print ('active_default: {}'.format(self.active_default))
         print('Active_user : {}'.format(self.active_user))
-        # print('active_depend: {}'.format(self.active_depend))
+        # print ('active_depend: {}'.format(self.active_depend))
 
 
-class ProcSubprodGroup:
+class ProcSubprodGroup(object):
     def __init__(self, group, active_default=True):
         self.group = group
-        self.active_default=active_default
+        self.active_default = active_default
         self.active_user = True
