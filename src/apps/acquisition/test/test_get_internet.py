@@ -664,6 +664,8 @@ class TestGetInternet(unittest.TestCase):
                                files_filter_expression=internet_source.files_filter_expression,
                                https_params=internet_source.https_params)
 
+            print('************* NOTE: This test seems unstable - see ES2-606 *****************')
+
             # Direct test ! True: #
             if self.direct_download:
                 filename = 'chirps-v2.0.2020.02.3.tif'
@@ -731,6 +733,8 @@ class TestGetInternet(unittest.TestCase):
                                type=internet_source.type,
                                files_filter_expression=internet_source.files_filter_expression,
                                https_params=internet_source.https_params)
+
+            print('************* NOTE: This test seems unstable - see ES2-606 *****************')
 
             # Direct test ! True: #
             if self.direct_download:
