@@ -872,6 +872,7 @@ class TestIngestion(unittest.TestCase):
         productcode = 'olci-wrr'
         productversion = 'V02.0'
         subproductcode = 'chl-oc4me'
+        subproductcode_2 = 'tsm-nn'
         mapsetcode = 'SENTINEL-Africa-1km'
         if eumetcast:
             datasource_descrID = 'EO:EUM:DAT:SENTINEL-3:OL_2_WRR___NRT'
@@ -905,8 +906,22 @@ class TestIngestion(unittest.TestCase):
                  'nodata': no_data}
 
         subproducts = [sprod]
+
+        args = {"subproductcode": subproductcode_2,
+                 "productcode": productcode,
+                 "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+        product_in_info = querydb.get_product_in_info(**args)
+        sprod_tsm = {'subproduct': subproductcode_2,
+                 'mapsetcode': mapsetcode,
+                 're_extract': product_in_info.re_extract,
+                 're_process': product_in_info.re_process,
+                 'nodata': product_in_info.no_data}
+
+        subproducts.append(sprod_tsm)
         # Remove existing output
-        # self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
+        self.remove_output_file(productcode, subproductcode_2, productversion, mapsetcode, out_date)
         if eumetcast:
             datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                             source_id=datasource_descrID)
@@ -918,8 +933,11 @@ class TestIngestion(unittest.TestCase):
 
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
                                         version=productversion, mapsetcode=mapsetcode, date=out_date)
+        status_prod_2 = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode_2,
+                                        version=productversion, mapsetcode=mapsetcode, date=out_date)
         force_status_ok = 1
         self.assertEqual(force_status_ok, 1)
+        # self.assertEqual(status * status_prod_2, 1)  --> mesa-proc
 
     #   ---------------------------------------------------------------------------
     #   OCEANOGRAPHY - Sentinel 3 SLSTR WST
