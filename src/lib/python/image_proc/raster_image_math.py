@@ -3855,7 +3855,7 @@ def assign_metadata_processing(input_file_list, output_file, parameters=None):
             sds_meta.assign_parameters(parameters)
 
         # Modify/Assign some of the metadata
-        sds_meta.assign_comput_time_now()
+        sds_meta.assign_compute_time_now()
         str_date, productcode, subproductcode, mapset, version = functions.get_all_from_filename(
             os.path.basename(output_file))
 
