@@ -372,7 +372,7 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
 #       0 -> ingestion OK; files to be removed/stored
 #       1 -> ingestion wrong; files to be copied to /data/ingest.wrong
 #       None -> some mandatory files are missing: wait and do not touch files
-#
+    data_dir_out = es_constants.processing_dir
     my_logger.info("Entering routine %s for prod: %s and date: %s" % ('ingestion', product['productcode'], in_date))
 
     preproc_type = datasource_descr.preproc_type
@@ -383,7 +383,8 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
 
     # Create temp output dir
     try:
-        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_files[0]),
+        # Reduce the length of the tmp_dir: the resulting path was too long for operating in the docker container (see ES2-544)
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(input_files[0])[0:6],
                                   dir=es_constants.base_tmp_dir)
     except:
         my_logger.error('Cannot create temporary dir ' + es_constants.base_tmp_dir + '. Exit')

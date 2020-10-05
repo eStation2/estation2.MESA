@@ -290,6 +290,7 @@ def pre_process_merge_tile(subproducts, tmpdir, input_files, my_logger):
                 command += ' -init '+str(nodata)
                 command += ' -o ' + output_file
                 command += ' -ot BYTE '
+                command += ' -of GTiff '
                 for file in input_files:
                     command += ' '+file
 
@@ -638,7 +639,7 @@ def pre_process_pml_netcdf(subproducts, tmpdir , input_files, my_logger):
                 out_tmp_file_gtiff = tmpdir + os.path.sep + id_subproduct + '_' + id_mapset + '.tif.merged'
 
                 # Take gdal_merge.py from es2globals
-                command = es_constants.gdal_merge + ' -init '+ str(nodata_value)+' -co \"compress=lzw\" -ot Float32 -o '
+                command = es_constants.gdal_merge + ' -init '+ str(nodata_value)+' -co \"compress=lzw\"  -of GTiff -ot Float32 -o '
                 command += out_tmp_file_gtiff
                 for file_add in geotiff_files:
                     command += ' '
@@ -1844,10 +1845,19 @@ def pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=None):
         raise NameError('Error in Preprocessing pre_process_gsod ')
 
 
-def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=None, zipped=False):
+def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=None, data_format='TAR'):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
 #   Returns -1 if nothing has to be done on the passed files
+##   Description: the current implementation is based on GPT, and includes the following steps
+#       1. Unzip or untar or just copy files into a temp dir
+#       2. Write a 'subset' graph xml in order to:
+#           a. Subset geographically:
+#           b. Band subset (depends on subdatasource)
+#           c. Apply a flag (band math)
+#       3. Write a reprojection ..
+#       4. Merge by applying input and output nodata (-n -54.53 -a_nodata -32768)
+#   NOTE: now we mask by using l2p_flags_cloud ('True' means cloud detected -> reject)
 #
     # Prepare the output file list
     pre_processed_list = []
@@ -1877,26 +1887,22 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
         # Unzips the file
         for input_file in list_input_files:
 
-            if zipped:
+            if data_format == 'ZIP':
                 # Unzip the .tar file in 'tmpdir'
                 command = 'unzip ' + input_file + ' -d ' + tmpdir + os.path.sep  # ' --strip-components 1'
-                print(command)
+                print (command)
                 status = os.system(command)
-                # TODO: Change the code to OS independent
-                # from zipfile import ZipFile
-                # with ZipFile('input_file','r') as zipObj:
-                #     zipObj.extractall(tmpdir + os.path.sep)
 
-            else:
+            elif data_format == 'TAR':
                 # Unzip the .tar file in 'tmpdir'
                 command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep  # ' --strip-components 1'
                 print(command)
                 status = os.system(command)
-                # TODO: Change the code to OS independent
-                # import tarfile
-                # tar = tarfile.open(input_file)
-                # tar.extractall(path=tmpdir + os.path.sep)  # untar file into same directory
-                # tar.close()
+
+            # JEODPP EOS data: In this case we just need to copy the folder tmp dir and remaining process is carried out asusal
+            else:
+                tmp_img_file_path = tmpdir + os.path.sep + os.path.basename(input_file)
+                shutil.copytree(input_file, tmp_img_file_path)
 
         # Loop over subproducts and extract associated files. In case of more Mapsets, more sprods exist
         for sprod in subproducts:
@@ -2099,27 +2105,10 @@ def pre_process_snap_band_select_nc(subproducts, tmpdir, input_files, my_logger,
         else:
             temp_list_input_files = []
             temp_list_input_files.append(input_files)
-
-        # Select only the 'day-time' files
-        # for one_file in temp_list_input_files:
-        #     one_filename = os.path.basename(one_file)
-        #     in_date = one_filename.split('_')[7]
-        #     day_data = functions.is_data_captured_during_day(in_date)
-        #     if day_data:
-        #         list_input_files.append(one_file)
-
         # Check at least 1 day-time file is there
         if len(temp_list_input_files) == 0:
             my_logger.debug('No any file captured. Return')
             return -1
-
-        # for input_file in temp_list_input_files:
-        #
-        #     # Unzip the .tar file in 'tmpdir'
-        #     command = 'cp ' + input_file + ' ' + tmpdir + os.path.sep # ' --strip-components 1'
-        #     # print(command)
-        #     status = os.system(command)
-        #     # ToDo : check the status or use try/except
 
         # Loop over subproducts and extract associated files. In case of more Mapsets, more sprods exist
         for sprod in subproducts:
@@ -2170,6 +2159,76 @@ def pre_process_snap_band_select_nc(subproducts, tmpdir, input_files, my_logger,
     except:
         my_logger.error('Error in Preprocessing pre_process_snap_band_select_nc ')
         raise NameError('Error in Preprocessing pre_process_snap_band_select_nc ')
+#
+# def pre_process_CGLS_Resample_300_1km(subproducts, tmpdir, input_files, my_logger, in_date=None):
+# # -------------------------------------------------------------------------------------------------------
+# #   Pre-process the netcdf using snap - subset and merge the tiles
+# #   Returns -1 if nothing has to be done on the passed files
+# #
+#     # Prepare the output file list
+#     pre_processed_list = []
+#     list_input_files = []
+#
+#     # Make sure input is a list (if only a string is received, it loops over chars)
+#     if isinstance(input_files, list):
+#         temp_list_input_files = input_files
+#     else:
+#         temp_list_input_files = []
+#         temp_list_input_files.append(input_files)
+#
+#     # Check at least 1 day-time file is there
+#     if len(temp_list_input_files) == 0:
+#         my_logger.debug('No any file captured. Return')
+#         return -1
+#
+#     # Loop over subproducts and extract associated files. In case of more Mapsets, more sprods exist
+#     for sprod in subproducts:
+#         interm_files_list = []
+#         # In each unzipped folder pre-process the dataset and store the list of files to be merged
+#         count =  1
+#         # for input_file in temp_list_input_files:
+#
+#         # Define the re_expr for extracting files
+#         bandname = sprod['re_extract']
+#         # re_process = sprod['re_process']
+#
+#         output_resampled_tif = tmpdir + os.path.sep + 'resampled.nc'
+#
+#         # -----------------------------------------------------------------------------------------
+#         # Resample 300m to  1Km using  PL code
+#         # ------------------------------------------------------------------------------------------
+#         from apps.tools import CGLS_ResampleTool
+#
+#         CGLS_ResampleTool.preprocess_CGLS_resampling(temp_list_input_files[0], tmpdir)
+#
+#         # # ToDo : check the status or use try/except
+#         if not os.path.exists(output_resampled_tif):
+#             my_logger.debug('Error in resampling. Return')
+#             return -1
+#
+#         pre_processed_list.append(output_resampled_tif)
+#         # # Check at least 1 file is reprojected file is there
+#         # if len(interm_files_list) == 0:
+#         #     my_logger.debug('No any file overlapping the ROI. Return')
+#         #     return -1
+#         #
+#         # if len(interm_files_list) > 1 :
+#         #     out_tmp_file_gtiff = tmpdir + os.path.sep + re_process+'_merged.tif'
+#         #     input_files_str = ''
+#         #     for file_add in interm_files_list:
+#         #         input_files_str += ' '
+#         #         input_files_str += file_add
+#         #     command = 'gdalwarp -srcnodata "{}" -dstnodata "{}" -ot Float32 {} {}'.format(int(no_data), int(no_data),
+#         #          input_files_str, out_tmp_file_gtiff)
+#         #     # command = 'gdalwarp -srcnodata "103.69266" -dstnodata "1000" -s_srs "epsg:4326" -t_srs "+proj=longlat +datum=WGS84" -ot Float32 {} {}'.format(
+#         #     #     input_files_str, out_tmp_file_gtiff)
+#         #     my_logger.info('Command for merging is: ' + command)
+#         #     os.system(command)
+#         #     pre_processed_list.append(out_tmp_file_gtiff)
+#         # else:
+#         #     pre_processed_list.append(interm_files_list[0])
+#
+#     return pre_processed_list
 
 def pre_process_netcdf_VGT300(subproducts, tmpdir, input_files, my_logger, in_date=None):
 # -------------------------------------------------------------------------------------------------------
@@ -2237,7 +2296,7 @@ def pre_process_netcdf_VGT300(subproducts, tmpdir, input_files, my_logger, in_da
         raise NameError('Error in Preprocessing pre_process_netcdf_VGT300 ')
 
 
-def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=None, zipped=False):
+def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=None, data_format='TAR'):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process the Sentinel 3 Level 2 product from SLSTR - WST
 #
@@ -2280,18 +2339,23 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
 
         # Unzips the file
         for input_file in list_input_files:
-            if zipped:
+
+            if data_format == 'ZIP':
                 # Unzip the .tar file in 'tmpdir'
                 command = 'unzip ' + input_file + ' -d ' + tmpdir + os.path.sep  # ' --strip-components 1'
-                print(command)
+                print (command)
                 status = os.system(command)
 
-            else:
+            elif data_format == 'TAR':
                 # Unzip the .tar file in 'tmpdir'
                 command = 'tar -xvf ' + input_file + ' -C ' + tmpdir + os.path.sep  # ' --strip-components 1'
-                print(command)
+                print (command)
                 status = os.system(command)
-                # TODO: Change the code to OS independent
+
+            # JEODPP EOS data: In this case we just need to copy the folder tmp dir and remaining process is carried out asusal
+            else:
+                tmp_img_file_path = tmpdir + os.path.sep + os.path.basename(input_file)
+                shutil.copytree(input_file, tmp_img_file_path)
 
         # Loop over subproducts and extract associated files
         for sprod in subproducts:
@@ -2349,7 +2413,7 @@ def pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_da
                 return -1
 
             if len(interm_files_list) > 1 :
-                command = es_constants.gdal_merge + ' -n '+ scaled_no_data+' -a_nodata '+ str(int(no_data))+' -ot Float32 ' + ' -o '  # -co \"compress=lzw\" -ot Float32  -n -32768 -a_nodata -32768
+                command = es_constants.gdal_merge + ' -of GTiff ' + '-n ' + scaled_no_data + ' -a_nodata ' + str(int(no_data)) + ' -ot Float32 ' + ' -o '  # -co \"compress=lzw\" -ot Float32  -n -32768 -a_nodata -32768
 
                 out_tmp_file_gtiff = tmpdir + os.path.sep + 'merged.tif.merged'
 
@@ -2543,8 +2607,12 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
 #           CPC_BINARY: binary file in big-endian
 #           BINARY: .bil product (e.g. GEOWRSI)
 #           ENVI_2_GTIFF: convert ENVI files(.img,.hdr) to GEOTIF
-#           NETCDF_S3_WRR: S3A OLCI WRR data treatment using SNAP-GPT to do band subset, reproject.
-#           NETCDF_S3_WST: S3A SLSTR WST data treatment using SNAP-GPT to do band subset, reproject.
+#           NETCDF_S3_WRR: TAR data format - S3A OLCI WRR data treatment using SNAP-GPT to do band subset, reproject.
+#           NETCDF_S3_WRR_JEODPP :JEODPP EOS data format: S3A OLCI WRR data treatment using SNAP-GPT to do band subset, reproject.
+#           NETCDF_S3_WRR_ZIP :ZIP data format  3A OLCI WRR data treatment using SNAP-GPT to do band subset, reproject.
+#           NETCDF_S3_WST: TAR data format - S3A SLSTR WST data treatment using SNAP-GPT to do band subset, reproject.
+#           NETCDF_S3_WST_ZIP: ZIP data format - S3A SLSTR WST data treatment using SNAP-GPT to do band subset, reproject.
+#           NETCDF_S3_WST_JEODPP: JEODPP- FOLDER - FORMAT : S3A SLSTR WST data treatment using SNAP-GPT to do band subset, reproject.
 #           MERGE_TILE: Merge the tiles from VITO website and convert to nobigtif format
 #           JRC_WBD_GEE: merges the various tiles of the .tif files retrieved from GEE application and remove the bigtif tag(works only in developement machine)
 #       native_mapset_code: id code of the native mapset (from datasource_descr)
@@ -2628,19 +2696,26 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
             interm_files = pre_process_gsod(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
 
         elif preproc_type == 'NETCDF_S3_WRR_ZIP':
-            interm_files = pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=in_date, zipped=True)
+            interm_files = pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=in_date, data_format='ZIP')
 
         elif preproc_type == 'NETCDF_S3_WRR':
-            interm_files = pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
+            interm_files = pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=in_date, data_format='TAR')
+
+        # JEODPP EOS data: In this case we just need to copy the folder tmp dir and remaining process is carried out asusal
+        elif preproc_type == 'NETCDF_S3_WRR_JEODPP':
+            interm_files = pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_date=in_date, data_format='FOLDER')
 
         elif preproc_type == 'NETCDF_GPT_SUBSET':
             interm_files = pre_process_netcdf_VGT300(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
 
         elif preproc_type == 'NETCDF_S3_WST':
-            interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
+            interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date, data_format='TAR')
 
         elif preproc_type == 'NETCDF_S3_WST_ZIP':
-            interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date, zipped=True)
+            interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date, data_format='ZIP')
+
+        elif preproc_type == 'NETCDF_S3_WST_JEODPP':
+            interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date, data_format='FOLDER')
 
         elif preproc_type == 'TARZIP':
             interm_files = pre_process_tarzip(subproducts, tmpdir, input_files, my_logger)
@@ -2655,6 +2730,9 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
         #     interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
         elif preproc_type == 'SNAP_SUBSET_NC':
             interm_files = pre_process_snap_subset_nc(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
+        # elif preproc_type == 'CGLS_Resample_300_1Km':
+        #     interm_files = pre_process_CGLS_Resample_300_1km(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
+
         elif preproc_type == 'SNAP_BAND_SELECT_NC':
             interm_files = pre_process_snap_band_select_nc(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
 

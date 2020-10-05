@@ -315,6 +315,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             orig_ds = None
             trg_ds = None
 
+        out_driver = None
         # Check not WD-GEE
         if not trg_mapset.is_wbd():
             # Write metadata, if not merging is needed
@@ -334,6 +335,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             final_list_files = in_files         #+ [intermFile]       #[in_files, os.path.basename(intermFile)]
             file_write_metadata = output_filename
             shutil.move(intermFile,output_filename)  # TODO why just copy? should be move like in other cases
+
 
         # -------------------------------------------------------------------------
         # Assign Metadata to the ingested file
@@ -454,6 +456,7 @@ def merge_files_to_existings(in_files, out_nodata, old_file_list, tmp_output_fil
     try:
         command = es_constants.gdal_merge + ' -n ' + str(out_nodata)
         command += ' -a_nodata ' + str(out_nodata)
+        command += ' -of GTiff '
         command += ' -co \"compress=lzw\" -o '
         command += tmp_output_file
         command += ' ' + my_output_filename + ' ' + output_filename
