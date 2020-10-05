@@ -27,8 +27,13 @@ from database import querydb
 from apps.productmanagement.products import *
 from lib.python.daemon import DaemonDryRunnable
 
+_author__ = "Marco Clerici"
+
 logger = log.my_logger(__name__)
 data_dir = es_constants.es2globals['processing_dir']
+
+# Get the local systems settings
+systemsettings = functions.getSystemSettings()
 
 
 def get_status_local_machine():
@@ -38,7 +43,7 @@ def get_status_local_machine():
     logger.debug("Entering routine %s" % 'get_status_local_machine')
 
     # Get the local systems settings
-    systemsettings = functions.getSystemSettings()
+    # systemsettings = functions.getSystemSettings()
 
     # Get status of all services
     status_services = functions.getStatusAllServices()
@@ -74,22 +79,27 @@ def get_status_local_machine():
 def save_status_local_machine():
     #   Save a text file containing the status of the local machine
     #
+    status = False
+    try:
+        logger.debug("Entering routine %s " % 'save_status_local_machine')
 
-    logger.debug("Entering routine %s " % 'save_status_local_machine')
+        # Define .txt filename
+        status_system_file = es_constants.es2globals['status_system_file']
 
-    # Define .txt filename
-    status_system_file=es_constants.es2globals['status_system_file']
+        # Get status of all services
+        machine_status = get_status_local_machine()
 
-    # Get status of all services
-    machine_status = get_status_local_machine()
+        # Write to file
+        fid = open(status_system_file, 'w')
 
-    # Write to file
-    fid = open(status_system_file,'w')
-    for value in machine_status:
-        fid.write('%s = %s \n' % (value, machine_status[value]))
-    fid.close()
+        for value in machine_status:
+            fid.write('%s = %s \n' % (value, machine_status[value]))
+        fid.close()
 
-    return 0
+    except:
+        status = True
+
+    return status
 
 
 def system_data_sync(source, target):
@@ -97,13 +107,13 @@ def system_data_sync(source, target):
     #   It is based on rsync daemon, the correct module should be set in /etc/rsyncd.conf file
     #   The rsync daemon should running (permission set in /etc/default/rsync)
 
-    logfile=es_constants.es2globals['log_dir']+'rsync.log'
-    message=time.strftime("%Y-%m-%d %H:%M")+' INFO: Running the data sync now ... \n'
-    log_id=open(logfile,'w')
+    logfile = es_constants.es2globals['log_dir'] + 'rsync.log'
+    message = time.strftime("%Y-%m-%d %H:%M") + ' INFO: Running the data sync now ... \n'
+    log_id = open(logfile, 'w')
     log_id.write(message)
     log_id.close()
     logger.debug("Entering routine %s" % 'system_data_sync')
-    command = 'rsync -CavK '+source+' '+target+ ' >> '+logfile
+    command = 'rsync -CavK ' + source + ' ' + target + ' >> ' + logfile
     logger.debug("Executing %s" % command)
     # return
     status = os.system(command)
@@ -120,7 +130,7 @@ def system_bucardo_service(action):
     logger.debug("Entering routine %s" % 'system_bucardo_service')
 
     # Check that bucardo is running
-    command = ['bucardo','status']
+    command = ['bucardo', 'status']
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
     status_on = re.search('PID', out)
@@ -129,7 +139,7 @@ def system_bucardo_service(action):
         if status_on:
             logger.info('Bucardo already running. Continue')
         else:
-            command = ['bucardo','start']
+            command = ['bucardo', 'start']
             p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = p.communicate()
             logger.info('Bucardo start message: %s' % err)
@@ -137,7 +147,7 @@ def system_bucardo_service(action):
         if not status_on:
             logger.info('Bucardo already stopped. Continue')
         else:
-            command = ['bucardo','stop']
+            command = ['bucardo', 'stop']
             p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = p.communicate()
 
@@ -145,7 +155,7 @@ def system_bucardo_service(action):
     time.sleep(3)
 
     # Check the final status
-    command = ['bucardo','status']
+    command = ['bucardo', 'status']
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
     status_on = re.search('PID', out)
@@ -531,7 +541,7 @@ def system_manage_lock(lock_id, action):
     #
     # lock_id is whatever string (but 'All_locks' which is reserved)
     #
-    # action can be: check  -> check if it exist
+    # action can be:    check  -> check if it exist
     #                   create -> write the file
     #                   delete -> remove the file
 
@@ -543,18 +553,29 @@ def system_manage_lock(lock_id, action):
     if lock_id == 'All_locks':
         if action == 'Delete':
             for f in os.listdir(dir_lock):
-                if re.search('action*.lock', f):
-                    status = os.remove(os.path.join(dir_lock,f))
+                if re.search('action.*lock', f):
+                    try:
+                        os.remove(os.path.join(dir_lock, f))
+                    except:
+                        status = 1
+                    else:
+                        status = 0
         else:
             logger.warning("Only delete action is defined for all locks")
     else:
-        lock_file = dir_lock+os.path.sep+'action_'+lock_id+'.lock'
+        lock_file = dir_lock + os.path.sep + 'action_' + lock_id + '.lock'
         if action == 'Check':
             status = os.path.exists(lock_file)
 
         if action == 'Delete':
             if os.path.exists(lock_file):
-                status = os.path.remove(lock_file)
+                # See ES2-596
+                try:
+                    status = os.remove(lock_file)
+                except:
+                    status = 1
+                else:
+                    status = 0
             else:
                 logger.warning("Lock file does not exist: %s" % lock_file)
                 status = 1
@@ -582,6 +603,7 @@ def clean_temp_dir():
                     shutil.rmtree(f)
         except:
             logger.warning('A directory was deleted by system: %s' % f)
+            return 1
     return 0
 
 
@@ -589,8 +611,8 @@ def loop_system(dry_run=False):
     #    Driver of the system service
     #    Reads configuration from the system setting file (system_settings.ini)
     #    Perform the needed operations, according to the machine role/mode
-    #    Arguments: dry_run -> if > 0, only report what has to be done (no actions)
-    #                       -> if = 0, do operations (default)
+    #    Arguments: dry_run -> if > 0, execute only once (test)
+    #                       -> if = 0, do operations in loop
 
     logger.info("Entering routine %s" % 'loop_system')
 
@@ -811,6 +833,7 @@ def loop_system(dry_run=False):
         # Exit in case of dry_run
         if dry_run:
             execute_loop=False
+            return 0
 
         # Sleep some time
         time.sleep(float(es_constants.es2globals['system_sleep_time_sec']))
