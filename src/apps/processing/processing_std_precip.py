@@ -94,7 +94,8 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
     if starting_dates is not None:
         starting_files = []
         for my_date in starting_dates:
-            starting_files.append(input_dir+my_date+in_prod_ident)
+            if functions.is_file_exists_in_path(input_dir+my_date+in_prod_ident):
+                starting_files.append(input_dir+my_date+in_prod_ident)
     else:
         starting_files=input_dir+"*"+in_prod_ident
 
