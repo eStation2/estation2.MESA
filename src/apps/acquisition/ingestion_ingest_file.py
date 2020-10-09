@@ -210,7 +210,7 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             continue
 
         my_logger.info("Processing intermediate file: %s" % os.path.basename(intermFile))
-        tmp_dir = os.path.dirname(intermFile)
+        tmp_dir = os.path.dirname(intermFile)    # TODO In case of preprocess is not done then file will be from the native location.. Change to tmp dir
 
         # -------------------------------------------------------------------------
         # Collect info and prepare filenaming
