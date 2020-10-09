@@ -509,11 +509,12 @@ class TestIngestion(unittest.TestCase):
 
         re_process = product_in_info.re_process
         re_extract = product_in_info.re_extract
-
+        no_data = product_in_info.no_data
         sprod = {'subproduct': subproductcode,
                  'mapsetcode': mapsetcode,
                  're_extract': re_extract,
-                 're_process': re_process}
+                 're_process': re_process,
+                 'nodata': no_data}
 
         subproducts = [sprod]
         # Remove existing output
@@ -822,8 +823,8 @@ class TestIngestion(unittest.TestCase):
         datasource_descrID = 'EO:EUM:DAT:MULT:CPMAD:OC'
         input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
         date_fileslist = [os.path.join(input_dir, 'PML_Tanzania_MODIS_oc_3daycomp_20200312_20200314.nc.bz2')]
-        in_date = '20200314'
-        out_date = '20200314'
+        in_date = '20200312'
+        out_date = '20200312'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
