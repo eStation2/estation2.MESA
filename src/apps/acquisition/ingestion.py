@@ -71,6 +71,8 @@ ingest_dir_in = es_constants.ingest_dir
 ingest_error_dir = es_constants.ingest_error_dir
 data_dir_out = es_constants.processing_dir
 
+python_version = sys.version_info[0]
+
 def loop_ingestion(dry_run=False, test_one_product=None):
 
 #    Driver of the ingestion process
@@ -1704,8 +1706,11 @@ def pre_process_nasa_firms(subproducts, tmpdir, input_files, my_logger):
             outFile.write(input_file.read())
 
     # Execute the ogr2ogr command
-    command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
-    command = 'ogr2ogr -s_srs EPSG:4326 -t_srs EPSG:4326 -oo X_POSSIBLE_NAMES=Lon* -oo Y_POSSIBLE_NAMES=Lat* -f "ESRI Shapefile" '+ file_shp + ' '+file_csv
+    if python_version == 2:
+        command = 'ogr2ogr -f "ESRI Shapefile" ' + file_shp + ' '+file_vrt
+    elif python_version == 3:
+        command = 'ogr2ogr -s_srs EPSG:4326 -t_srs EPSG:4326 -oo X_POSSIBLE_NAMES=Lon* -oo Y_POSSIBLE_NAMES=Lat* -f "ESRI Shapefile" '+ file_shp + ' '+file_csv
+
     my_logger.debug('Command is: '+command)
     try:
         os.system(command)
@@ -1762,7 +1767,10 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         region_code = region_code.split('-')[3]
     else:
         #JRC-WBD_NA_20190101-0000000000-0000000000.tif
+        #For Other region
         date = input_file_name.split('_')[2]  # 0601-0000000000-0000000000.tif
+        #For ECOWAS
+        # date = input_file_name.split('_')[1]
         date = date.split('-')[0]
         region_code = input_file_name.split('_')[1]
         # region_code = region_code.split('-')[3]

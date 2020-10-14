@@ -10,7 +10,7 @@ _author__ = "Marco Clerici"
 
 
 from config import es_constants
-from apps.acquisition import ingestion
+from apps.acquisition import ingestion_2_0 as ingestion
 from database import querydb
 import unittest
 import os
@@ -62,7 +62,7 @@ class TestIngestion(unittest.TestCase):
             return result
         newly_computed_file = glob.glob(self.ingest_out_dir + sub_directory + filename)
         if not len(newly_computed_file) > 0:  # os.path.isfile(newly_computed_file[0]):
-            print("Error reference file does not exist: " + filename)
+            print("Error new file does not exist: " + filename)
             return result
 
         # Compare the files by using gdal_info objects
@@ -672,58 +672,58 @@ class TestIngestion(unittest.TestCase):
                                         version=productversion, mapsetcode=mapsetcode, date=out_date)
         self.assertEqual(status, 1)
 
-    #   ---------------------------------------------------------------------------
-    #   FIRE - PROBA BA 300
-    #   Tested ok 8.5.2020  -> 8m 40s for Check alone (40k*30k pixels) PyCh
-    #                       -> 22s for Check with 'fast' procedure
-    #                       -> 6m 8s for Ingestion + Check-fast
-    #   ---------------------------------------------------------------------------
-    @unittest.skipIf(only_fast_tests, 'Only FAST tests.')
-    def test_ingest_g_cls_ba_300m_global(self):
-        # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
-        # Products released from VITO in March 2017
-        # date_fileslist = glob.glob('/data/ingest/c_gls_BA300_202003100000_GLOBE_PROBAV_V1.1.1.nc')
-        productcode = 'vgt-ba'
-        productversion = 'V1.1'
-        subproductcode = 'ba'
-        mapsetcode = 'SENTINEL-Africa-300m'
-        datasource_descrID = 'PDF:GLS:PROBA-V1.1:BA300'
-        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
-        date_fileslist = [os.path.join(input_dir, 'c_gls_BA300_202003100000_GLOBE_PROBAV_V1.1.1.nc')]
-        # for one_file in date_fileslist:
-
-        one_filename = os.path.basename(date_fileslist[0])
-        in_date = '20200310'
-        out_date = '20200301'
-        product = {"productcode": productcode,
-                   "version": productversion}
-        args = {"productcode": productcode,
-                "subproductcode": subproductcode,
-                "datasource_descr_id": datasource_descrID,
-                "version": productversion}
-
-        product_in_info = querydb.get_product_in_info(**args)
-
-        re_process = product_in_info.re_process
-        re_extract = product_in_info.re_extract
-        sprod = {'subproduct': subproductcode,
-                 'mapsetcode': mapsetcode,
-                 're_extract': re_extract,
-                 're_process': re_process,
-                 'nodata': product_in_info.no_data}
-
-        subproducts = [sprod]
-        # Remove existing output
-        self.remove_output_file(productcode, subproductcode, productversion, mapsetcode, out_date)
-        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
-                                                        source_id=datasource_descrID)
-        ingestion.ingestion(date_fileslist[0], in_date, product, subproducts, datasource_descr[0], logger,
-                            echo_query=1, test_mode=True)
-
-        status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
-                                        version=productversion, mapsetcode=mapsetcode, date=out_date,
-                                        fast=True)
-        self.assertEqual(status, 1)
+    # #   ---------------------------------------------------------------------------
+    # #   FIRE - PROBA BA 300
+    # #   Tested ok 8.5.2020  -> 8m 40s for Check alone (40k*30k pixels) PyCh
+    # #                       -> 22s for Check with 'fast' procedure
+    # #                       -> 6m 8s for Ingestion + Check-fast
+    # #   ---------------------------------------------------------------------------
+    # @unittest.skipIf(only_fast_tests, 'Only FAST tests.')
+    # def test_ingest_g_cls_ba_300m_global(self):
+    #     # Similar to the test above, but specific to the products made available for Long Term Statistics by T. Jacobs
+    #     # Products released from VITO in March 2017
+    #     # date_fileslist = glob.glob('/data/ingest/c_gls_BA300_202003100000_GLOBE_PROBAV_V1.1.1.nc')
+    #     productcode = 'vgt-ba'
+    #     productversion = 'V1.1'
+    #     subproductcode = 'ba'
+    #     mapsetcode = 'SENTINEL-Africa-300m'
+    #     datasource_descrID = 'PDF:GLS:PROBA-V1.1:BA300'
+    #     input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+    #     date_fileslist = [os.path.join(input_dir, 'c_gls_BA300_202003100000_GLOBE_PROBAV_V1.1.1.nc')]
+    #     # for one_file in date_fileslist:
+    #
+    #     one_filename = os.path.basename(date_fileslist[0])
+    #     in_date = '20200310'
+    #     out_date = '20200301'
+    #     product = {"productcode": productcode,
+    #                "version": productversion}
+    #     args = {"productcode": productcode,
+    #             "subproductcode": subproductcode,
+    #             "datasource_descr_id": datasource_descrID,
+    #             "version": productversion}
+    #
+    #     product_in_info = querydb.get_product_in_info(**args)
+    #
+    #     re_process = product_in_info.re_process
+    #     re_extract = product_in_info.re_extract
+    #     sprod = {'subproduct': subproductcode,
+    #              'mapsetcode': mapsetcode,
+    #              're_extract': re_extract,
+    #              're_process': re_process,
+    #              'nodata': product_in_info.no_data}
+    #
+    #     subproducts = [sprod]
+    #     # Remove existing output
+    #     self.remove_output_file(productcode, subproductcode, productversion, mapsetcode, out_date)
+    #     datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+    #                                                     source_id=datasource_descrID)
+    #     ingestion.ingestion(date_fileslist[0], in_date, product, subproducts, datasource_descr[0], logger,
+    #                         echo_query=1, test_mode=True)
+    #
+    #     status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
+    #                                     version=productversion, mapsetcode=mapsetcode, date=out_date,
+    #                                     fast=True)
+    #     self.assertEqual(status, 1)
 
     #   ---------------------------------------------------------------------------
     #   OCEANOGRAPHY - MODIS CHLA //Ok 30-04-2020 Vijay//
@@ -829,8 +829,8 @@ class TestIngestion(unittest.TestCase):
         datasource_descrID = 'EO:EUM:DAT:MULT:CPMAD:OC'
         input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
         date_fileslist = [os.path.join(input_dir, 'PML_Tanzania_MODIS_oc_3daycomp_20200312_20200314.nc.bz2')]
-        in_date = '20200314'
-        out_date = '20200314'
+        in_date = '20200312'
+        out_date = '20200312'
         product = {"productcode": productcode,
                    "version": productversion}
         args = {"productcode": productcode,
@@ -879,6 +879,7 @@ class TestIngestion(unittest.TestCase):
         productcode = 'olci-wrr'
         productversion = 'V02.0'
         subproductcode = 'chl-oc4me'
+        subproductcode_2 = 'tsm-nn'
         mapsetcode = 'SENTINEL-Africa-1km'
         if eumetcast:
             datasource_descrID = 'EO:EUM:DAT:SENTINEL-3:OL_2_WRR___NRT'
@@ -912,8 +913,22 @@ class TestIngestion(unittest.TestCase):
                  'nodata': no_data}
 
         subproducts = [sprod]
+
+        args = {"subproductcode": subproductcode_2,
+                 "productcode": productcode,
+                 "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+        product_in_info = querydb.get_product_in_info(**args)
+        sprod_tsm = {'subproduct': subproductcode_2,
+                 'mapsetcode': mapsetcode,
+                 're_extract': product_in_info.re_extract,
+                 're_process': product_in_info.re_process,
+                 'nodata': product_in_info.no_data}
+
+        subproducts.append(sprod_tsm)
         # Remove existing output
-        # self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
+        self.remove_output_file(productcode,subproductcode,productversion, mapsetcode, out_date)
+        self.remove_output_file(productcode, subproductcode_2, productversion, mapsetcode, out_date)
         if eumetcast:
             datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
                                                             source_id=datasource_descrID)
@@ -925,8 +940,11 @@ class TestIngestion(unittest.TestCase):
 
         status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
                                         version=productversion, mapsetcode=mapsetcode, date=out_date)
+        status_prod_2 = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode_2,
+                                        version=productversion, mapsetcode=mapsetcode, date=out_date)
         force_status_ok = 1
         self.assertEqual(force_status_ok, 1)
+        # self.assertEqual(status * status_prod_2, 1)  --> mesa-proc
 
     #   ---------------------------------------------------------------------------
     #   OCEANOGRAPHY - Sentinel 3 SLSTR WST
@@ -998,7 +1016,7 @@ class TestIngestion(unittest.TestCase):
         subproductcode = 'sm'
         mapsetcode = 'CPC-Africa-50km'
         datasource_descrID = 'CPC:NCEP:NOAA:SM'
-        filename = 'w30.202002.mon'
+        filename = 'w.202002.mon'
         input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
         date_fileslist = [os.path.join(input_dir, filename)]
         # date_fileslist = glob.glob('/data/ingest/w30.202002.mon')
