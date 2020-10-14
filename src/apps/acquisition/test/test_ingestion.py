@@ -10,7 +10,7 @@ _author__ = "Marco Clerici"
 
 
 from config import es_constants
-from apps.acquisition import ingestion_2_0 as ingestion
+from apps.acquisition import ingestion
 from database import querydb
 import unittest
 import os
