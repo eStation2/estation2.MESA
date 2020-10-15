@@ -39,8 +39,7 @@ class SdsMetadata(object):
                             # ------------------  As in the 'product' table ----------------------
                             'eStation2_product': '',  # 2. productcode
                             'eStation2_subProduct': '',  # 3. subproductcode
-                            'eStation2_product_version': '',
-                            # 4. product version (e.g. MODIS Collection 4 or 5; by default is undefined -> '')
+                            'eStation2_product_version': '',# 4. product version (e.g. MODIS Collection 4 or 5; by default is undefined -> '')
 
                             'eStation2_defined_by': '',  # 5. JRC or User
                             'eStation2_category': '',  # 6. Product category (TODO-M.C.: double-check wrt INSPIRE)
@@ -189,10 +188,11 @@ class SdsMetadata(object):
         #   Assign prod/subprod/version
         self.sds_metadata['eStation2_product'] = str(product)
         self.sds_metadata['eStation2_subProduct'] = str(subproduct)
-        if isinstance(version, str) or isinstance(version, str):
-            self.sds_metadata['eStation2_product_version'] = version
-        else:
-            self.sds_metadata['eStation2_product_version'] = 'undefined'
+        self.sds_metadata['eStation2_product_version'] = str(version)
+        # if isinstance(version, str) or isinstance(version, str): #empty or undefined
+        #     self.sds_metadata['eStation2_product_version'] = version
+        # else:
+        #     self.sds_metadata['eStation2_product_version'] = 'undefined'
 
         self.sds_metadata['eStation2_defined_by'] = product_out_info.defined_by
         self.sds_metadata['eStation2_category'] = product_out_info.category_id
