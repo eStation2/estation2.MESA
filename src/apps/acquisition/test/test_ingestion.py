@@ -1010,7 +1010,7 @@ class TestIngestion(unittest.TestCase):
         subproductcode = 'sm'
         mapsetcode = 'CPC-Africa-50km'
         datasource_descrID = 'CPC:NCEP:NOAA:SM'
-        filename = 'w30.202002.mon'
+        filename = 'w.202002.mon'
         input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
         date_fileslist = [os.path.join(input_dir, filename)]
         # date_fileslist = glob.glob('/data/ingest/w30.202002.mon')
