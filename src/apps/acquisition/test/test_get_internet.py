@@ -635,13 +635,13 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def testRemoteFtp_CHIRPS_PREL(self):
         source_active = False
-        internet_id = 'UCSB:CHIRPS:PREL:DEKAD'
+        internet_id = 'UCSB:CHIRPS:PREL:DEKAD:HTTP'
         start_date_fixed = 20200101
         end_date_fixed = 20200310
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = 'chirps-v2.0.2020.02.3.tif'
-        include_files_expression = "chirps-v2.0.20[12].*.tif$"
+        include_files_expression = "chirps-v2.0.%Y.%m.%{dkm}.tif"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -664,7 +664,7 @@ class TestGetInternet(unittest.TestCase):
                                files_filter_expression=internet_source.files_filter_expression,
                                https_params=internet_source.https_params)
 
-            print('************* NOTE: This test seems unstable - see ES2-606 *****************')
+            # print('************* NOTE: This test seems unstable - see ES2-606 *****************')
 
             # Direct test ! True: #
             if self.direct_download:
@@ -675,9 +675,11 @@ class TestGetInternet(unittest.TestCase):
                 self.assertEqual(status, 0)
 
             # Test pattern (with fixed date)
-            list = get_list_matching_files(str(internet_source.url),
-                                           internet_source.user_name + ':' + internet_source.password,
-                                           include_files_expression, internet_source.type)
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
+                                                  start_date_fixed,
+                                                  end_date_fixed,
+                                                  str(internet_source.frequency_id),
+                                                  multi_template=False)
             if self.pattern:
                 self.assertTrue(file_to_check in list)
 
@@ -705,13 +707,13 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     def testRemoteFtp_CHIRPS_2_0(self):
         source_active = False
-        internet_id = 'UCSB:CHIRPS:DEKAD:2.0'
+        internet_id = 'UCSB:CHIRPS:DEKAD:2.0:HTTP'
         start_date_fixed = 20200101
         end_date_fixed = 20200310
         start_date_dyn = -45
         end_date_dyn = -30
         file_to_check = 'chirps-v2.0.2020.01.1.tif.gz'
-        include_files_expression = "chirps-v2.0.20[12].*.tif.gz"
+        include_files_expression = "chirps-v2.0.%Y.%m.%{dkm}.tif.gz"
 
         internet_sources = querydb.get_active_internet_sources()
         for s in internet_sources:
@@ -734,7 +736,7 @@ class TestGetInternet(unittest.TestCase):
                                files_filter_expression=internet_source.files_filter_expression,
                                https_params=internet_source.https_params)
 
-            print('************* NOTE: This test seems unstable - see ES2-606 *****************')
+            # print('************* NOTE: This test seems unstable - see ES2-606 *****************')
 
             # Direct test ! True: #
             if self.direct_download:
@@ -745,9 +747,11 @@ class TestGetInternet(unittest.TestCase):
                 self.assertEqual(status, 0)
 
             # Test pattern (with fixed date)
-            list = get_list_matching_files(str(internet_source.url),
-                                           internet_source.user_name + ':' + internet_source.password,
-                                           include_files_expression, internet_source.type)
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
+                                                  start_date_fixed,
+                                                  end_date_fixed,
+                                                  str(internet_source.frequency_id),
+                                                  multi_template=False)
             if self.pattern:
                 self.assertTrue(file_to_check in list)
 
