@@ -22,7 +22,7 @@ import datetime
 import shutil
 import time
 import subprocess
-
+import json
 from time import sleep
 
 # Import eStation2 modules
@@ -31,10 +31,10 @@ from config import es_constants
 from database import querydb
 from lib.python import functions
 from apps.productmanagement import datasets
-from apps.tools import motu_api
+from apps.tools import motu_api, cds_api
 from apps.tools import jeodpp_api
 from apps.tools import coda_eum_api
-
+from apps.acquisition import ingestion
 logger = log.my_logger(__name__)
 
 #   General definitions
@@ -474,7 +474,7 @@ def build_list_matching_files_tmpl_theia(base_url, template, from_date, to_date,
             template.replace("-", "#")
 
         list_matches = []
-        import json
+
         # Load the template json object and get the parameters
         parameters = json.loads(template)
         products = parameters.get('products')
@@ -561,6 +561,231 @@ def build_list_matching_files_jeodpp(base_url, template, from_date, to_date, fre
         raise
 
     return list_productid_band
+
+#####################################################################################
+#   build_list_matching_files_cds
+#   Purpose: return the list of file names matching a 'template' with 'date' placeholders
+#            It is the entry point for the 'http_cds' source type
+#   Author: VIJAY CHARAN VENKATACHALAM, JRC, European Commission
+#   Date: 2020/06
+#   Inputs: template: object with the needed parameters to fill the template get
+#           from_date: start date for the dataset (datetime.datetime object)
+#           to_date: end date for the dataset (datetime.datetime object)
+#           frequency: dataset 'frequency' (see DB 'frequency' table)
+#
+def build_list_matching_files_cds(base_url, template, from_date, to_date, frequency_id,
+                                  resourcename_uuid):
+    # Add a check on frequency
+    try:
+        frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
+    except Exception as inst:
+        logger.debug("Error in datasets.Dataset.get_frequency: %s" % inst.args[0])
+        raise
+
+    # Manage the start_date (mandatory).
+    try:
+        # If it is a date, convert to datetime
+        if functions.is_date_yyyymmdd(str(from_date), silent=True):
+            datetime_start = datetime.datetime.strptime(str(from_date), '%Y%m%d')
+        else:
+            # If it is a negative number, subtract from current date
+            if isinstance(from_date, int) or isinstance(from_date, long):
+                if from_date < 0:
+                    datetime_start = datetime.datetime.today() - datetime.timedelta(days=-from_date)
+            else:
+                logger.debug("Error in Start Date: must be YYYYMMDD or -Ndays")
+                raise Exception("Start Date not valid")
+    except:
+        raise Exception("Start Date not valid")
+
+    # Manage the end_date (mandatory).
+    try:
+        if functions.is_date_yyyymmdd(str(to_date), silent=True):
+            datetime_end = datetime.datetime.strptime(str(to_date), '%Y%m%d')
+        # If it is a negative number, subtract from current date
+        elif isinstance(to_date, int) or isinstance(to_date, long):
+            if to_date < 0:
+                datetime_end = datetime.datetime.today() - datetime.timedelta(days=-to_date)
+        else:
+            datetime_end = datetime.datetime.today()
+    except:
+        pass
+
+    try:
+        dates = frequency.get_dates(datetime_start, datetime_end)
+    except Exception as inst:
+        logger.debug("Error in frequency.get_dates: %s" % inst.args[0])
+        raise
+
+    try:
+        if sys.platform == 'win32':
+            template.replace("-", "#")
+
+        # return lst
+        list_input_files =  cds_api.create_list_cds(dates, template, base_url, resourcename_uuid)
+
+    except Exception as inst:
+        logger.debug("Error in frequency.get_internet_dates: %s" % inst.args[0])
+        raise
+
+    return list_input_files
+
+#####################################################################################
+#   build_list_matching_files_jeodpp_catalog
+#   Purpose: return the list of file names matching a 'template' with 'date' placeholders
+#            It is the entry point for the 'http_templ' source type
+#   Author: VIJAY CHARAN VENKATACHALAM, JRC, European Commission
+#   Date: 2020/06
+#   Inputs: template: object with the needed parameters to fill the template get
+#           from_date: start date for the dataset (datetime.datetime object)
+#           to_date: end date for the dataset (datetime.datetime object)
+#           frequency: dataset 'frequency' (see DB 'frequency' table)
+#
+def build_list_matching_files_jeodpp_catalog(base_url, template, from_date, to_date, frequency_id, files_filter_expression):
+    # Add a check on frequency
+    try:
+        frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
+    except Exception as inst:
+        logger.debug("Error in datasets.Dataset.get_frequency: %s" % inst.args[0])
+        raise
+
+    # Manage the start_date (mandatory).
+    try:
+        # If it is a date, convert to datetime
+        if functions.is_date_yyyymmdd(str(from_date), silent=True):
+            datetime_start = datetime.datetime.strptime(str(from_date), '%Y%m%d')
+        else:
+            # If it is a negative number, subtract from current date
+            if isinstance(from_date, int) or isinstance(from_date, int):
+                if from_date < 0:
+                    datetime_start = datetime.datetime.today() - datetime.timedelta(days=-from_date)
+            else:
+                logger.debug("Error in Start Date: must be YYYYMMDD or -Ndays")
+                raise Exception("Start Date not valid")
+    except:
+        raise Exception("Start Date not valid")
+
+    # Manage the end_date (mandatory).
+    try:
+        if functions.is_date_yyyymmdd(str(to_date), silent=True):
+            datetime_end = datetime.datetime.strptime(str(to_date), '%Y%m%d')
+        # If it is a negative number, subtract from current date
+        elif isinstance(to_date, int) or isinstance(to_date, int):
+            if to_date < 0:
+                datetime_end = datetime.datetime.today() - datetime.timedelta(days=-to_date)
+        else:
+            datetime_end = datetime.datetime.today()
+    except:
+        pass
+
+    try:
+        dates = frequency.get_dates(datetime_start, datetime_end)
+    except Exception as inst:
+        logger.debug("Error in frequency.get_dates: %s" % inst.args[0])
+        raise
+
+    try:
+        if sys.platform == 'win32':
+            template.replace("-", "#")
+
+        # return lst
+        list_input_files =  jeodpp_api.get_filedir_Jeodpp_catalog(datetime_start, datetime_end, template, base_url, None)
+
+    except Exception as inst:
+        logger.debug("Error in frequency.get_internet_dates: %s" % inst.args[0])
+        raise
+
+    return list_input_files
+
+
+
+#####################################################################################
+#   build_list_matching_files_jeodpp_eos
+#   Purpose: return the list of file names matching a 'template' with 'date' placeholders
+#            It is the entry point for the 'http_templ' source type
+#   Author: VIJAY CHARAN VENKATACHALAM, JRC, European Commission
+#   Date: 2019/09
+#   Inputs: template: object with the needed parameters to fill the template get
+#           from_date: start date for the dataset (datetime.datetime object)
+#           to_date: end date for the dataset (datetime.datetime object)
+#           frequency: dataset 'frequency' (see DB 'frequency' table)
+#
+def build_list_matching_files_jeodpp_eos(base_url, template, from_date, to_date, frequency_id, files_filter_expression):
+    # Add a check on frequency
+    try:
+        frequency = datasets.Dataset.get_frequency(frequency_id, datasets.Frequency.DATEFORMAT.DATETIME)
+    except Exception as inst:
+        logger.debug("Error in datasets.Dataset.get_frequency: %s" % inst.args[0])
+        raise
+
+    # Manage the start_date (mandatory).
+    try:
+        # If it is a date, convert to datetime
+        if functions.is_date_yyyymmdd(str(from_date), silent=True):
+            datetime_start = datetime.datetime.strptime(str(from_date), '%Y%m%d')
+        else:
+            # If it is a negative number, subtract from current date
+            if isinstance(from_date, int) or isinstance(from_date, int):
+                if from_date < 0:
+                    datetime_start = datetime.datetime.today() - datetime.timedelta(days=-from_date)
+            else:
+                logger.debug("Error in Start Date: must be YYYYMMDD or -Ndays")
+                raise Exception("Start Date not valid")
+    except:
+        raise Exception("Start Date not valid")
+
+    # Manage the end_date (mandatory).
+    try:
+        if functions.is_date_yyyymmdd(str(to_date), silent=True):
+            datetime_end = datetime.datetime.strptime(str(to_date), '%Y%m%d')
+        # If it is a negative number, subtract from current date
+        elif isinstance(to_date, int) or isinstance(to_date, int):
+            if to_date < 0:
+                datetime_end = datetime.datetime.today() - datetime.timedelta(days=-to_date)
+        else:
+            datetime_end = datetime.datetime.today()
+    except:
+        pass
+
+    try:
+        dates = frequency.get_dates(datetime_start, datetime_end)
+    except Exception as inst:
+        logger.debug("Error in frequency.get_dates: %s" % inst.args[0])
+        raise
+
+    try:
+        if sys.platform == 'win32':
+            template.replace("-", "#")
+
+        parameters = json.loads(template)
+        producttype = parameters.get('producttype')
+
+        list_input_files = []
+        for date in dates:
+            dirs=[]
+            full_dir_path = base_url+os.path.sep+producttype+os.path.sep+str(date.year)+os.path.sep+date.strftime('%m')+os.path.sep+date.strftime('%d')
+            if os.path.exists(full_dir_path):
+                dirs = next(os.walk(full_dir_path))[1]
+                for dir in dirs:
+                    fn = os.path.join(full_dir_path, dir)
+                    import glob
+                    input_files = []
+                    input_files = glob.glob(fn + os.path.sep + files_filter_expression)
+                    for one_file in input_files:
+                        one_filename = os.path.basename(one_file)
+                        in_date = one_filename.split('_')[7]
+                        day_data = functions.is_data_captured_during_day(in_date)
+                        if day_data:
+                            list_input_files.append(one_file)
+        # return lst
+        # list_productid_band = jeodpp_api.generate_list_products(dates, template, frequency, base_url, usr_pwd)
+
+    except Exception as inst:
+        logger.debug("Error in frequency.get_internet_dates: %s" % inst.args[0])
+        raise
+
+    return list_input_files
+
 
 
 ######################################################################################
@@ -1503,6 +1728,116 @@ def loop_get_internet(dry_run=False, test_one_source=False, my_source=None):
                                     logger.info("JEODPP Internet service completed")
                                     current_list = []
 
+                            elif internet_type == 'jeodpp_eos':
+                                # Create the full filename from a 'template' which contains
+                                jeodpp_internet_url = str(internet_source.url)
+
+                                if internet_source.productcode is None or internet_source.version is None:
+                                    logger.error("Product is not passed")
+                                    return
+
+                                product = {"productcode": internet_source.productcode,
+                                           "version": internet_source.version}
+                                # Datasource description
+                                datasource_descr = querydb.get_datasource_descr(source_type='INTERNET', source_id=internet_id)
+                                datasource_descr = datasource_descr[0]
+                                # Get list of subproducts
+
+                                subproducts = ingestion.get_list_ingestion_trigger(product, datasource_descr.datasource_descr_id)
+
+                                try:
+                                    current_list = build_list_matching_files_jeodpp_catalog(jeodpp_internet_url,
+                                                                                    str(internet_source.include_files_expression),
+                                                                                    internet_source.start_date,
+                                                                                    internet_source.end_date,
+                                                                                    str(internet_source.frequency_id),
+                                                                                    str(internet_source.files_filter_expression)
+                                                                                    )
+                                    # ongoing_product_band_list = jeodpp_api.get_product_id_band_from_list(ongoing_list)
+                                    # Loop over current list
+                                    if len(current_list) > 0:
+                                        listtoprocessrequest = []
+                                        listofmonths = []
+                                        listofdays = []
+                                        listoffiles = []
+                                        for current_file in current_list:
+                                            # TODO Getting the dates could be also done from database info.
+                                            current_file_day = current_file.split('/')[-3]
+                                            current_file_month = current_file.split('/')[-4]
+                                            current_file_year = current_file.split('/')[-5]
+
+                                            processed_list = []
+                                            processed_list_filename_month_day = es_constants.get_internet_processed_list_prefix + internet_id +current_file_year+ current_file_month + current_file_day +'.list'
+                                            processed_list = functions.restore_obj_from_pickle(processed_list,
+                                                                                               processed_list_filename_month_day)
+
+                                            # Check if current list is not in processed list
+                                            if len(processed_list) == 0 :
+                                                listtoprocessrequest.append(current_file)
+                                                listoffiles.append(current_file.split('/')[-1])
+                                                if current_file_month not in listofmonths:
+                                                    listofmonths.append(current_file_month)
+                                                if current_file_day not in listofdays:
+                                                    listofdays.append(current_file_day)
+                                            else:
+                                                if current_file not in processed_list:
+                                                    listtoprocessrequest.append(current_file)
+                                                    listoffiles.append(current_file.split('/')[-1])
+                                                    if current_file_month not in listofmonths:
+                                                        listofmonths.append(current_file_month)
+                                                    if current_file_day not in listofdays:
+                                                        listofdays.append(current_file_day)
+                                        # List to Ingestion
+                                        if listtoprocessrequest != set([]) and len(listtoprocessrequest) > 0:
+
+                                            dates_list = ingestion.get_list_unique_dates(datasource_descr,listoffiles, dates_not_in_filename=False, product_in_info=None, ingest=None)
+                                            # for month in list(listofmonths):
+                                            for date in list(dates_list):
+                                                # Filter files for singe day
+                                                # for day in list(listofdays):
+                                                # Create a ingest list per day
+                                                to_ingest_list=[]
+                                                day = date[6:8]
+                                                year = date[0:4]
+                                                month = date[4:6]
+                                                for filename in list(listtoprocessrequest):
+                                                    current_file_day = filename.split('/')[-3]
+                                                    current_file_month = filename.split('/')[-4]
+                                                    if current_file_day == day and current_file_month == month:
+                                                        to_ingest_list.append(filename)
+                                                if len(to_ingest_list) == 0:
+                                                    # logger_spec.info("No files to ingest: " + str(date))
+                                                    continue
+
+                                                # Intialize the list to enter in processed list
+                                                processed_list = []
+                                                processed_list_filename_month_day = es_constants.get_internet_processed_list_prefix + internet_id +year+ month + day + '.list'
+                                                processed_list = functions.restore_obj_from_pickle(processed_list, processed_list_filename_month_day)
+
+                                                # Ingest file now
+                                                logger_spec.info("Ingesting files of date: " + str(date))
+                                                try:
+                                                    ingestion.ingestion(to_ingest_list, year+month+day, product, subproducts, datasource_descr, logger, echo_query=1, test_mode=True)
+                                                    processed_list.extend(to_ingest_list)
+                                                    functions.dump_obj_to_pickle(processed_list, processed_list_filename_month_day)
+                                                except:
+                                                    logger.error("Error in Ingestion")
+                                                    b_error = True
+                                        else:
+                                            logger_spec.info("No active files to process")
+
+                                except:
+                                    logger.error("Error in JEODPP Internet service. Continue")
+                                    b_error = True
+
+                                finally:
+                                    logger.info("END OF JEODPP EOS Acquistion")
+                                    current_list = []
+                                    processed_list = []
+
+
+                            elif internet_type == 'cds_api':
+                                current_list = cds_api_loop_internet(internet_source)
 
                             # elif internet_type == 'sentinel_sat':
                             #     # Create the full filename from a 'template' which contains
@@ -1724,3 +2059,154 @@ def get_list_matching_files_subdir_local(list, local_dir, regex, level, max_leve
                                                      new_sub_dir)
 
     return 0
+
+
+def cds_api_loop_internet(internet_source):
+    logger_spec = log.my_logger('apps.get_internet.' + internet_source.internet_id)
+
+    if internet_source.user_name is None:
+        user_name = "anonymous"
+    else:
+        user_name = internet_source.user_name
+
+    if internet_source.password is None:
+        password = "anonymous"
+    else:
+        password = internet_source.password
+
+    usr_pwd = str(user_name) + ':' + str(password)
+
+    # Create the full filename from a 'template' which contains
+    cds_internet_url = str(internet_source.url)
+
+    #Read the CDS parameters from the file.
+    parameter = cds_api.read_cds_parameter_file(internet_source.internet_id)
+
+    # internet_source.internet_id = "CDS:ERA5:REANALYSIS:SST:MONTH"
+    # internet_source.internet_id = "CDS:ERA5:REANALYSIS:SST:HOUR"
+    # internet_source.internet_id = "CDS:ERA5:REANALYSIS:SST:DAY"
+    # internet_source.internet_id = "CDS:ERA5:REANALYSIS:SST:HOUR:PRESSURE925"
+    # internet_source.resourcename_uuid = internet_source.files_filter_expression
+    # internet_source.include_files_expression = {"resourcename_uuid":"reanalysis-era5-single-levels", "format": "netcdf", "product_type": "reanalysis",
+    #     "variable": "sea_surface_temperature", "year": None,"month": None, "day":None }
+    if parameter is not None:
+        resourcename_uuid = parameter.get('resourcename_uuid')
+        template_paramater = parameter.get('template')
+    else:
+        resourcename_uuid = internet_source.files_filter_expression
+        template_paramater = internet_source.include_files_expression
+
+    ongoing_list = []
+    ongoing_list_filename = es_constants.get_internet_processed_list_prefix + str(
+        internet_source.internet_id) + '_Ongoing' + '.list'
+    ongoing_list = functions.restore_obj_from_pickle(ongoing_list, ongoing_list_filename)
+
+    processed_list = []
+    processed_list_filename = es_constants.get_internet_processed_list_prefix + internet_source.internet_id + '.list'
+    processed_list = functions.restore_obj_from_pickle(processed_list,
+                                                       processed_list_filename)
+
+    try:
+        current_list = []
+        # Check if template is dict or string them create resources_parameters
+        if type(template_paramater) is dict:
+            resources_parameters = template_paramater
+        else:
+            resources_parameters = json.loads(template_paramater)
+
+        if 'period' in resources_parameters:
+            current_list = cds_api.build_list_matching_files_cds_period(cds_internet_url, template=template_paramater, resourcename_uuid=resourcename_uuid)
+        else:
+            # Dates defined are dynamic not based on the configuration file
+            current_list = build_list_matching_files_cds(cds_internet_url, template=template_paramater,
+                                                         from_date=internet_source.start_date, to_date=internet_source.end_date,
+                                                         frequency_id=str(internet_source.frequency_id), resourcename_uuid=resourcename_uuid)
+
+        # Current list and ongoing list in format (Datetime:ResourceID:variable)
+        ongoing_list_reduced = cds_api.get_cds_current_list_pattern(ongoing_list)
+
+        # Loop over current list to check if the file is already processed and exist in filesystem
+        if len(current_list) > 0:
+            listtoprocessrequest = []
+            listtoprocessrequest = cds_api.check_processed_list(current_list, processed_list, ongoing_list_reduced, template_paramater)
+            # ongoing_list= listtoprocessrequest   #line for test vto be commented
+            if listtoprocessrequest != set([]):  # What if error occurs in this loop
+                # logger_spec.info("Loop on the List to Process Request files.")
+                for filename in list(listtoprocessrequest):  # What if error occurs in this loop
+                    logger_spec.info("Creating Job request for Product ID: " + filename)
+                    try:
+                        # Give request to CDS to process
+                        # HTTP request to CDS follow here once the request is success add the request ID to ongoing list
+                        current_datetime_str = filename.split(':')[0]
+                        current_resource_id = filename.split(':')[1]
+                        template_without_date=template_paramater
+                        template = cds_api.build_cds_date_template(current_datetime_str, template_without_date)
+                        created_ongoing_request_id = cds_api.create_cds_job(internet_source, usr_pwd, template, resourcename_uuid)
+
+                        if created_ongoing_request_id is not None:
+                            ongoing_list.append(filename+":"+created_ongoing_request_id)
+                            functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+                    except:
+                        logger_spec.warning(
+                            "Problem while creating Job request to JEODPP: %s.", filename)
+                        b_error = True
+        # functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+        if len(ongoing_list) > 0:
+            logger_spec.info("Loop over the downloadable list files.")
+            # Current list and ongoing list in format (Datetime:ResourceID:variable)
+            # ongoing_list_reduced = cds_api.get_cds_current_list_pattern(ongoing_list)
+            # Make the ongoing_product_list unique to loop over
+            #ongoing_list_reduced = functions.conv_list_2_unique_value(ongoing_list_reduced)
+            # ongoing_job_list = jeodpp_api.get_job_id_from_list(ongoing_list)
+            listtodownload = []
+            for ongoing in ongoing_list:
+                ongoing_request_id = ongoing.split(':')[-1]
+                job_status = cds_api.get_task_status(internet_source.url, ongoing_request_id, usr_pwd)
+                if job_status == 'completed':
+                        logger_spec.info("Downloading Product: " + str(ongoing))
+                        try:
+                            download_url = cds_api.get_job_download_url(internet_source.url, ongoing_request_id, usr_pwd)
+                            if download_url is False:
+                                logger_spec.warning("Problem in getting download Url : %s.", str(ongoing))
+                                continue
+                            target_path = cds_api.get_cds_target_path(es_constants.ingest_dir, ongoing,
+                                                                      template_paramater)
+                            download_result = cds_api.get_file(download_url, usr_pwd, None, target_path)
+                            if download_result:
+                                logger_spec.info("Download Success for : " + str(ongoing))
+                                processed_item = cds_api.get_cds_current_Item_pattern(ongoing)
+                                processed_list.append(processed_item)  # Add the processed list only with datetime, resourceid_product_type and variable
+                                functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+                                ongoing_list.remove(ongoing)
+                                functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+                                deleted = cds_api.delete_cds_task(internet_source.url, ongoing_request_id, usr_pwd, internet_source.https_params)
+                                if not deleted:  # To manage the delete store the job id in the  delete list and remove the job
+                                    logger_spec.warning("Problem while deleting Product job id: %s.", str(ongoing))
+                            else:
+                                #Check why download link is not available eventhough the job is completed
+                                logger_spec.warning("Download link is not available: %s.", str(ongoing))
+                        except:
+                            logger_spec.warning("Problem while Downloading Product: %s.", str(ongoing))
+                            b_error = True
+                elif job_status == 'failed':
+                    # Check if the request failed and remove the job
+                    # Check if the created request is failed then remove the job(task)
+                    logger_spec.warning("Problem with created job so deleteing it: %s.", str(ongoing))
+                    deleted = cds_api.delete_cds_task(internet_source.url, ongoing_request_id, usr_pwd, internet_source.https_params)
+                    if not deleted:  # To manage the delete store the job id in the  delete list and remove the job
+                        logger_spec.warning("Problem while deleting Product job id: %s.", str(ongoing))
+                    else:
+                        ongoing_list.remove(ongoing)
+                        functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+        functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+        functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+
+    except:
+        logger.error("Error in CDS service. Continue")
+        b_error = True
+
+    finally:
+        logger.info("CDS service completed")
+        current_list = []
+        return current_list
+
