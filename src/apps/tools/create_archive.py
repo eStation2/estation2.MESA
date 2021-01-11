@@ -157,7 +157,7 @@ class Create():
         mapset='FEWSNET-Africa-8km'
         product='fewsnet-rfe'
         version='2.0'
-        start_date=datetime.date(2011, 1, 1)
+        start_date=datetime.date(2015, 1, 1)
         end_date=None
 
         # RFE from 2.0: since 01.01.2011
