@@ -1,8 +1,8 @@
 #
 #	purpose: Define the ingest service
-#	author:  M.Clerici & Jurriaan van't Klooster
-#	date:	 20.02.2014
-#   descr:	 Process input files into the specified 'mapset'
+#	author:  Vijay Charan & M.Clerici & Jurriaan van't Klooster
+#	date:	 September 2020
+#   descr:
 #	history: 1.0
 #
 #   TODO-LinkIT: for MCD45monthly aborts for out-of-memory in re-scaling data ! FTTB ingest only 2 windows
@@ -53,172 +53,13 @@ def loop_ingestion(dry_run=False, test_one_product=None):
         #     status = ingest_archives_eumetcast(dry_run=dry_run)
         # except:
         #     logger.error("Error in executing ingest_archives_eumetcast")
-        loop_ingestion_0(dry_run=False, test_one_product=None)
+        loop_ingestion_drive(dry_run=False, test_one_product=None)
 
         # Wait at the end of the loop
         logger.info("Entering sleep time of  %s seconds" % str(10))
         time.sleep(10)
 
-def verify_test_one_product(test_one_product=None, productcode=None):
-
-    # Verify the test-one-product case
-    do_ingest_source = True
-    if test_one_product:
-        if productcode != test_one_product:
-            do_ingest_source = False
-
-    return do_ingest_source
-
-def get_filenaming_info(source, datasource_descr):
-    # Get the 'filenaming' info (incl. 'area-type') from the acquisition source
-    if source.type == 'EUMETCAST':
-
-        my_filter_expr = datasource_descr.filter_expression_jrc
-        # for eumetcast_filter, datasource_descr in querydb.get_datasource_descr(source_type=source.type,
-        #                                                                        source_id=source.data_source_id):
-        logger.info("Eumetcast Source: looking for files in %s - named like: %s" % (
-            ingest_dir_in, my_filter_expr))
-
-    elif source.type == 'INTERNET':
-        # Implement file name filtering for INTERNET data source.
-        # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type=source.type,
-        #                                                                       source_id=source.data_source_id):
-        my_filter_expr = datasource_descr.files_filter_expression
-        logger.info("Internet Source: looking for files in %s - named like: %s" % (
-            ingest_dir_in, my_filter_expr))
-
-    return my_filter_expr
-
-def get_files_matching_with_file_expression(my_filter_expr):
-    files = []
-    # Get the 'filenaming' info (incl. 'area-type') from the acquisition source
-    files = [os.path.basename(f) for f in glob.glob(ingest_dir_in + '*') if
-             re.match(my_filter_expr, os.path.basename(f))]
-    return files
-
-def is_date_not_in_filename(input_to_process_re):
-    dates_not_in_filename = False
-    if input_to_process_re == 'dates_not_in_filename':
-        dates_not_in_filename = True
-
-    return dates_not_in_filename
-
-#########################################################################################################
-###################### Get Subproducts associated with ingestion and datasource #########################
-## Goes in error if specific datasource is not associated with subproducts eg. WSI crop & Pasture #######
-#########################################################################################################
-def get_subproduct(ingest, product_in_info, datasource_descr_id):
-    sprod=None
-    try:
-        re_process = product_in_info.re_process
-        re_extract = product_in_info.re_extract
-        nodata_value = product_in_info.no_data
-        sprod = {'subproduct': ingest.subproductcode,
-                 'mapsetcode': ingest.mapsetcode,
-                 're_extract': re_extract,
-                 're_process': re_process,
-                 'nodata': nodata_value}
-        # subproducts.append(sprod)
-        return sprod
-    except:
-        # What to return here?
-        logger.warning("Subproduct %s not defined for source %s" % (
-            ingest.subproductcode, datasource_descr_id))
-    finally:
-        return sprod
-
-#########################################################################################
-#######Build the list of dates from datasource description & Product info ###############
-#########################################################################################
-def build_date_list_from_datasource(datasource_descr, product_in_info, ingest_mapset):
-    dates_list = []
-
-    start_datetime = datetime.datetime.strptime(str(datasource_descr.start_date), "%Y%m%d")
-    if datasource_descr.end_date is None:
-        end_datetime = datetime.date.today()
-    else:
-        end_datetime = datetime.datetime.strptime(str(datasource_descr.end_date), "%Y%m%d")
-
-    all_starting_dates = proc_functions.get_list_dates_for_dataset(product_in_info.productcode, \
-                                                                   product_in_info.subproductcode, \
-                                                                   product_in_info.version, \
-                                                                   start_date=datasource_descr.start_date,
-                                                                   end_date=datasource_descr.end_date)
-
-    my_dataset = products.Dataset(product_in_info.productcode,
-                                  product_in_info.subproductcode,
-                                  ingest_mapset,
-                                  version=product_in_info.version,
-                                  from_date=start_datetime,
-                                  to_date=end_datetime)
-    my_dates = my_dataset.get_dates()
-
-    my_formatted_dates = []
-    for my_date in my_dates:
-        my_formatted_dates.append(my_dataset._frequency.format_date(my_date))
-
-    my_missing_dates = []
-    for curr_date in all_starting_dates:
-        if curr_date not in my_formatted_dates:
-            my_missing_dates.append(curr_date)
-
-    dates_list = sorted(my_missing_dates, reverse=False)
-
-    return dates_list
-
-#########################################################################################
-#######      Build the list of dates from datasource description & files  ###############
-#########################################################################################
-def build_date_list_from_filenames(files, datasource_descr):
-    dates_list = []
-    for filename in files:
-        date_position = int(datasource_descr.date_position)
-        if datasource_descr.format_type == 'delimited':
-            splitted_fn = re.split(datasource_descr.delimiter, filename)
-            date_string = splitted_fn[date_position]
-            if len(date_string) > len(datasource_descr.date_format):
-                date_string = date_string[0:len(datasource_descr.date_format)]
-            dates_list.append(date_string)
-        else:
-            dates_list.append(
-                filename[date_position:date_position + len(datasource_descr.date_format)])
-
-    dates_list = set(dates_list)
-    dates_list = sorted(dates_list, reverse=False)
-
-    return dates_list
-
-#################################################
-#######   Get list unique dates   ###############
-#################################################
-def get_list_unique_dates(datasource_descr, files, dates_not_in_filename, product_in_info, ingest_mapsetcode ):
-    #   Check the case 'dates_not_in_filename' (e.g. GSOD -> yearly files continuously updated)
-    dates_list = []
-    if dates_not_in_filename:
-        # Build the list of dates from datasource description
-        dates_list = build_date_list_from_datasource(datasource_descr, product_in_info, ingest_mapsetcode)
-    else:
-        # Build the list of dates from filenames
-        dates_list = build_date_list_from_filenames(files, datasource_descr)
-
-    return dates_list
-
-def get_dates_file_list(dates_not_in_filename, files, my_filter_expr, in_date, logger_spec):
-    date_fileslist = []
-    if dates_not_in_filename:
-        date_fileslist = [ingest_dir_in + l for l in files]
-    else:
-        # Refresh the files list (some files have been deleted)
-        files = [os.path.basename(f) for f in glob.glob(ingest_dir_in + '*') if
-                 re.match(my_filter_expr, os.path.basename(f))]
-        logger_spec.debug("     --> processing date, in native format: %s" % in_date)
-        # Get the list of existing files for that date
-        regex = re.compile(".*(" + in_date + ").*")
-        date_fileslist = [ingest_dir_in + m.group(0) for l in files for m in [regex.search(l)] if m]
-
-    return date_fileslist
-
-def loop_ingestion_0(dry_run=False, test_one_product=None):
+def loop_ingestion_drive(dry_run=False, test_one_product=None):
     echo_query = False
     # Get all active product ingestion records with a subproduct count.
     active_product_ingestions = querydb.get_ingestion_product(allrecs=True)
@@ -229,7 +70,7 @@ def loop_ingestion_0(dry_run=False, test_one_product=None):
         productversion = active_product_ingest[1]
 
         # Verify the test-one-product case
-        do_ingest_product = verify_test_one_product(test_one_product, productcode)
+        do_ingest_product = is_test_one_product(test_one_product, productcode)
 
         if do_ingest_product:
             logger.info("Ingestion active for product: [%s] subproduct N. %s" % (active_product_ingest[0],
@@ -322,37 +163,6 @@ def loop_ingestion_0(dry_run=False, test_one_product=None):
                         else:
                             time.sleep(10)
 
-def store_native_files(product, date_fileslist, logger_spec):
-    # Special case for mesa-proc @ JRC
-    # Copy to 'Archive' directory
-    output_directory = data_dir_out + functions.set_path_sub_directory(
-        product['productcode'], None, 'Native', product['version'], 'dummy_mapset_arg')
-    functions.check_output_dir(output_directory)
-    # Archive the files
-    for file_to_move in date_fileslist:
-        logger_spec.debug("     --> now archiving input files: %s" % file_to_move)
-        new_location = output_directory + os.path.basename(file_to_move)
-        try:
-            if os.path.isfile(file_to_move):
-                shutil.move(file_to_move, new_location)
-            else:
-                logger_spec.debug("     --> file to be archived cannot be found: %s" % file_to_move)
-        except:
-            logger_spec.debug("     --> error in archiving file: %s" % file_to_move)
-
-def delete_files(date_fileslist, logger_spec):
-    # Delete the files
-    for file_to_remove in date_fileslist:
-        logger_spec.debug("     --> now deleting input files: %s" % file_to_remove)
-        try:
-            if os.path.isfile(file_to_remove):
-                os.remove(file_to_remove)
-            else:
-                logger_spec.debug("     --> file to be deleted cannot be found: %s" % file_to_remove)
-        except:
-            logger_spec.debug("     --> error in deleting file: %s" % file_to_remove)
-
-
 def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_logger, echo_query=False, test_mode=False):
 #   Manages ingestion of 1/more file/files for a given date
 #   Arguments:
@@ -394,8 +204,8 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
         do_preprocess = 1
 
     if do_preprocess == 1:
-        composed_file_list = ingestion_0(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger, in_date, product,
-                    test_mode)
+        composed_file_list = ingestion_pre_process(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger, in_date, product,
+                                                   test_mode)
         # TODO alter this area
         # Error occurred and was detected in pre_process routine
         if str(composed_file_list) == '1':
@@ -418,8 +228,8 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
     # -------------------------------------------------------------------------
     # Ingest_file
     # -------------------------------------------------------------------------
-    ingestion_1(composed_file_list, in_date, product, subproducts, datasource_descr, my_logger, input_files,
-                    echo_query, test_mode, tmpdir)
+    ingestion_ingest_file(composed_file_list, in_date, product, subproducts, datasource_descr, my_logger, input_files,
+                          echo_query, test_mode, tmpdir)
     # -------------------------------------------------------------------------
     # Remove the Temp working directory
     # -------------------------------------------------------------------------
@@ -432,8 +242,8 @@ def ingestion(input_files, in_date, product, subproducts, datasource_descr, my_l
     return 0
 
 
-def ingestion_1(composed_file_list, in_date, product, subproducts, datasource_descr, my_logger, input_files,
-                echo_query, test_mode, tmpdir):
+def ingestion_ingest_file(composed_file_list, in_date, product, subproducts, datasource_descr, my_logger, input_files,
+                          echo_query, test_mode, tmpdir):
     try:
         from apps.acquisition import ingestion_ingest_file
         ingestion_ingest_file.ingest_file(composed_file_list, in_date, product, subproducts, datasource_descr, my_logger, in_files=input_files,
@@ -453,7 +263,7 @@ def ingestion_1(composed_file_list, in_date, product, subproducts, datasource_de
         shutil.rmtree(tmpdir)
         raise NameError('Error in ingestion routine')
 
-def ingestion_0(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger, in_date, product, test_mode):
+def ingestion_pre_process(preproc_type, native_mapset_code, subproducts, input_files, tmpdir, my_logger, in_date, product, test_mode):
     my_logger.debug("Calling routine %s" % 'preprocess_files')
     try:
         from apps.acquisition import ingestion_pre_process
@@ -490,5 +300,194 @@ def ingestion_0(preproc_type, native_mapset_code, subproducts, input_files, tmpd
 
         shutil.rmtree(tmpdir)
         raise NameError('Caught Error in preprocessing routine')
+
+def is_date_not_in_filename(input_to_process_re):
+    dates_not_in_filename = False
+    if input_to_process_re == 'dates_not_in_filename':
+        dates_not_in_filename = True
+
+    return dates_not_in_filename
+
+def is_test_one_product(test_one_product=None, productcode=None):
+
+    # Verify the test-one-product case
+    do_ingest_source = True
+    if test_one_product:
+        if productcode != test_one_product:
+            do_ingest_source = False
+
+    return do_ingest_source
+
+def get_filenaming_info(source, datasource_descr):
+    # Get the 'filenaming' info (incl. 'area-type') from the acquisition source
+    if source.type == 'EUMETCAST':
+
+        my_filter_expr = datasource_descr.filter_expression_jrc
+        # for eumetcast_filter, datasource_descr in querydb.get_datasource_descr(source_type=source.type,
+        #                                                                        source_id=source.data_source_id):
+        logger.info("Eumetcast Source: looking for files in %s - named like: %s" % (
+            ingest_dir_in, my_filter_expr))
+
+    elif source.type == 'INTERNET':
+        # Implement file name filtering for INTERNET data source.
+        # for internet_filter, datasource_descr in querydb.get_datasource_descr(source_type=source.type,
+        #                                                                       source_id=source.data_source_id):
+        my_filter_expr = datasource_descr.files_filter_expression
+        logger.info("Internet Source: looking for files in %s - named like: %s" % (
+            ingest_dir_in, my_filter_expr))
+
+    return my_filter_expr
+
+def get_files_matching_with_file_expression(my_filter_expr):
+    files = []
+    # Get the 'filenaming' info (incl. 'area-type') from the acquisition source
+    files = [os.path.basename(f) for f in glob.glob(ingest_dir_in + '*') if
+             re.match(my_filter_expr, os.path.basename(f))]
+    return files
+
+#########################################################################################################
+###################### Get Subproducts associated with ingestion and datasource #########################
+## Goes in error if specific datasource is not associated with subproducts eg. WSI crop & Pasture #######
+#########################################################################################################
+def get_subproduct(ingest, product_in_info, datasource_descr_id):
+    sprod=None
+    try:
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+        nodata_value = product_in_info.no_data
+        sprod = {'subproduct': ingest.subproductcode,
+                 'mapsetcode': ingest.mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process,
+                 'nodata': nodata_value}
+        # subproducts.append(sprod)
+        return sprod
+    except:
+        # What to return here?
+        logger.warning("Subproduct %s not defined for source %s" % (
+            ingest.subproductcode, datasource_descr_id))
+    finally:
+        return sprod
+
+#################################################
+#######   Get list unique dates   ###############
+#################################################
+def get_list_unique_dates(datasource_descr, files, dates_not_in_filename, product_in_info, ingest_mapsetcode ):
+    #   Check the case 'dates_not_in_filename' (e.g. GSOD -> yearly files continuously updated)
+    dates_list = []
+    if dates_not_in_filename:
+        # Build the list of dates from datasource description
+        dates_list = build_date_list_from_datasource(datasource_descr, product_in_info, ingest_mapsetcode)
+    else:
+        # Build the list of dates from filenames
+        dates_list = build_date_list_from_filenames(files, datasource_descr)
+
+    return dates_list
+
+def get_dates_file_list(dates_not_in_filename, files, my_filter_expr, in_date, logger_spec):
+    date_fileslist = []
+    if dates_not_in_filename:
+        date_fileslist = [ingest_dir_in + l for l in files]
+    else:
+        # Refresh the files list (some files have been deleted)
+        files = [os.path.basename(f) for f in glob.glob(ingest_dir_in + '*') if
+                 re.match(my_filter_expr, os.path.basename(f))]
+        logger_spec.debug("     --> processing date, in native format: %s" % in_date)
+        # Get the list of existing files for that date
+        regex = re.compile(".*(" + in_date + ").*")
+        date_fileslist = [ingest_dir_in + m.group(0) for l in files for m in [regex.search(l)] if m]
+
+    return date_fileslist
+
+#########################################################################################
+#######Build the list of dates from datasource description & Product info ###############
+#########################################################################################
+def build_date_list_from_datasource(datasource_descr, product_in_info, ingest_mapset):
+    dates_list = []
+
+    start_datetime = datetime.datetime.strptime(str(datasource_descr.start_date), "%Y%m%d")
+    if datasource_descr.end_date is None:
+        end_datetime = datetime.date.today()
+    else:
+        end_datetime = datetime.datetime.strptime(str(datasource_descr.end_date), "%Y%m%d")
+
+    all_starting_dates = proc_functions.get_list_dates_for_dataset(product_in_info.productcode, \
+                                                                   product_in_info.subproductcode, \
+                                                                   product_in_info.version, \
+                                                                   start_date=datasource_descr.start_date,
+                                                                   end_date=datasource_descr.end_date)
+
+    my_dataset = products.Dataset(product_in_info.productcode,
+                                  product_in_info.subproductcode,
+                                  ingest_mapset,
+                                  version=product_in_info.version,
+                                  from_date=start_datetime,
+                                  to_date=end_datetime)
+    my_dates = my_dataset.get_dates()
+
+    my_formatted_dates = []
+    for my_date in my_dates:
+        my_formatted_dates.append(my_dataset._frequency.format_date(my_date))
+
+    my_missing_dates = []
+    for curr_date in all_starting_dates:
+        if curr_date not in my_formatted_dates:
+            my_missing_dates.append(curr_date)
+
+    dates_list = sorted(my_missing_dates, reverse=False)
+
+    return dates_list
+
+#########################################################################################
+#######      Build the list of dates from datasource description & files  ###############
+#########################################################################################
+def build_date_list_from_filenames(files, datasource_descr):
+    dates_list = []
+    for filename in files:
+        date_position = int(datasource_descr.date_position)
+        if datasource_descr.format_type == 'delimited':
+            splitted_fn = re.split(datasource_descr.delimiter, filename)
+            date_string = splitted_fn[date_position]
+            if len(date_string) > len(datasource_descr.date_format):
+                date_string = date_string[0:len(datasource_descr.date_format)]
+            dates_list.append(date_string)
+        else:
+            dates_list.append(
+                filename[date_position:date_position + len(datasource_descr.date_format)])
+
+    dates_list = set(dates_list)
+    dates_list = sorted(dates_list, reverse=False)
+
+    return dates_list
+
+def store_native_files(product, date_fileslist, logger_spec):
+    # Special case for mesa-proc @ JRC
+    # Copy to 'Archive' directory
+    output_directory = data_dir_out + functions.set_path_sub_directory(
+        product['productcode'], None, 'Native', product['version'], 'dummy_mapset_arg')
+    functions.check_output_dir(output_directory)
+    # Archive the files
+    for file_to_move in date_fileslist:
+        logger_spec.debug("     --> now archiving input files: %s" % file_to_move)
+        new_location = output_directory + os.path.basename(file_to_move)
+        try:
+            if os.path.isfile(file_to_move):
+                shutil.move(file_to_move, new_location)
+            else:
+                logger_spec.debug("     --> file to be archived cannot be found: %s" % file_to_move)
+        except:
+            logger_spec.debug("     --> error in archiving file: %s" % file_to_move)
+
+def delete_files(date_fileslist, logger_spec):
+    # Delete the files
+    for file_to_remove in date_fileslist:
+        logger_spec.debug("     --> now deleting input files: %s" % file_to_remove)
+        try:
+            if os.path.isfile(file_to_remove):
+                os.remove(file_to_remove)
+            else:
+                logger_spec.debug("     --> file to be deleted cannot be found: %s" % file_to_remove)
+        except:
+            logger_spec.debug("     --> error in deleting file: %s" % file_to_remove)
 
 

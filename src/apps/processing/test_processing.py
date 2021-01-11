@@ -243,7 +243,7 @@ def my_proc_tamsat_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None,
 
     # Create the list of dates -> returns empty if start==end==None
     if start_date is not None and end_date is not None:
-        starting_dates = proc_functions.get_list_dates_for_dataset('tamsat-rfe', '10d', '3.0', start_date=start_date, end_date=end_date)
+        starting_dates = proc_functions.get_list_dates_for_dataset('tamsat-rfe', '10d', '3.1', start_date=start_date, end_date=end_date)
     else:
         starting_dates = None
 
@@ -254,8 +254,9 @@ def my_proc_tamsat_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None,
             'starting_sprod':'10d',\
             'starting_dates': starting_dates,\
             'mapset': 'TAMSAT-Africa-4km',\
-            'version':'3.0',
-            'logfile':'log-tamsat.log'}
+            'version':'3.1',
+            'logfile':'log-tamsat.log',
+            'upsert_db': True }
 
     res_queue = None
     proc_lists=processing_std_precip_stats_only(res_queue,**args)
@@ -888,30 +889,29 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 
     processing_std_vgt_stats_only(res_queue, **args)
 
-# from apps.processing.processing_std_swi import *
-# def test_subprocess_swi(pipe_run=4, pipe_print=0, touch_files_only=False):
-#     start_date = '19990101'
-#     end_date = '20181221'
-#
-#     if start_date is not None and end_date is not None:
-#         starting_dates = proc_functions.get_list_dates_for_dataset('vgt-ba', 'ba', 'V1.5', start_date=start_date, end_date=end_date)
-#     else:
-#         starting_dates = None
-#     args = {'pipeline_run_level':pipe_run, \
-#             'pipeline_printout_level':pipe_print, \
-#             'pipeline_printout_graph_level': 0, \
-#             'prod': 'ascat-swi',\
-#             'starting_sprod':'swi',\
-#             'mapset': 'ASCAT-Africa-12-5km',\
-#             'version':'V3.1',
-#             'starting_dates': starting_dates,
-#             'logfile':'ascat-swi',
-#             'upsert_db' : True,
-#             'touch_only':touch_files_only
-#             }
-#     res_queue = None
-#
-#     processing_std_swi_stats_only(res_queue, **args)
+from apps.processing.processing_std_reproject import *
+def test_process_repoject(pipe_run=4, pipe_print=0, touch_files_only=False):
+    start_date = None #'19990101'
+    end_date = None #'20181221'
+
+    if start_date is not None and end_date is not None:
+        starting_dates = proc_functions.get_list_dates_for_dataset('vgt-ndvi', 'ndv', 'olci-v2.0', start_date=start_date, end_date=end_date)
+    else:
+        starting_dates = None
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': 'vgt-ndvi',\
+            'starting_sprod':'ndv',\
+            'mapset': 'SPOTV-Africa-300m',\
+            'version':'olci-v2.0',
+            'starting_dates': starting_dates,
+            'logfile':'vgt-ndvi',
+            'touch_files_only':False
+            }
+    res_queue = None
+
+    processing_std_reproject(res_queue, **args)
 
 
 
@@ -920,10 +920,10 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 #   Call a specific processing chain - To be TESTED after 03.3.2019
 #   ---------------------------------------------------------------------
 
-# test_subprocess_swi(pipe_run=3, pipe_print=0, touch_files_only=False)
+# test_process_repoject(pipe_run=3, pipe_print=0, touch_files_only=False)
 # test_subprocess_vgt_lai(pipe_run=0, pipe_print=4, touch_files_only=False)
 # test_subprocess_vgt_fcover(pipe_run=3, pipe_print=0, touch_files_only=False)
-test_subprocess_modis_fapar(pipe_run=3, pipe_print=0, touch_files_only=False)
+# test_subprocess_modis_fapar(pipe_run=3, pipe_print=0, touch_files_only=False)
 # test_subprocess_vgt_fapar(pipe_run=0, pipe_print=4, touch_files_only=False)
 # my_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False)
 # my_proc_std_ndvi_res(pipe_run=3, pipe_print=0, touch_files_only=False)
@@ -936,7 +936,7 @@ test_subprocess_modis_fapar(pipe_run=3, pipe_print=0, touch_files_only=False)
 #my_proc_std_modis_kd490(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_modis_pp(pipe_run=0, pipe_print=4, touch_files_only=False)
 #my_proc_std_median_filter()
-#my_proc_tamsat_rfe(pipe_run=4, pipe_print=0, start_date='19830101', end_date='20171231', touch_files_only=False)
+my_proc_tamsat_rfe(pipe_run=3, pipe_print=0, start_date='19830101', end_date='20181221', touch_files_only=False)
 # proc_list=my_proc_fewsnet_rfe(pipe_run=0, pipe_print=8, start_date=None, end_date=None, touch_files_only=False)                       # OK
 
 # my_proc_chirps_dekad(pipe_run=3, pipe_print=0, start_date='20180101', end_date='20181231', upsert_db=False, touch_files_only=False)
