@@ -5,7 +5,7 @@ from osgeo import gdal
 
 import os
 
-def plot_1o1(data_1, data_2, x_label=None, y_label=None, figure_title=None):
+def plot_1o1(data_1, data_2, x_label=None, y_label=None, figure_title=None, png_file=None):
     """
     :param data_1:              -> np.array dataset 1
     :param data_2:              -> np.array dataset 2
@@ -110,7 +110,7 @@ def plot_1o1(data_1, data_2, x_label=None, y_label=None, figure_title=None):
         plt.grid()
         plt.tight_layout()
 
-        plt.savefig("/data/processing/exchange/"+filename+".png")
+        plt.savefig("/data/processing/exchange/"+png_file+".png")
         
         #plt.show()
 
@@ -126,27 +126,45 @@ def plot_1o1(data_1, data_2, x_label=None, y_label=None, figure_title=None):
 #data_2[data_2==-32768]=np.nan
 #data_1 = np.random.sample((10, 10))
 #data_2 = np.random.sample((10, 10))
-input_directory = os.fsencode("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10davg-linearx2/")
-filename = "test"
+# M.C. Commented on 21.12.2020
+# input_directory = os.fsencode("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10davg-linearx2/")
+# filename = "test"
+# for file in os.listdir(input_directory):
+#     filename = os.fsdecode(file)
+#     if filename.endswith(".tif") or filename.endswith(".py"):
+#         ds_1 = gdal.Open("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10davg-linearx2/"+filename)
+#         data_1 = np.array(ds_1.GetRasterBand(1).ReadAsArray())
 #
-for file in os.listdir(input_directory):
-    filename = os.fsdecode(file)
-    if filename.endswith(".tif") or filename.endswith(".py"): 
-        ds_1 = gdal.Open("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10davg-linearx2/"+filename)
-        data_1 = np.array(ds_1.GetRasterBand(1).ReadAsArray())
-
-        ds_2 = gdal.Open("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10dmax-linearx2/"+filename)
-        data_2 = np.array(ds_2.GetRasterBand(1).ReadAsArray())
-        
-        data_1 = data_1.astype('float')
-        data_2 = data_2.astype('float')
-        #
-        data_1[data_1 == -32768] = np.nan
-        data_2[data_2 == -32768] = np.nan
-        
-        plot_1o1(data_1, data_2, "1999-2017", "1999-2014", filename)
-        
-    else:
-        continue
-
+#         ds_2 = gdal.Open("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10dmax-linearx2/"+filename)
+#         data_2 = np.array(ds_2.GetRasterBand(1).ReadAsArray())
+#
+#         data_1 = data_1.astype('float')
+#         data_2 = data_2.astype('float')
+#         #
+#         data_1[data_1 == -32768] = np.nan
+#         data_2[data_2 == -32768] = np.nan
+#
+#         plot_1o1(data_1, data_2, "1999-2017", "1999-2014", filename)
+#
+#     else:
+#         continue
 #plot_1o1(data_1, data_2, "1999-2017", "1999-2014", "Scatterplot - avg")
+
+indir = '/data/processing/exchange/vgt-ndvi/NDVI300/c_gls_NDVI300_202007010000_AFRI_OLCI_V2.0.1/processed/SPOTV-Africa-1km/'
+files = [indir+'average_20200701_olci-ndvi_ndv_SPOTV-Africa-1km_V2.0.tif',
+         indir+'nearestneighbour_20200701_olci-ndvi_ndv_SPOTV-Africa-1km_V2.0.tif']
+
+ds_1 = gdal.Open(files[0])
+data_1 = np.array(ds_1.GetRasterBand(1).ReadAsArray())
+
+ds_2 = gdal.Open(files[1])
+data_2 = np.array(ds_2.GetRasterBand(1).ReadAsArray())
+
+data_1 = data_1.astype('float')
+data_2 = data_2.astype('float')
+#
+data_1[data_1 == -32768] = np.nan
+data_2[data_2 == -32768] = np.nan
+
+plot_1o1(data_1, data_2, x_label="Average", y_label="Nearest", png_file='NDVI_OLCI_reprojected')
+
