@@ -1,11 +1,13 @@
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy import stats  # , interpolate
 from osgeo import gdal
 
 import os
 
-def plot_1o1(data_1, data_2, x_label=None, y_label=None, figure_title=None):
+def plot_1o1(data_1, data_2, x_label=None, y_label=None, figure_title=None, png_file=None):
     """
     :param data_1:              -> np.array dataset 1
     :param data_2:              -> np.array dataset 2
@@ -110,7 +112,7 @@ def plot_1o1(data_1, data_2, x_label=None, y_label=None, figure_title=None):
         plt.grid()
         plt.tight_layout()
 
-        plt.savefig("/data/processing/exchange/"+filename+".png")
+        plt.savefig(png_file+".png")
         
         #plt.show()
 
@@ -126,27 +128,72 @@ def plot_1o1(data_1, data_2, x_label=None, y_label=None, figure_title=None):
 #data_2[data_2==-32768]=np.nan
 #data_1 = np.random.sample((10, 10))
 #data_2 = np.random.sample((10, 10))
-input_directory = os.fsencode("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10davg-linearx2/")
-filename = "test"
+# M.C. Commented on 21.12.2020
+# input_directory = os.fsencode("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10davg-linearx2/")
+# filename = "test"
+# for file in os.listdir(input_directory):
+#     filename = os.fsdecode(file)
+#     if filename.endswith(".tif") or filename.endswith(".py"):
+#         ds_1 = gdal.Open("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10davg-linearx2/"+filename)
+#         data_1 = np.array(ds_1.GetRasterBand(1).ReadAsArray())
 #
-for file in os.listdir(input_directory):
-    filename = os.fsdecode(file)
-    if filename.endswith(".tif") or filename.endswith(".py"): 
-        ds_1 = gdal.Open("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10davg-linearx2/"+filename)
-        data_1 = np.array(ds_1.GetRasterBand(1).ReadAsArray())
+#         ds_2 = gdal.Open("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10dmax-linearx2/"+filename)
+#         data_2 = np.array(ds_2.GetRasterBand(1).ReadAsArray())
+#
+#         data_1 = data_1.astype('float')
+#         data_2 = data_2.astype('float')
+#         #
+#         data_1[data_1 == -32768] = np.nan
+#         data_2[data_2 == -32768] = np.nan
+#
+#         plot_1o1(data_1, data_2, "1999-2017", "1999-2014", filename)
+#
+#     else:
+#         continue
 
-        ds_2 = gdal.Open("/data/processing/vgt-ndvi/sv2-pv2.2/SPOTV-Africa-1km/derived/10dmax-linearx2/"+filename)
-        data_2 = np.array(ds_2.GetRasterBand(1).ReadAsArray())
-        
-        data_1 = data_1.astype('float')
-        data_2 = data_2.astype('float')
-        #
-        data_1[data_1 == -32768] = np.nan
-        data_2[data_2 == -32768] = np.nan
-        
-        plot_1o1(data_1, data_2, "1999-2017", "1999-2014", filename)
-        
-    else:
-        continue
+# ------------------------------------------------------------------------------------------------
+# for NDVI-OLCI vs. PROBAV
+# ------------------------------------------------------------------------------------------------
+indir = '/data/processing/vgt-ndvi/'
 
-#plot_1o1(data_1, data_2, "1999-2017", "1999-2014", "Scatterplot - avg")
+file_olci_vci='/data/processing/exchange/NDVI300/test_data/20200701_vgt-ndvi_vci_SPOTV-Africa-1km_olci-v2.0.tif'; x_label="OLCI_VCI"
+file_pv_vci= indir+'sv2-pv2.2/SPOTV-Africa-1km/derived/vci/20200701_vgt-ndvi_vci_SPOTV-Africa-1km_sv2-pv2.2.tif'; y_label="PROBAV_VCI"
+
+
+png_file_path="/data/processing/exchange/NDVI300/"+'20200701_'+x_label+'_'+y_label
+
+file_0=file_olci_vci
+file_1=file_pv_vci
+
+# ------------------------------------------------------------------------------------------------
+# for TAMSAT 3.1
+# ------------------------------------------------------------------------------------------------
+# indir = '/data/processing/tamsat-rfe/'
+# file_0= indir+'3.0/TAMSAT-Africa-4km/derived/10ddiff/'+'20200101_tamsat-rfe_10ddiff_TAMSAT-Africa-4km_3.0.tif'
+# file_1= indir+'3.1/TAMSAT-Africa-4km/derived/10ddiff/'+'20200101_tamsat-rfe_10ddiff_TAMSAT-Africa-4km_3.1.tif'
+# x_label="3.0"
+# y_label="3.1"
+# png_file_path="/data/processing/exchange/"+'20200101_tamsat_10ddiff_'+x_label+'_'+y_label
+
+# ------------------------------------------------------------------------------------------------
+# Execution code
+# ------------------------------------------------------------------------------------------------
+
+ds_1 = gdal.Open(file_0)
+data_1 = np.array(ds_1.GetRasterBand(1).ReadAsArray())
+
+ds_2 = gdal.Open(file_1)
+data_2 = np.array(ds_2.GetRasterBand(1).ReadAsArray())
+
+data_1 = data_1.astype('float')
+data_2 = data_2.astype('float')
+# #
+data_1[data_1 < -200 ] = np.nan
+data_1[data_1  > 200.0] = np.nan
+data_2[data_2 < -200] = np.nan
+data_2[data_2  > 200.0] = np.nan
+# data_1[data_1 == -32768] = np.nan
+# data_2[data_2 == -32768] = np.nan
+
+plot_1o1(data_1, data_2, x_label=x_label, y_label=y_label, png_file=png_file_path)
+
