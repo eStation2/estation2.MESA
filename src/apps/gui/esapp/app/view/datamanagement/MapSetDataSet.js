@@ -507,6 +507,7 @@ Ext.define("esapp.view.datamanagement.MapSetDataSet",{
             width: 65,
             align:'center',
             stopSelection: false,
+            hidden: (esapp.globals['role'] == 'pc3' && esapp.globals['mode'] == 'nominal') ? true : false,
             items: [{
                 icon: 'resources/img/icons/download.png',
                 tooltip: esapp.Utils.getTranslation('tipcompletedataset'),    // 'Complete data set',

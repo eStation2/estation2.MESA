@@ -55,7 +55,7 @@ import shutil
 # scipy for chla gradient computation
 # TODO: On reference machines it has to be -> from scipy import ndimage ! Not on our development VMs!
 # TODO: Change to  if sys.platform == 'win32':
-if sys.platform == 'win32':
+if sys.platform != 'win32':
     import scipy
 else:
     from scipy import ndimage

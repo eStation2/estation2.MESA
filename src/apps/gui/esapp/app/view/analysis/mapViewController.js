@@ -16,7 +16,12 @@ Ext.define('esapp.view.analysis.mapViewController', {
             outmaskFeature = null,
             mapviewSize = me.getSize().width + "," + me.getSize().height,
             productTimeline = me.lookupReference('product-time-line_' + me.id),
-            showtimeline = false;
+            showtimeline = false,
+            productdate = null;
+
+        if (me.productdate != me.timeline[me.timeline.length-1]['date']){
+            productdate = me.productdate;
+        }
 
         if (mapOutmaskToggleBtn.pressed){
             var wkt = new ol.format.WKT();
@@ -51,7 +56,7 @@ Ext.define('esapp.view.analysis.mapViewController', {
             subproductcode: esapp.Utils.objectExists(me.subproductcode) && me.subproductcode != '' ? me.subproductcode : null,
             productversion: esapp.Utils.objectExists(me.productversion) && me.productversion != '' ? me.productversion : null,
             mapsetcode: esapp.Utils.objectExists(me.mapsetcode) && me.mapsetcode != '' ? me.mapsetcode : null,
-            productdate: me.productdate,
+            productdate: productdate,
             legendid: esapp.Utils.objectExists(me.legendid) && me.legendid > 0 ? me.legendid : null,
             legendlayout:  mapLegendObj.legendLayout,
             legendobjposition: me.productcode != '' && mapLegendObj.html != '' ? mapLegendObj.getPosition(true).toString() : mapLegendObj.legendPosition.toString(),

@@ -11,8 +11,8 @@ import webpy_esapp_helpers
 import webpy_esapp
 from database import crud
 
-import plotly.plotly as py
-from plotly.graph_objs import *
+# import plotly.plotly as py
+# from plotly.graph_objs import *
 
 import StringIO
 import matplotlib as mpl
@@ -26,6 +26,11 @@ logger = log.my_logger(__name__)
 
 
 class TestWebpy(unittest.TestCase):
+
+    def test_getMapsets(self):
+        mapsets_json = webpy_esapp_helpers.getMapsets()
+        print mapsets_json
+        self.assertEqual(1, 1)
 
     def test_checkCreateSubproductDir(self):
         # productcode = 'vgt-ndvi'

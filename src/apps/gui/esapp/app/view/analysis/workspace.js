@@ -28,7 +28,7 @@ Ext.define("esapp.view.analysis.workspace",{
     bodyPadding: '1 0 0 0',
     autoScroll: true,
     scrollable: 'vertical',
-    closable: false,
+    closable: true,
     closeAction: 'destroy', // 'hide'
     plugins: ['tabtitleedit'],
 
@@ -39,7 +39,7 @@ Ext.define("esapp.view.analysis.workspace",{
         isrefworkspace: false,
         title: '',
         titleEditable: false,
-        closable: false,
+        closable: true,
         pinable: false,
         pinned: false,
         maps: [],
@@ -229,7 +229,8 @@ Ext.define("esapp.view.analysis.workspace",{
                 iconCls: 'legends',
                 style: { color: 'gray' },
                 scale: 'small',
-                hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null || esapp.globals['typeinstallation'] == 'jrc_online' ? true : false),
+                // hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null || esapp.globals['typeinstallation'] == 'jrc_online' ? true : false),
+                hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
                 handler: 'legendAdmin'
             },{
                 xtype: 'button',
@@ -240,7 +241,8 @@ Ext.define("esapp.view.analysis.workspace",{
                 style: { color: 'gray' },
                 scale: 'small',
                 // hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
-                hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null || esapp.globals['typeinstallation'] == 'jrc_online' ? true : false),
+                // hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null || esapp.globals['typeinstallation'] == 'jrc_online' ? true : false),
+                hidden:  (esapp.getUser() == 'undefined' || esapp.getUser() == null ? true : false),
                 handler: 'layerAdmin'
             },{
                 xtype: 'button',
@@ -435,7 +437,7 @@ Ext.define("esapp.view.analysis.workspace",{
                         me.updateLayout();
                     }
                 });
-                taskMakeTabCloseable.delay(5000);
+                // taskMakeTabCloseable.delay(5000);
 
                 //me.map = new ol.Map({
                 //    layers: me.backgroundLayers,

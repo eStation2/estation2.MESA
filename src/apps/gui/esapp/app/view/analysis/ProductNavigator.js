@@ -498,7 +498,7 @@ Ext.define("esapp.view.analysis.ProductNavigator",{
                         name: 'assign_legend',
                         iconCls: 'fa fa-plus-circle fa-1x',
                         style: {color: 'green'},
-                        hidden: esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online',
+                        // hidden: esapp.globals['typeinstallation'].toLowerCase() == 'jrc_online',
                         handler: 'assignLegend'
                     }]
                 },

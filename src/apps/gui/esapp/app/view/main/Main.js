@@ -522,7 +522,7 @@ Ext.define('esapp.view.main.Main', {
                     me.maintabpanel.getTabBar().items.getAt(indexDashboardTab).show();
                     me.maintabpanel.getTabBar().items.getAt(indexAcquisitionTab).hide();
                     me.maintabpanel.getTabBar().items.getAt(indexProcessingTab).hide();
-                    me.maintabpanel.getTabBar().items.getAt(indexDataManagementTab).hide();
+                    me.maintabpanel.getTabBar().items.getAt(indexDataManagementTab).show();
                     me.maintabpanel.getTabBar().items.getAt(indexAnalysisTab).show();
                     me.maintabpanel.getTabBar().items.getAt(indexSystemTab).show();
                 }

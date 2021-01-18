@@ -34,7 +34,7 @@ import ast
 import sys
 import numpy as N
 import urllib
-import configparser
+import ConfigParser
 from xml.dom import minidom
 from datetime import date
 from socket import socket
@@ -419,7 +419,7 @@ def getJRCRefSettings():
     jrc_ref_settingsfile = os.path.join(es_constants.es2globals['base_dir'],
                                         'database/referenceWorkspaces/', 'jrc_ref_settings.ini')
 
-    config_jrc_ref_settings = configparser.ConfigParser()
+    config_jrc_ref_settings = ConfigParser.ConfigParser()
     config_jrc_ref_settings.read([jrc_ref_settingsfile])
 
     jrc_ref_settings = config_jrc_ref_settings.items('JRC_REF_SETTINGS')  # returns a list of tuples
@@ -432,7 +432,7 @@ def setJRCRefSetting(setting=None, value=None):
         jrc_ref_settingsfile = os.path.join(es_constants.es2globals['base_dir'],
                                             'database/referenceWorkspaces/', 'jrc_ref_settings.ini')
 
-        config_jrc_ref_settings = configparser.ConfigParser()
+        config_jrc_ref_settings = ConfigParser.ConfigParser()
         config_jrc_ref_settings.read([jrc_ref_settingsfile])
 
         if config_jrc_ref_settings.has_option('JRC_REF_SETTINGS', setting):
