@@ -152,18 +152,33 @@ def plot_1o1(data_1, data_2, x_label=None, y_label=None, figure_title=None, png_
 #         continue
 
 # ------------------------------------------------------------------------------------------------
-# for NDVI-OLCI vs. PROBAV
+# for NDVI-OLCI vs. PROBAV : VCI
 # ------------------------------------------------------------------------------------------------
 indir = '/data/processing/vgt-ndvi/'
 
 file_olci_vci='/data/processing/exchange/NDVI300/test_data/20200701_vgt-ndvi_vci_SPOTV-Africa-1km_olci-v2.0.tif'; x_label="OLCI_VCI"
-file_pv_vci= indir+'sv2-pv2.2/SPOTV-Africa-1km/derived/vci/20200701_vgt-ndvi_vci_SPOTV-Africa-1km_sv2-pv2.2.tif'; y_label="PROBAV_VCI"
+file_pv_vci=  '/data/processing/exchange/NDVI300/test_data/20200701_vgt-ndvi_vci_SPOTV-Africa-1km_sv2-pv2.2.tif'; y_label="PROBAV_VCI"
 
 
 png_file_path="/data/processing/exchange/NDVI300/"+'20200701_'+x_label+'_'+y_label
 
 file_0=file_olci_vci
 file_1=file_pv_vci
+
+# ------------------------------------------------------------------------------------------------
+# for NDVI-OLCI vs. PROBAV : ICN
+# ------------------------------------------------------------------------------------------------
+indir = '/data/processing/vgt-ndvi/'
+
+file_olci_vci='/data/processing/exchange/NDVI300/test_data/20200701_vgt-ndvi_icn_SPOTV-Africa-1km_olci-v2.0.tif'; x_label="OLCI_icn"
+file_pv_vci=  '/data/processing/exchange/NDVI300/test_data/20200701_vgt-ndvi_icn_SPOTV-Africa-1km_sv2-pv2.2.tif'; y_label="PROBAV_icn"
+
+
+png_file_path="/data/processing/exchange/NDVI300/"+'20200701_'+x_label+'_'+y_label
+
+file_0=file_olci_vci
+file_1=file_pv_vci
+
 
 # ------------------------------------------------------------------------------------------------
 # for TAMSAT 3.1
