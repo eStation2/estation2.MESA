@@ -55,7 +55,7 @@ import shutil
 # scipy for chla gradient computation
 # TODO: On reference machines it has to be -> from scipy import ndimage ! Not on our development VMs!
 # TODO: Change to  if sys.platform == 'win32':
-if sys.platform == 'win32':
+if sys.platform != 'win32':
     import scipy
 else:
     from scipy import ndimage
@@ -1163,7 +1163,7 @@ def do_make_vci(input_file='', min_file='', max_file='', output_file='', input_n
                 dataout = N.zeros(ns) + output_nodata
 
             if input_nodata is not None:
-                wtp = (minVal != output_nodata) * (maxVal != output_nodata) * (maxVal != minVal)
+                wtp = (data != input_nodata) * (minVal != input_nodata) * (maxVal != input_nodata) * (maxVal != minVal)
             else:
                 wtp = (maxVal != minVal)
 
@@ -1253,8 +1253,8 @@ def do_make_baresoil(input_file='', avg_file='', min_file='', max_file='', outpu
         driver_type = fileFID.GetDriver().ShortName
 
         # Try and assign input_nodata if it is UNDEF
+        sds_meta = metadata.SdsMetadata()
         if input_nodata is None:
-            sds_meta = metadata.SdsMetadata()
             if os.path.exists(input_file):
                 input_nodata = float(sds_meta.get_nodata_value(input_file))
                 [scaling_factor, scaling_offset] = sds_meta.get_scaling_values(input_file)
@@ -3783,6 +3783,7 @@ def compare_two_raster_array(input_file_1='', input_file_2='', max_delta=None, c
                         print("Min diff is {} at position {}".format(min_diff,idx_min[0]))
                     idx_diff = [r1 != r2]
                     print("Number of pixel differing is: {}".format(N.count_nonzero(idx_diff)))
+
             if create_plot:
                 from apps.tools.scatter_plot import plot_1o1
                 output_file=es_constants.es2globals['test_data_dir']+'plot_1o1.png'

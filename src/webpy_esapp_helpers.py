@@ -59,6 +59,33 @@ logger = log.my_logger(__name__)
 WEBPY_COOKIE_NAME = "webpy_session_id"
 
 
+def getMapsets():
+    mapsets_dict_all = []
+    mapsets = querydb.get_mapsets()
+
+    if hasattr(mapsets, "__len__") and mapsets.__len__() > 0:
+        for mapset in mapsets:
+            # print mapset
+            mapset_dict = functions.row2dict(mapset)
+            mapsets_dict_all.append(mapset_dict)
+
+        mapsets_json = json.dumps(mapsets_dict_all,
+                                  ensure_ascii=False,
+                                  encoding='utf-8',
+                                  sort_keys=True,
+                                  indent=4,
+                                  separators=(', ', ': '))
+
+        mapsets_json = '{"success":"true", "total":' \
+                       + str(mapsets.__len__()) \
+                       + ',"mapsets":' + mapsets_json + '}'
+
+    else:
+        mapsets_json = '{"success":false, "error":"No Mapsets defined!"}'
+
+    return mapsets_json
+
+
 def GetLogos():
     logos_dict_all = []
     logos = querydb.get_logos()
@@ -5616,7 +5643,18 @@ def getDatasetCompleteness(dataset, fordatamanagement):
         # ... else read it
         else:
             with open(completeness_file_json) as f:
-                completeness_dict = json.load(f)
+                try:
+                    completeness_dict = json.load(f)
+                except ValueError:
+                    # recreate completeness_file_json
+                    completeness = dataset.get_dataset_normalized_info()
+                    completeness_dict['datasetcompleteness'] = completeness
+                    completeness_dict['datasetcompletenessimage'] = createDatasetCompletenessImage(completeness,
+                                                                                                   dataset.frequency_id,
+                                                                                                   completeness_file_png,
+                                                                                                   fordatamanagement)
+                    with open(completeness_file_json, 'w') as f:
+                        json.dump(completeness_dict, f)
     # Create .json
     else:
         completeness = dataset.get_dataset_normalized_info()

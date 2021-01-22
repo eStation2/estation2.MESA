@@ -206,7 +206,7 @@
 //            "path": "lib/js/Highcharts/js/highcharts.js",
 //            "remote": true
 //        },{
-//            "path": "lib/js/Ext.ux/extjs-upload-widget-masterlib/upload/"
+//            "path": "lib/js/Ext.ux/extjs-upload-widget-master/lib/upload/"
 //            ,"remote": true
 //        },{
 //            "path": "lib/js/Ext.ux/AwesomeUploader/Ext.ux.form.FileUploadField.js",

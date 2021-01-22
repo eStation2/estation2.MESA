@@ -636,11 +636,11 @@ class TestGetInternet(unittest.TestCase):
     def testRemoteFtp_CHIRPS_PREL(self):
         source_active = False
         internet_id = 'UCSB:CHIRPS:PREL:DEKAD:HTTP'
-        start_date_fixed = 20200101
-        end_date_fixed = 20200310
+        start_date_fixed = 20201001
+        end_date_fixed = 20201210
         start_date_dyn = -45
         end_date_dyn = -30
-        file_to_check = 'chirps-v2.0.2020.02.3.tif'
+        file_to_check = 'chirps-v2.0.2020.11.3.tif'
         include_files_expression = "chirps-v2.0.%Y.%m.%{dkm}.tif"
 
         internet_sources = querydb.get_active_internet_sources()

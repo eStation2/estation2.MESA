@@ -76,7 +76,7 @@ Ext.define('esapp.view.analysis.analysisMainController', {
                     workspacename: workspace.get('workspacename'),
                     isNewWorkspace: false,
                     title: workspace.get('workspacename'),
-                    closable: false,
+                    closable: true,
                     titleEditable: true,
                     pinable: true,
                     pinned: workspace.get('pinned'),

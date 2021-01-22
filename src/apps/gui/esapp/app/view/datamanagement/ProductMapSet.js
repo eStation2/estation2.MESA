@@ -156,6 +156,7 @@ Ext.define("esapp.view.datamanagement.ProductMapSet",{
             width: 65,
             align:'center',
             stopSelection: false,
+            hidden: (esapp.globals['role'] == 'pc3' && esapp.globals['mode'] == 'nominal') ? true : false,
             items: [{
                 icon: 'resources/img/icons/download.png',
                 tooltip: esapp.Utils.getTranslation('tipcompletedatasetmapset'),    // 'Complete all data sets for this product\'s mapset',

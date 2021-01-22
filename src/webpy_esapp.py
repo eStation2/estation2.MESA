@@ -2834,28 +2834,7 @@ class GetMapsets:
     def GET(self):
         getparams = web.input()
 
-        mapsets_dict_all = []
-        mapsets = querydb.get_mapsets()
-
-        if hasattr(mapsets, "__len__") and mapsets.__len__() > 0:
-            for mapset in mapsets:
-                # print(mapset)
-                mapset_dict = functions.row2dict(mapset)
-                mapsets_dict_all.append(mapset_dict)
-
-            mapsets_json = json.dumps(mapsets_dict_all,
-                                   ensure_ascii=False,
-                                   encoding='utf-8',
-                                   sort_keys=True,
-                                   indent=4,
-                                   separators=(', ', ': '))
-
-            mapsets_json = '{"success":"true", "total":'\
-                                  + str(mapsets.__len__())\
-                                  + ',"mapsets":'+mapsets_json+'}'
-
-        else:
-            mapsets_json = '{"success":false, "error":"No Mapsets defined!"}'
+        mapsets_json = webpy_esapp_helpers.getMapsets()
 
         return mapsets_json
 
