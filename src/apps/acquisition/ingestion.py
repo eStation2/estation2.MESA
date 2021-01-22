@@ -1741,7 +1741,7 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         region_code = input_file_name.split('_')[1]
         # region_code = region_code.split('-')[3]
 
-    if region_code == 'ICPAC':
+    if region_code == 'ICPAC' or region_code == 'EA':
         region='IGAD'
         # ullr_xy=' -17.5290058 27.3132762 24.0006488 4.2682552 '      # ECOWAS
         ullr_xy=' 21.8145086965016 23.1455424529815 51.4155244442228 -11.7612826888632 '      # IGAD
