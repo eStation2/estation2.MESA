@@ -185,6 +185,11 @@ class TestSystem(unittest.TestCase):
         status = es2system.loop_system(dry_run=True)
         self.assertEqual(status, 0)
 
+    # def test_reduce_length_dataset(self):
+    #
+    #     # Clean the temp dirs and check the status
+    #     status = es2system.reduce_length_dataset()
+    #     self.assertEqual(status, 0)
 
 suite_system = unittest.TestLoader().loadTestsFromTestCase(TestSystem)
 if __name__ == "__main__":

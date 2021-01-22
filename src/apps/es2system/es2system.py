@@ -1013,6 +1013,74 @@ def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None, ma
                             logger.error('Error in executing command: {}'.format(command))
                             spec_logger.error('Error in executing command: {}'.format(command))
 
+###################################################################################################################
+# ##In order to reduce length of dataset this method has been created                                            ##
+# ##Reference ES2-333                                                                                            ##
+# For now time peroid to remove is hardcoded ( dekad - <5yrs, daily - <1yr, 15mins - <60days, others -no removal)##
+# #################################################################################################################)
+def reduce_length_dataset(dry_run=False, masked=True):
+    #   Reduce the length of datasets
+    spec_logger = log.my_logger('apps.es2system.reduce_length_dataset')
+
+    # Create an ad-hoc file for the lftp command output (beside the standard logger)
+    logfile=es_constants.es2globals['log_dir']+'reduce_length_dataset.log'
+    message=time.strftime("%Y-%m-%d %H:%M")+' INFO: Reducing the length of dataset ... \n'
+
+    logger.debug("Entering routine %s" % 'reduce_length_dataset')
+
+    # Loop over 'not-masked' products
+    products = querydb.get_products(activated=True)
+    for row in products:
+
+        prod_dict = functions.row2dict(row)
+        productcode = prod_dict['productcode']
+        version = prod_dict['version']
+
+        p = Product(product_code=productcode, version=version)
+
+        all_prod_mapsets = p.mapsets
+        # Loop over existing mapset
+        for mapset in all_prod_mapsets:
+            all_mapset_datasets = p.get_subproducts(mapset=mapset)
+
+            # Loop over existing subproducts
+            for subproductcode in all_mapset_datasets:
+                # Get info - and ONLY for NOT masked products
+                from apps.productmanagement import datasets
+                dataset_obj = datasets.Dataset(productcode, subproductcode, mapset, version=version)
+
+                if dataset_obj is not None and not dataset_obj.no_year():
+                    # dataset_dict = functions.row2dict(dataset_info)
+                    # dataset_dict['mapsetcode'] = mapset
+                    frequency_id = dataset_obj.frequency_id #dataset_dict['frequency_id']
+                    logger.debug('Working on {}/{}/{}/{}'.format(productcode,version,mapset,subproductcode))
+                    spec_logger.info('Working on product/mapset/subproduct {}/{}/{} \n'.format(productcode,mapset, subproductcode))
+
+                    if frequency_id == 'e1day':
+                        periodtoremove = -365
+                    elif frequency_id == 'e15minute':
+                        periodtoremove = -60
+                    elif frequency_id == 'e1dekad':
+                        periodtoremove = -1825
+                    else :
+                        # Skip the produce
+                        continue
+                    start_date = functions.conv_yyyymmdd_2_dateObj('19810101')
+                    end_date = functions.manage_end_date(periodtoremove)
+                    file_list = dataset_obj.get_filenames()
+                    for file in file_list:
+                        file_date_str = functions.get_date_from_path_full(file)
+                        file_datetime = datetime.datetime(day=int(file_date_str[6:8]), month=int(file_date_str[4:6]), year=int(file_date_str[0:4]))
+                        if start_date <= file_datetime <= end_date:
+                            #remove the file
+                            # os.remove(file)
+                            spec_logger.info('Removed the product/mapset/subproduct filename {}/{}/{}/{} \n'.format(productcode, mapset,
+                                                                                          subproductcode,file))
+
+    return 0
+
+
+
 
 class SystemDaemon(DaemonDryRunnable):
     def run(self):
