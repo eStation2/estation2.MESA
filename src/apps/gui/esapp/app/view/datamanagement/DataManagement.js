@@ -189,6 +189,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                 iconCls: 'fa fa-cloud-download fa-2x',
                 style: {color: 'gray'},
                 scale: 'medium',
+                hidden: (esapp.globals['role'] == 'pc3' && esapp.globals['mode'] == 'nominal') ? true : false,
                 handler: 'showRequestsAdmin',
                 listeners: {
                     afterrender: function (btn) {
@@ -231,6 +232,51 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
             hideable: true,
             variableRowHeight: false
         };
+
+        if (esapp.globals['role'] == 'pc3' && esapp.globals['mode'] == 'nominal'){
+            me.gridheader = ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 215px; left: 0px;" tabindex="-1">' +
+                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('mapset') + '</span>' +
+                '           </div>' +
+                '       </div>' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 255px; right: auto; left: 215px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproductname') + '</span>' +
+                '           </div>' +
+                '       </div>' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 360px; right: auto; left: 470px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('status') + '</span>' +
+                '           </div>' +
+                '       </div>';
+        }
+        else {
+            me.gridheader = ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 215px; left: 0px;" tabindex="-1">' +
+                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('mapset') + '</span>' +
+                '           </div>' +
+                '       </div>' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 70px; right: auto; left: 215px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('actions') + '</span>' +
+                '           </div>' +
+                '       </div>' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 255px; right: auto; left: 285px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproductname') + '</span>' +
+                '           </div>' +
+                '       </div>' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 360px; right: auto; left: 545px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('status') + '</span>' +
+                '           </div>' +
+                '       </div>' +
+                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 905px; margin: 0px; top: 0px;" tabindex="-1">' +
+                '           <div data-ref="titleEl" class="x-column-header-inner">' +
+                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('actions') + '</span>' +
+                '           </div>' +
+                '       </div>';
+        }
 
         me.columns = [
         {
@@ -286,6 +332,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                 align:'center',
                 menuDisabled: true,
                 stopSelection: false,
+                hidden: (esapp.globals['role'] == 'pc3' && esapp.globals['mode'] == 'nominal') ? true : false,
                 items: [{
                     icon: 'resources/img/icons/download.png',
                     tooltip: esapp.Utils.getTranslation('tipcompletedatasetall'),    // 'Complete all product data sets (all mapsets and its subproducts).',
@@ -321,31 +368,7 @@ Ext.define("esapp.view.datamanagement.DataManagement",{
                 variableRowHeight: false,
                 scrollable: false,
 
-                header: ' <div class="x-column-header  x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 215px; left: 0px;" tabindex="-1">' +
-                '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('mapset') + '</span>' +
-                '           </div>' +
-                '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 70px; right: auto; left: 215px; margin: 0px; top: 0px;" tabindex="-1">' +
-                '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('actions') + '</span>' +
-                '           </div>' +
-                '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 255px; right: auto; left: 285px; margin: 0px; top: 0px;" tabindex="-1">' +
-                '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('subproductname') + '</span>' +
-                '           </div>' +
-                '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; width: 360px; right: auto; left: 545px; margin: 0px; top: 0px;" tabindex="-1">' +
-                '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('status') + '</span>' +
-                '           </div>' +
-                '       </div>' +
-                '       <div class="x-column-header x-column-header-align-left x-box-item x-column-header-default x-unselectable" style="border-top: 0px; border-right: 0px; width: 70px;  left: 905px; margin: 0px; top: 0px;" tabindex="-1">' +
-                '           <div data-ref="titleEl" class="x-column-header-inner">' +
-                '               <span data-ref="textEl" class="x-column-header-text">' + esapp.Utils.getTranslation('actions') + '</span>' +
-                '           </div>' +
-                '       </div>',
+                header: me.gridheader,
                 // listeners: {
                 //   render: function(column){
                 //       //column.titleEl.removeCls('x-column-header-inner');

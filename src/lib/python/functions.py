@@ -34,7 +34,7 @@ import ast
 import sys
 import numpy as N
 import urllib
-import configparser
+import ConfigParser
 from xml.dom import minidom
 from datetime import date
 from socket import socket
@@ -419,7 +419,7 @@ def getJRCRefSettings():
     jrc_ref_settingsfile = os.path.join(es_constants.es2globals['base_dir'],
                                         'database/referenceWorkspaces/', 'jrc_ref_settings.ini')
 
-    config_jrc_ref_settings = configparser.ConfigParser()
+    config_jrc_ref_settings = ConfigParser.ConfigParser()
     config_jrc_ref_settings.read([jrc_ref_settingsfile])
 
     jrc_ref_settings = config_jrc_ref_settings.items('JRC_REF_SETTINGS')  # returns a list of tuples
@@ -432,7 +432,7 @@ def setJRCRefSetting(setting=None, value=None):
         jrc_ref_settingsfile = os.path.join(es_constants.es2globals['base_dir'],
                                             'database/referenceWorkspaces/', 'jrc_ref_settings.ini')
 
-        config_jrc_ref_settings = configparser.ConfigParser()
+        config_jrc_ref_settings = ConfigParser.ConfigParser()
         config_jrc_ref_settings.read([jrc_ref_settingsfile])
 
         if config_jrc_ref_settings.has_option('JRC_REF_SETTINGS', setting):
@@ -1239,6 +1239,54 @@ def get_number_days_month(yyyymmdd):
 
     return tot_days
 
+######################################################################################
+#   manage_end_date
+#   This function has been used in many places to manage if the end date is not passed as proper values like (-365, +100 days etc)
+#   Purpose: Function returns the number of days per dekad (from 8 to 11)
+#   Author: Vijay Charan
+#   Date: 2021/01/18
+#   Input: - or + values or just YYYYMMDD
+#   Output: date time object
+#
+def manage_end_date(to_date):
+    # Manage the end_date (mandatory).
+    datetime_end = None
+    try:
+        if is_date_yyyymmdd(str(to_date), silent=True):
+            datetime_end = datetime.datetime.strptime(str(to_date), '%Y%m%d')
+        # If it is a negative number, subtract from current date
+        elif isinstance(to_date, int) or isinstance(to_date, long):
+            if to_date < 0:
+                datetime_end = datetime.datetime.today() - datetime.timedelta(days=-to_date)
+            elif to_date > 0:
+                datetime_end = datetime.datetime.today() + datetime.timedelta(days=to_date)
+        else:
+            datetime_end = datetime.datetime.today()
+
+        return datetime_end
+
+    except:
+        logger.debug("Error in managing end dates")
+        raise
+
+
+######################################################################################
+#   conv_yyyymmdd_2_dateObj
+#   Purpose: Function returns a date object from str(YYYYMMDD)as input.
+#   Author: Vijay Charan
+#   Date: 2021/01/18
+#   Input: string of numbers in the format YYYYMMDD
+#   Output: date object, otherwise -1
+#
+def conv_yyyymmdd_2_dateObj(yyyymmdd):
+
+    year = int(str(yyyymmdd)[0:4])
+    month = int(str(yyyymmdd)[4:6])
+    day = int(str(yyyymmdd)[6:8])
+
+    date = datetime.datetime(year=year, month=month, day=day)
+    # date_yyyymmdd = str(year)+month+day
+    return date
 
 ######################################################################################
 #   conv_list_2_string
