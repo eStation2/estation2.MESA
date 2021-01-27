@@ -628,7 +628,7 @@ def remove_resoucename(dict):
 def read_cds_parameter_file(internet_id):
     #Read the CDS parameters from the file.
     try:
-        parameter_file = '/eStation2/get_lists/get_cds/' +internet_id.replace(":", "_")+'.txt'
+        parameter_file = '/eStation2/config_cds/' +internet_id.replace(":", "_")+'.txt'
         with open(parameter_file) as json_file:
             data = json.load(json_file)
     except:
