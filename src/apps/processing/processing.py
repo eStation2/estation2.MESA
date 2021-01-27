@@ -47,6 +47,7 @@ from apps.processing import processing_std_3dayavg
 from apps.processing import processing_std_dmp
 from apps.processing import processing_std_opfish
 from apps.processing import processing_std_vgt
+from apps.processing import processing_std_reproject
 
 from lib.python.daemon import DaemonDryRunnable
 

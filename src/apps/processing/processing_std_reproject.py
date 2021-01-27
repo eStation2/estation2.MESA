@@ -72,7 +72,7 @@ def create_pipeline(prod, starting_sprod, mapset, version, starting_dates=None, 
                                              timeseries_role='',
                                              active_default=True)
 
-    target_mapset_name = 'SPOTV-Africa-1km'
+    target_mapset_name = mapset.split('-')[0]+'-'+mapset.split('-')[1]+'-1km' #'SPOTV-Africa-1km'
     prod_ident_reprojected = functions.set_path_filename_no_date(prod, output_sprod,target_mapset_name, version, ext)
     subdir_reprojected = functions.set_path_sub_directory(prod, output_sprod, 'Derived', version, target_mapset_name)
 
