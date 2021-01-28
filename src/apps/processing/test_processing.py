@@ -920,7 +920,7 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 #   Call a specific processing chain - To be TESTED after 03.3.2019
 #   ---------------------------------------------------------------------
 
-test_process_repoject(pipe_run=0, pipe_print=4, touch_files_only=False)
+# test_process_repoject(pipe_run=0, pipe_print=4, touch_files_only=False)
 # test_subprocess_vgt_lai(pipe_run=0, pipe_print=4, touch_files_only=False)
 # test_subprocess_vgt_fcover(pipe_run=3, pipe_print=0, touch_files_only=False)
 # test_subprocess_modis_fapar(pipe_run=3, pipe_print=0, touch_files_only=False)
@@ -936,7 +936,7 @@ test_process_repoject(pipe_run=0, pipe_print=4, touch_files_only=False)
 #my_proc_std_modis_kd490(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_modis_pp(pipe_run=0, pipe_print=4, touch_files_only=False)
 #my_proc_std_median_filter()
-# my_proc_tamsat_rfe(pipe_run=3, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
+my_proc_tamsat_rfe(pipe_run=3, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
 # proc_list=my_proc_fewsnet_rfe(pipe_run=0, pipe_print=8, start_date=None, end_date=None, touch_files_only=False)                       # OK
 
 # my_proc_chirps_dekad(pipe_run=3, pipe_print=0, start_date='20180101', end_date='20181231', upsert_db=False, touch_files_only=False)
