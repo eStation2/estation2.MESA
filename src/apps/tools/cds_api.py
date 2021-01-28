@@ -542,10 +542,10 @@ def check_processed_list(current_list, processed_list, ongoing_list, template_pa
     listtoprocessrequest = []
 
     for current_file in current_list:
-        # Check if current list (file is already there in filesystem)
-        file_location = get_cds_target_path(es_constants.ingest_dir, current_file, template_paramater)
-        if os.path.exists(file_location):
-            continue
+        # # Check if current list (file is already there in filesystem)
+        # file_location = get_cds_target_path(es_constants.ingest_dir, current_file, template_paramater)
+        # if os.path.exists(file_location):
+        #     continue
 
         # Check if current list is not in processed list
         if len(processed_list) == 0 and len(ongoing_list) == 0:

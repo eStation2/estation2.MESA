@@ -2105,7 +2105,6 @@ def cds_api_loop_internet(internet_source):
     processed_list_filename = es_constants.get_internet_processed_list_prefix + internet_source.internet_id + '.list'
     processed_list = functions.restore_obj_from_pickle(processed_list,
                                                        processed_list_filename)
-
     try:
         current_list = []
         # Check if template is dict or string them create resources_parameters
@@ -2163,31 +2162,31 @@ def cds_api_loop_internet(internet_source):
                 ongoing_request_id = ongoing.split(':')[-1]
                 job_status = cds_api.get_task_status(internet_source.url, ongoing_request_id, usr_pwd)
                 if job_status == 'completed':
-                        logger_spec.info("Downloading Product: " + str(ongoing))
-                        try:
-                            download_url = cds_api.get_job_download_url(internet_source.url, ongoing_request_id, usr_pwd)
-                            if download_url is False:
-                                logger_spec.warning("Problem in getting download Url : %s.", str(ongoing))
-                                continue
-                            target_path = cds_api.get_cds_target_path(es_constants.ingest_dir, ongoing,
-                                                                      template_paramater)
-                            download_result = cds_api.get_file(download_url, usr_pwd, None, target_path)
-                            if download_result:
-                                logger_spec.info("Download Success for : " + str(ongoing))
-                                processed_item = cds_api.get_cds_current_Item_pattern(ongoing)
-                                processed_list.append(processed_item)  # Add the processed list only with datetime, resourceid_product_type and variable
-                                functions.dump_obj_to_pickle(processed_list, processed_list_filename)
-                                ongoing_list.remove(ongoing)
-                                functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
-                                deleted = cds_api.delete_cds_task(internet_source.url, ongoing_request_id, usr_pwd, internet_source.https_params)
-                                if not deleted:  # To manage the delete store the job id in the  delete list and remove the job
-                                    logger_spec.warning("Problem while deleting Product job id: %s.", str(ongoing))
-                            else:
-                                #Check why download link is not available eventhough the job is completed
-                                logger_spec.warning("Download link is not available: %s.", str(ongoing))
-                        except:
-                            logger_spec.warning("Problem while Downloading Product: %s.", str(ongoing))
-                            b_error = True
+                    logger_spec.info("Downloading Product: " + str(ongoing))
+                    try:
+                        download_url = cds_api.get_job_download_url(internet_source.url, ongoing_request_id, usr_pwd)
+                        if download_url is False:
+                            logger_spec.warning("Problem in getting download Url : %s.", str(ongoing))
+                            continue
+                        target_path = cds_api.get_cds_target_path(es_constants.ingest_dir, ongoing,
+                                                                  template_paramater)
+                        download_result = cds_api.get_file(download_url, usr_pwd, None, target_path)
+                        if download_result:
+                            logger_spec.info("Download Success for : " + str(ongoing))
+                            processed_item = cds_api.get_cds_current_Item_pattern(ongoing)
+                            processed_list.append(processed_item)  # Add the processed list only with datetime, resourceid_product_type and variable
+                            functions.dump_obj_to_pickle(processed_list, processed_list_filename)
+                            ongoing_list.remove(ongoing)
+                            functions.dump_obj_to_pickle(ongoing_list, ongoing_list_filename)
+                            deleted = cds_api.delete_cds_task(internet_source.url, ongoing_request_id, usr_pwd, internet_source.https_params)
+                            if not deleted:  # To manage the delete store the job id in the  delete list and remove the job
+                                logger_spec.warning("Problem while deleting Product job id: %s.", str(ongoing))
+                        else:
+                            #Check why download link is not available eventhough the job is completed
+                            logger_spec.warning("Download link is not available: %s.", str(ongoing))
+                    except:
+                        logger_spec.warning("Problem while Downloading Product: %s.", str(ongoing))
+                        b_error = True
                 elif job_status == 'failed':
                     # Check if the request failed and remove the job
                     # Check if the created request is failed then remove the job(task)
