@@ -889,29 +889,29 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 
     processing_std_vgt_stats_only(res_queue, **args)
 
-from apps.processing.processing_std_reproject import *
-def test_process_repoject(pipe_run=4, pipe_print=0, touch_files_only=False):
-    start_date = None #'19990101'
-    end_date = None #'20181221'
-
-    if start_date is not None and end_date is not None:
-        starting_dates = proc_functions.get_list_dates_for_dataset('vgt-ndvi', 'ndv', 'olci-v2.0', start_date=start_date, end_date=end_date)
-    else:
-        starting_dates = None
-    args = {'pipeline_run_level':pipe_run, \
-            'pipeline_printout_level':pipe_print, \
-            'pipeline_printout_graph_level': 0, \
-            'prod': 'vgt-ndvi',\
-            'starting_sprod':'ndv',\
-            'mapset': 'SPOTV-Africa-300m',\
-            'version':'olci-v2.0',
-            'starting_dates': starting_dates,
-            'logfile':'vgt-ndvi',
-            'touch_files_only':False
-            }
-    res_queue = None
-
-    processing_std_reproject(res_queue, **args)
+# from apps.processing.processing_reproject import *
+# def test_process_repoject(pipe_run=4, pipe_print=0, touch_files_only=False):
+#     start_date = None #'19990101'
+#     end_date = None #'20181221'
+#
+#     if start_date is not None and end_date is not None:
+#         starting_dates = proc_functions.get_list_dates_for_dataset('vgt-ndvi', 'ndv', 'olci-v2.0', start_date=start_date, end_date=end_date)
+#     else:
+#         starting_dates = None
+#     args = {'pipeline_run_level':pipe_run, \
+#             'pipeline_printout_level':pipe_print, \
+#             'pipeline_printout_graph_level': 0, \
+#             'prod': 'vgt-ndvi',\
+#             'starting_sprod':'ndv',\
+#             'mapset': 'SPOTV-Africa-300m',\
+#             'version':'olci-v2.0',
+#             'starting_dates': starting_dates,
+#             'logfile':'vgt-ndvi',
+#             'touch_files_only':False
+#             }
+#     res_queue = None
+#
+#     processing_reproject(res_queue, **args)
 
 
 
