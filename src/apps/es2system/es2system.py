@@ -1073,7 +1073,7 @@ def reduce_length_dataset(dry_run=False, masked=True):
                         file_datetime = datetime.datetime(day=int(file_date_str[6:8]), month=int(file_date_str[4:6]), year=int(file_date_str[0:4]))
                         if start_date <= file_datetime <= end_date:
                             #remove the file
-                            # os.remove(file)
+                            os.remove(file)
                             spec_logger.info('Removed the product/mapset/subproduct filename {}/{}/{}/{} \n'.format(productcode, mapset,
                                                                                           subproductcode,file))
 
