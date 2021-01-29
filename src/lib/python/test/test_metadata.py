@@ -316,10 +316,10 @@ class TestMetaData(unittest.TestCase):
         sds_meta = SdsMetadata()
         # Dummy output File
         gtiff_file = create_temp_file()
-        sds_meta.write_to_ds(gtiff_file)
+        sds_meta.write_to_file(gtiff_file)
 
         sds_meta_read = SdsMetadata()
-        sds_meta_read.read_from_ds(gtiff_file)
+        sds_meta_read.read_from_file(gtiff_file)
         value1 = sds_meta.get_item('eStation2_product')
         value2 = sds_meta_read.get_item('eStation2_product')
         self.assertEqual(value1, value2)
@@ -365,7 +365,7 @@ class TestMetaData(unittest.TestCase):
         sds_meta = SdsMetadata()
         # Dummy output File
         gtiff_file = create_temp_file()
-        sds_meta.write_to_ds(gtiff_file)
+        sds_meta.write_to_file(gtiff_file)
         self.assertTrue(os.path.isfile(gtiff_file))
 
     def test_write_to_file(self):
