@@ -102,6 +102,7 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                 { internet_type_id:'ftp', internet_type_name:'FTP', internet_type_descr:'' },
                 { internet_type_id:'ftp_tmpl', internet_type_name:'FTP TEMPLATE', internet_type_descr:'' },
                 { internet_type_id:'http_tmpl', internet_type_name:'HTTP TEMPLATE', internet_type_descr:'' },
+                { internet_type_id:'http_tmpl_modis', internet_type_name:'HTTP TEMPLATE MODIS', internet_type_descr:'' },
                 { internet_type_id:'http_multi_tmpl', internet_type_name:'HTTP MULTIPLE TEMPLATE', internet_type_descr:'' },
                 { internet_type_id:'http_tmpl_vito', internet_type_name:'HTTP TEMPLATE VITO', internet_type_descr:'' },
                 { internet_type_id:'http_tmpl_theia', internet_type_name:'HTTP TEMPLATE THEIA', internet_type_descr:'' },
@@ -163,7 +164,8 @@ Ext.define("esapp.view.acquisition.editInternetSource",{
                 { preproc_type:'NETCDF_S3_WST_ZIP', preproc_type_descr:'NETCDF S3 WST ZIPPED'},
                 { preproc_type:'TARZIP', preproc_type_descr:'TARZIP'},
                 { preproc_type:'NETCDF_AVISO', preproc_type_descr:'NETCDF AVISO'},
-                { preproc_type:'SNAP_SUBSET_NC', preproc_type_descr:'SNAP SUBSET NC'}
+                { preproc_type:'SNAP_SUBSET_NC', preproc_type_descr:'SNAP SUBSET NC'},
+                { preproc_type:'SNAP_SUBSET_GLS_ZIP', preproc_type_descr:'SNAP SUBSET GLS ZIPPED'}
             ]
         });
 
