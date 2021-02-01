@@ -246,10 +246,12 @@ class TestRasterImage(unittest.TestCase):
 
         # Additional test for ES2-626: compute vci (not linearx2) before and after modification of raster_image_math.py
 
-        output_filename_no_baresoil = 'vgt-ndvi/vci/20200301_vgt-ndvi_vci_no_baresoil_SPOTV-Africa-1km_sv2-pv2.2.tif'
         output_filename = 'vgt-ndvi/vci/20200301_vgt-ndvi_vci_SPOTV-Africa-1km_sv2-pv2.2.tif'
 
-        output_file_no_baresoil=os.path.join(self.root_out_dir, output_filename_no_baresoil)
+        tmpdir = tempfile.mkdtemp(prefix=__name__, suffix='_' + os.path.basename(output_filename),
+                                  dir=es_constants.base_tmp_dir)
+
+        output_file_no_baresoil=os.path.join(tmpdir, os.path.basename(output_filename))
         output_file=os.path.join(self.root_out_dir, output_filename)
 
         ref_file   =os.path.join(self.ref_dir, output_filename)
@@ -261,8 +263,8 @@ class TestRasterImage(unittest.TestCase):
         baresoil_file = self.ref_dir + 'vgt-ndvi/baresoil/20200301_vgt-ndvi_baresoil_SPOTV-Africa-1km_sv2-pv2.2.tif'
 
         args = {"input_file": input_file, "min_file": min_file, "max_file": max_file, "output_file": output_file_no_baresoil, "output_format": 'GTIFF', "options": "compress = lzw"}
-
         raster_image_math.do_make_vci(**args)
+
         no_data = -32768
         args = {"input_file": output_file_no_baresoil, "mask_file": baresoil_file, "output_file": output_file,
                 "options": "compress = lzw", "mask_value": no_data, "out_value": no_data}

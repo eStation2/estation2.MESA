@@ -542,10 +542,10 @@ def check_processed_list(current_list, processed_list, ongoing_list, template_pa
     listtoprocessrequest = []
 
     for current_file in current_list:
-        # Check if current list (file is already there in filesystem)
-        file_location = get_cds_target_path(es_constants.ingest_dir, current_file, template_paramater)
-        if os.path.exists(file_location):
-            continue
+        # # Check if current list (file is already there in filesystem)
+        # file_location = get_cds_target_path(es_constants.ingest_dir, current_file, template_paramater)
+        # if os.path.exists(file_location):
+        #     continue
 
         # Check if current list is not in processed list
         if len(processed_list) == 0 and len(ongoing_list) == 0:
@@ -628,7 +628,7 @@ def remove_resoucename(dict):
 def read_cds_parameter_file(internet_id):
     #Read the CDS parameters from the file.
     try:
-        parameter_file = '/eStation2/get_lists/get_cds/' +internet_id.replace(":", "_")+'.txt'
+        parameter_file = '/eStation2/config_cds/' +internet_id.replace(":", "_")+'.txt'
         with open(parameter_file) as json_file:
             data = json.load(json_file)
     except:
