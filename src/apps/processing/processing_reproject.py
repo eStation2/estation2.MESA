@@ -127,7 +127,7 @@ def processing_reproject(res_queue, pipeline_run_level=0, pipeline_printout_leve
                         update_stats=True):
 
     spec_logger = log.my_logger(logfile)
-    spec_logger.info("Entering routine %s" % 'processing_std_reproject9')
+    spec_logger.info("Entering routine %s" % 'processing_std_reproject')
 
 
     proc_lists = None
