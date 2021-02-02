@@ -62,6 +62,33 @@ def my_proc_std_ndvi_res(pipe_run=0, pipe_print=3, touch_files_only=False):
     # proc_lists = processing_std_ndvi_stats_only(res_queue,**args)
     #proc_lists = processing_std_ndvi_all(res_queue,**args)
 
+from apps.processing.processing_reproject import *
+def my_proc_reproj_ndvi_olci(pipe_run=0, pipe_print=3, touch_files_only=False):
+
+    productcode='vgt-ndvi'
+    subproductcode='ndv'
+    version='olci-v2.0'
+    start_date='20200701'
+    end_date='20200701'
+
+    list_dates = proc_functions.get_list_dates_for_dataset(productcode, subproductcode, version, start_date=start_date, end_date=end_date)
+    process_id = 228
+    input_products = querydb.get_processing_chain_products(process_id,type='input')
+    output_products = querydb.get_processing_chain_products(process_id,type='output')
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'input_products': input_products,\
+            'output_product': output_products,\
+            'logfile':'test_processing_reproj_ndvi_olci'}
+
+    res_queue = None
+    proc_lists = processing_reproject(res_queue,**args)
+#   Run the pipeline
+#     proc_lists = processing_reproject(res_queue, pipeline_run_level=0, pipeline_printout_level=0,
+#                              pipeline_printout_graph_level=0, input_products='', output_product='', write2file=None, logfile=None, nrt_products=True,
+#                         update_stats=True)
+
 #   ---------------------------------------------------------------------
 # vgt-ndvi merge (for sv2-pv2.2)
 #   ---------------------------------------------------------------------
@@ -889,33 +916,6 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 
     processing_std_vgt_stats_only(res_queue, **args)
 
-# from apps.processing.processing_reproject import *
-# def test_process_repoject(pipe_run=4, pipe_print=0, touch_files_only=False):
-#     start_date = None #'19990101'
-#     end_date = None #'20181221'
-#
-#     if start_date is not None and end_date is not None:
-#         starting_dates = proc_functions.get_list_dates_for_dataset('vgt-ndvi', 'ndv', 'olci-v2.0', start_date=start_date, end_date=end_date)
-#     else:
-#         starting_dates = None
-#     args = {'pipeline_run_level':pipe_run, \
-#             'pipeline_printout_level':pipe_print, \
-#             'pipeline_printout_graph_level': 0, \
-#             'prod': 'vgt-ndvi',\
-#             'starting_sprod':'ndv',\
-#             'mapset': 'SPOTV-Africa-300m',\
-#             'version':'olci-v2.0',
-#             'starting_dates': starting_dates,
-#             'logfile':'vgt-ndvi',
-#             'touch_files_only':False
-#             }
-#     res_queue = None
-#
-#     processing_reproject(res_queue, **args)
-
-
-
-
 #   ---------------------------------------------------------------------
 #   Call a specific processing chain - To be TESTED after 03.3.2019
 #   ---------------------------------------------------------------------
@@ -936,7 +936,7 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 #my_proc_std_modis_kd490(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_modis_pp(pipe_run=0, pipe_print=4, touch_files_only=False)
 #my_proc_std_median_filter()
-my_proc_tamsat_rfe(pipe_run=3, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
+# my_proc_tamsat_rfe(pipe_run=3, pipe_print=0, start_date=None, end_date=None, touch_files_only=False)
 # proc_list=my_proc_fewsnet_rfe(pipe_run=0, pipe_print=8, start_date=None, end_date=None, touch_files_only=False)                       # OK
 
 # my_proc_chirps_dekad(pipe_run=3, pipe_print=0, start_date='20180101', end_date='20181231', upsert_db=False, touch_files_only=False)
@@ -960,6 +960,8 @@ my_proc_tamsat_rfe(pipe_run=3, pipe_print=0, start_date=None, end_date=None, tou
 #my_proc_std_ba(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None, touch_files_only=False)
 #my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=False)
 #test_proc_modis_chla_opfish(pipe_run=3, pipe_print=0, touch_files_only=False)
+my_proc_reproj_ndvi_olci(pipe_run=3, pipe_print=0, touch_files_only=False)
+
 #   ---------------------------------------------------------------------
 #   OFF-LINE Tests (on raster-math functions)
 #   ---------------------------------------------------------------------
