@@ -3631,9 +3631,15 @@ def ingest_file(interm_files_list, in_date, product, subproducts, datasource_des
             out_data = mem_ds.ReadAsArray()
 
             # Apply rescale to data
-            scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
-                                       out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger,
-                                       in_scale_type)
+            if out_data.shape[0] > 20000:
+
+                scaled_data = rescale_data_line(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
+                                           out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger,
+                                           in_scale_type)
+            else:
+                scaled_data = rescale_data(out_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max,
+                                           out_data_type_numpy, out_scale_factor, out_offset, out_nodata, my_logger,
+                                           in_scale_type)
 
             # Create a copy to output_file
             trg_ds = out_driver.CreateCopy(my_output_filename, out_ds, 0, [es_constants.ES2_OUTFILE_OPTIONS])
@@ -4336,6 +4342,111 @@ def rescale_data(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in
     # Return the output array
 
     return trg_data
+
+
+def rescale_data_line(in_data, in_scale_factor, in_offset, in_nodata, in_mask_min, in_mask_max, out_data_type,
+                 out_scale_factor, out_offset, out_nodata, my_logger, in_scale_type):
+#
+#   Format/scale the output data taking into account input/output properties, line-by-line (for large arrays)
+#   Args:
+#       in_data: input data array (numpy array)
+#       in_scale_factor: scale factor to be applied to input data
+#       in_offset: offset to be applied to input data
+#           Note: PhysVal = DN * scale_factor + offset
+#
+#       in_nodata: nodata value applied to input data
+#       in_mask_min: min range of values not to be converted to physical values
+#                    In the output, it is converted to nodata
+#       in_mask_max: max range of values not to be converted to physical values
+#                    In the output, it is converted to nodata
+#       out_data_type: output data type (byte, int16, uint16, ...)
+#       out_scale_factor: scale factor applied to the output
+#       out_offset: offset applied to the output -> should be 0
+#           Note: PhysVal = NumValue * scale_factor + offset
+#
+#       out_nodata: output nodata (should depend on out_data_type only)
+#
+#   Returns: output data
+#
+
+    # Check input
+    if not isinstance(in_data, N.ndarray):
+        my_logger.error('Input argument must be a numpy array. Exit')
+        return 1
+    # Create output array
+    trg_data_matrix = N.zeros(in_data.shape, dtype=out_data_type)
+
+    n_rows = in_data.shape[0]
+    for il in range(n_rows):
+
+        in_data_line = in_data[il,:]
+
+        # Get position of input nodata
+        if in_nodata is not None:
+            idx_nodata = (in_data_line == in_nodata)
+        else:
+            idx_nodata = N.zeros(1, dtype=bool)
+
+        # Get position of values exceeding in_mask_min value
+        if in_mask_min is not None:
+            idx_mask_min = (in_data_line <= in_mask_min)
+        else:
+            idx_mask_min = N.zeros(1, dtype=bool)
+
+        # Get position of values below in_mask_max value
+        if in_mask_max is not None:
+            idx_mask_max = (in_data_line >= in_mask_max)
+        else:
+            idx_mask_max = N.zeros(1, dtype=bool)
+
+        # # ES2-385 If input scale factor , offset and output scale factor, offsets are the same then return trg_data as in_data
+        if in_scale_factor == out_scale_factor and in_offset == out_offset:
+            trg_data = in_data_line
+            my_logger.info('Skip rescaling because input scale factor , offset and output scale factor, offsets are the same')
+
+            # Assign output nodata to in_nodata and mask range
+            if idx_nodata.any():
+                trg_data[idx_nodata] = out_nodata
+
+            if idx_mask_min.any():
+                trg_data[idx_mask_min] = out_nodata
+
+            if idx_mask_max.any():
+                trg_data[idx_mask_max] = out_nodata
+
+            return trg_data
+
+        # Check if input rescaling has to be done
+        if in_scale_factor != 1 or in_offset != 0:
+            phys_value = in_data_line * in_scale_factor + in_offset
+        else:
+            phys_value = in_data_line
+
+        if in_scale_type=='log10':
+            phys_value =  N.power(10,phys_value)
+
+        # Assign to the output array
+        # Option 2: ES2-385 Check if Output rescaling has to be done
+        if out_scale_factor != 1 or out_offset != 0:
+            trg_data = (phys_value - out_offset) / out_scale_factor
+        else:
+            trg_data = phys_value
+
+        # Assign output nodata to in_nodata and mask range
+        if idx_nodata.any():
+            trg_data[idx_nodata] = out_nodata
+
+        if idx_mask_min.any():
+            trg_data[idx_mask_min] = out_nodata
+
+        if idx_mask_max.any():
+            trg_data[idx_mask_max] = out_nodata
+
+        # Return the output array
+        trg_data_matrix[il,:] = trg_data
+
+    return trg_data_matrix
+
 
 def get_list_ingestion_trigger(product, datasource_descr_id):
     # Get list of ingestions triggers [prod/subprod/mapset]
