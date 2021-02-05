@@ -98,6 +98,41 @@ ALTER TABLE products.mapset_new
 COMMENT ON COLUMN products.mapset_new.defined_by IS 'values: JRC or USER';
 
 
+ALTER TABLE products.datasource_description
+DROP CONSTRAINT mapset_datasource_description_fk,
+ADD CONSTRAINT mapset_new_datasource_description_fk FOREIGN KEY (native_mapset)
+      REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+ALTER TABLE products.ingestion
+DROP CONSTRAINT mapset_ingestion_fk,
+ADD CONSTRAINT mapset_new_ingestion_fk FOREIGN KEY (mapsetcode)
+REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+ALTER TABLE products.process_product
+DROP CONSTRAINT mapset_process_input_product_fk,
+ADD CONSTRAINT mapset_new_process_input_product_fk FOREIGN KEY (mapsetcode)
+REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+ALTER TABLE products.thema_product
+DROP CONSTRAINT mapset_thema_product_fk,
+ADD CONSTRAINT mapset_new_thema_product_fk FOREIGN KEY (mapsetcode)
+REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+ON UPDATE CASCADE ON DELETE SET NULL;
+
+ALTER TABLE products.spirits
+DROP CONSTRAINT mapset_spirits_fk,
+ADD CONSTRAINT mapset_new_spirits_fk FOREIGN KEY (mapsetcode)
+REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+
 CREATE TABLE IF NOT EXISTS analysis.user_role
 (
   role_id integer NOT NULL,
@@ -736,6 +771,22 @@ ALTER TABLE analysis.layers ADD COLUMN provider character varying;
 /**********************************************************
   BEGIN update insert all functions
  *********************************************************/
+CREATE OR REPLACE FUNCTION products.check_mapset(mapsetid character varying)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+       mapset_id   ALIAS FOR  $1;
+	BEGIN
+       PERFORM * FROM products.mapset_new WHERE mapsetcode = mapset_id;
+       RETURN FOUND;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE STRICT
+  COST 100;
+ALTER FUNCTION products.check_mapset(character varying)
+  OWNER TO estation;
+
+
 
 CREATE OR REPLACE FUNCTION analysis.update_insert_logo(
     logo_id integer,
