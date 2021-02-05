@@ -347,6 +347,49 @@ class TestIngestion(unittest.TestCase):
                                         version=productversion, mapsetcode=mapsetcode, date=out_date)
         self.assertEqual(status, 1)
 
+    @unittest.skipIf(only_fast_tests, 'Only FAST tests.')
+    def test_ingest_c_gls_ndvi_olci(self):
+
+        # Test Copernicus Products Sentinel-OLCI version 2.0
+        productcode = 'vgt-ndvi'
+        productversion = 'olci-v2.0'
+        subproductcode = 'ndv'
+        mapsetcode = 'SPOTV-Africa-300m'
+        datasource_descrID = 'EO:EUM:DAT:OLCI-V2.0:NDVI'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir, 'c_gls_NDVI300_202007010000_AFRI_OLCI_V2.0.1.zip')]
+        # date_fileslist = glob.glob('/data/TestIngestion/c_gls_NDVI_201401010000_AFRI_PROBAV_V2.2.1.zip*')
+        in_date = '202007010000'
+        out_date = '20200701'
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
+
+        subproducts = [sprod]
+        # Remove existing output
+        self.remove_output_file(productcode, subproductcode, productversion, mapsetcode, out_date)
+        datasource_descr = querydb.get_datasource_descr(source_type='EUMETCAST',
+                                                        source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger,
+                            echo_query=1, test_mode=True)
+
+        status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
+                                        version=productversion, mapsetcode=mapsetcode, date=out_date)
+        self.assertEqual(status, 1)
+
     #   ---------------------------------------------------------------------------
     #   Vegetation - NDVI 300m
     #   Tested ok 4.5.20 - 5m 47s PyCh
