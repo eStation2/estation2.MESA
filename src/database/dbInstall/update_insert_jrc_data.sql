@@ -256,6 +256,60 @@ SELECT products.update_insert_mapset_new(mapsetcode := 'SPOTV-IGAD-300m', descri
 SELECT products.update_insert_mapset_new(mapsetcode := 'SENTINEL-Africa-1km', descriptive_name := 'Africa 1km (SENTINEL)', description := 'SENTINEL 1km mapset', defined_by := 'JRC', proj_code := 'EPSG:4326', resolutioncode := '1KM', bboxcode := 'Africa-S3', pixel_size_x := 12881, pixel_size_y:= 10081, footprint_image := 'data:image/png;base64,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', center_of_pixel:= true, full_copy := true );
 
 
+/*
+  CREATE FOREIGN KEY CONTRAINTS TO NEW TABLE mapset_new
+  This has to be done after inserting the data so that the creation does not go in error because of error
+  key does not exists in table mapset_new
+*/
+ALTER TABLE products.datasource_description
+DROP CONSTRAINT mapset_datasource_description_fk,
+ADD CONSTRAINT mapset_new_datasource_description_fk FOREIGN KEY (native_mapset)
+      REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+ALTER TABLE products.ingestion
+DROP CONSTRAINT mapset_ingestion_fk,
+ADD CONSTRAINT mapset_new_ingestion_fk FOREIGN KEY (mapsetcode)
+REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+ALTER TABLE products.process_product
+DROP CONSTRAINT mapset_process_input_product_fk,
+ADD CONSTRAINT mapset_new_process_input_product_fk FOREIGN KEY (mapsetcode)
+REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+ALTER TABLE products.thema_product
+DROP CONSTRAINT mapset_thema_product_fk,
+ADD CONSTRAINT mapset_new_thema_product_fk FOREIGN KEY (mapsetcode)
+REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+ON UPDATE CASCADE ON DELETE SET NULL;
+
+ALTER TABLE products.spirits
+DROP CONSTRAINT mapset_spirits_fk,
+ADD CONSTRAINT mapset_new_spirits_fk FOREIGN KEY (mapsetcode)
+REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+CREATE OR REPLACE FUNCTION products.check_mapset(mapsetid character varying)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+       mapset_id   ALIAS FOR  $1;
+	BEGIN
+       PERFORM * FROM products.mapset_new WHERE mapsetcode = mapset_id;
+       RETURN FOUND;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE STRICT
+  COST 100;
+ALTER FUNCTION products.check_mapset(character varying)
+  OWNER TO estation;
+
 
 
 SELECT products.update_insert_mapset(mapsetcode := 'MSG-satellite-3km', defined_by := 'JRC', descriptive_name := 'MSG disk 3km', description := 'MSG_satellite_3km', srs_wkt := 'PROJCS["unnamed",GEOGCS["WGS 84",DATUM["unknown",SPHEROID["WGS84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]],PROJECTION["Geostationary_Satellite"],PARAMETER["central_meridian",0],PARAMETER["satellite_height",35785831],PARAMETER["false_easting",0],PARAMETER["false_northing",0]]', upper_left_long := -5570248.47758297, pixel_shift_long := 3000.40316594828, rotation_factor_long := 0, upper_left_lat := 5570248.47758297, pixel_shift_lat := -3000.40316594828, rotation_factor_lat := 0, pixel_size_x := 3712, pixel_size_y:= 3712, footprint_image := 'resources/img/MSG-disk-3km.png', full_copy := true );
