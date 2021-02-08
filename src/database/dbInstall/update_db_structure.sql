@@ -98,6 +98,7 @@ ALTER TABLE products.mapset_new
 COMMENT ON COLUMN products.mapset_new.defined_by IS 'values: JRC or USER';
 
 
+
 CREATE TABLE IF NOT EXISTS analysis.user_role
 (
   role_id integer NOT NULL,
