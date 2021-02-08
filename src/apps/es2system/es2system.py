@@ -903,7 +903,7 @@ def push_data_ftp(dry_run=False, user=None, psw=None, url=None, trg_dir=None, ma
     #   It uses a command like:
     #       lftp -e "mirror -RLe /data/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/10dmax-linearx2/
     #                            /narma/eStation_2.0/processing/vgt-ndvi/sv2-pv2.1/SPOTV-Africa-1km/derived/10dmax-linearx2/;exit"
-    #                            -u narma:JRCVRw2960 sftp://srv-ies-ftp.jrc.it"" >> /eStation2/log/push_data_ftp.log
+    #                            -u narma:<PASSWORD> sftp://srv-ies-ftp.jrc.it"" >> /eStation2/log/push_data_ftp.log
     #
 
     spec_logger = log.my_logger('apps.es2system.push_data_ftp')
