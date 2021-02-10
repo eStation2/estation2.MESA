@@ -3991,7 +3991,7 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
     output_dir = os.path.split(output_file)[0]
     functions.check_output_dir(output_dir)
 
-    # Compare input-target mapset
+    # Compare input-target mapset -> copy
     if target_mapsetid==mapsetid:
 
         # Check if the target file exist ... and delete it in case
@@ -3999,10 +3999,16 @@ def ingest_file_archive(input_file, target_mapsetid, echo_query=False, no_delete
             os.remove(output_file)
         # Copy file to output
         shutil.copyfile(my_input_file,output_file)
-        # Open output dataset for writing metadata
-        #trg_ds = gdal.Open(output_file)
+
 
     else:
+        # Check wd-gee products and exit in case (no re-projection)
+        target_mapset_obj = mapset.MapSet()
+        target_mapset_obj.assigndb(target_mapsetid)
+
+        if target_mapset_obj.is_wbd():
+            logger.info('Do not consider wd-gee for re-projection')
+            return
 
         # -------------------------------------------------------------------------
         # Manage the geo-referencing associated to input file
