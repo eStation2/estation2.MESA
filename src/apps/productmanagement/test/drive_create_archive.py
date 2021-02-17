@@ -235,12 +235,30 @@ class TestCreate(unittest.TestCase):
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
-    def TestCreateArchive_tamsat_rfe(self):
+    def TestCreateArchive_rain_spi(self):
 
+        base_target_dir=self.target_dir
+        mapset='CHIRP-Africa-5km'
+        product='rain-spi'
+        version='V1.0'
+        start_date=datetime.date(2015, 1, 1)
+        end_date=None
+
+        # crop/pasture
+        subproducts=['spi-1mon','spi-3mon']
+        for subproduct in subproducts:
+            target_dir = base_target_dir + product+ os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+    def TestCreateArchive_tamsat_rfe(self, version=None):
+
+        if version is None:
+            version = '3.1'
         base_target_dir=self.target_dir
         mapset='TAMSAT-Africa-4km'
         product='tamsat-rfe'
-        version='3.0'
+
         start_date=datetime.date(2015, 1, 1)
         end_date=None
 
@@ -554,6 +572,38 @@ class TestCreate(unittest.TestCase):
         functions.check_output_dir(target_dir)
         create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
 
+    def TestCreateArchive_lsasaf_et(self):
+
+        base_target_dir=self.target_dir
+        mapset='SPOTV-Africa-1km'
+        product='lsasaf-et'
+        version='undefined'
+        start_date=datetime.date(2016, 1, 1)
+        end_date=None
+
+        # SM
+        subproducts= ['10dcum','1moncum']
+        for subproduct in subproducts:
+            target_dir = base_target_dir + product+ os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
+    def TestCreateArchive_lsasaf_lst(self):
+
+        base_target_dir=self.target_dir
+        mapset='SPOTV-Africa-1km'
+        product='lsasaf-lst'
+        version='undefined'
+        start_date=datetime.date(2018, 1, 1)
+        end_date=None
+
+        # SM
+        subproducts= ['10dmax','10dmax', '10dmin']
+        for subproduct in subproducts:
+            target_dir = base_target_dir + product+ os.path.sep + subproduct
+            functions.check_output_dir(target_dir)
+            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+
     # -------------------------- ALL --------------------------------------------------
 
     def TestCreateArchive_all(self):
@@ -568,15 +618,17 @@ class TestCreate(unittest.TestCase):
         self.TestCreateArchive_vgt_ndvi()
         self.TestCreateArchive_vgt_fapar()
 
-        # # Rainfall (30.10.20 -> done)
+        # # Rainfall (30.10.20 -> done) (rain-spi and tamsat-3.1 added on 10.2.2021)
         self.TestCreateArchive_arc2_rain()
         self.TestCreateArchive_chirps_dekad()
         self.TestCreateArchive_fewsnet_rfe()
-        self.TestCreateArchive_tamsat_rfe()
+        self.TestCreateArchive_rain_spi()
+        self.TestCreateArchive_tamsat_rfe(version='3.0')
+        self.TestCreateArchive_tamsat_rfe(version='3.1')
 
         # # Fire (30.10.20 -> done)
         self.TestCreateArchive_modis_firms()
-        #
+
         # Inland Water ()
         self.TestCreateArchive_wd_gee()
 
@@ -593,10 +645,11 @@ class TestCreate(unittest.TestCase):
         self.TestCreateArchive_olci_wrr()
         self.TestCreateArchive_slstr_sst()
 
-        # Miscellaneous
+        # Miscellaneous [lsasaf added on 10.2.2021]
         self.TestCreateArchive_ascat_swi()
         self.TestCreateArchive_cpc_sm()
-
+        self.TestCreateArchive_lsasaf_et()
+        self.TestCreateArchive_lsasaf_lst()
 
 
 
