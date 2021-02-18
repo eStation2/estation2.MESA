@@ -268,20 +268,23 @@ ADD CONSTRAINT mapset_new_datasource_description_fk FOREIGN KEY (native_mapset)
       REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
       ON UPDATE CASCADE ON DELETE SET NULL;
 
-
 ALTER TABLE products.ingestion
 DROP CONSTRAINT mapset_ingestion_fk,
 ADD CONSTRAINT mapset_new_ingestion_fk FOREIGN KEY (mapsetcode)
 REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
 ON UPDATE CASCADE ON DELETE RESTRICT;
 
+ALTER TABLE products.processing
+DROP CONSTRAINT mapset_processing_fk,
+ADD CONSTRAINT mapset_new_processing_fk FOREIGN KEY (output_mapsetcode)
+REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+ON UPDATE CASCADE ON DELETE SET NULL
 
 ALTER TABLE products.process_product
 DROP CONSTRAINT mapset_process_input_product_fk,
 ADD CONSTRAINT mapset_new_process_input_product_fk FOREIGN KEY (mapsetcode)
 REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
 ON UPDATE CASCADE ON DELETE SET NULL;
-
 
 ALTER TABLE products.thema_product
 DROP CONSTRAINT mapset_thema_product_fk,
