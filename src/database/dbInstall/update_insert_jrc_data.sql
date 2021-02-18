@@ -257,6 +257,61 @@ SELECT products.update_insert_mapset_new(mapsetcode := 'SENTINEL-Africa-1km', de
 
 
 
+/*
+  CREATE FOREIGN KEY CONTRAINTS TO NEW TABLE mapset_new
+  This has to be done after inserting the data so that the creation does not go in error because of error
+  key does not exists in table mapset_new
+*/
+ALTER TABLE products.datasource_description
+DROP CONSTRAINT mapset_datasource_description_fk,
+ADD CONSTRAINT mapset_new_datasource_description_fk FOREIGN KEY (native_mapset)
+      REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+ALTER TABLE products.ingestion
+DROP CONSTRAINT mapset_ingestion_fk,
+ADD CONSTRAINT mapset_new_ingestion_fk FOREIGN KEY (mapsetcode)
+REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+ALTER TABLE products.process_product
+DROP CONSTRAINT mapset_process_input_product_fk,
+ADD CONSTRAINT mapset_new_process_input_product_fk FOREIGN KEY (mapsetcode)
+REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+ALTER TABLE products.thema_product
+DROP CONSTRAINT mapset_thema_product_fk,
+ADD CONSTRAINT mapset_new_thema_product_fk FOREIGN KEY (mapsetcode)
+REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+ON UPDATE CASCADE ON DELETE SET NULL;
+
+ALTER TABLE products.spirits
+DROP CONSTRAINT mapset_spirits_fk,
+ADD CONSTRAINT mapset_new_spirits_fk FOREIGN KEY (mapsetcode)
+REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
+ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+CREATE OR REPLACE FUNCTION products.check_mapset(mapsetid character varying)
+  RETURNS boolean AS
+$BODY$
+	DECLARE
+       mapset_id   ALIAS FOR  $1;
+	BEGIN
+       PERFORM * FROM products.mapset_new WHERE mapsetcode = mapset_id;
+       RETURN FOUND;
+	END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE STRICT
+  COST 100;
+ALTER FUNCTION products.check_mapset(character varying)
+  OWNER TO estation;
+
+
 
 SELECT products.update_insert_mapset(mapsetcode := 'MSG-satellite-3km', defined_by := 'JRC', descriptive_name := 'MSG disk 3km', description := 'MSG_satellite_3km', srs_wkt := 'PROJCS["unnamed",GEOGCS["WGS 84",DATUM["unknown",SPHEROID["WGS84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]],PROJECTION["Geostationary_Satellite"],PARAMETER["central_meridian",0],PARAMETER["satellite_height",35785831],PARAMETER["false_easting",0],PARAMETER["false_northing",0]]', upper_left_long := -5570248.47758297, pixel_shift_long := 3000.40316594828, rotation_factor_long := 0, upper_left_lat := 5570248.47758297, pixel_shift_lat := -3000.40316594828, rotation_factor_lat := 0, pixel_size_x := 3712, pixel_size_y:= 3712, footprint_image := 'resources/img/MSG-disk-3km.png', full_copy := true );
 SELECT products.update_insert_mapset(mapsetcode := 'SPOTV-Africa-1km', defined_by := 'JRC', descriptive_name := 'Africa 1km (SPOTV)', description := 'Original Spot VGT 1km mapset', srs_wkt := 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],TOWGS84[0,0,0,0,0,0,0],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9108"]],AUTHORITY["EPSG","4326"]]', upper_left_long := -26.0044642857143, pixel_shift_long := 0.008928571428571, rotation_factor_long := 0, upper_left_lat := 38.0044642857143, pixel_shift_lat := -0.008928571428571, rotation_factor_lat := 0, pixel_size_x := 9633, pixel_size_y:= 8177, footprint_image := 'resources/img/SPOTV-Africa-1km.png', full_copy := true );
