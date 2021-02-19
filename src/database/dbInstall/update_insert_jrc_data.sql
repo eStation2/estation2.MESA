@@ -278,7 +278,7 @@ ALTER TABLE products.processing
 DROP CONSTRAINT mapset_processing_fk,
 ADD CONSTRAINT mapset_new_processing_fk FOREIGN KEY (output_mapsetcode)
 REFERENCES products.mapset_new (mapsetcode) MATCH SIMPLE
-ON UPDATE CASCADE ON DELETE SET NULL
+ON UPDATE CASCADE ON DELETE SET NULL;
 
 ALTER TABLE products.process_product
 DROP CONSTRAINT mapset_process_input_product_fk,
