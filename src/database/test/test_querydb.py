@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 __author__ = "Jurriaan van 't Klooster"
 
-
+import unittest
 from unittest import TestCase
 from lib.python import es_logging as log
 # Trivial change
@@ -15,20 +15,15 @@ from lib.python import functions
 class TestQuerydb(TestCase):
 
     def test_checkUser(self):
-        user_info = {
-            'userid': 'n002rty4',
-            'username': 'MESA CWG',
-            'password': 'eStation2020',
-            'userlevel': 2,
-            'email': 'mesa.cwg@gmail.com',
-            'prefered_language': 'eng'
+        params = {
+            'userid': 'adminuser'
         }
-
-        userFromDB = querydb.checkUser(user_info)
-        print userFromDB.get('userlevel')
-        print userFromDB
-        self.assertEqual(1, 1)
-
+        result = querydb.checkUser(params)
+        if result:
+            print result[0]
+            self.assertGreater(result.__len__(), 0)
+        else:
+            self.assertFalse(True)
 
     def test_getProductNative(self):
         productcode = 'vgt-lai'
@@ -91,8 +86,10 @@ class TestQuerydb(TestCase):
 
         self.assertEqual(1, 1)
 
+    # Changing the Thema should not be executed as a test (unless rolling back to original one)
+    @unittest.skipIf(True, 'Changing the Thema should not be executed as a test !')
     def test_set_thema(self):
-        themaid = 'AGRYHMET'
+        themaid = 'AGRHYMET'
         themaset = querydb.set_thema(themaid)
         print themaset
 
