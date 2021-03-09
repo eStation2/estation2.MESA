@@ -10,13 +10,13 @@ start = time.clock()
 
 # Manual Switch for START/STOP
 do_start = True
-dry_run = True
+dry_run = False
 service = False
 serialize = False                   # for debug
 # test_one_product = 62               # MODIS_PP on 8daysavg
 # test_one_product =  1               # FEWSNET std_precip
 # test_one_product = 51               # VGT-NDVI merge 2.2
-test_one_product = None               # VGT-NDVI 2.2 std_ndvi_prods_only
+test_one_product = 52                 # VGT-NDVI 2.2 std_ndvi_prods_only
 
 # service is always False because this module is used by the windows version or for testing
 # ToDo: The code under the if statement can be deleted, service_processing.py is now used by non windows versions
