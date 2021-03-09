@@ -98,7 +98,8 @@ def loop_processing(dry_run=False, serialize=False, test_one_product=None):
     sleep_time=es_constants.processing_sleep_time_sec
 
     while True:
-
+        # ES2-646 Variable is intialized to manage single product processing
+        do_processing_singleproduct = False
         logger.debug("Entering infinite loop")
         # Get all active processing chains from the database.
         active_processing_chains = querydb.get_active_processing_chains()
