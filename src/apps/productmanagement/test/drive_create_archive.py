@@ -338,21 +338,22 @@ class drive_Create():
             functions.check_output_dir(target_dir)
             create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
-        mapset='SPOTV-Africa-10km'
-        # derived products 10km
-        subproducts=['10dcount10k', '10dcount10kdiff', '10dcount10kperc', '10dcount10kratio']
-        for subproduct in subproducts:
-
-            target_dir = base_target_dir + product + os.path.sep + subproduct
-            functions.check_output_dir(target_dir)
-            create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
-
-        # stats products 1km
-        subproducts=['10dcount10kavg', '10dcount10kmin','10dcount10kmax']
-        for subproduct in subproducts:
-            target_dir = base_target_dir + product + os.path.sep + subproduct
-            functions.check_output_dir(target_dir)
-            create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
+        # See ES2-647
+        # mapset='SPOTV-Africa-10km'
+        # # derived products 10km
+        # subproducts=['10dcount10k', '10dcount10kdiff', '10dcount10kperc', '10dcount10kratio']
+        # for subproduct in subproducts:
+        #
+        #     target_dir = base_target_dir + product + os.path.sep + subproduct
+        #     functions.check_output_dir(target_dir)
+        #     create_archive_eumetcast(product, version, subproduct, mapset, start_date=start_date, end_date=end_date, target_dir=target_dir)
+        #
+        # # stats products 10km
+        # subproducts=['10dcount10kavg', '10dcount10kmin','10dcount10kmax']
+        # for subproduct in subproducts:
+        #     target_dir = base_target_dir + product + os.path.sep + subproduct
+        #     functions.check_output_dir(target_dir)
+        #     create_archive_eumetcast(product, version, subproduct, mapset, start_date=-1, end_date=-1, target_dir=target_dir)
 
     # -------------------------- OCEANOGRAPHY --------------------------------------------------
 
