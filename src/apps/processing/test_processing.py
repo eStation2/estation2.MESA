@@ -316,8 +316,8 @@ def my_proc_fewsnet_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None
 def my_proc_fewsnet_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False):
 
     # Create the list of dates -> returns empty if start==end==None
-    if start_date is not None and end_date is not None:
-        starting_dates = proc_functions.get_list_dates_for_dataset('fewsnet-rfe', '10d', '2.0', start_date=start_date, end_date=end_date)
+    if start_date is not None or end_date is not None:
+        starting_dates = proc_functions.get_list_dates_for_dataset('fewsnet-rfe', '1moncum', '2.0', start_date=start_date, end_date=end_date)
     else:
         starting_dates = None
 
@@ -332,7 +332,7 @@ def my_proc_fewsnet_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None
             'logfile':'log-fewsnet.log'}
 
     res_queue = None
-    proc_lists=processing_std_precip_stats_only(res_queue,**args)
+    proc_lists=processing_std_precip_prods_only(res_queue,**args)
     print(proc_lists)
 
 #   ---------------------------------------------------------------------
@@ -916,6 +916,33 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 
     processing_std_vgt_stats_only(res_queue, **args)
 
+# from apps.processing.processing_reproject import *
+# def test_process_repoject(pipe_run=4, pipe_print=0, touch_files_only=False):
+#     start_date = None #'19990101'
+#     end_date = None #'20181221'
+#
+#     if start_date is not None and end_date is not None:
+#         starting_dates = proc_functions.get_list_dates_for_dataset('vgt-ndvi', 'ndv', 'olci-v2.0', start_date=start_date, end_date=end_date)
+#     else:
+#         starting_dates = None
+#     args = {'pipeline_run_level':pipe_run, \
+#             'pipeline_printout_level':pipe_print, \
+#             'pipeline_printout_graph_level': 0, \
+#             'prod': 'vgt-ndvi',\
+#             'starting_sprod':'ndv',\
+#             'mapset': 'SPOTV-Africa-300m',\
+#             'version':'olci-v2.0',
+#             'starting_dates': starting_dates,
+#             'logfile':'vgt-ndvi',
+#             'touch_files_only':False
+#             }
+#     res_queue = None
+#
+#     processing_reproject(res_queue, **args)
+
+
+
+
 #   ---------------------------------------------------------------------
 #   Call a specific processing chain - To be TESTED after 03.3.2019
 #   ---------------------------------------------------------------------
@@ -940,7 +967,7 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 # proc_list=my_proc_fewsnet_rfe(pipe_run=0, pipe_print=8, start_date=None, end_date=None, touch_files_only=False)                       # OK
 
 # my_proc_chirps_dekad(pipe_run=3, pipe_print=0, start_date='20180101', end_date='20181231', upsert_db=False, touch_files_only=False)
-# my_proc_fewsnet_rfe(pipe_run=3, pipe_print=0, start_date='20010101', end_date='20181231',touch_files_only=False)
+my_proc_fewsnet_rfe(pipe_run=3, pipe_print=0, start_date='20210101', end_date='20210201',touch_files_only=False)
 # my_proc_arc2rain_dekad(pipe_run=0, pipe_print=6, start_date='19810101', end_date='20171231', upsert_db=False, touch_files_only=False)
 # my_proc_chirps_lp(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False, type='')
 # start_y='2019'; start_m='11'; start_d='01';       start_date=start_y+start_m+start_d+'0000'
@@ -960,7 +987,7 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 #my_proc_std_ba(start_date=None, end_date=None, pipe_run=0, pipe_print=3, start_date_stats=None, end_date_stats=None, touch_files_only=False)
 #my_proc_olci_wrr_chla_gradient(pipe_run=0, pipe_print=3, touch_files_only=False)
 #test_proc_modis_chla_opfish(pipe_run=3, pipe_print=0, touch_files_only=False)
-my_proc_reproj_ndvi_olci(pipe_run=3, pipe_print=0, touch_files_only=False)
+# my_proc_reproj_ndvi_olci(pipe_run=3, pipe_print=0, touch_files_only=False)
 
 #   ---------------------------------------------------------------------
 #   OFF-LINE Tests (on raster-math functions)
