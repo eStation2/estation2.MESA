@@ -271,7 +271,7 @@ FTS.add_configuration(
     name="Land Surface Temperature - MSG / Land SAF Africa",
     input_directory=tellicast_path,
     output_directories=[estation_path],
-    include_filter="^S-LSA_-HDF5_LSASAF_MSG_LST_.Afr_.*.bz2$",
+    include_filter="^S-LSA_-HDF5_LSASAF_MSG_LST_.*.bz2$",
     exclude_filter="^$"
 )
 
