@@ -110,9 +110,9 @@ class SdsMetadata(object):
         else:
             # Go through the metadata list and write to sds
             for key, value in list(self.sds_metadata.items()):
-                # Check length of value
+                # Check length of string - if too long, take initial and final part
                 if len(str(value)) > 1000:
-                    wrt_value = str(value)[0:1000] + ' + others ...'
+                    wrt_value = str(value)[0:900] + ' ... '+str(value)[-100:-1]+str(value)[-1]
                 else:
                     wrt_value = str(value)
                 dataset.SetMetadataItem(key, wrt_value)
