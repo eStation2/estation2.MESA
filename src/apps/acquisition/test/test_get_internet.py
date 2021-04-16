@@ -348,6 +348,63 @@ class TestGetInternet(unittest.TestCase):
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
                 self.assertEqual(result, 0)
 
+
+    #   ---------------------------------------------------------------------------
+    #   Vegetation - MODIS FAPAR
+    #   ---------------------------------------------------------------------------
+    def testRemoteHttps_MODIS_FAPAR(self):
+        source_active = False
+        internet_id = 'JRC:DRO:FAPAR:10DFAPAR'
+        start_date_fixed = 20210221
+        end_date_fixed = 20210301
+        start_date_dyn = -45
+        end_date_dyn = -30
+        file_to_check = 'fAPAR_MOD_2021_07.tif'
+        include_files_expression = "fAPAR_MOD_%Y_%{dky}.tif"
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+                source_active = True
+
+        if source_active:
+            my_source = Source(internet_id=internet_id,
+                               url=internet_source.url,
+                               descriptive_name='VITO PDF server - FAPAR 2.0 (offline retrieval)',
+                               include_files_expression=include_files_expression,
+                               pull_frequency=internet_source.pull_frequency,
+                               user_name=internet_source.user_name,
+                               password=internet_source.password,
+                               start_date=start_date_dyn,
+                               end_date=end_date_dyn,
+                               frequency_id=internet_source.frequency_id,
+                               type=internet_source.type,
+                               files_filter_expression=internet_source.files_filter_expression,
+                               https_params=internet_source.https_params)
+
+            # Direct test !
+            if self.direct_download:
+                filename = 'fAPAR_MOD_2021_07.tif'
+                remote_url = internet_source.url + filename
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                           userpwd=internet_source.user_name + ':' + internet_source.password)
+                self.assertEqual(status, 0)
+
+            # Test pattern (with fixed date)
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
+                                                  start_date_fixed,
+                                                  end_date_fixed,
+                                                  str(internet_source.frequency_id),
+                                                  multi_template=False)
+            if self.pattern:
+                self.assertTrue(file_to_check in list)
+
+            # Test download (dynamic dates
+            if True: #self.download:
+                result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
+                self.assertEqual(result, 0)
+
     #   ---------------------------------------------------------------------------
     #   Vegetation - FCOVER RT6
     #   ---------------------------------------------------------------------------
@@ -463,7 +520,7 @@ class TestGetInternet(unittest.TestCase):
     #   ---------------------------------------------------------------------------
     #   Vegetation - NDVI
     #   ---------------------------------------------------------------------------
-    def test_RemoteHttps_NDVI(self):
+    def testRemoteHttps_NDVI(self):
         source_active = False
         internet_id = 'PDF:GLS:PROBA-V2.2:NDVI'
         start_date_fixed = 20191010

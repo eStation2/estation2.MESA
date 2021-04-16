@@ -416,8 +416,8 @@ def my_proc_fewsnet_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None
 def my_proc_fewsnet_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False):
 
     # Create the list of dates -> returns empty if start==end==None
-    if start_date is not None and end_date is not None:
-        starting_dates = proc_functions.get_list_dates_for_dataset('fewsnet-rfe', '10d', '2.0', start_date=start_date, end_date=end_date)
+    if start_date is not None or end_date is not None:
+        starting_dates = proc_functions.get_list_dates_for_dataset('fewsnet-rfe', '1moncum', '2.0', start_date=start_date, end_date=end_date)
     else:
         starting_dates = None
 
@@ -432,7 +432,7 @@ def my_proc_fewsnet_rfe(pipe_run=0, pipe_print=3, start_date=None, end_date=None
             'logfile':'log-fewsnet.log'}
 
     res_queue = None
-    proc_lists=processing_std_precip_stats_only(res_queue,**args)
+    proc_lists=processing_std_precip_prods_only(res_queue,**args)
     print(proc_lists)
 
 #   ---------------------------------------------------------------------
@@ -1015,6 +1015,33 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
     res_queue = None
 
     processing_std_vgt_stats_only(res_queue, **args)
+
+# from apps.processing.processing_reproject import *
+# def test_process_repoject(pipe_run=4, pipe_print=0, touch_files_only=False):
+#     start_date = None #'19990101'
+#     end_date = None #'20181221'
+#
+#     if start_date is not None and end_date is not None:
+#         starting_dates = proc_functions.get_list_dates_for_dataset('vgt-ndvi', 'ndv', 'olci-v2.0', start_date=start_date, end_date=end_date)
+#     else:
+#         starting_dates = None
+#     args = {'pipeline_run_level':pipe_run, \
+#             'pipeline_printout_level':pipe_print, \
+#             'pipeline_printout_graph_level': 0, \
+#             'prod': 'vgt-ndvi',\
+#             'starting_sprod':'ndv',\
+#             'mapset': 'SPOTV-Africa-300m',\
+#             'version':'olci-v2.0',
+#             'starting_dates': starting_dates,
+#             'logfile':'vgt-ndvi',
+#             'touch_files_only':False
+#             }
+#     res_queue = None
+#
+#     processing_reproject(res_queue, **args)
+
+
+
 
 #   ---------------------------------------------------------------------
 #   Call a specific processing chain - To be TESTED after 03.3.2019
