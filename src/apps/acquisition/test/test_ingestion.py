@@ -397,6 +397,48 @@ class TestIngestion(unittest.TestCase):
         self.assertEqual(status, 1)
 
     @unittest.skipIf(only_fast_tests, 'Only FAST tests.')
+    def test_ingest_c_gls_ndvi_3_0(self):
+
+        # Test Copernicus Products version 2.2 (starting with NDVI 2.2.1)
+        productcode = 'vgt-ndvi'
+        productversion = 'proba-v3.0'
+        subproductcode = 'ndv'
+        mapsetcode = 'SPOTV-Africa-1km'
+        datasource_descrID = 'PDF:GLS:PROBA-V3.0:NDVI'
+        input_dir = self.test_ingest_dir + os.path.sep + productcode + os.path.sep + self.native_dir
+        date_fileslist = [os.path.join(input_dir, 'c_gls_NDVI_201912010000_GLOBE_PROBAV_V3.0.1.nc')]
+        in_date = '201912010000'
+        out_date = '20191201'
+        product = {"productcode": productcode,
+                   "version": productversion}
+        args = {"productcode": productcode,
+                "subproductcode": subproductcode,
+                "datasource_descr_id": datasource_descrID,
+                "version": productversion}
+
+        product_in_info = querydb.get_product_in_info(**args)
+
+        re_process = product_in_info.re_process
+        re_extract = product_in_info.re_extract
+
+        sprod = {'subproduct': subproductcode,
+                 'mapsetcode': mapsetcode,
+                 're_extract': re_extract,
+                 're_process': re_process}
+
+        subproducts = [sprod]
+        # Remove existing output
+        self.remove_output_file(productcode, subproductcode, productversion, mapsetcode, out_date)
+        datasource_descr = querydb.get_datasource_descr(source_type='INTERNET',
+                                                        source_id=datasource_descrID)
+        ingestion.ingestion(date_fileslist, in_date, product, subproducts, datasource_descr[0], logger,
+                            echo_query=1, test_mode=True)
+
+        status = self.checkIngestedFile(productcode=productcode, subproductcode=subproductcode,
+                                        version=productversion, mapsetcode=mapsetcode, date=out_date)
+        self.assertEqual(status, 1)
+
+    @unittest.skipIf(only_fast_tests, 'Only FAST tests.')
     def test_ingest_c_gls_ndvi_olci(self):
 
         # Test Copernicus Products Sentinel-OLCI version 2.0

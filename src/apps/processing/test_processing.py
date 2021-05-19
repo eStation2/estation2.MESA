@@ -62,6 +62,87 @@ def my_proc_std_ndvi_res(pipe_run=0, pipe_print=3, touch_files_only=False):
     # proc_lists = processing_std_ndvi_stats_only(res_queue,**args)
     #proc_lists = processing_std_ndvi_all(res_queue,**args)
 
+def my_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False):
+    #(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False):
+
+    productcode='vgt-ndvi'
+    subproductcode='ndv'
+    version='sv2-pv2.2'
+    start_date='20180101'
+    end_date=None
+
+    list_dates = proc_functions.get_list_dates_for_dataset(productcode, subproductcode, version, start_date=start_date, end_date=end_date)
+
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': productcode,\
+            'starting_sprod':subproductcode,\
+            'mapset': 'SPOTV-Africa-1km',\
+            'version': version,
+            'starting_dates': list_dates,
+            'logfile':'test_processing_ndvi',
+            'touch_files_only':touch_files_only}
+
+    #res_queue = Queue()
+    res_queue = None
+    proc_lists = processing_std_ndvi_prods_only(res_queue,**args)
+    # proc_lists = processing_std_ndvi_stats_only(res_queue,**args)
+    #proc_lists = processing_std_ndvi_all(res_queue,**args)
+
+def my_proc_std_ndvi_3_0(pipe_run=0, pipe_print=3, touch_files_only=False):
+    #(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False):
+
+    productcode='vgt-ndvi'
+    subproductcode='ndv'
+    version='sv2-pv3.0'
+    start_date='19990101'
+    end_date='20191221'
+
+    list_dates = proc_functions.get_list_dates_for_dataset(productcode, subproductcode, version, start_date=start_date, end_date=end_date)
+
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': productcode,\
+            'starting_sprod':subproductcode,\
+            'mapset': 'SPOTV-Africa-1km',\
+            'version': version,
+            'starting_dates': list_dates,
+            'logfile':'test_processing_ndvi',
+            'touch_files_only':touch_files_only}
+
+    #res_queue = Queue()
+    res_queue = None
+    # proc_lists = processing_std_ndvi_prods_only(res_queue,**args)
+    proc_lists = processing_std_ndvi_stats_only(res_queue,**args)
+    #proc_lists = processing_std_ndvi_all(res_queue,**args)
+
+def my_proc_std_ndvi_vgt_pv_olci(pipe_run=0, pipe_print=3, touch_files_only=False):
+
+    productcode='vgt-ndvi'
+    subproductcode='ndv'
+    version='vgt-pv-olci'
+    start_date='19990101'
+    end_date=None
+
+    list_dates = proc_functions.get_list_dates_for_dataset(productcode, subproductcode, version, start_date=start_date, end_date=end_date)
+
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': productcode,\
+            'starting_sprod':subproductcode,\
+            'mapset': 'SPOTV-Africa-1km',\
+            'version': version,
+            'starting_dates': list_dates,
+            'logfile':'test_processing_ndvi',
+            'touch_files_only':touch_files_only}
+
+    res_queue = None
+    proc_lists = processing_std_ndvi_prods_only(res_queue,**args)
+
+
 from apps.processing.processing_reproject import *
 def my_proc_reproj_ndvi_olci(pipe_run=0, pipe_print=3, touch_files_only=False):
 
@@ -96,6 +177,25 @@ from apps.processing.processing_merge import *
 def my_proc_ndvi_merge(pipe_run=0, pipe_print=3, touch_files_only=False):
 
     process_id = 51
+    input_products = querydb.get_processing_chain_products(process_id,type='input')
+    output_products = querydb.get_processing_chain_products(process_id,type='output')
+
+    args = {'pipeline_run_level':0, \
+            'pipeline_printout_level':3, \
+            'input_products': input_products,\
+            'output_product':output_products,\
+            'mapset': 'SPOTV-Africa-1km'}
+
+    res_queue = None
+    processing_merge(**args)
+
+#   ---------------------------------------------------------------------
+# vgt-ndvi merge (for sv2-pv3.0)
+#   ---------------------------------------------------------------------
+from apps.processing.processing_merge import *
+def my_proc_ndvi_merge_3_0(pipe_run=0, pipe_print=3, touch_files_only=False):
+
+    process_id = 235
     input_products = querydb.get_processing_chain_products(process_id,type='input')
     output_products = querydb.get_processing_chain_products(process_id,type='output')
 
@@ -953,8 +1053,10 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 # test_subprocess_modis_fapar(pipe_run=3, pipe_print=0, touch_files_only=False)
 # test_subprocess_vgt_fapar(pipe_run=0, pipe_print=4, touch_files_only=False)
 # my_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False)
+# my_proc_std_ndvi_3_0(pipe_run=5, pipe_print=0, touch_files_only=False)
+my_proc_std_ndvi_vgt_pv_olci(pipe_run=5, pipe_print=0, touch_files_only=False)
 # my_proc_std_ndvi_res(pipe_run=3, pipe_print=0, touch_files_only=False)
-#my_proc_ndvi_merge(pipe_run=0, pipe_print=3, touch_files_only=False)
+# my_proc_ndvi_merge_3_0(pipe_run=0, pipe_print=3, touch_files_only=False)
 # my_proc_pml_modis_fronts(pipe_run=3, pipe_print=0, touch_files_only=False)
 #my_proc_std_fronts(pipe_run=0, pipe_print=3, touch_files_only=False)
 #my_proc_std_modis_chla(pipe_run=0, pipe_print=3, touch_files_only=False)
@@ -967,7 +1069,7 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 # proc_list=my_proc_fewsnet_rfe(pipe_run=0, pipe_print=8, start_date=None, end_date=None, touch_files_only=False)                       # OK
 
 # my_proc_chirps_dekad(pipe_run=3, pipe_print=0, start_date='20180101', end_date='20181231', upsert_db=False, touch_files_only=False)
-my_proc_fewsnet_rfe(pipe_run=3, pipe_print=0, start_date='20210101', end_date='20210201',touch_files_only=False)
+# my_proc_fewsnet_rfe(pipe_run=3, pipe_print=0, start_date='20010101', end_date='20181231',touch_files_only=False)
 # my_proc_arc2rain_dekad(pipe_run=0, pipe_print=6, start_date='19810101', end_date='20171231', upsert_db=False, touch_files_only=False)
 # my_proc_chirps_lp(pipe_run=0, pipe_print=3, start_date=None, end_date=None, touch_files_only=False, type='')
 # start_y='2019'; start_m='11'; start_d='01';       start_date=start_y+start_m+start_d+'0000'

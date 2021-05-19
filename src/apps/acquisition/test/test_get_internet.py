@@ -573,6 +573,60 @@ class TestGetInternet(unittest.TestCase):
                 result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
                 self.assertEqual(result, 0)
 
+    def test_RemoteHttps_NDVI_3_0(self):
+        source_active = False
+        internet_id = 'PDF:GLS:PROBA-V3.0:NDVI'
+        start_date_fixed = 20191221
+        end_date_fixed = 20191221
+        start_date_dyn = -45
+        end_date_dyn = -30
+        file_to_check = '/2019/12/21/NDVI_201912210000_GLOBE_PROBAV_V3.0.1/c_gls_NDVI_201912210000_GLOBE_PROBAV_V3.0.1.nc'
+        include_files_expression = "/%Y/%-m/%d/NDVI_%Y%m%d0000_GLOBE_PROBAV_V3.0.1/c_gls_NDVI_%Y%m%d0000_GLOBE_PROBAV_V3.0.1.nc"
+
+        internet_sources = querydb.get_active_internet_sources()
+        for s in internet_sources:
+            if s.internet_id == internet_id:
+                internet_source = s
+                source_active = True
+
+        if source_active:
+            my_source = Source(internet_id=internet_id,
+                               url=internet_source.url,
+                               descriptive_name='VITO PDF server - NDVI 3.0 (offline retrieval)',
+                               include_files_expression=include_files_expression,
+                               pull_frequency=internet_source.pull_frequency,
+                               user_name=internet_source.user_name,
+                               password=internet_source.password,
+                               start_date=start_date_dyn,
+                               end_date=end_date_dyn,
+                               frequency_id=internet_source.frequency_id,
+                               type=internet_source.type,
+                               files_filter_expression=internet_source.files_filter_expression,
+                               https_params=internet_source.https_params)
+
+            # Direct test !
+            if self.direct_download:
+                filename = 'c_gls_NDVI_201912210000_GLOBE_PROBAV_V3.0.1.nc'
+                remote_url = internet_source.url + '/2019/12/21/NDVI_201912210000_GLOBE_PROBAV_V3.0.1/' + filename
+                status = get_file_from_url(remote_url, self.target_dir, target_file=filename,
+                                           userpwd=internet_source.user_name + ':' + internet_source.password)
+                self.assertEqual(status, 0)
+
+            # Test pattern (with fixed date)
+            list = build_list_matching_files_tmpl(str(internet_source.url), include_files_expression,
+                                                  start_date_fixed,
+                                                  end_date_fixed,
+                                                  str(internet_source.frequency_id),
+                                                  multi_template=False)
+            if self.pattern:
+                self.assertTrue(file_to_check in list)
+
+            # Test download (dynamic dates
+            if self.download:
+                result = loop_get_internet(test_one_source=internet_id, my_source=my_source)
+                self.assertEqual(result, 0)
+
+
     #   ---------------------------------------------------------------------------
     #   Vegetation - NDVI 300m
     #   ---------------------------------------------------------------------------
@@ -2677,6 +2731,6 @@ class TestGetInternet(unittest.TestCase):
     #     # Check last 90 days (check list length = 9)
     #     result = get_one_source(my_source)
 
-suite_get_internet = unittest.TestLoader().loadTestsFromTestCase(TestGetInternet)
-if __name__ == '__main__':
-    unittest.TextTestRunner(verbosity=2).run(suite_get_internet)
+# suite_get_internet = unittest.TestLoader().loadTestsFromTestCase(TestGetInternet)
+# if __name__ == '__main__':
+#     unittest.TextTestRunner(verbosity=2).run(suite_get_internet)

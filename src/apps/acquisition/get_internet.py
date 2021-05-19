@@ -1977,6 +1977,12 @@ def loop_get_internet(dry_run=False, test_one_source=False, my_source=None):
                                                 if not result:
                                                     logger_spec.info("File %s copied.", filename)
                                                     processed_list.append(filename)
+                                                    # Save the list after each file (M.C. 8.4.21 - for PROBAV/VGT 3.0)
+                                                    functions.dump_obj_to_pickle(processed_list,
+                                                                                 processed_list_filename)
+                                                    functions.dump_obj_to_pickle(processed_info,
+                                                                                 processed_info_filename)
+
                                                 else:
                                                     logger_spec.warning("File %s not copied: ", filename)
                                                     b_error = True
