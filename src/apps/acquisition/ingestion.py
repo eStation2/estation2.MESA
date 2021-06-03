@@ -1741,7 +1741,7 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         region_code = input_file_name.split('_')[1]
         # region_code = region_code.split('-')[3]
 
-    if region_code == 'ICPAC' or region_code == 'EA':
+    if region_code == 'ICPAC' or region_code == 'EA' or region_code == 'IGAD':
         region='IGAD'
         # ullr_xy=' -17.5290058 27.3132762 24.0006488 4.2682552 '      # ECOWAS
         ullr_xy=' 21.8145086965016 23.1455424529815 51.4155244442228 -11.7612826888632 '      # IGAD
@@ -1750,25 +1750,25 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         file_naming = 'MESA_JRC_wd-gee_' + sprod_code + '_' + date + '_WD-GEE-' + region + '-AVG_1.0'
         # output_tar = '/data/ingest/'+file_naming+'.tgz'
 
-    elif region_code == 'NA':
+    elif region_code == 'NA' or region_code == 'NORTHAFRICA':
         region = 'NORTHAFRICA'
-        ullr_xy = ' -17.1042823357493 14.7154823322187 36.2489081763193 37.5610773118327 '
+        ullr_xy = ' -17.1042823357493 37.5610773118327 36.2489081763193 14.7154823322187  '
         file_naming = 'MESA_JRC_wd-gee_' + sprod_code + '_' + date + '_WD-GEE-' + region + '-AVG_1.0'
         # output_tar = '/data/ingest/'+file_naming+'.tgz'
 
-    elif region_code == 'SA':
+    elif region_code == 'SA' or region_code == 'SOUTHAFRICA':
         region = 'SOUTHAFRICA'
-        ullr_xy = ' 11.67019352	-46.98153003 40.83947894 -4.388180331 '
+        ullr_xy = ' 11.67019352	-4.388180331 40.83947894 -46.98153003 '
         file_naming = 'MESA_JRC_wd-gee_' + sprod_code + '_' + date + '_WD-GEE-' + region + '-AVG_1.0'
 
-    elif region_code == 'CA':
+    elif region_code == 'CA' or region_code == 'CENTRALAFRICA':
         region = 'CENTRALAFRICA'
-        ullr_xy = ' 5.6170756400709561 -13.4558646408263130 31.3120368693836895 23.4395610454738517 '
+        ullr_xy = ' 5.6170756400709561 23.4395610454738517 31.3120368693836895 -13.4558646408263130  '
         file_naming = 'MESA_JRC_wd-gee_' + sprod_code + '_' + date + '_WD-GEE-' + region + '-AVG_1.0'
 
-    elif region_code == 'WA':
+    elif region_code == 'WA' or region_code == 'WESTAFRICA':
         region = 'WESTAFRICA'
-        ullr_xy = ' -25.3589014815236 4.26852473555073 15.9958511066742 25.0002041885746 '
+        ullr_xy = ' -25.3589014815236 25.0002041885746 15.9958511066742 4.26852473555073 '
         file_naming = 'MESA_JRC_wd-gee_' + sprod_code + '_' + date + '_WD-GEE-' + region + '-AVG_1.0'
 
     else :
@@ -1818,7 +1818,7 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         command = es_constants.gdal_merge
         command += ' -co \"compress=lzw\"'
         command += ' -ps 0.000269494585236 0.000269494585236 '
-        # command += ' -ul_lr '+ ullr_xy      # If not specified it take the input file extent which is fine for us?
+        command += ' -ul_lr '+ ullr_xy      # If not specified it take the input file extent which is fine for us?
         command += ' -o ' + output_file
         command += ' -ot BYTE '
         for file in good_input_files:
@@ -1830,9 +1830,9 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         pass
 
     # # Rescale the data using gdal_calc (need only if the value of the data is binary)
-    # rescale_func = "\"A * 100\""
-    # rescale_command = "gdal_calc.py -A "+ output_file +" --co \"compress=lzw\" --type=Int16 --outfile="+output_file_vrt+" --calc="+rescale_func
-    # os.system(rescale_command)
+    rescale_func = "\"A * 100\""
+    rescale_command = "gdal_calc.py -A "+ output_file +" --co \"compress=lzw\" --type=Int16 --outfile="+output_file_vrt+" --calc="+rescale_func
+    os.system(rescale_command)
     # # M.C. 30.10.17 (see ES2-96)
     # # Do gdal_translate, in order to better compress the file
 
@@ -1841,11 +1841,11 @@ def pre_process_wdb_gee(subproducts, native_mapset_code, tmpdir, input_files, my
         command += ' -co \"compress=lzw\"'
         command += ' -co \"BIGTIFF=No\"'
         command += ' -ot BYTE '
-        command += ' '+output_file
-        # command += ' ' + output_file_vrt #To be changed if rescaling is done
+        # command += ' '+output_file
+        command += ' ' + output_file_vrt #To be changed if rescaling is done
         command += ' '+output_file_mapset
 
-        my_logger.debug('Command for re-project is: ' + command)
+        my_logger.debug('Command for gdal translate non bigtiff is: ' + command)
         os.system(command)
         interm_files_list.append(output_file_mapset)
 
