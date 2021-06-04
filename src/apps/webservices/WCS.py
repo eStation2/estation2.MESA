@@ -17,6 +17,7 @@
 #       http://mesa-proc.jrc.it/webservices?SERVICE=WCS&REQUEST=GetCoverage&FORMAT=GTiff&COVERAGE=layer_modis-firms_v6.0_10dcount10kdiff
 #       http://mesa-proc.jrc.it/webservices?SERVICE=WCS&REQUEST=GetCoverage&FORMAT=GTiff&COVERAGE=layer_modis-firms_v6.0_10dcount
 #       http://mesa-proc.jrc.it/webservices?SERVICE=WCS&REQUEST=GetCoverage&FORMAT=GTiff&COVERAGE=layer_modis-sst_v2013.1_monanom
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WCS&REQUEST=GetCoverage&FORMAT=GTiff&COVERAGE=layer_vgt-ndvi_olci-v2.0_ndv&WIDTH=256&HEIGHT=256&CRS=EPSG%3A4326&STYLES=&BBOX=0%2C-45%2C45%2C0
 
 
 import mapscript
@@ -290,7 +291,7 @@ def getRequest(params):
     content_type = content_type.split(';')[0]
 
     ms_mapfilename = es_constants.base_tmp_dir+'/'+filename+str(llx)+'_'+str(lly)+'_'+str(urx)+'_'+str(ury)+'.map'
-    productmap.save(ms_mapfilename)
+    # productmap.save(ms_mapfilename)
 
     if content_type == 'image/tiff':
         content = mapscript.msIO_getStdoutBufferBytes()
