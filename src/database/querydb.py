@@ -30,10 +30,16 @@ def get_products_webservices():
     global db
     try:
         query = "SELECT sub.*, m.mapsetcode, l.legend_id as default_legend_id FROM products.product sub " \
-                "INNER JOIN (SELECT i.productcode, i.version, i.mapsetcode " \
-                "            FROM products.ingestion i " \
-                "            WHERE i.mapsetcode like '%Africa%' and i.mapsetcode not like '%NAfrica%') m " \
-                "  ON sub.productcode = m.productcode AND sub.version = m.version " \
+                "LEFT OUTER JOIN ( " \
+                "	SELECT DISTINCT i.productcode, i.version, i.subproductcode, i.mapsetcode " \
+                "	FROM products.ingestion i  " \
+                "	WHERE (i.mapsetcode like '%Africa%' or i.mapsetcode like '%Global%') and i.mapsetcode not like '%NAfrica%' " \
+                "	UNION " \
+                "	SELECT distinct d.productcode, d.version, d.subproductcode, d.mapsetcode " \
+                "	FROM products.process_product d " \
+                "	WHERE (d.mapsetcode like '%Africa%' or d.mapsetcode like '%Global%') and d.mapsetcode not like '%NAfrica%' " \
+                "	) m  " \
+                "  ON sub.productcode = m.productcode AND sub.version = m.version AND sub.subproductcode = m.subproductcode " \
                 "INNER JOIN (SELECT * FROM analysis.product_legend WHERE default_legend = TRUE ) l " \
                 "  ON sub.productcode = l.productcode AND sub.version = l.version AND sub.subproductcode = l.subproductcode " \
                 "WHERE (sub.productcode, sub.version) IN ( " \

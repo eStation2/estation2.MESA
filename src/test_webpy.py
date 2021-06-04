@@ -27,15 +27,15 @@ logger = log.my_logger(__name__)
 
 class TestWebpy(unittest.TestCase):
 
-    def test_WCST(self):
-        params = {
-            'SERVICE': 'WMS',
-            'REQUEST': 'GetCapabilities'
-        }
+    def test_Webservices(self):
+        # params = {
+        #     'SERVICE': 'WCS',
+        #     'REQUEST': 'GetCapabilities'
+        # }
         # params = {
         #     'SERVICE': 'WMS',
         #     'REQUEST': 'GetMap',
-        #     'LAYERS': 'layer_chirps-dekad_2.0_10d'
+        #     'LAYERS': 'layer_modis-firms_v6.0_10dcount10kdiff'  # 'layer_chirps-dekad_2.0_10d'
         # }
         # params = {
         #     'SERVICE': 'WCS',
@@ -43,18 +43,18 @@ class TestWebpy(unittest.TestCase):
         #     'REQUEST': 'DescribeCoverage',
         #     'COVERAGE': 'layer_ndvi_linearx2'
         # }
-        # params = {
-        #     'SERVICE': 'WCS',
-        #     'VERSION': '1.0.0',
-        #     'REQUEST': 'GetCoverage',
-        #     'FORMAT': 'GTiff',
-        #     'COVERAGE': 'layer_ndvi_linearx2'
-        #     # 'TIME': '2000-01-11',
-        #     # 'BBOX': '-26, -35, 60, 38',
-        #     # 'CRS': 'EPSG:4326',
-        #     # 'WIDTH': 720,
-        #     # 'HEIGHT': 720
-        # }
+        params = {
+            'SERVICE': 'WCS',
+            'VERSION': '1.0.0',
+            'REQUEST': 'GetCoverage',
+            'FORMAT': 'GTiff',
+            'COVERAGE': 'layer_chirps-dekad_2.0_1mondiff'
+            # 'TIME': '2000-01-11',
+            # 'BBOX': '-26, -35, 60, 38',
+            # 'CRS': 'EPSG:4326',
+            # 'WIDTH': 720,
+            # 'HEIGHT': 720
+        }
 
         content_type, content, filename = webpy_esapp_helpers.WebServices(params)
         print content_type

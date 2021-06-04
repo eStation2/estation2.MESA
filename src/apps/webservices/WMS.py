@@ -4,19 +4,23 @@
 # Example calls:
 #
 #  GetCapabilities:
-#       http://localhost:8888/webservices?SERVICE=WMS&REQUEST=GetCapabilities
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WMS&REQUEST=GetCapabilities
 #  GetMap:
-#       http://localhost:8888/webservices?SERVICE=WMS&REQUEST=GetMap&FORMAT=image%2Fjpg&LAYERS=layer_chirps-dekad_2.0_10d
-#       http://localhost:8888/webservices?SERVICE=WMS&REQUEST=GetMap&FORMAT=image%2Fjpg&LAYERS=layer_chirps-dekad_2.0_10d&DATE=20200111
-#       http://localhost:8888/webservices?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=layer_chirps-dekad_2.0_10d&FORMAT=image%2Fjpg&TRANSPARENT=true&date=20200921&time_to_nocache=1622704629174&WIDTH=256&HEIGHT=256&CRS=EPSG%3A4326&STYLES=&BBOX=-45%2C45%2C-22.5%2C67.5
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WMS&REQUEST=GetMap&FORMAT=image%2Fjpg&LAYERS=layer_chirps-dekad_2.0_10d
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WMS&REQUEST=GetMap&FORMAT=image%2Fjpg&LAYERS=layer_chirps-dekad_2.0_10d&DATE=20200111
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=layer_chirps-dekad_2.0_10d&FORMAT=image%2Fjpg&TRANSPARENT=true&date=20200921&time_to_nocache=1622704629174&WIDTH=256&HEIGHT=256&CRS=EPSG%3A4326&STYLES=&BBOX=-45%2C45%2C-22.5%2C67.5
 #  DescribeLayer
-#       http://localhost:8888/webservices?SERVICE=WMS&REQUEST=DescribeLayer&LAYERS=layer_chirps-dekad_2.0_10d
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WMS&REQUEST=DescribeLayer&LAYERS=layer_chirps-dekad_2.0_10d
 #
 #  GetLegendGraphic
-#       http://localhost:8888/webservices?SERVICE=WMS&REQUEST=GetLegendGraphic&LAYERS=layer_chirps-dekad_2.0_10d
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WMS&REQUEST=GetLegendGraphic&LAYERS=layer_chirps-dekad_2.0_10d
 #
 #  For Africa Platform
-#       http://localhost:8888/webservices?SERVICE=WMS&REQUEST=GetMap&FORMAT=image%2Fjpg&LAYERS=layer_chirps-dekad_2.0_1mondiff
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WMS&REQUEST=GetMap&FORMAT=image%2Fjpg&LAYERS=layer_chirps-dekad_2.0_1mondiff
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WMS&REQUEST=GetMap&FORMAT=image%2Fjpg&LAYERS=layer_modis-firms_v6.0_10dcount10kdiff
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WMS&REQUEST=GetMap&FORMAT=image%2Fjpg&LAYERS=layer_modis-firms_v6.0_10dcount
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WMS&REQUEST=GetMap&FORMAT=image%2Fjpg&LAYERS=layer_modis-sst_v2013.1_monanom
+
 
 import mapscript
 import locale
@@ -39,7 +43,7 @@ def getRequest(params):
         params['SERVICE'] = 'WMS'
 
     if "VERSION" not in params or params['VERSION'].strip() not in ['1.1.1', '1.3.0']:
-        params['VERSION'] = '1.3.0'
+        params['VERSION'] = '1.1.1'
 
     if "REQUEST" not in params or params['REQUEST'].strip() not in ['GetCapabilities', 'GetMap', 'DescribeLayer', 'GetStyles', 'GetFeatureInfo', 'GetLegendGraphic']:
         if "LAYERS" not in params or params['LAYERS'].strip() == '':
@@ -54,13 +58,13 @@ def getRequest(params):
         params['STYLES'] = ''
 
     if "SLD_VERSION" not in params or params['SLD_VERSION'].strip() not in ['1.0.0', '1.1.1', '1.3.0']:
-        params['VERSION'] = '1.0.0'
+        params['SLD_VERSION'] = '1.0.0'
 
     projlib = es_constants.proj4_lib_dir
     errorfile = es_constants.log_dir+"/mapserver_wms_layer_errors.log"
     imagepath = es_constants.base_dir+"/webservices/tmp/"
     fontsetfilenamepath = es_constants.apps_dir+'/webservices/fonts.txt'
-    thisServerURL = 'http://localhost:8888/webservices'
+    thisServerURL = 'http://mesa-proc.jrc.it/webservices'
 
     productmap = mapscript.mapObj(es_constants.apps_dir+'/webservices/MAP_main.map')
     productmap.setConfigOption("PROJ_LIB", projlib)
@@ -123,9 +127,34 @@ def getRequest(params):
             if params['LAYERS'] != 'layer_' + productid:
                 continue
 
-        mapsetinfo = querydb.get_mapset_fullinfo(mapsetcode)
         p = Product(product_code=productcode, version=version)
-        dataset = p.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode)
+        # dataset = p.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode)
+
+        if not mapsetcode or mapsetcode == '':
+            all_prod_mapsets = p.mapsets
+            dates_available = None
+            if all_prod_mapsets.__len__() > 0:
+                for mapset in all_prod_mapsets:
+                    dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                    dataset.get_filenames()
+                    dates_available = dataset.get_dates()
+                    if not dates_available:
+                        continue  # No files available for product with mapset so skip and go to next mapset
+                    else:
+                        mapsetcode = mapset
+            else:
+                continue
+        else:
+            dataset = p.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode)
+            dataset.get_filenames()
+            dates_available = dataset.get_dates()
+            if not dates_available:
+                continue  # No files available for product with mapset so skip and go to next mapset
+
+        if not dates_available:
+            continue    # No files available for product so skip and go to next product
+
+        mapsetinfo = querydb.get_mapset_fullinfo(mapsetcode)
 
         fileextension = '.jpg'
         if "FORMAT" in params and params['FORMAT'].strip() != '':
@@ -143,11 +172,6 @@ def getRequest(params):
         else:
             params['FORMAT'] = 'image/jpeg'
             productmap.selectOutputFormat('jpg')
-
-        dataset.get_filenames()
-        dates_available = dataset.get_dates()
-        if not dates_available:
-            continue    # No files available for product so skip and go to next product
 
         if 'DATE' in params:
             filedate = params['DATE']
@@ -297,21 +321,21 @@ def getRequest(params):
         layer.debug = mapscript.MS_TRUE
         layer.data = productfile
 
-        layer.setMetaData('wms_name', 'layer_'+productid)
+        layer.setMetaData('ows_name', 'layer_'+productid)
         # layer.setMetaData('wms_label', descriptive_name)
         layer.setMetaData('ows_title', descriptive_name)
-        layer.setMetaData('wms_abstract', description)
-        layer.setMetaData('wms_description', description)
+        # layer.setMetaData('ows_abstract', description)
+        # layer.setMetaData('ows_description', description)
         layer.setMetaData('wms_enable_request', '*')
-        layer.setMetaData('wms_srs', projection)
-        layer.setMetaData('wms_extent', str(llx) + " " + str(lly) + " " + str(urx) + " " + str(ury))
+        layer.setMetaData('ows_srs', projection)
+        layer.setMetaData('ows_extent', str(llx) + " " + str(lly) + " " + str(urx) + " " + str(ury))
         # layer.setMetaData('wms_size', str(w) + " " + str(h))    # required if "data" or "resolution" are not not set!
         # layer.setMetaData('wms_resolution', resolution)     # required if "data" is not set.
-        layer.setMetaData('wms_format', params['FORMAT'])
+        layer.setMetaData('ows_format', params['FORMAT'])
         # layer.setMetaData('wms_nativeformat', 'GTiff')
         # layer.setMetaData('wms_rangeset_name', "layer_"+productid+"_Range")  # required to support DescribeCoverage request
         # layer.setMetaData('wms_rangeset_label', "layer_"+productid+"_Label")     # required to support DescribeCoverage request
-        layer.setMetaData('wms_timeextent', timeextent)
+        layer.setMetaData('ows_timeextent', timeextent)
 
         # scale & buckets
         if num_buckets > 0:

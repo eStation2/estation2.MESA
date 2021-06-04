@@ -268,8 +268,9 @@ class WebServices:
         params = web.input()
         content_type, content, filename = webpy_esapp_helpers.WebServices(params)
         if content_type == 'image/tiff':
-            web.header('Content-type', content_type)    #content_type[0]+"/"+content_type[1])     # +"\n"
+            web.header('Content-type', content_type)    #  content_type[0]+"/"+content_type[1])   # +"\n"
             web.header("Content-Disposition", "attachment; filename=" + filename)    # +"\n"
+            yield content
         elif content_type.find('image') != -1:
             web.header('Content-type', content_type)
             yield content

@@ -4,13 +4,20 @@
 # Example calls:
 #
 # GetCapabilities:
-#       http://localhost:8888/webservices?SERVICE=WCS&VERSION=1.0.0&REQUEST=GetCapabilities
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WCS&VERSION=1.0.0&REQUEST=GetCapabilities
 #  GetCoverage:
-#       http://localhost:8888/webservices?SERVICE=WCS&version=1.0.0&REQUEST=GetCoverage&FORMAT=GTiff&COVERAGE=layer_chirps-dekad_2.0_10d
-#       http://localhost:8888/webservices?SERVICE=WCS&version=1.0.0&REQUEST=GetCoverage&FORMAT=GTiff&COVERAGE=layer_chirps-dekad_2.0_10d&DATE=20200111
-#       http://localhost:8888/webservices?SERVICE=WCS&version=1.0.0&REQUEST=GetCoverage&FORMAT=GTiff&COVERAGE=layer_chirps-dekad_2.0_10d&DATE=20200111&BBOX=-26,-35,60,38&CRS=EPSG:4326&WIDTH=720&HEIGHT=720
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WCS&version=1.0.0&REQUEST=GetCoverage&FORMAT=GTiff&COVERAGE=layer_chirps-dekad_2.0_10d
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WCS&version=1.0.0&REQUEST=GetCoverage&FORMAT=GTiff&COVERAGE=layer_chirps-dekad_2.0_10d&DATE=20200111
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WCS&version=1.0.0&REQUEST=GetCoverage&FORMAT=GTiff&COVERAGE=layer_chirps-dekad_2.0_10d&DATE=20200111&BBOX=-26,-35,60,38&CRS=EPSG:4326&WIDTH=720&HEIGHT=720
 #  DescribeCoverage
-#       http://localhost:8888/webservices?SERVICE=WCS&VERSION=1.0.0&REQUEST=DescribeCoverage&COVERAGE=layer_chirps-dekad_2.0_10d
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WCS&VERSION=1.0.0&REQUEST=DescribeCoverage&COVERAGE=layer_chirps-dekad_2.0_10d
+#
+#  For Africa Platform
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WCS&REQUEST=GetCoverage&FORMAT=GTiff&COVERAGE=layer_chirps-dekad_2.0_1mondiff
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WCS&REQUEST=GetCoverage&FORMAT=GTiff&COVERAGE=layer_modis-firms_v6.0_10dcount10kdiff
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WCS&REQUEST=GetCoverage&FORMAT=GTiff&COVERAGE=layer_modis-firms_v6.0_10dcount
+#       http://mesa-proc.jrc.it/webservices?SERVICE=WCS&REQUEST=GetCoverage&FORMAT=GTiff&COVERAGE=layer_modis-sst_v2013.1_monanom
+
 
 import mapscript
 import locale
@@ -48,7 +55,7 @@ def getRequest(params):
     errorfile = es_constants.log_dir+"/mapserver_wcs_layer_errors.log"
     imagepath = es_constants.base_dir+"/webservices/tmp/"
     fontsetfilenamepath = es_constants.apps_dir+'/webservices/fonts.txt'
-    thisServerURL = 'http://localhost:8888/webservices'
+    thisServerURL = 'http://mesa-proc.jrc.it/webservices'
 
     productmap = mapscript.mapObj(es_constants.apps_dir+'/webservices/MAP_main.map')
     productmap.setConfigOption("PROJ_LIB", projlib)
@@ -103,13 +110,41 @@ def getRequest(params):
         provider = product['provider']
         data_type_id = product['data_type_id']
 
+        if productid == 'chirps-dekad_2.0_1mondiff':
+            x=1
+
         if params['REQUEST'].strip() in ['GetCoverage', 'DescribeCoverage']:
             if params['COVERAGE'] != 'layer_' + productid:
                 continue
 
-        mapsetinfo = querydb.get_mapset_fullinfo(mapsetcode)
         p = Product(product_code=productcode, version=version)
-        dataset = p.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode)
+        # dataset = p.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode)
+
+        if not mapsetcode or mapsetcode == '':
+            all_prod_mapsets = p.mapsets
+            dates_available = None
+            if all_prod_mapsets.__len__() > 0:
+                for mapset in all_prod_mapsets:
+                    dataset = p.get_dataset(mapset=mapset, sub_product_code=subproductcode)
+                    dataset.get_filenames()
+                    dates_available = dataset.get_dates()
+                    if not dates_available:
+                        continue  # No files available for product with mapset so skip and go to next mapset
+                    else:
+                        mapsetcode = mapset
+            else:
+                continue
+        else:
+            dataset = p.get_dataset(mapset=mapsetcode, sub_product_code=subproductcode)
+            dataset.get_filenames()
+            dates_available = dataset.get_dates()
+            if not dates_available:
+                continue  # No files available for product with mapset so skip and go to next mapset
+
+        if not dates_available:
+            continue    # No files available for product so skip and go to next product
+
+        mapsetinfo = querydb.get_mapset_fullinfo(mapsetcode)
 
         if data_type_id.upper() == 'BYTE':
             productmap.selectOutputFormat('GEOTIFF_BYTE')
@@ -119,11 +154,6 @@ def getRequest(params):
             productmap.selectOutputFormat('GEOTIFF_FLOAT')
         else:
             productmap.selectOutputFormat('tif')
-
-        dataset.get_filenames()
-        dates_available = dataset.get_dates()
-        if not dates_available:
-            continue    # No files available for product so skip and go to next product
 
         if 'DATE' in params:
             filedate = params['DATE']
@@ -234,8 +264,8 @@ def getRequest(params):
         layer.setMetaData('wcs_name', 'layer_'+productid)
         layer.setMetaData('wcs_label', descriptive_name)
         # layer.setMetaData('ows_title', descriptive_name)
-        layer.setMetaData('wcs_abstract', description)
-        layer.setMetaData('wcs_description', description)
+        # layer.setMetaData('wcs_abstract', description)
+        # layer.setMetaData('wcs_description', description)
         layer.setMetaData('wcs_enable_request', '*')
         layer.setMetaData('wcs_srs', projection)
         layer.setMetaData('wcs_extent', str(llx) + " " + str(lly) + " " + str(urx) + " " + str(ury))
