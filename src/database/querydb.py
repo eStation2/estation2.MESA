@@ -26,6 +26,44 @@ db = connectdb.ConnectDB(schema='products').db
 dbschema_analysis = connectdb.ConnectDB(schema='analysis').db
 
 
+def get_products_webservices():
+    global db
+    try:
+        query = "SELECT sub.*, m.mapsetcode, l.legend_id as default_legend_id FROM products.product sub " \
+                "LEFT OUTER JOIN ( " \
+                "	SELECT DISTINCT i.productcode, i.version, i.subproductcode, i.mapsetcode " \
+                "	FROM products.ingestion i  " \
+                "	WHERE (i.mapsetcode like '%Africa%' or i.mapsetcode like '%Global%') and i.mapsetcode not like '%NAfrica%' " \
+                "	UNION " \
+                "	SELECT distinct d.productcode, d.version, d.subproductcode, d.mapsetcode " \
+                "	FROM products.process_product d " \
+                "	WHERE (d.mapsetcode like '%Africa%' or d.mapsetcode like '%Global%') and d.mapsetcode not like '%NAfrica%' " \
+                "	) m  " \
+                "  ON sub.productcode = m.productcode AND sub.version = m.version AND sub.subproductcode = m.subproductcode " \
+                "INNER JOIN (SELECT * FROM analysis.product_legend WHERE default_legend = TRUE ) l " \
+                "  ON sub.productcode = l.productcode AND sub.version = l.version AND sub.subproductcode = l.subproductcode " \
+                "WHERE (sub.productcode, sub.version) IN ( " \
+                "    SELECT productcode, version FROM products.product p " \
+                "    WHERE p.product_type = 'Native' " \
+                "      AND p.activated) " \
+                "AND sub.masked = 'f' " \
+                "AND sub.product_type != 'Native' " \
+                "ORDER BY sub.category_id DESC, sub.productcode, sub.version, sub.subproductcode"
+
+
+        products = db.execute(query)
+        products = products.fetchall()
+
+        return products
+    except:
+        exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
+        # Exit the script and print an error telling what happened.
+        logger.error("get_products_webservices: Database query error!\n -> {}".format(exceptionvalue))
+    finally:
+        if db.session:
+            db.session.close()
+
+
 def get_logos():
     global db
     try:
@@ -1863,7 +1901,6 @@ def update_ingest_subproduct_info(productinfo):
 def get_mapsets_for_ingest(productcode, version, subproductcode):
     global db
     try:
-        # query = " SELECT * FROM products.mapset " \
         query = " SELECT  mapset_new.mapsetcode, " \
                 " 	mapset_new.defined_by, " \
                 " 	mapset_new.descriptive_name, " \
@@ -1977,29 +2014,67 @@ def get_mapset(mapsetcode='', allrecs=False):
             db.session.close()
 
 
-def __get_mapset(mapsetcode='', allrecs=False):
+def get_mapset_fullinfo(mapsetcode=''):
     global db
-    # my_db = connectdb.ConnectDB().db
     try:
         mapset = []
-        if allrecs:
-            if db.mapset.order_by(asc(db.mapset.mapsetcode)).count() >= 1:
-                mapset = db.mapset.order_by(asc(db.mapset.mapsetcode)).all()
-        else:
-            where = db.mapset.mapsetcode == mapsetcode
-            if db.mapset.filter(where).count() == 1:
-                mapset = db.mapset.filter(where).one()
 
-        return mapset
+        query = " SELECT mapset_new.mapsetcode, " \
+                " mapset_new.defined_by, " \
+                " mapset_new.descriptive_name, " \
+                " mapset_new.description, " \
+                " mapset_new.center_of_pixel, " \
+                " mapset_new.pixel_size_x, " \
+                " mapset_new.pixel_size_y, " \
+                " mapset_new.footprint_image, " \
+                " projection.proj_code, " \
+                " projection.descriptive_name AS projection_descriptive_name, " \
+                " projection.srs_wkt, " \
+                " bbox.bboxcode, " \
+                " bbox.descriptive_name AS bbox_descriptive_name, " \
+                " 	CASE WHEN mapset_new.center_of_pixel  " \
+                "        THEN ROUND(CAST(bbox.upper_left_long - (resolution.pixel_shift_long/2) as NUMERIC), 13) " \
+                "        ELSE bbox.upper_left_long END AS upper_left_long, " \
+                " 	CASE WHEN mapset_new.center_of_pixel " \
+                "        THEN ROUND(CAST(bbox.upper_left_lat + (resolution.pixel_shift_long/2)as NUMERIC), 13) " \
+                "        ELSE bbox.upper_left_lat END AS upper_left_lat, " \
+                " bbox.lower_right_long, " \
+                " bbox.lower_right_lat, " \
+                " bbox.predefined, " \
+                " resolution.resolutioncode, " \
+                " resolution.descriptive_name AS resolution_descriptive_name, " \
+                " resolution.pixel_shift_long, " \
+                " resolution.pixel_shift_lat, " \
+                " i.ingestions_assigned " \
+                " FROM products.mapset_new AS mapset_new " \
+                " INNER JOIN products.projection AS projection ON mapset_new.proj_code = projection.proj_code " \
+                " INNER JOIN products.resolution AS resolution ON mapset_new.resolutioncode = resolution.resolutioncode " \
+                " INNER JOIN products.bbox ON mapset_new.bboxcode = bbox.bboxcode " \
+                " LEFT OUTER JOIN ( " \
+                " 	SELECT i.mapsetcode, count(i.mapsetcode) as ingestions_assigned " \
+                " 	FROM products.ingestion i " \
+                " 	GROUP BY i.mapsetcode " \
+                " ) i " \
+                " ON i.mapsetcode = mapset_new.mapsetcode "
+
+        query += " WHERE mapset_new.mapsetcode =  '" + mapsetcode + "' "
+
+        mapset = db.execute(query)
+        mapset = mapset.fetchall()
+
+        mapset_record = []
+        if mapset != [] and hasattr(mapset, "__len__") and mapset.__len__() > 0:
+            for mapsetinfo in mapset:
+                mapset_record = functions.row2dict(mapsetinfo)
+
+        return mapset_record
     except:
         exceptiontype, exceptionvalue, exceptiontraceback = sys.exc_info()
         # Exit the script and print an error telling what happened.
-        raise logger.error("get_mapset: Database query error!\n -> {}".format(exceptionvalue))
-        # raise Exception("get_mapset: Database query error!\n ->%s" % exceptionvalue)
+        raise logger.error("get_mapset_fullinfo: Database query error!\n -> {}".format(exceptionvalue))
     finally:
         if db.session:
             db.session.close()
-        # my_db = None
 
 
 def get_mapsets():

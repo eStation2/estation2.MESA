@@ -26,6 +26,10 @@ import subprocess
 from subprocess import *
 from multiprocessing import *
 
+import logging
+mpl_logger = logging.getLogger('matplotlib')
+mpl_logger.setLevel(logging.WARNING)
+
 import matplotlib as mpl
 mpl.use('Agg')
 mpl.rcParams['savefig.pad_inches'] = 0
@@ -50,13 +54,62 @@ from apps.analysis.getTimeseries import (getTimeseries, getFilesList)
 # from multiprocessing import (Process, Queue)
 from apps.tools import ingest_historical_archives as iha
 
+from apps.webservices import WMS
+from apps.webservices import WCS
+
 from lib.python import functions
 from lib.python import es_logging as log
 
 logger = log.my_logger(__name__)
 
-
 WEBPY_COOKIE_NAME = "webpy_session_id"
+
+
+def WebServices(params):
+    # Make _REQUEST indexes uppercase. They are case sensitive.
+    params = {
+        key.upper(): ([item for item in params[key]] if type(params[key]) == type([]) else params[key])
+        for key in params}
+
+    service = 'WMS'
+    if params['SERVICE']:
+        service = params['SERVICE'].upper()
+
+    request = 'GetCapabilities'
+    if params['REQUEST']:
+        request = params['REQUEST']
+
+    content_type = ''
+    content = ''
+    filename = ''
+
+    if service == 'WMS':
+        if request in ['GetCapabilities', 'GetMap', 'GetFeatureInfo', 'DescribeLayer', 'GetLegendGraphic',
+                       'GetStyles']:
+            content_type, content, filename = WMS.getRequest(params)
+        else:
+            errormsg = 'Please indicate the REQUEST with GetCapabilities, GetMap, GetFeatureInfo, DescribeLayer, GetLegendGraphic or GetStyles'
+            logger.error("WMS Web Service: Error!\n -> {}".format(errormsg))
+            content = '{"success":false, "error":"' + errormsg + '"}'
+    elif service == 'WCS':
+        if request in ['GetCapabilities', 'GetCoverage', 'DescribeCoverage']:
+            content_type, content, filename = WCS.getRequest(params)
+        else:
+            errormsg = 'Please indicate the REQUEST with GetCapabilities, GetCoverage, DescribeCoverage'
+            logger.error("WCS Web Service: Error!\n -> {}".format(errormsg))
+            content = '{"success":false, "error":"' + errormsg + '"}'
+    elif service == 'WPS':
+        if request in ['GetCapabilities', 'Execute', 'DescribeProcess']:
+            a = 1
+        else:
+            errormsg = 'Please indicate the REQUEST with GetCapabilities, Execute, DescribeProcess'
+            logger.error("WPS Web Service: Error!\n -> {}".format(errormsg))
+            content = '{"success":false, "error":"' + errormsg + '"}'
+    else:
+        logger.error("WebServices: Error!\n -> {}".format('Undefined Web Services call!'))
+        content = '{"success":false, "error":"Undefined Web Services call!"}'
+
+    return content_type, content, filename
 
 
 def getMapsets():

@@ -1,0 +1,56 @@
+MAP
+    # FONTSET "./fonts.txt"
+    # CONFIG "PROJ_LIB" "/usr/share/proj/"
+    # CONFIG "MS_ERRORFILE" "/srv/www/htdocs/EMMADEV/ms_tmp/ms_wms_layer_errors.log"
+    # SYMBOLSET "./Symbols.sym"
+
+    UNITS DD
+    DEBUG 5
+
+    # IMAGETYPE gif
+
+    OUTPUTFORMAT
+        NAME "GEOTIFF_BYTE"
+        DRIVER "GDAL/GTiff"
+        MIMETYPE "image/tiff"
+        IMAGEMODE BYTE
+        EXTENSION "tif"
+    END
+
+    OUTPUTFORMAT
+        NAME "GEOTIFF_INT16"
+        DRIVER "GDAL/GTiff"
+        MIMETYPE "image/tiff"
+        IMAGEMODE INT16
+        EXTENSION "tif"
+    END
+
+    OUTPUTFORMAT
+        NAME "GEOTIFF_FLOAT"
+        DRIVER "GDAL/GTiff"
+        IMAGEMODE FLOAT32
+        MIMETYPE "image/tiff"
+        EXTENSION "tif"
+    END
+
+    OUTPUTFORMAT
+        NAME "RGBTIFF"
+        DRIVER "GDAL/GTiff"
+        IMAGEMODE RGB
+        MIMETYPE "image/tiff"
+        EXTENSION "tif"
+    END
+
+    OUTPUTFORMAT
+        NAME "GEOTIFF_BYTE_LZW"
+        DRIVER "GDAL/GTiff"
+        MIMETYPE "image/tiff"
+        IMAGEMODE BYTE
+        EXTENSION "tif"
+        FORMATOPTION "COMPRESS=LZW"
+    END
+
+
+    # generated automatically
+
+END
