@@ -2340,6 +2340,114 @@ def pre_process_netcdf_s3_wrr(subproducts, tmpdir, input_files, my_logger, in_da
     return pre_processed_list
 
 
+def pre_process_netcdf_olci_ndvi(subproducts, tmpdir, input_files, my_logger, in_date=None, data_format='TAR'):
+# -------------------------------------------------------------------------------------------------------
+#   Pre-process the Sentinel 3 Level 2 product from OLCI - WRR
+#   Returns -1 if nothing has to be done on the passed files
+##   Description: the current implementation is based on GPT, and includes the following steps
+#       1. Unzip or untar or just copy files into a temp dir
+#       2. Write a 'subset' graph xml in order to:
+#           a. Subset geographically:
+#           b. Band subset (depends on subdatasource)
+#           c. Apply a flag (band math)
+#       3. Write a reprojection ..
+#       4. Merge by applying input and output nodata (-n -54.53 -a_nodata -32768)
+#   NOTE: now we mask by using l2p_flags_cloud ('True' means cloud detected -> reject)
+#
+
+    # prepare the output as an empty list
+    pre_processed_list = []
+
+    # Build a list of subdatasets to be extracted
+    sds_to_process = []
+    for sprod in subproducts:
+        # if sprod != 0:
+        sds_to_process.append(sprod['re_process'])
+
+    # Make sure input is a list (if only a string is received, it loops over chars)
+    if isinstance(input_files, list):
+        list_input_files = input_files
+    else:
+        list_input_files = []
+        list_input_files.append(input_files)
+    my_unzip_file = None
+    # Unzips the file
+    for input_file in list_input_files:
+
+        if zipfile.is_zipfile(input_file):
+            zip_file = zipfile.ZipFile(input_file)  # Create ZipFile object
+            zip_list = zip_file.namelist()  # Get the list of its contents
+
+            # Loop over subproducts and extract associated files
+            for sprod in subproducts:
+
+                # Define the re_expr for extracting files
+                re_extract = '.*' + sprod['re_extract'] + '.*'
+                my_logger.debug('Re_expression: ' + re_extract + ' to match sprod ' + sprod['subproduct'])
+
+                for files in zip_list:
+                    my_logger.debug('File in the .zip archive is: ' + files)
+                    if re.match(re_extract, files):  # Check it matches one of sprods -> extract from zip
+                        filename = os.path.basename(files)
+                        data = zip_file.read(files)
+                        myfile_path = os.path.join(tmpdir, filename)
+                        myfile = open(myfile_path, "wb")
+                        myfile.write(data)
+                        myfile.close()
+                        my_unzip_file = myfile_path
+
+            zip_file.close()
+
+        else:
+            my_logger.error("File %s is not a valid zipfile. Exit", input_files)
+            return 1
+
+        # Loop over datasets and extract the one in the list
+        for output_sds in sds_to_process:
+        # for sprod in subproducts:
+            # interm_files_list = []
+            # # In each unzipped folder pre-process the dataset and store the list of files to be merged
+            # count =  1
+            # # for input_file in temp_list_input_files:
+            #
+            # # Define the re_expr for extracting files
+            # bandname = sprod['re_extract']
+            # re_process = sprod['re_process']
+            # no_data = sprod['nodata']
+            # subproductcode = sprod['subproduct']
+            #
+            # count = count + 1
+            bandname = output_sds
+            tmpdir_output = tmpdir + os.path.sep + bandname #+ str(count)
+            os.makedirs(tmpdir_output)
+            tmpdir_output_band = tmpdir_output + os.path.sep + bandname
+
+            if not os.path.exists(tmpdir_output_band):
+                # ES2-284 fix
+                # path = os.path.join(tmpdir, untar_file)
+                if os.path.isdir(tmpdir_output):
+                    os.makedirs(tmpdir_output_band)
+                else:
+                    continue
+
+            # ------------------------------------------------------------------------------------------
+            # Write a graph xml and subset the product for specific band, also applying flags
+            # ------------------------------------------------------------------------------------------
+            expression = 'QFLAG.NDVI_warning ? -32768 : NDVI'
+            functions.write_graph_xml_band_math_subset_ndvi(output_dir=tmpdir_output, band_name=bandname, expression= expression, inputfile=my_unzip_file)     #'l2p_flags_cloud ? NaN : sea_surface_temperature')
+            #functions.write_graph_xml_band_math_subset(output_dir=tmpdir_untar, band_name=re_process)
+
+            graph_xml_subset = tmpdir_output_band  + os.path.sep + 'graph_xml_subset.xml'
+            output_subset_tif = tmpdir_output_band + os.path.sep + 'band_subset.tif'
+
+            command = es_constants.gpt_exec+' '+ graph_xml_subset
+            status=os.system(command)
+
+            if os.path.exists(output_subset_tif):
+                pre_processed_list.append(output_subset_tif)
+
+    return pre_processed_list
+
 def pre_process_snap_subset_nc(subproducts, tmpdir, input_files, my_logger, in_date=None):
 # -------------------------------------------------------------------------------------------------------
 #   Pre-process the netcdf using snap - subset and merge the tiles
@@ -3263,6 +3371,8 @@ def pre_process_inputs(preproc_type, native_mapset_code, subproducts, input_file
         #     interm_files = pre_process_netcdf_s3_wst(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
         elif preproc_type == 'SNAP_SUBSET_NC':
             interm_files = pre_process_snap_subset_nc(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
+        elif preproc_type == 'SNAP_MATH_SUBSET_OLCI_NDVI':
+            interm_files = pre_process_netcdf_olci_ndvi(subproducts, tmpdir, input_files, my_logger, in_date=None, data_format='ZIP')
         elif preproc_type == 'SNAP_SUBSET_GLS_ZIP':
             interm_files = pre_process_snap_subset_gls_zip(subproducts, tmpdir, input_files, my_logger, in_date=in_date)
 
