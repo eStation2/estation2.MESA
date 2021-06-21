@@ -1096,7 +1096,7 @@ class TestWebpy(unittest.TestCase):
         result = webpy_esapp_helpers.getProductLayer(params)
         # print(result)
         # Copy the file for analysis in Windows
-        command = 'cp '+result+' /srv/www/eStation2/Tests/mapscript/'
+        command = 'cp '+result+' /data/processing/exchange/Tests/mapscript/'
         os.system(command)
         self.assertEqual(1, 1)
 
