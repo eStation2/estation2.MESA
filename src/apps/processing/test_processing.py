@@ -97,6 +97,7 @@ def my_proc_std_ndvi_3_0(pipe_run=0, pipe_print=3, touch_files_only=False):
     subproductcode='ndv'
     version='sv2-pv3.0'
     start_date='19990101'
+    # end_date=None
     end_date='20191221'
 
     list_dates = proc_functions.get_list_dates_for_dataset(productcode, subproductcode, version, start_date=start_date, end_date=end_date)
@@ -142,6 +143,29 @@ def my_proc_std_ndvi_vgt_pv_olci(pipe_run=0, pipe_print=3, touch_files_only=Fals
     res_queue = None
     proc_lists = processing_std_ndvi_prods_only(res_queue,**args)
 
+def my_proc_std_ndvi_olci_2_0(pipe_run=0, pipe_print=3, touch_files_only=False):
+
+    productcode='vgt-ndvi'
+    subproductcode='ndv'
+    version='olci-v2.0'
+    start_date=None
+    end_date=None
+
+    list_dates = proc_functions.get_list_dates_for_dataset(productcode, subproductcode, version, start_date=start_date, end_date=end_date)
+
+    args = {'pipeline_run_level':pipe_run, \
+            'pipeline_printout_level':pipe_print, \
+            'pipeline_printout_graph_level': 0, \
+            'prod': productcode,\
+            'starting_sprod':subproductcode,\
+            'mapset': 'SPOTV-Africa-1km',\
+            'version': version,
+            'starting_dates': list_dates,
+            'logfile':'test_processing_ndvi',
+            'touch_files_only':touch_files_only}
+
+    res_queue = None
+    proc_lists = processing_std_ndvi_prods_only(res_queue,**args)
 
 from apps.processing.processing_reproject import *
 def my_proc_reproj_ndvi_olci(pipe_run=0, pipe_print=3, touch_files_only=False):
@@ -1053,8 +1077,7 @@ def test_subprocess_vgt_lai(pipe_run=4, pipe_print=0, touch_files_only=False):
 # test_subprocess_modis_fapar(pipe_run=3, pipe_print=0, touch_files_only=False)
 # test_subprocess_vgt_fapar(pipe_run=0, pipe_print=4, touch_files_only=False)
 # my_proc_std_ndvi(pipe_run=0, pipe_print=3, touch_files_only=False)
-# my_proc_std_ndvi_3_0(pipe_run=5, pipe_print=0, touch_files_only=False)
-my_proc_std_ndvi_vgt_pv_olci(pipe_run=5, pipe_print=0, touch_files_only=False)
+# my_proc_std_ndvi_vgt_pv_olci(pipe_run=3, pipe_print=0, touch_files_only=False)
 # my_proc_std_ndvi_res(pipe_run=3, pipe_print=0, touch_files_only=False)
 # my_proc_ndvi_merge_3_0(pipe_run=0, pipe_print=3, touch_files_only=False)
 # my_proc_pml_modis_fronts(pipe_run=3, pipe_print=0, touch_files_only=False)
@@ -1103,3 +1126,5 @@ my_proc_std_ndvi_vgt_pv_olci(pipe_run=5, pipe_print=0, touch_files_only=False)
 #         "options": "compress = lzw"}
 #raster_image_math.extrapolate_edge(**args)
 #raster_image_math.compute_median_filter(**args)
+# my_proc_std_ndvi_olci_2_0(pipe_run=3, pipe_print=0, touch_files_only=False)
+my_proc_std_ndvi_3_0(pipe_run=5, pipe_print=0, touch_files_only=False)
