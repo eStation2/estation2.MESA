@@ -3760,10 +3760,16 @@ def get_eumetcast_sources():
     try:
 
         query = "SELECT pads.*, es.eumetcast_id, es.filter_expression_jrc \
-                 FROM products.eumetcast_source es JOIN products.product_acquisition_data_source pads \
-                   ON pads.data_source_id = es.eumetcast_id \
-                 WHERE pads.type = 'EUMETCAST' \
-                   AND pads.activated"
+                 FROM products.eumetcast_source es \
+                 JOIN (SELECT pads2.* FROM products.product_acquisition_data_source pads2 \
+                       JOIN products.product p \
+                       ON pads2.productcode = p.productcode \
+                       AND pads2.subproductcode = p.subproductcode \
+                       AND pads2.version = p.version \
+                       WHERE p.product_type = 'Native' AND p.activated = TRUE \
+                         AND pads2.type = 'EUMETCAST' AND pads2.activated = TRUE) pads \
+                ON pads.data_source_id = es.eumetcast_id "
+
 
         result = dbschema_analysis.execute(query)
         eumetcast_sources = result.fetchall()
