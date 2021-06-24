@@ -9,9 +9,9 @@ logger = log.my_logger(__name__)
 
 # Manual Switch for START/STOP
 do_start = True
-dry_run  = False
+dry_run  = True
 service  = False
-only_prod = 'olci-wrr'    # 'wd-gee'
+only_prod = 'modis-ndvi'    # 'wd-gee'
 
 # service is always False because this module is used by the windows version or for testing
 # ToDo: The code under the if statement can be deleted, service_ingestion.py is now used by non windows versions
